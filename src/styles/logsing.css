@@ -1,0 +1,265 @@
+/* ===== Layout chính ===== */
+.container {
+    display: flex;
+    height: 100vh;
+    font-family: 'Segoe UI', sans-serif;
+    color: #333;
+  }
+  
+  /* ===== Bên trái: Form ===== */
+  .form-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* mới */
+    align-items: center;
+    padding: 40px 20px;
+    background: white;
+    height: 100vh;
+    box-sizing: border-box;
+    position: relative; /* Thêm dòng này */
+    padding-bottom: 60px; /* Tạo khoảng trống cho footer */
+  }
+  
+  .form-wrapper {
+    width: 100%;
+    max-width: 400px;
+    margin-top: auto;
+    margin-bottom: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .form-section h2 {
+    font-size: 50px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    font-family: cursive;
+    color: #102c3e;
+  }
+  
+  form {
+    display: flex;
+    flex-direction: column;
+    max-width: 400px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  
+  label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #444;
+  }
+  
+  input {
+    background-color: white;     /* Nền ô trắng */
+    color: #000000;                 /* Chữ màu */
+    padding: 12px 15px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 14px;
+  }
+  
+  /* ===== Tùy chọn: Ghi nhớ + Forgot password ===== */
+  .options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    margin-bottom: 15px;
+  }
+  
+  .options label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-weight: normal;
+  }
+  
+  .options a {
+    color: #102c3e;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  
+  /* ===== Nút chính ===== */
+  .main-btn {
+    padding: 12px;
+    background-color: #102c3e;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    width: 100%;
+  }
+  
+  /* ===== OR ===== */
+  .divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    font-size: 20px;
+    color: #333; /* Màu chữ */
+    margin: 15px 0;
+    font-weight: 500;
+  }
+  
+  .divider::before,
+  .divider::after {
+    content: "";
+    flex: 1;
+    border-bottom: 2px solid #ccc; /* Đường kẻ mờ */
+    margin: 0 10px;
+  }
+  
+  /* ===== Google/FaceBook ===== */
+  .google-btn,
+  .facebook-btn {
+    padding: 12px;
+    background-color: #e3f2fd;
+    color: #1a73e8;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .social-icon {
+    width: 25px; /* chiều cao logo */
+    height: 25px; /* chiều rộng logo */
+  }
+  
+  /* ===== Chân trang ===== */
+  .footer-text {
+    font-size: 14px;
+    margin-top: 15px;
+    text-align: center;
+    color: #555;
+  }
+  /*Signin/up*/
+  .footer-text a {   
+    color: #ff0000;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  
+  footer {
+    text-align: center;
+    font-size: 14px;
+    color: #000;
+    padding-top: 15px;
+    width: 100%;
+    border-top: 1px solid #ccc;
+    position: absolute; /* Thay đổi từ text-align sang position */
+    bottom: 20px; /* Khoảng cách từ dưới lên */
+    margin-top: auto; /* Đẩy footer xuống dưới cùng */
+  }
+  
+  /* ===== Bên phải: Hình ảnh ===== */
+  .image-section {
+    flex: 1;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: white; /* xoá nền đen */
+  }
+  
+  .image-section::before {
+    content: '';
+    display: block;
+    width: 90%; /* Tỉ lệ rộng */
+    height: 90%; /* Tỉ lệ cao */
+    background-image: url('/flower.jpg'); /* Đường Dẫn Hình */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  }
+  .error {
+    color: red;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+  }
+  /* Thông Báo Check Email */
+  .modal-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+  }
+  
+  .modal-box {
+    background: white;
+    border-radius: 10px;
+    width: 400px;
+    padding: 30px;
+    text-align: center;
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+  }
+  
+  .modal-body p {
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-top: 20px;
+  }
+  
+  .close-btn {
+    font-size: 1.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #333;
+    transition: color 0.2s ease;
+  }
+  
+  .close-btn:hover {
+    color: red;
+  }
+  /* Thông Báo nhập Email */
+.modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.modal-body p {
+  margin-top: 5px;
+  margin-bottom: 10px;
+  font-size: 1rem;
+  color: #333;
+}
+
+.modal-body input {
+  margin-bottom: 5px;
+  padding: 12px 15px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+}
