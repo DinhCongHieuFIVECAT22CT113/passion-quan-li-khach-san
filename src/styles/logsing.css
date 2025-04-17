@@ -60,6 +60,8 @@
     margin-bottom: 15px;
     border: 1px solid #ccc;
     border-radius: 5px;
+    border-color: #102c3e;
+    outline: none;
     width: 100%;
     box-sizing: border-box;
     font-size: 14px;
@@ -90,7 +92,7 @@
   /* ===== Nút chính ===== */
   .main-btn {
     padding: 12px;
-    background-color: #102c3e;
+    background-color: #0d2233;
     color: white;
     border: none;
     border-radius: 5px;
