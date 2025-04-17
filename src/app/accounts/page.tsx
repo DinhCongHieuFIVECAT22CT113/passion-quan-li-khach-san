@@ -12,7 +12,14 @@ const AccountPage: React.FC = () => {
   // Avatar
   const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
-
+  const handleLogout = () => {
+    // Xóa dữ liệu đăng nhập nếu cần, ví dụ:
+    localStorage.removeItem('token');
+    sessionStorage.clear(); // hoặc bất kỳ logic logout nào bạn cần
+  
+    // Chuyển hướng về trang login
+    window.location.href = '/login';
+  };
   // State cho Thông tin cá nhân
   const [name, setName] = useState('Nguyễn Văn A');
   const [email, setEmail] = useState('example@email.com');
@@ -109,6 +116,21 @@ const AccountPage: React.FC = () => {
   return (
     <div className="account-container">
       <div className="account-header">
+      <div className="account-actions">
+  <button
+    className="home-btn"
+    onClick={() => window.location.href = '/home'}
+  >
+    Quay trở lại trang chủ
+  </button>
+
+  <button
+  className="logout-btn"
+  onClick={handleLogout}
+>
+  <i className="fas fa-sign-out-alt logout-icon"></i> Đăng Xuất
+</button>
+</div>
         <h2>Tài khoản</h2>
       </div>
 
