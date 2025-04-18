@@ -305,3 +305,4 @@ F:\HotelAPI\HotelAPI\obj\Debug\net8.0\refint\HotelAPI.dll
 F:\HotelAPI\HotelAPI\obj\Debug\net8.0\HotelAPI.pdb
 F:\HotelAPI\HotelAPI\obj\Debug\net8.0\HotelAPI.genruntimeconfig.cache
 F:\HotelAPI\HotelAPI\obj\Debug\net8.0\ref\HotelAPI.dll
+F:\HotelAPI\HotelAPI\obj\Debug\net8.0\HotelAPI.sourcelink.json
