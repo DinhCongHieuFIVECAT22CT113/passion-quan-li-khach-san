@@ -69,7 +69,7 @@ const HomePage = () => {
     <div className={styles.container}>
       {/* Hero Section */}
       <section className={styles.hero}>
-        <h1>Discover Extraordinary<br />Comfort in Hotels</h1>
+        <h1>Welcome to Hotel Management System</h1>
         <div className={styles.dots}>
           <span className={styles.dot} />
           <span className={styles.dot} />

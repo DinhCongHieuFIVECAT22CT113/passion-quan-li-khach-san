@@ -3,5 +3,9 @@
 import LanguageSelector from '@/components/LanguageSelector';
 
 export default function LanguagePage() {
-  return <LanguageSelector />;
+  return (
+    <div className="p-4">
+      <LanguageSelector />
+    </div>
+  );
 } 

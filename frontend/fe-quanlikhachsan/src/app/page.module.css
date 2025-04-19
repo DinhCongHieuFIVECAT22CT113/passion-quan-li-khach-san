@@ -35,10 +35,9 @@
   }
   
   .container {
-    width: 100%;
+    padding: 20px;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 20px;
   }
   
   .header {
@@ -196,37 +195,26 @@
   
   /* Hero Section */
   .hero {
-    height: 600px;
-    background-image: url('/images/hero-bg.jpg');
-    background-size: cover;
-    background-position: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: white;
     text-align: center;
-    position: relative;
+    padding: 60px 0;
   }
   
   .hero h1 {
-    font-size: 48px;
-    font-weight: bold;
-    margin-bottom: 30px;
-    line-height: 1.2;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    font-size: 2.5rem;
+    color: var(--text-color);
+    margin-bottom: 20px;
   }
   
   .dots {
     display: flex;
-    gap: 10px;
-    margin-top: 20px;
+    justify-content: center;
+    gap: 8px;
   }
   
   .dot {
-    width: 10px;
-    height: 10px;
-    background: white;
+    width: 8px;
+    height: 8px;
+    background-color: var(--primary-color);
     border-radius: 50%;
     opacity: 0.5;
   }
@@ -237,34 +225,30 @@
   
   /* Booking Form */
   .bookingSection {
-    margin-top: -50px;
-    padding: 0 20px;
+    margin: 40px 0;
   }
   
   .bookingForm {
     background: white;
     padding: 30px;
-    border-radius: 10px;
+    border-radius: 12px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    max-width: 800px;
-    margin: 0 auto;
   }
   
   .bookingForm h2 {
-    font-size: 24px;
-    margin-bottom: 10px;
+    color: var(--text-color);
+    margin-bottom: 8px;
   }
   
   .bookingForm p {
-    color: #666;
-    margin-bottom: 20px;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
   }
   
   .formGrid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 20px;
-    align-items: end;
   }
   
   .formGroup {
@@ -274,341 +258,22 @@
   }
   
   .formGroup label {
-    font-size: 14px;
-    color: #666;
+    font-weight: 500;
+    color: var(--text-color);
   }
   
   .formGroup input,
-  .formGroup select {
+  .formGroup select,
+  .formGroup textarea {
     padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 16px;
-  }
-  
-  .bookNowBtn {
-    background: #4A90E2;
-    color: white;
-    border: none;
-    padding: 12px 24px;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background 0.3s;
-  }
-  
-  .bookNowBtn:hover {
-    background: #357ABD;
-  }
-  
-  /* Services Grid */
-  .servicesGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 30px;
-    margin: 60px 0;
-    position: relative;
-  }
-  
-  .serviceCard {
-    position: relative;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-  
-  .serviceImage {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-  }
-  
-  .serviceCard h3 {
-    position: absolute;
-    bottom: 20px;
-    left: 20px;
-    color: white;
-    font-size: 20px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-    z-index: 2;
-  }
-  
-  .serviceCard.expanded {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 90vw;
-    height: 90vh;
-    max-width: 1200px;
-    max-height: 800px;
-    z-index: 1000;
-    background: black;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .serviceCard.expanded::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
-    z-index: -1;
-  }
-  
-  .serviceCard.expanded .serviceImage {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-  }
-  
-  .serviceCard.expanded h3 {
-    display: none;
-  }
-  
-  /* Add keyboard shortcut hint */
-  .serviceCard.expanded::after {
-    content: 'Press ESC to close';
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: white;
-    font-size: 14px;
-    opacity: 0.7;
-  }
-  
-  /* Special Offers */
-  .specialOffers {
-    padding: 60px 0;
-  }
-  
-  .sectionHeader {
-    text-align: center;
-    margin-bottom: 40px;
-  }
-  
-  .sectionHeader h2 {
-    color: #4A90E2;
-    font-size: 18px;
-    margin-bottom: 10px;
-  }
-  
-  .sectionHeader h3 {
-    font-size: 32px;
-    margin-bottom: 15px;
-  }
-  
-  .sectionHeader p {
-    color: #666;
-    max-width: 600px;
-    margin: 0 auto 20px;
-  }
-  
-  .viewAll {
-    color: #4A90E2;
-    text-decoration: none;
-    font-weight: 500;
-  }
-  
-  .offersGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 30px;
-  }
-  
-  .offerCard {
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    background: white;
-  }
-  
-  .offerCard img {
-    width: 100%;
-    height: 200px;
-    object-fit: cover;
-  }
-  
-  .offerContent {
-    padding: 20px;
-  }
-  
-  .category {
-    color: #666;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
     font-size: 14px;
   }
   
-  .offerContent h4 {
-    margin: 10px 0;
-    font-size: 20px;
-  }
-  
-  .price {
-    display: flex;
-    align-items: baseline;
-    gap: 5px;
-  }
-  
-  .price span:first-child {
-    font-size: 24px;
-    font-weight: bold;
-    color: #4A90E2;
-  }
-  
-  .price span:last-child {
-    color: #666;
-    font-size: 14px;
-  }
-  
-  /* Footer */
-  .footer {
-    background: #1a1a1a;
-    color: white;
-    padding: 60px 0 20px;
-    margin-top: 60px;
-  }
-  
-  .footerContent {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 20px;
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 40px;
-  }
-  
-  .footerLeft h2 {
-    font-size: 28px;
-    margin-bottom: 30px;
-    font-weight: 500;
-  }
-  
-  .newsletter {
-    display: flex;
-    gap: 10px;
-    max-width: 400px;
-  }
-  
-  .newsletter input {
-    flex: 1;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 4px;
-    font-size: 16px;
-    background: white;
-  }
-  
-  .newsletter button {
-    padding: 12px 30px;
-    background: #4A90E2;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: background 0.3s;
-  }
-  
-  .newsletter button:hover {
-    background: #357ABD;
-  }
-  
-  .footerRight {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-  }
-  
-  .footerLogo {
-    margin-bottom: 40px;
-  }
-  
-  .footerLinks {
-    display: flex;
-    gap: 60px;
-  }
-  
-  .linkColumn {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-  }
-  
-  .linkColumn a {
-    color: white;
-    text-decoration: none;
-    font-size: 14px;
-    transition: color 0.3s;
-  }
-  
-  .linkColumn a:hover {
-    color: #4A90E2;
-  }
-  
-  .footerBottom {
-    max-width: 1200px;
-    margin: 60px auto 0;
-    padding: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    text-align: center;
-    font-size: 14px;
-    color: #999;
-  }
-  
-  /* Responsive adjustments */
-  @media (max-width: 768px) {
-    .footerContent {
-      grid-template-columns: 1fr;
-    }
-    
-    .footerRight {
-      align-items: flex-start;
-    }
-    
-    .footerLinks {
-      flex-direction: column;
-      gap: 30px;
-    }
-    
-    .newsletter {
-      flex-direction: column;
-    }
-    
-    .newsletter button {
-      width: 100%;
-    }
-  }
-  
-  .closeButton {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.9);
-    border: none;
-    color: #333;
-    font-size: 24px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.3s ease;
-    z-index: 1001;
-  }
-  
-  .closeButton:hover {
-    background: white;
-    transform: scale(1.1);
+  .formGroup textarea {
+    resize: vertical;
+    min-height: 100px;
   }
   
   .dateRangeWrapper {
@@ -650,48 +315,267 @@
     }
   }
   
-  /* Override react-date-range styles */
-  :global(.rdrMonth) {
-    width: 100% !important;
-    min-width: 280px !important;
+  .bookNowBtn {
+    grid-column: 1 / -1;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
   }
   
-  :global(.rdrCalendarWrapper) {
-    font-size: 16px !important;
-    background: white !important;
+  .bookNowBtn:hover {
+    background-color: #3512cc;
   }
   
-  :global(.rdrDateDisplayWrapper) {
-    background: transparent !important;
+  /* Services Grid */
+  .servicesGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+    margin: 40px 0;
   }
   
-  :global(.rdrDateDisplay) {
-    margin: 0.8em !important;
-  }
-  
-  :global(.rdrDefinedRangesWrapper) {
-    border-right: solid 1px #eff2f7 !important;
-    background: #fff !important;
-  }
-  
-  :global(.rdrStaticRanges) {
-    border-bottom: 0 !important;
-  }
-  
-  :global(.rdrStaticRange) {
-    border: 0 !important;
-    background: #fff !important;
-  }
-  
-  :global(.rdrStaticRange:hover) {
-    background: #f5f5f5 !important;
-  }
-  
-  :global(.rdrInputRanges) {
-    padding: 10px 0 !important;
-  }
-  
-  :global(.rdrDateRangePickerWrapper) {
-    border-radius: 8px;
+  .serviceCard {
+    position: relative;
+    border-radius: 12px;
     overflow: hidden;
-  } 
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .serviceCard:hover {
+    transform: translateY(-4px);
+  }
+  
+  .serviceImage {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+  }
+  
+  .serviceCard h3 {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 20px;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+    color: white;
+    margin: 0;
+  }
+  
+  .closeButton {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 20px;
+    line-height: 1;
+  }
+  
+  .expanded {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80vw;
+    max-width: 1200px;
+    height: 80vh;
+    z-index: 1000;
+  }
+  
+  .expanded .serviceImage {
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* Special Offers */
+  .specialOffers {
+    margin: 60px 0;
+  }
+  
+  .sectionHeader {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  
+  .sectionHeader h2 {
+    color: var(--text-color);
+    margin-bottom: 8px;
+  }
+  
+  .sectionHeader h3 {
+    color: var(--primary-color);
+    margin-bottom: 16px;
+  }
+  
+  .sectionHeader p {
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto 20px;
+  }
+  
+  .viewAll {
+    color: var(--primary-color);
+    font-weight: 500;
+  }
+  
+  .offersGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+  }
+  
+  .offerCard {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+  
+  .offerContent {
+    padding: 20px;
+  }
+  
+  .category {
+    color: var(--primary-color);
+    font-size: 14px;
+    font-weight: 500;
+  }
+  
+  .offerContent h4 {
+    margin: 8px 0;
+    color: var(--text-color);
+  }
+  
+  .price {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+  }
+  
+  .price span:first-child {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-color);
+  }
+  
+  .price span:last-child {
+    color: var(--text-secondary);
+  }
+  
+  /* Footer */
+  .footer {
+    background: white;
+    padding: 60px 0 20px;
+    margin-top: 80px;
+  }
+  
+  .footerContent {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 40px;
+  }
+  
+  .footerLeft h2 {
+    margin-bottom: 20px;
+    color: var(--text-color);
+  }
+  
+  .newsletter {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .newsletter input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+  }
+  
+  .newsletter button {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  
+  .footerRight {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .footerLogo {
+    flex: 1;
+  }
+  
+  .footerLinks {
+    flex: 2;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 40px;
+  }
+  
+  .linkColumn {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .linkColumn a {
+    color: var(--text-secondary);
+    transition: color 0.2s;
+  }
+  
+  .linkColumn a:hover {
+    color: var(--primary-color);
+  }
+  
+  .footerBottom {
+    text-align: center;
+    padding-top: 40px;
+    color: var(--text-secondary);
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .footerContent {
+      grid-template-columns: 1fr;
+    }
+    
+    .footerRight {
+      flex-direction: column;
+      gap: 30px;
+    }
+    
+    .footerLinks {
+      grid-template-columns: 1fr;
+    }
+    
+    .newsletter {
+      flex-direction: column;
+    }
+    
+    .newsletter button {
+      width: 100%;
+    }
+  }
