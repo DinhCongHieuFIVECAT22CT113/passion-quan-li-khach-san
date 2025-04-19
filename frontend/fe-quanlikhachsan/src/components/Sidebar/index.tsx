@@ -2,42 +2,66 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 
-const Sidebar: React.FC = () => {
+const Sidebar = () => {
+  const pathname = usePathname();
+
   return (
-    <aside style={{
-      width: '240px',
-      height: '100vh',
-      background: '#1a1f36',
-      padding: '20px',
-      color: 'white',
-      position: 'fixed',
-      left: 0,
-      top: 0,
-    }}>
-      <div style={{ marginBottom: '40px' }}>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>PASSION</h1>
+    <aside className="w-64 min-h-screen bg-white shadow-lg">
+      <div className="p-4">
+        <div className="flex items-center mb-8">
+          <Image src="/images/logo.png" alt="Logo" width={30} height={30} />
+          <span className="ml-2 text-xl font-semibold">PASSION</span>
+        </div>
+
+        <div className="mb-4">
+          <h2 className="text-gray-500 text-sm">Menu</h2>
+        </div>
+
+        <nav>
+          <Link 
+            href="/"
+            className={`flex items-center p-3 mb-2 rounded-lg transition-colors ${
+              pathname === '/' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <span className="text-xl mr-3">🏠</span>
+            <span>Trang chủ</span>
+          </Link>
+
+          <Link 
+            href="/account"
+            className={`flex items-center p-3 mb-2 rounded-lg transition-colors ${
+              pathname === '/account' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <span className="text-xl mr-3">👤</span>
+            <span>Tài Khoản</span>
+          </Link>
+
+          <Link 
+            href="/permissions"
+            className={`flex items-center p-3 mb-2 rounded-lg transition-colors ${
+              pathname === '/permissions' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <span className="text-xl mr-3">🔑</span>
+            <span>Phân Quyền</span>
+          </Link>
+
+          <Link 
+            href="/language"
+            className={`flex items-center p-3 mb-2 rounded-lg transition-colors ${
+              pathname === '/language' ? 'bg-blue-50 text-blue-600' : 'text-gray-600 hover:bg-gray-100'
+            }`}
+          >
+            <span className="text-xl mr-3">🌐</span>
+            <span>Đa Ngôn Ngữ</span>
+          </Link>
+        </nav>
       </div>
-      
-      <nav>
-        <ul style={{ listStyle: 'none', padding: 0 }}>
-          <li style={{ marginBottom: '15px' }}>
-            <Link href="/" style={{ color: 'white', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              🏠 Dashboard
-            </Link>
-          </li>
-          <li style={{ marginBottom: '15px' }}>
-            <Link href="/account" style={{ color: 'white', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              👤 Tài khoản
-            </Link>
-          </li>
-          <li style={{ marginBottom: '15px' }}>
-            <Link href="/language" style={{ color: 'white', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>
-              🌐 Ngôn ngữ
-            </Link>
-          </li>
-        </ul>
-      </nav>
     </aside>
   );
 };

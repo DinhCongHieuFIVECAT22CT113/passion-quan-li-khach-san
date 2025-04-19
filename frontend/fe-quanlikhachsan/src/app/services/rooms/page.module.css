@@ -1,0 +1,226 @@
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.heroSection {
+  position: relative;
+  width: 100%;
+  height: 600px;
+  margin-bottom: 60px;
+}
+
+.heroImageWrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.heroImageWrapper::after {
+  content: '🔍';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  font-size: 32px;
+  color: white;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 20px;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+
+.heroImageWrapper:hover::after {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.heroImageWrapper:hover .heroImage {
+  transform: scale(1.05);
+}
+
+.heroImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 20px;
+  transition: transform 0.3s ease;
+}
+
+.heroTitle {
+  position: absolute;
+  bottom: 40px;
+  left: 40px;
+  color: white;
+  font-size: 48px;
+  font-weight: bold;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.content {
+  margin-top: 40px;
+}
+
+.description {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 60px;
+}
+
+.description h2 {
+  font-size: 36px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.description p {
+  font-size: 18px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.roomsList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.roomCard {
+  background: white;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s;
+}
+
+.roomCard:hover {
+  transform: translateY(-5px);
+}
+
+.roomImageWrapper {
+  position: relative;
+  width: 100%;
+  height: 250px;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.roomImageWrapper::after {
+  content: '🔍';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  font-size: 24px;
+  color: white;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 15px;
+  border-radius: 50%;
+  transition: transform 0.3s ease;
+}
+
+.roomImageWrapper:hover::after {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.roomImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.roomImageWrapper:hover .roomImage {
+  transform: scale(1.05);
+}
+
+.roomInfo {
+  padding: 20px;
+}
+
+.roomInfo h3 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.roomInfo p {
+  color: #666;
+  margin-bottom: 15px;
+}
+
+.amenities {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.amenity {
+  background: #f5f5f5;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 14px;
+  color: #666;
+}
+
+.price {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  margin-bottom: 20px;
+}
+
+.price span:first-child {
+  font-size: 28px;
+  font-weight: bold;
+  color: #4A90E2;
+}
+
+.price span:last-child {
+  color: #666;
+  font-size: 16px;
+}
+
+.bookButton {
+  width: 100%;
+  background: #4A90E2;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.bookButton:hover {
+  background: #357ABD;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+
+  .heroSection {
+    height: 400px;
+  }
+
+  .heroTitle {
+    font-size: 36px;
+    bottom: 20px;
+    left: 20px;
+  }
+
+  .description h2 {
+    font-size: 28px;
+  }
+
+  .description p {
+    font-size: 16px;
+  }
+} 
