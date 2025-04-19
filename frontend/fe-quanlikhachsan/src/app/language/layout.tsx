@@ -1,4 +1,4 @@
-// app/dashboard/layout.tsx
+// app/dashboard/language/layout.tsx
 'use client';
 
 import { Inter } from 'next/font/google';
@@ -10,7 +10,7 @@ const inter = Inter({
   display: 'swap',
 });
 
-export default function DashboardLayout({
+export default function LangLayout({
   children,
 }: {
   children: React.ReactNode;

@@ -1,4 +1,4 @@
-// app/dashboard/layout.tsx
+// app/dashboard/permissions/layout.tsx
 'use client';
 
 import { Inter } from 'next/font/google';
@@ -10,7 +10,7 @@ const inter = Inter({
   display: 'swap',
 });
 
-export default function DashboardLayout({
+export default function PermLayout({
   children,
 }: {
   children: React.ReactNode;
