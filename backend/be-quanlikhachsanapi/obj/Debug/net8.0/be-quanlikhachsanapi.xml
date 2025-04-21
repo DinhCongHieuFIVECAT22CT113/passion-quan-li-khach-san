@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>be-quanlikhachsanapi</name>
+    </assembly>
+    <members>
+        <member name="T:be_quanlikhachsanapi.Migrations.InitialCreate">
+            <inheritdoc />
+        </member>
+        <member name="M:be_quanlikhachsanapi.Migrations.InitialCreate.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:be_quanlikhachsanapi.Migrations.InitialCreate.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:be_quanlikhachsanapi.Migrations.InitialCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>

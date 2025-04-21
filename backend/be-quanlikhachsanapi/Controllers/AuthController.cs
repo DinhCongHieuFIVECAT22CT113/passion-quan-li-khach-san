@@ -27,7 +27,8 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("Đăng ký")]
-    public async Task<ActionResult<UserDto>> Register([FromBody] RegisterDto registerDto)
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<UserDto>> Register([FromForm] RegisterDto registerDto)
     {
         // Kiểm tra ModelState (bao gồm cả xác nhận mật khẩu)
         if (!ModelState.IsValid)
@@ -107,7 +108,8 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("Đăng nhập")]
-    public async Task<ActionResult<UserDto>> Login([FromBody] LoginDto loginDto)
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<UserDto>> Login([FromForm] LoginDto loginDto)
     {
         // Tìm kiếm KhachHang theo UserName thay vì Email
         var khachHang = await _context.KhachHangs

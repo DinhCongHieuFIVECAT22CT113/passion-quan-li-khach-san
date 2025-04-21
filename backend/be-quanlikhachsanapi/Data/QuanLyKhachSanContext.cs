@@ -52,8 +52,10 @@ public partial class QuanLyKhachSanContext : DbContext
     public virtual DbSet<SuDungDichVu> SuDungDichVus { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=MSI\\SQLEXPRESS01;Database=QuanLyKhachSan;Trusted_Connection=True;TrustServerCertificate=True");
+    {
+        // Không làm gì cả - connection string sẽ được cung cấp thông qua Dependency Injection
+        // từ appsettings.json trong Program.cs
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -6,44 +6,46 @@ using System.Text;
 using be_quanlikhachsanapi.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
+using System.Data.SqlClient;
+using System.Text.Json;
+using be_quanlikhachsanapi.Helpers;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.Extensions.Options;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using be_quanlikhachsanapi.Configuration;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddControllers();
+// Đọc connection string từ appsettings.json
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+Console.WriteLine($"Đang thử kết nối đến: {connectionString}");
+
+// Cấu hình API Controllers
+builder.Services.AddControllers()
+    .AddNewtonsoftJson(options => {
+        options.SerializerSettings.Converters.Add(new StringEnumConverter());
+        options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+    });
+
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(option =>
-{
-    option.SwaggerDoc("v1", new OpenApiInfo { Title = "QuanLyKhachSan API", Version = "v1" });
-    option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        In = ParameterLocation.Header,
-        Description = "Please enter a valid token",
-        Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        BearerFormat = "JWT",
-        Scheme = "Bearer"
-    });
-    option.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type=ReferenceType.SecurityScheme,
-                    Id="Bearer"
-                }
-            },
-            new string[]{}
-        }
-    });
+
+// Cấu hình Swagger để hiển thị input form dạng ô vuông/hình chữ nhật
+builder.Services.AddSwaggerGen(options => {
+    options.ConfigureSwagger();
+});
+builder.Services.AddSwaggerGenNewtonsoftSupport();
+
+// Cấu hình XML comments cho Swagger
+builder.Services.Configure<SwaggerGenOptions>(options => {
+    options.CustomSchemaIds(type => type.FullName);
 });
 
-// Add DbContext
+// Add DbContext - sử dụng connection string từ appsettings.json
 builder.Services.AddDbContext<QuanLyKhachSanContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(connectionString));
 
 // Add CORS
 builder.Services.AddCors(options =>
@@ -62,6 +64,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IPasswordHasher<KhachHang>, PasswordHasher<KhachHang>>();
 builder.Services.AddScoped<ISendEmailServices, SendEmailServices>();
 builder.Services.AddScoped<IWriteFileRepository, WriteFileRepository>();
+
 // Add Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -82,7 +85,12 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c => {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "QuanLyKhachSan API v1");
+        c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.None);
+        c.DefaultModelsExpandDepth(-1); // Ẩn schema mặc định ở phía dưới trang
+        c.DisplayRequestDuration();
+    });
 }
 
 app.UseHttpsRedirection();
