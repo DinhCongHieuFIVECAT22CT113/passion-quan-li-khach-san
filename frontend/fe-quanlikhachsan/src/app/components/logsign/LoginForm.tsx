@@ -160,7 +160,7 @@ const LoginForm: React.FC = () => {
         Chưa có tài khoản? <a href="/signup">Đăng ký</a>
       </p>
 
-      <footer>© 2025 BẢN QUYỀN ĐƯỢC BẢO LƯU</footer>
+      <footer>© 2025 PASSION HORIZON</footer>
 
       {showForgotModal && (
         <div className="modal-overlay">

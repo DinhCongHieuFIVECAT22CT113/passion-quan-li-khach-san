@@ -39,31 +39,31 @@ const SignupForm: React.FC = () => {
     }
 
     if (!validateEmail(formData.email)) {
-      newErrors.email = 'Email không hợp lệ. Ví dụ: yourname@example.com';
+      newErrors.email = 'Email không hợp lệ.';
     }
 
     if (!validatePassword(formData.password)) {
-      newErrors.password = 'Mật khẩu phải ít nhất 8 ký tự, gồm chữ, số và ký tự đặc biệt';
+      newErrors.password = 'gồm chữ, số, ký tự đặc biệt';
     }
 
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Mật khẩu xác nhận không khớp';
+      newErrors.confirmPassword = 'Mật khẩu không khớp';
     }
 
     if (!formData.hokh.trim()) {
-      newErrors.hokh = 'Vui lòng nhập họ khách hàng';
+      newErrors.hokh = 'Bắt buộc';
     }
 
     if (!formData.tenkh.trim()) {
-      newErrors.tenkh = 'Vui lòng nhập tên khách hàng';
+      newErrors.tenkh = 'Bắt buộc';
     }
 
     if (!validateCCCD(formData.soCccd)) {
-      newErrors.soCccd = 'Số CCCD phải có đúng 12 chữ số';
+      newErrors.soCccd = 'Số CCCD phải có 12 chữ số';
     }
 
     if (!validatePhone(formData.soDienThoai)) {
-      newErrors.soDienThoai = 'Vui lòng thêm số điện thoại';
+      newErrors.soDienThoai = 'Bắt buộc';
     }
 
     setErrors(newErrors);
@@ -111,75 +111,88 @@ const SignupForm: React.FC = () => {
           name="email"
           value={formData.email}
           onChange={handleChange}
-          placeholder="Ví dụ:Example@email.com"
+          placeholder="Ví dụ: yourname@example.com"
         />
         {errors.email && <p className="error">{errors.email}</p>}
 
-        {/* Mật khẩu */}
-        <label>Mật khẩu</label>
-        <input
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          placeholder="Ít nhất 8 ký tự, chữ, số và ký tự đặc biệt"
-        />
-        {errors.password && <p className="error">{errors.password}</p>}
+{/* Mật khẩu và Xác nhận mật khẩu - chia đôi */}
+<div className="row-group">
+  <div className="half-width">
+    <label>Mật khẩu</label>
+    <input
+      type="password"
+      name="password"
+      value={formData.password}
+      onChange={handleChange}
+      placeholder="Ít nhất 8 ký tự"
+    />
+    {errors.password && <p className="error">{errors.password}</p>}
+  </div>
+  <div className="half-width">
+    <label>Xác nhận mật khẩu</label>
+    <input
+      type="password"
+      name="confirmPassword"
+      value={formData.confirmPassword}
+      onChange={handleChange}
+      placeholder="Nhập lại mật khẩu"
+    />
+    {errors.confirmPassword && <p className="error">{errors.confirmPassword}</p>}
+  </div>
+</div>
 
-        {/* Xác nhận mật khẩu */}
-        <label>Xác nhận mật khẩu</label>
-        <input
-          type="password"
-          name="confirmPassword"
-          value={formData.confirmPassword}
-          onChange={handleChange}
-          placeholder="Nhập lại mật khẩu"
-        />
-        {errors.confirmPassword && <p className="error">{errors.confirmPassword}</p>}
+{/* Họ và Tên - chia đôi */}
+<div className="row-group">
+  <div className="half-width">
+    <label>Họ</label>
+    <input
+      type="text"
+      name="hokh"
+      value={formData.hokh}
+      onChange={handleChange}
+      placeholder="Nhập họ của bạn"
+    />
+    {errors.hokh && <p className="error">{errors.hokh}</p>}
+  </div>
+  <div className="half-width">
+    <label>Tên</label>
+    <input
+      type="text"
+      name="tenkh"
+      value={formData.tenkh}
+      onChange={handleChange}
+      placeholder="Nhập tên của bạn"
+    />
+    {errors.tenkh && <p className="error">{errors.tenkh}</p>}
+  </div>
+</div>
 
-        {/* Họ khách hàng */}
-        <label>Họ: </label>
-        <input
-          type="text"
-          name="hokh"
-          value={formData.hokh}
-          onChange={handleChange}
-          placeholder="Nhập họ của bạn"
-        />
-        {errors.hokh && <p className="error">{errors.hokh}</p>}
-
-        {/* Tên khách hàng */}
-        <label>Tên: </label>
-        <input
-          type="text"
-          name="tenkh"
-          value={formData.tenkh}
-          onChange={handleChange}
-          placeholder="Nhập tên của bạn ( bao gồm tên đệm nếu có )"
-        />
-        {errors.tenkh && <p className="error">{errors.tenkh}</p>}
-
-        {/* Số CCCD */}
-        <label>Số CCCD/CMND</label>
-        <input
-          type="text"
-          name="soCccd"
-          value={formData.soCccd}
-          onChange={handleChange}
-          placeholder="Nhập số CCCD/CMND ( gồm 12 số )"
-        />
-        {errors.soCccd && <p className="error">{errors.soCccd}</p>}
-
-{/* Số điện thoại */}
-<label>Số điện thoại</label>
-<input
-  type="tel"
-  name="soDienThoai"
-  value={formData.soDienThoai}
-  onChange={handleChange}
-  placeholder="Nhập số điện thoại"
-/>
-{errors.soDienThoai && <p className="error">{errors.soDienThoai}</p>}
+{/* Số CCCD và Số điện thoại - chia đôi */}
+<div className="row-group">
+  <div className="half-width">
+    <label>Số CCCD/CMND</label>
+    <input
+      type="text"
+      name="soCccd"
+      value={formData.soCccd}
+      onChange={handleChange}
+      placeholder="12 chữ số"
+      maxLength={12}
+    />
+    {errors.soCccd && <p className="error">{errors.soCccd}</p>}
+  </div>
+  <div className="half-width">
+    <label>Số điện thoại</label>
+    <input
+      type="tel"
+      name="soDienThoai"
+      value={formData.soDienThoai}
+      onChange={handleChange}
+      placeholder="Nhập số điện thoại"
+    />
+    {errors.soDienThoai && <p className="error">{errors.soDienThoai}</p>}
+  </div>
+</div>
 
         {errors.submit && <p className="error" style={{ textAlign: 'center' }}>{errors.submit}</p>}
 
@@ -208,7 +221,7 @@ const SignupForm: React.FC = () => {
         Đã có tài khoản? <a href="/login">Đăng nhập</a>
       </p>
 
-      <footer>© 2025 BẢN QUYỀN ĐƯỢC BẢO LƯU</footer>
+      <footer>© 2025 PASSION HORIZON</footer>
 
       {showModal && (
         <div className="modal-overlay">

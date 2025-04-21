@@ -1,3 +1,4 @@
+// WelcomeForm.tsx
 'use client';
 import React from 'react';
 import { useRouter } from 'next/navigation';
@@ -8,9 +9,12 @@ const WelcomeForm: React.FC = () => {
 
   return (
     <div className={styles.formSection}>
-      <h2 className={styles.title}>Chào Mừng</h2>
+      <div className={styles.titleContainer}>
+        <h1 className={styles.mainTitle}>PASSION HORIZON</h1>
+        <p className={styles.subTitle}>Luxury Resort</p>
+      </div>
       
-      <div className={styles.formWrapper}>
+      <div className={styles.buttonGroup}>
         <button 
           className={styles.mainBtn}
           onClick={() => router.push('/login')}
@@ -26,7 +30,7 @@ const WelcomeForm: React.FC = () => {
         </button>
       </div>
 
-      <footer className={styles.footer}>© 2025 BẢN QUYỀN ĐƯỢC BẢO LƯU</footer>
+      <footer className={styles.footer}>© 2025 PASSION HORIZON</footer>
     </div>
   );
 };
