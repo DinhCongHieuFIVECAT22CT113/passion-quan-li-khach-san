@@ -39,8 +39,6 @@ public partial class QuanLyKhachSanContext : DbContext
 
     public virtual DbSet<NhanVien> NhanViens { get; set; }
 
-    public virtual DbSet<PhanQuyen> PhanQuyens { get; set; }
-
     public virtual DbSet<PhanQuyenNhanVien> PhanQuyenNhanViens { get; set; }
 
     public virtual DbSet<Phong> Phongs { get; set; }
@@ -382,29 +380,6 @@ public partial class QuanLyKhachSanContext : DbContext
                 .HasForeignKey(d => d.MaCaLam)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_NhanVien_CaLamViec");
-        });
-
-        modelBuilder.Entity<PhanQuyen>(entity =>
-        {
-            entity
-                .HasNoKey()
-                .ToTable("PhanQuyen");
-
-            entity.Property(e => e.MaKh)
-                .HasMaxLength(10)
-                .IsUnicode(false)
-                .HasColumnName("MaKH");
-            entity.Property(e => e.MaNv)
-                .HasMaxLength(10)
-                .IsUnicode(false)
-                .HasColumnName("MaNV");
-            entity.Property(e => e.MaRole)
-                .HasMaxLength(10)
-                .IsUnicode(false);
-
-            entity.HasOne(d => d.MaKhNavigation).WithMany()
-                .HasForeignKey(d => d.MaKh)
-                .HasConstraintName("FK_PhanQuyen_KhachHang");
         });
 
         modelBuilder.Entity<PhanQuyenNhanVien>(entity =>
