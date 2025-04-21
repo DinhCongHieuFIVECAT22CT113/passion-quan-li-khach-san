@@ -267,21 +267,21 @@ body {
   
   .payment-confirmation-modal .modal-actions {
     display: flex;
-    flex-direction: column; /* Xếp nút theo chiều dọc */
-    gap: 15px; /* Tăng khoảng cách giữa các nút */
-    width: 100%; /* Để các nút chiếm hết chiều rộng modal */
+    flex-direction: column; 
+    gap: 15px;
+    width: 100%; 
   }
   
   .payment-confirmation-modal .modal-box {
-    width: 300px; /* Điều chỉnh độ rộng modal xác nhận nếu cần */
+    width: 300px;
   }
   
   .large-button {
-    padding: 15px 20px; /* Tăng padding để nút to hơn */
-    font-size: 1.2rem; /* Tăng kích thước chữ */
-    width: 100%; /* Chiếm hết chiều rộng của modal-actions */
-    text-align: center; /* Căn chữ vào giữa nút */
-    margin-bottom: 10px; /* Thêm margin dưới mỗi nút */
+    padding: 15px 20px; 
+    font-size: 1.2rem; 
+    width: 100%; 
+    text-align: center;
+    margin-bottom: 10px;
   }
   
   .modal-confirm-btn {
@@ -297,7 +297,7 @@ body {
   }
   
   .modal-cancel-btn {
-    background-color: #dc3545; /* Màu đỏ cho nút No */
+    background-color: #dc3545; 
     color: white;
     border: none;
   }
@@ -311,10 +311,10 @@ body {
     border-radius: 5px;
     font-size: 1rem;
     cursor: pointer;
-    background-color: #007bff; /* Màu xanh dương */
+    background-color: #007bff; 
     color: white;
     border: none;
-    width: 100%; /* Chiếm hết chiều rộng modal thông báo */
+    width: 100%; 
     text-align: center;
   }
   
@@ -329,10 +329,10 @@ body {
     padding: 20px;
     border-radius: 12px;
     display: flex;
-    flex-direction: column; /* THÊM DÒNG NÀY */
+    flex-direction: column; 
     justify-content: center;
     align-items: center;
-    gap: 20px; /* Thêm khoảng cách giữa dòng text và nút */
+    gap: 20px;
   }
   
   .payment-complete-modal .modal-box h3 {
