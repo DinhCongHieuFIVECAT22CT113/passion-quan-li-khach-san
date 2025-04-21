@@ -41,6 +41,8 @@ public partial class QuanLyKhachSanContext : DbContext
 
     public virtual DbSet<PhanQuyen> PhanQuyens { get; set; }
 
+    public virtual DbSet<PhanQuyenNhanVien> PhanQuyenNhanViens { get; set; }
+
     public virtual DbSet<Phong> Phongs { get; set; }
 
     public virtual DbSet<PhuongThucThanhToan> PhuongThucThanhToans { get; set; }
@@ -53,7 +55,7 @@ public partial class QuanLyKhachSanContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=MSI\\SQLEXPRESS01;Database=QuanLyKhachSan;Trusted_Connection=True;TrustServerCertificate=True");
+        => optionsBuilder.UseSqlServer("Server=CONG-HIEU\\CONGHIEU;Initial Catalog=QuanLyKhachSan;Integrated Security=True; TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -260,6 +262,9 @@ public partial class QuanLyKhachSanContext : DbContext
                 .HasMaxLength(10)
                 .IsUnicode(false)
                 .HasColumnName("MaLoaiKH");
+            entity.Property(e => e.MaRole)
+                .HasMaxLength(10)
+                .IsUnicode(false);
             entity.Property(e => e.NgaySua).HasColumnType("datetime");
             entity.Property(e => e.NgayTao).HasColumnType("datetime");
             entity.Property(e => e.PasswordHash).HasMaxLength(255);
@@ -281,6 +286,10 @@ public partial class QuanLyKhachSanContext : DbContext
             entity.HasOne(d => d.MaLoaiKhNavigation).WithMany(p => p.KhachHangs)
                 .HasForeignKey(d => d.MaLoaiKh)
                 .HasConstraintName("FK_KhachHang_LoaiKhachHang");
+
+            entity.HasOne(d => d.MaRoleNavigation).WithMany(p => p.KhachHangs)
+                .HasForeignKey(d => d.MaRole)
+                .HasConstraintName("FK_KhachHang_Role");
         });
 
         modelBuilder.Entity<KhuyenMai>(entity =>
@@ -377,13 +386,10 @@ public partial class QuanLyKhachSanContext : DbContext
 
         modelBuilder.Entity<PhanQuyen>(entity =>
         {
-            entity.HasKey(e => e.MaRole);
+            entity
+                .HasNoKey()
+                .ToTable("PhanQuyen");
 
-            entity.ToTable("PhanQuyen");
-
-            entity.Property(e => e.MaRole)
-                .HasMaxLength(10)
-                .IsUnicode(false);
             entity.Property(e => e.MaKh)
                 .HasMaxLength(10)
                 .IsUnicode(false)
@@ -392,17 +398,36 @@ public partial class QuanLyKhachSanContext : DbContext
                 .HasMaxLength(10)
                 .IsUnicode(false)
                 .HasColumnName("MaNV");
+            entity.Property(e => e.MaRole)
+                .HasMaxLength(10)
+                .IsUnicode(false);
 
-            entity.HasOne(d => d.MaKhNavigation).WithMany(p => p.PhanQuyens)
+            entity.HasOne(d => d.MaKhNavigation).WithMany()
                 .HasForeignKey(d => d.MaKh)
                 .HasConstraintName("FK_PhanQuyen_KhachHang");
+        });
 
-            entity.HasOne(d => d.MaNvNavigation).WithMany(p => p.PhanQuyens)
-                .HasForeignKey(d => d.MaNv)
+        modelBuilder.Entity<PhanQuyenNhanVien>(entity =>
+        {
+            entity.HasKey(e => e.MaNv);
+
+            entity.ToTable("PhanQuyenNhanVien");
+
+            entity.Property(e => e.MaNv)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .HasColumnName("MaNV");
+            entity.Property(e => e.MaRole)
+                .HasMaxLength(10)
+                .IsUnicode(false);
+
+            entity.HasOne(d => d.MaNvNavigation).WithOne(p => p.PhanQuyenNhanVien)
+                .HasForeignKey<PhanQuyenNhanVien>(d => d.MaNv)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_PhanQuyen_NhanVien");
 
-            entity.HasOne(d => d.MaRoleNavigation).WithOne(p => p.PhanQuyen)
-                .HasForeignKey<PhanQuyen>(d => d.MaRole)
+            entity.HasOne(d => d.MaRoleNavigation).WithMany(p => p.PhanQuyenNhanViens)
+                .HasForeignKey(d => d.MaRole)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_PhanQuyen_Role");
         });
@@ -472,7 +497,7 @@ public partial class QuanLyKhachSanContext : DbContext
             entity.HasOne(d => d.MaDatPhongNavigation).WithMany(p => p.Reviews)
                 .HasForeignKey(d => d.MaDatPhong)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_DanhGia_DatPhong");
+                .HasConstraintName("FK_Review_DatPhong");
         });
 
         modelBuilder.Entity<Role>(entity =>

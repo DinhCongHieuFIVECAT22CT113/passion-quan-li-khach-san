@@ -15,5 +15,7 @@ public partial class Role
 
     public DateTime? NgaySua { get; set; }
 
-    public virtual PhanQuyen? PhanQuyen { get; set; }
+    public virtual ICollection<KhachHang> KhachHangs { get; set; } = new List<KhachHang>();
+
+    public virtual ICollection<PhanQuyenNhanVien> PhanQuyenNhanViens { get; set; } = new List<PhanQuyenNhanVien>();
 }

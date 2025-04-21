@@ -29,9 +29,11 @@ public partial class KhachHang
 
     public string? MaLoaiKh { get; set; }
 
+    public string? MaRole { get; set; }
+
     public virtual ICollection<DatPhong> DatPhongs { get; set; } = new List<DatPhong>();
 
     public virtual LoaiKhachHang? MaLoaiKhNavigation { get; set; }
 
-    public virtual ICollection<PhanQuyen> PhanQuyens { get; set; } = new List<PhanQuyen>();
+    public virtual Role? MaRoleNavigation { get; set; }
 }
