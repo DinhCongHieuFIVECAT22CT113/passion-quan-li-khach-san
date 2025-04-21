@@ -108,11 +108,13 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<ActionResult<UserDto>> Login([FromBody] LoginDto loginDto)
     {
+        // Tìm kiếm KhachHang theo UserName thay vì Email
         var khachHang = await _context.KhachHangs
-            .SingleOrDefaultAsync(x => x.Email == loginDto.Email);
+            .SingleOrDefaultAsync(x => x.UserName == loginDto.UserName);
 
         if (khachHang == null)
-            return Unauthorized("Email không tồn tại");
+            // Cập nhật thông báo lỗi (tùy chọn)
+            return Unauthorized("UserName không tồn tại hoặc không đúng."); 
 
         var result = _passwordHasher.VerifyHashedPassword(
             khachHang,
@@ -121,12 +123,14 @@ public class AuthController : ControllerBase
         );
 
         if (result == PasswordVerificationResult.Failed)
-            return Unauthorized("Mật khẩu không đúng");
+            // Cập nhật thông báo lỗi (tùy chọn)
+            return Unauthorized("Mật khẩu không đúng."); 
 
+        // Phần trả về giữ nguyên
         return new UserDto
         {
             MaKh = khachHang.MaKh,
-            Email = khachHang.Email,
+            Email = khachHang.Email, // Vẫn trả về Email trong UserDto
             HoTen = khachHang.HoKh + " " + khachHang.TenKh,
             Token = _tokenService.CreateToken(khachHang)
         };

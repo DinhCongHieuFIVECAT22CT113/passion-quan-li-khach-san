@@ -34,8 +34,8 @@ namespace be_quanlikhachsanapi.DTOs
 
     public class LoginDto
     {
-        [Required(ErrorMessage = "Email là bắt buộc")]
-        public string Email { get; set; } = default!;
+        [Required(ErrorMessage = "UserName là bắt buộc")]
+        public string UserName { get; set; } = default!;
 
         [Required(ErrorMessage = "Mật khẩu là bắt buộc")]
         public string Password { get; set; } = default!;
