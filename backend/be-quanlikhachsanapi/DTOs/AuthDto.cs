@@ -49,8 +49,31 @@ namespace be_quanlikhachsanapi.DTOs
         [MinLength(6, ErrorMessage = "Mật khẩu phải có ít nhất 6 ký tự")]
         public required string NewPassword { get; set; }
         [Required(ErrorMessage = "Xác nhận mật khẩu là bắt buộc")]
-        [Compare("Password", ErrorMessage = "Mật khẩu mới và xác nhận mật khẩu không khớp.")]
+        [Compare("NewPassword", ErrorMessage = "Mật khẩu mới và xác nhận mật khẩu không khớp.")]
         public required string ConfirmPassword { get; set; }
+    }
+    public class ForgotPasswordDto
+    {
+        [Required(ErrorMessage = "Email là bắt buộc")]
+        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
+        public required string Email { get; set; }
+    }
+    public class ResetPasswordDto
+    {
+        [Required(ErrorMessage = "Mật khẩu mới là bắt buộc")]
+        [MinLength(6, ErrorMessage = "Mật khẩu phải có ít nhất 6 ký tự")]
+        public required string NewPassword { get; set; }
+        
+        [Required(ErrorMessage = "Xác nhận mật khẩu là bắt buộc")]
+        [Compare("NewPassword", ErrorMessage = "Mật khẩu mới và xác nhận mật khẩu không khớp.")]
+        public required string ConfirmPassword { get; set; }
+        
+        [Required(ErrorMessage = "Token là bắt buộc")]
+        public required string Token { get; set; }
+        
+        [Required(ErrorMessage = "Email là bắt buộc")]
+        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
+        public required string Email { get; set; }
     }
     public class UserDto
     {

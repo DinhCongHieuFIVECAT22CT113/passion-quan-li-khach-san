@@ -268,6 +268,8 @@ public partial class QuanLyKhachSanContext : DbContext
             entity.Property(e => e.NgaySua).HasColumnType("datetime");
             entity.Property(e => e.NgayTao).HasColumnType("datetime");
             entity.Property(e => e.PasswordHash).HasMaxLength(255);
+            entity.Property(e => e.ResetPasswordToken).HasMaxLength(255);
+            entity.Property(e => e.ResetPasswordTokenExpiry).HasColumnType("datetime");
             entity.Property(e => e.Sdt)
                 .HasMaxLength(20)
                 .IsUnicode(false)
