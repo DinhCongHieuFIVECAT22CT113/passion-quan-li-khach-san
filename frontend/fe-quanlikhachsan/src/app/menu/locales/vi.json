@@ -1,0 +1,23 @@
+{
+    "common": {
+      "home": "Trang chủ",
+      "account": "Tài Khoản",
+      "permissions": "Phân Quyền",
+      "language": "Đa Ngôn Ngữ",
+      "settings": "Cài Đặt Hệ Thống",
+      "search": "Tìm kiếm...",
+      "save": "Lưu"
+    },
+    "languages": {
+      "vi": "Tiếng Việt",
+      "en": "Tiếng Anh",
+      "zh": "Tiếng Trung",
+      "hi": "Tiếng Hindi",
+      "es": "Tiếng Tây Ban Nha",
+      "fr": "Tiếng Pháp",
+      "ar": "Tiếng Ả Rập",
+      "bn": "Tiếng Bengali",
+      "ru": "Tiếng Nga",
+      "pt": "Tiếng Bồ Đào Nha"
+    }
+  } 
