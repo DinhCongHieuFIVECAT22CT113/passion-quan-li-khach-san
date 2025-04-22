@@ -64,6 +64,7 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IPasswordHasher<KhachHang>, PasswordHasher<KhachHang>>();
 builder.Services.AddScoped<ISendEmailServices, SendEmailServices>();
 builder.Services.AddScoped<IWriteFileRepository, WriteFileRepository>();
+builder.Services.AddScoped<IPhongRepository, PhongRepository>();
 
 // Add Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
