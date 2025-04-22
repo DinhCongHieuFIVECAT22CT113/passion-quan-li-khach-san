@@ -30,6 +30,10 @@ public partial class KhachHang
     public string? MaLoaiKh { get; set; }
 
     public string? MaRole { get; set; }
+    
+    public string? ResetPasswordToken { get; set; }
+    
+    public DateTime? ResetPasswordTokenExpiry { get; set; }
 
     public virtual ICollection<DatPhong> DatPhongs { get; set; } = new List<DatPhong>();
 

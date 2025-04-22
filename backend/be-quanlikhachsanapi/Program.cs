@@ -61,10 +61,15 @@ builder.Services.AddCors(options =>
 
 // Add custom services
 builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.AddScoped<IPasswordHasher<KhachHang>, PasswordHasher<KhachHang>>();
 builder.Services.AddScoped<ISendEmailServices, SendEmailServices>();
 builder.Services.AddScoped<IWriteFileRepository, WriteFileRepository>();
 builder.Services.AddScoped<IPhongRepository, PhongRepository>();
+builder.Services.AddScoped<ILoaiPhongRepository, LoaiPhongRepository>();
+builder.Services.AddScoped<IDichVuRepository, DichVuRepository>();
+builder.Services.AddScoped<IKhuyenMaiRepository, KhuyenMaiRepository>();
+
+builder.Services.AddScoped<IPasswordHasher<KhachHang>, PasswordHasher<KhachHang>>();
+
 
 // Add Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

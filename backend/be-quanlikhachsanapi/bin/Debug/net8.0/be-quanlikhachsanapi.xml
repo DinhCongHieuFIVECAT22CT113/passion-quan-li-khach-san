@@ -16,5 +16,17 @@
         <member name="M:be_quanlikhachsanapi.Migrations.InitialCreate.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:be_quanlikhachsanapi.Migrations.AddResetPasswordFields">
+            <inheritdoc />
+        </member>
+        <member name="M:be_quanlikhachsanapi.Migrations.AddResetPasswordFields.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:be_quanlikhachsanapi.Migrations.AddResetPasswordFields.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:be_quanlikhachsanapi.Migrations.AddResetPasswordFields.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
     </members>
 </doc>
