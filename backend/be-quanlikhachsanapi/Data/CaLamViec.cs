@@ -14,4 +14,6 @@ public partial class CaLamViec
     public DateTime GioKetThuc { get; set; }
 
     public virtual ICollection<NhanVien> NhanViens { get; set; } = new List<NhanVien>();
+
+    public virtual ICollection<PhanCong> PhanCongs { get; set; } = new List<PhanCong>();
 }

@@ -77,7 +77,7 @@ namespace be_quanlikhachsanapi.Services
             };
             _context.DichVus.Add(dichVu);
             _context.SaveChanges();
-             return new JsonResult(new
+            return new JsonResult(new
             {
                 message = "Thêm dịch vụ thành công.",
                 dichVu = newMaDichVu
