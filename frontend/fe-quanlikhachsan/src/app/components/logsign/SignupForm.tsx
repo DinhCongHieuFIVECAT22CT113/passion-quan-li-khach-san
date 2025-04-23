@@ -3,68 +3,185 @@ import React, { useState } from 'react';
 import './logsign.css';
 
 const SignupForm: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string }>({});
+  const [formData, setFormData] = useState({
+    userName: '',
+    password: '',
+    confirmPassword: '',
+    email: '',
+    hokh: '',
+    tenkh: '',
+    soCccd: '',
+    soDienThoai: ''
+  });
+
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [showModal, setShowModal] = useState(false);
 
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const validatePassword = (password: string) => /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/.test(password);
+  const validatePhone = (phone: string) => /^\d+$/.test(phone);
+  const validateCCCD = (cccd: string) => /^\d{12}$/.test(cccd);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newErrors: typeof errors = {};
+    const newErrors: Record<string, string> = {};
 
-    if (!validateEmail(email)) {
+    if (!formData.userName.trim()) {
+      newErrors.userName = 'Vui lòng nhập tên đăng nhập';
+    }
+
+    if (!validateEmail(formData.email)) {
       newErrors.email = 'Email không hợp lệ. Ví dụ: yourname@example.com';
     }
 
-    if (!validatePassword(password)) {
+    if (!validatePassword(formData.password)) {
       newErrors.password = 'Mật khẩu phải ít nhất 8 ký tự, gồm chữ, số và ký tự đặc biệt';
     }
 
-    if (password !== confirmPassword) {
+    if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Mật khẩu xác nhận không khớp';
+    }
+
+    if (!formData.hokh.trim()) {
+      newErrors.hokh = 'Vui lòng nhập họ khách hàng';
+    }
+
+    if (!formData.tenkh.trim()) {
+      newErrors.tenkh = 'Vui lòng nhập tên khách hàng';
+    }
+
+    if (!validateCCCD(formData.soCccd)) {
+      newErrors.soCccd = 'Số CCCD phải có đúng 12 chữ số';
+    }
+
+    if (!validatePhone(formData.soDienThoai)) {
+      newErrors.soDienThoai = 'Vui lòng thêm số điện thoại';
     }
 
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-      setShowModal(true); // Hiện modal xác nhận
+      try {
+        // Gửi dữ liệu đến backend
+        const response = await fetch('/api/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });        
+
+        if (response.ok) {
+          setShowModal(true);
+        } else {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Đăng ký thất bại');
+        }
+      } catch (error) {
+        setErrors({ submit: error instanceof Error ? error.message : 'Có lỗi xảy ra' });
+      }
     }
   };
 
   return (
     <div className="form-section">
-      <h2>Xin chào Bạn</h2>
+      <h2>Đăng Ký</h2>
       <form onSubmit={handleSubmit}>
+        {/* Tên đăng nhập */}
+        <label>Tên Tài Khoản</label>
+        <input
+          type="text"
+          name="userName"
+          value={formData.userName}
+          onChange={handleChange}
+          placeholder="Nhập tên tài khoản của bạn"
+        />
+        {errors.userName && <p className="error">{errors.userName}</p>}
+
+        {/* Email */}
         <label>Email</label>
         <input
           type="text"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="Example@email.com"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          placeholder="Ví dụ:Example@email.com"
         />
         {errors.email && <p className="error">{errors.email}</p>}
 
+        {/* Mật khẩu */}
         <label>Mật khẩu</label>
         <input
           type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="Ít nhất 8 ký tự"
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
+          placeholder="Ít nhất 8 ký tự, chữ, số và ký tự đặc biệt"
         />
         {errors.password && <p className="error">{errors.password}</p>}
 
+        {/* Xác nhận mật khẩu */}
         <label>Xác nhận mật khẩu</label>
         <input
           type="password"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          placeholder="Ít nhất 8 ký tự"
+          name="confirmPassword"
+          value={formData.confirmPassword}
+          onChange={handleChange}
+          placeholder="Nhập lại mật khẩu"
         />
         {errors.confirmPassword && <p className="error">{errors.confirmPassword}</p>}
+
+        {/* Họ khách hàng */}
+        <label>Họ: </label>
+        <input
+          type="text"
+          name="hokh"
+          value={formData.hokh}
+          onChange={handleChange}
+          placeholder="Nhập họ của bạn"
+        />
+        {errors.hokh && <p className="error">{errors.hokh}</p>}
+
+        {/* Tên khách hàng */}
+        <label>Tên: </label>
+        <input
+          type="text"
+          name="tenkh"
+          value={formData.tenkh}
+          onChange={handleChange}
+          placeholder="Nhập tên của bạn ( bao gồm tên đệm nếu có )"
+        />
+        {errors.tenkh && <p className="error">{errors.tenkh}</p>}
+
+        {/* Số CCCD */}
+        <label>Số CCCD/CMND</label>
+        <input
+          type="text"
+          name="soCccd"
+          value={formData.soCccd}
+          onChange={handleChange}
+          placeholder="Nhập số CCCD/CMND ( gồm 12 số )"
+        />
+        {errors.soCccd && <p className="error">{errors.soCccd}</p>}
+
+{/* Số điện thoại */}
+<label>Số điện thoại</label>
+<input
+  type="tel"
+  name="soDienThoai"
+  value={formData.soDienThoai}
+  onChange={handleChange}
+  placeholder="Nhập số điện thoại"
+/>
+{errors.soDienThoai && <p className="error">{errors.soDienThoai}</p>}
+
+        {errors.submit && <p className="error" style={{ textAlign: 'center' }}>{errors.submit}</p>}
 
         <button type="submit" className="main-btn">Đăng ký</button>
 

@@ -13,6 +13,8 @@ const LoginForm: React.FC = () => {
   const [forgotEmail, setForgotEmail] = useState('');
   const [forgotEmailError, setForgotEmailError] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const router = useRouter();
 
@@ -22,7 +24,7 @@ const LoginForm: React.FC = () => {
   const validatePassword = (password: string) =>
     /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/.test(password);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: typeof errors = {};
 
@@ -37,9 +39,28 @@ const LoginForm: React.FC = () => {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-      console.log('Đăng nhập thành công', { email });
-      alert('Đăng nhập thành công!');
-      router.push('/home');
+      setIsLoading(true);
+      try {
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Đăng nhập thành công', data);
+          router.push('/home');
+        } else {
+          const errorData = await response.json();
+          window.alert(errorData.message || 'Đăng nhập thất bại');
+        }
+      } catch (error) {
+        console.error('Lỗi khi đăng nhập:', error);
+        window.alert('Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại sau.');
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -67,7 +88,7 @@ const LoginForm: React.FC = () => {
       setShowSuccessModal(true);
     } catch (error) {
       console.error('Lỗi khi gửi email:', error);
-      alert('Có lỗi xảy ra khi gửi email. Vui lòng thử lại sau.');
+      window.alert('Có lỗi xảy ra khi gửi email. Vui lòng thử lại sau.');
     } finally {
       setIsSending(false);
     }
@@ -80,8 +101,8 @@ const LoginForm: React.FC = () => {
       <form onSubmit={handleSubmit}>
         <label>Địa chỉ Email</label>
         <input
-          type="text"
-          placeholder="Example@email.com"
+          type="email"
+          placeholder="Ví dụ: yourname@example.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
@@ -98,12 +119,22 @@ const LoginForm: React.FC = () => {
 
         <div className="options">
           <label>
-            <input type="checkbox" /> Ghi nhớ tôi
+          <input
+            type="checkbox"
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)}
+            /> Ghi nhớ tôi
           </label>
           <a href="#" onClick={handleForgotPassword}>Quên mật khẩu?</a>
         </div>
 
-        <button type="submit" className="main-btn">Đăng nhập</button>
+        <button 
+          type="submit" 
+          className="main-btn"
+          disabled={isLoading}
+        >
+          {isLoading ? 'Đang xử lý...' : 'Đăng nhập'}
+        </button>
 
         <div className="divider">Hoặc</div>
 
@@ -123,13 +154,6 @@ const LoginForm: React.FC = () => {
           Đăng nhập với Facebook
         </button>
 
-        <button
-          type="button"
-          className="employee-btn"
-          onClick={() => router.push('/emp_login')}
-        >
-          Đăng nhập với tư cách nhân viên
-        </button>
       </form>
 
       <p className="footer-text">
