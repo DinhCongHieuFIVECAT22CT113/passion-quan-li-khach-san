@@ -39,6 +39,8 @@ public partial class QuanLyKhachSanContext : DbContext
 
     public virtual DbSet<NhanVien> NhanViens { get; set; }
 
+    public virtual DbSet<PhanCong> PhanCongs { get; set; }
+
     public virtual DbSet<PhanQuyenNhanVien> PhanQuyenNhanViens { get; set; }
 
     public virtual DbSet<Phong> Phongs { get; set; }
@@ -52,10 +54,8 @@ public partial class QuanLyKhachSanContext : DbContext
     public virtual DbSet<SuDungDichVu> SuDungDichVus { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        // Không làm gì cả - connection string sẽ được cung cấp thông qua Dependency Injection
-        // từ appsettings.json trong Program.cs
-    }
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Server=MSI\\SQLEXPRESS01;Database=QuanLyKhachSan;Trusted_Connection=True;TrustServerCertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -384,6 +384,34 @@ public partial class QuanLyKhachSanContext : DbContext
                 .HasForeignKey(d => d.MaCaLam)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_NhanVien_CaLamViec");
+        });
+
+        modelBuilder.Entity<PhanCong>(entity =>
+        {
+            entity.HasKey(e => e.MaPhanCong);
+
+            entity.ToTable("PhanCong");
+
+            entity.Property(e => e.MaPhanCong)
+                .HasMaxLength(10)
+                .IsUnicode(false);
+            entity.Property(e => e.MaCaLam)
+                .HasMaxLength(10)
+                .IsUnicode(false);
+            entity.Property(e => e.MaNv)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .HasColumnName("MaNV");
+
+            entity.HasOne(d => d.MaCaLamNavigation).WithMany(p => p.PhanCongs)
+                .HasForeignKey(d => d.MaCaLam)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_PhanCong_CaLamViec");
+
+            entity.HasOne(d => d.MaNvNavigation).WithMany(p => p.PhanCongs)
+                .HasForeignKey(d => d.MaNv)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_PhanCong_NhanVien");
         });
 
         modelBuilder.Entity<PhanQuyenNhanVien>(entity =>

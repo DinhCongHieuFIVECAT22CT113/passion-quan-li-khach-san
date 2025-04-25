@@ -36,8 +36,12 @@ namespace be_quanlikhachsanapi.DTOs
         public decimal SoTienGiam { get; set; }
 
         [Required(ErrorMessage = "Ngày bắt đầu là bắt buộc.")]
+        [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime NgayBatDau { get; set; }
         [Required(ErrorMessage = "Ngày kết thúc là bắt buộc.")]
+        [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime NgayKetThuc { get; set; }
         [Required(ErrorMessage = "Trạng thái là bắt buộc.")]
         [MaxLength(50)]
@@ -61,9 +65,13 @@ namespace be_quanlikhachsanapi.DTOs
         public decimal SoTienGiam { get; set; }
 
         [Required(ErrorMessage = "Ngày bắt đầu là bắt buộc.")]
+        [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime NgayBatDau { get; set; }
 
         [Required(ErrorMessage = "Ngày kết thúc là bắt buộc.")]
+        [DataType(DataType.Date)]
+        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime NgayKetThuc { get; set; }   
         [Required(ErrorMessage = "Trạng thái là bắt buộc.")]
         [MaxLength(50)] 

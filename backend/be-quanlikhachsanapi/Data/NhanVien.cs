@@ -35,5 +35,7 @@ public partial class NhanVien
 
     public virtual CaLamViec MaCaLamNavigation { get; set; } = null!;
 
+    public virtual ICollection<PhanCong> PhanCongs { get; set; } = new List<PhanCong>();
+
     public virtual PhanQuyenNhanVien? PhanQuyenNhanVien { get; set; }
 }
