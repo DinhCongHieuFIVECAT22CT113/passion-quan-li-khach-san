@@ -3,36 +3,48 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './Welcome.module.css';
 
+/**
+ * WelcomeForm component - The main welcome page with login and signup options
+ */
 const WelcomeForm: React.FC = () => {
   const router = useRouter();
 
+  const handleLogin = () => router.push('/login');
+  const handleSignup = () => router.push('/signup');
+
   return (
     <div className={styles.formSection}>
+      {/* Header Section */}
       <div className={styles.titleContainer}>
         <h1 className={styles.mainTitle}>PASSION HORIZON</h1>
         <p className={styles.subTitle}>Luxury Resort</p>
       </div>
+
+      {/* Welcome Message */}
+      <h2 className={styles.title}>Chào Mừng</h2>
       
+      {/* Button Group */}
       <div className={styles.buttonGroup}>
-        <h2 className={styles.title}>Chào Mừng</h2>
-        
         <div className={styles.formWrapper}>
           <button 
             className={styles.mainBtn}
-            onClick={() => router.push('/login')}
+            onClick={handleLogin}
+            aria-label="Đăng nhập"
           >
             Đăng Nhập
           </button>
           
           <button 
             className={`${styles.mainBtn} ${styles.signupBtn}`}
-            onClick={() => router.push('/signup')}
+            onClick={handleSignup}
+            aria-label="Đăng ký"
           >
             Đăng Ký
           </button>
         </div>
       </div>
 
+      {/* Footer */}
       <footer className={styles.footer}>© 2025 PASSION HORIZON</footer>
     </div>
   );
