@@ -87,22 +87,31 @@ input {
   align-items: center;
   font-size: 14px;
   margin-bottom: 15px;
+<<<<<<< HEAD
   width: 100%; /* Thêm dòng này */
+=======
+>>>>>>> MD_Fe
 }
 
 .options label {
   display: flex;
   align-items: center;
+<<<<<<< HEAD
   gap: 8px; /* Tăng khoảng cách giữa checkbox và text */
   font-weight: normal;
   margin: 0; /* Đảm bảo không có margin thừa */
   white-space: nowrap; /* Ngăn text xuống dòng */
+=======
+  gap: 5px;
+  font-weight: normal;
+>>>>>>> MD_Fe
 }
 
 .options a {
   color: #102c3e;
   text-decoration: none;
   font-weight: 600;
+<<<<<<< HEAD
   white-space: nowrap; /* Ngăn text xuống dòng */
 }
 
@@ -112,6 +121,8 @@ input {
   width: 16px;
   height: 16px;
   cursor: pointer;
+=======
+>>>>>>> MD_Fe
 }
 
 /* ===== Nút chính ===== */
@@ -135,8 +146,12 @@ input {
   text-align: center;
   font-size: 20px;
   color: #333;
+<<<<<<< HEAD
   margin: 10px 0;
   margin-top: -10px;
+=======
+  margin: 15px 0;
+>>>>>>> MD_Fe
   font-weight: 500;
 }
 
@@ -353,6 +368,7 @@ footer::before {
   color: red;
 }
 
+<<<<<<< HEAD
 /* Thêm vào file logsign.css */
 
 /* ===== Layout cho các trường chia đôi ===== */
@@ -389,3 +405,6 @@ footer::before {
   margin-top: -10px;
   margin-bottom: 15px;
 }
+=======
+
+>>>>>>> MD_Fe

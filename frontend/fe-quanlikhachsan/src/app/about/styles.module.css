@@ -1,0 +1,333 @@
+.container {
+  min-height: 100vh;
+  background: #ffffff;
+}
+
+/* Navigation */
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 5%;
+  background: white;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.navLeft {
+  flex: 0 0 auto;
+}
+
+.navCenter {
+  display: flex;
+  gap: 2.5rem;
+  justify-content: center;
+  flex: 1;
+}
+
+.navCenter a {
+  color: #333;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.navCenter a:hover {
+  color: #8B7355;
+}
+
+.navCenter a::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -4px;
+  left: 0;
+  background-color: #8B7355;
+  transition: width 0.3s ease;
+}
+
+.navCenter a:hover::after {
+  width: 100%;
+}
+
+.navRight {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.profileIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  color: #333;
+  transition: all 0.3s ease;
+}
+
+.profileIcon:hover {
+  color: #8B7355;
+  transform: scale(1.1);
+}
+
+.profileIcon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.bookNowBtn {
+  background: #8B7355;
+  color: white;
+  text-decoration: none;
+  padding: 0.6rem 1.5rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.bookNowBtn:hover {
+  background: #6F5B3E;
+  transform: translateY(-2px);
+}
+
+/* Hero Section */
+.hero {
+  height: 60vh;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+    url('/images/about-hero.jpg');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: white;
+  padding: 0 5%;
+  margin-top: 60px;
+}
+
+.heroContent {
+  max-width: 800px;
+}
+
+.hero h1 {
+  font-size: 3.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.hero p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  opacity: 0.9;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Team Section */
+.teamSection {
+  padding: 4rem 5%;
+}
+
+.teamMember {
+  display: flex;
+  gap: 4rem;
+  align-items: flex-start;
+  margin-bottom: 4rem;
+}
+
+.memberImage {
+  flex: 0 0 400px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.memberInfo {
+  flex: 1;
+}
+
+.memberInfo h2 {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 1.5rem;
+}
+
+.memberDescription p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+/* Clients Section */
+.clientsSection {
+  padding: 4rem 5%;
+  background: #f8f9fa;
+}
+
+.clientsSection h2 {
+  font-size: 2.5rem;
+  color: #333;
+  margin-bottom: 3rem;
+  text-align: center;
+}
+
+.clientsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 3rem;
+  align-items: center;
+  justify-items: center;
+}
+
+/* Footer */
+.footer {
+  background: #1a1a1a;
+  color: white;
+  padding: 4rem 5% 2rem;
+}
+
+.footerContent {
+  display: grid;
+  grid-template-columns: 1fr auto 2fr;
+  gap: 4rem;
+  margin-bottom: 3rem;
+}
+
+.newsletter h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.subscribeForm {
+  display: flex;
+  gap: 1rem;
+}
+
+.subscribeForm input {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 8px;
+}
+
+.subscribeForm button {
+  background: #8B7355;
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.subscribeForm button:hover {
+  background: #6F5B3E;
+}
+
+.footerLinks {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.footerLinks h4 {
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.footerLinks a {
+  display: block;
+  color: #999;
+  text-decoration: none;
+  margin-bottom: 0.5rem;
+  transition: color 0.3s ease;
+}
+
+.footerLinks a:hover {
+  color: #8B7355;
+}
+
+.copyright {
+  text-align: center;
+  color: #666;
+  padding-top: 2rem;
+  border-top: 1px solid #333;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .teamMember {
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .memberImage {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .footerContent {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .nav {
+    padding: 1rem;
+  }
+
+  .navLinks {
+    display: none;
+  }
+
+  .hero {
+    height: 50vh;
+  }
+
+  .hero h1 {
+    font-size: 2.5rem;
+  }
+
+  .hero p {
+    font-size: 1rem;
+  }
+
+  .teamSection {
+    padding: 2rem 1rem;
+  }
+
+  .memberInfo h2 {
+    font-size: 1.5rem;
+  }
+
+  .memberDescription p {
+    font-size: 1rem;
+  }
+
+  .clientsSection {
+    padding: 2rem 1rem;
+  }
+
+  .clientsSection h2 {
+    font-size: 2rem;
+  }
+
+  .footerLinks {
+    grid-template-columns: 1fr;
+  }
+} 

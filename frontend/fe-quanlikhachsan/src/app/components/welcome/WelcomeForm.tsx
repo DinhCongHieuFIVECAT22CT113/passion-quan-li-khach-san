@@ -1,4 +1,3 @@
-// WelcomeForm.tsx
 'use client';
 import React from 'react';
 import { useRouter } from 'next/navigation';
@@ -15,19 +14,23 @@ const WelcomeForm: React.FC = () => {
       </div>
       
       <div className={styles.buttonGroup}>
-        <button 
-          className={styles.mainBtn}
-          onClick={() => router.push('/login')}
-        >
-          Đăng Nhập
-        </button>
+        <h2 className={styles.title}>Chào Mừng</h2>
         
-        <button 
-          className={`${styles.mainBtn} ${styles.signupBtn}`}
-          onClick={() => router.push('/signup')}
-        >
-          Đăng Ký
-        </button>
+        <div className={styles.formWrapper}>
+          <button 
+            className={styles.mainBtn}
+            onClick={() => router.push('/login')}
+          >
+            Đăng Nhập
+          </button>
+          
+          <button 
+            className={`${styles.mainBtn} ${styles.signupBtn}`}
+            onClick={() => router.push('/signup')}
+          >
+            Đăng Ký
+          </button>
+        </div>
       </div>
 
       <footer className={styles.footer}>© 2025 PASSION HORIZON</footer>
