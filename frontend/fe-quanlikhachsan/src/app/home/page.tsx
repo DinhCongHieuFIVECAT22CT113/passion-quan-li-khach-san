@@ -218,7 +218,8 @@ export default function Home() {
                   ))}
                 </div>
                 <div className={styles.offerPrice}>
-                  <span className={styles.amount}>{offer.price.toLocaleString()}đ</span>
+                  <span className={styles.amount}>{offer.price.toLocaleString('vi-VN')}đ
+                  </span>
                   <span className={styles.perNight}>/ đêm</span>
                 </div>
               </div>

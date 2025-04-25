@@ -6,7 +6,7 @@ import styles from './page.module.css';
 
 export default function HomePage() {
   // Redirect to welcome page if not authenticated
-  redirect('/welcome');
+  redirect('/home');
 
   return (
     <main>

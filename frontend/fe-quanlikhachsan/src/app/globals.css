@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 * {
   margin: 0;
   padding: 0;
@@ -102,10 +101,6 @@ a:hover {
   from { opacity: 0; }
   to { opacity: 1; }
 }
-=======
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 :root {
   --foreground-rgb: 0, 0, 0;
@@ -134,4 +129,3 @@ body {
   max-width: 100vw;
   overflow-x: hidden;
 } 
->>>>>>> MD_Fe
