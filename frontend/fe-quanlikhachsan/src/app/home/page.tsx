@@ -93,7 +93,7 @@ export default function Home() {
           <Link href="/rooms">Phòng</Link>
         </div>
         <div className={styles.navRight}>
-          <Link href="/profile" className={styles.profileIcon}><FaUser /></Link>
+          <Link href="/profiles_acc" className={styles.profileIcon}><FaUser /></Link>
           <Link href="/booking" className={styles.bookNowBtn}>
             Đặt ngay
           </Link>

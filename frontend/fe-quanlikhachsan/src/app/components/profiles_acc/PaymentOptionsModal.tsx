@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './cus_account.css'; 
+import './profiles_acc.css'; 
 
 interface PaymentOptionsModalProps {
   onClose: () => void;

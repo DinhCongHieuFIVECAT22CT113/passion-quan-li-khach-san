@@ -1,8 +1,12 @@
 'use client';
 import React, { useState } from 'react';
-import './cus_account.css'; 
+import './profiles_acc.css';
 
-const PersonalInfoForm: React.FC = () => {
+interface PersonalInfoFormProps {
+  onSave?: (data: { name: string; address: string }) => void;
+}
+
+const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ onSave }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phoneCode, setPhoneCode] = useState('+84');
@@ -42,7 +46,6 @@ const PersonalInfoForm: React.FC = () => {
     };
     setErrors(newErrors);
 
-    // Kiểm tra có lỗi nào không
     return Object.values(newErrors).every((err) => err === '');
   };
 
@@ -59,6 +62,10 @@ const PersonalInfoForm: React.FC = () => {
     });
 
     setShowSaveSuccess(true);
+    
+    if (onSave) {
+      onSave({ name, address });
+    }
   };
 
   const handleCloseSuccessModal = () => {
@@ -82,29 +89,28 @@ const PersonalInfoForm: React.FC = () => {
       </div>
 
       <div className="form-group">
-  <label>Số điện thoại:</label>
-  <div className="phone-input-group">
-    <select
-      value={phoneCode}
-      onChange={(e) => setPhoneCode(e.target.value)}
-      className="phone-select"
-    >
-      {countryCodes.map((c) => (
-        <option key={c.code} value={c.code}>
-          {c.code} ({c.country})
-        </option>
-      ))}
-    </select>
-    <input
-      type="tel"
-      value={phone}
-      onChange={(e) => setPhone(e.target.value)}
-      className="phone-number-input"
-    />
-  </div>
-  {errors.phone && <p className="error">{errors.phone}</p>}
-</div>
-
+        <label>Số điện thoại:</label>
+        <div className="phone-input-group">
+          <select
+            value={phoneCode}
+            onChange={(e) => setPhoneCode(e.target.value)}
+            className="phone-select"
+          >
+            {countryCodes.map((c) => (
+              <option key={c.code} value={c.code}>
+                {c.code} ({c.country})
+              </option>
+            ))}
+          </select>
+          <input
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="phone-number-input"
+          />
+        </div>
+        {errors.phone && <p className="error">{errors.phone}</p>}
+      </div>
 
       <div className="form-group">
         <label>Địa chỉ:</label>

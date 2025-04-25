@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import './cus_account.css'; 
+import './profiles_acc.css'; 
 
 interface AvatarUploadModalProps {
   onClose: () => void;

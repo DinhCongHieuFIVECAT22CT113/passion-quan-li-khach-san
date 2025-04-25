@@ -1,6 +1,6 @@
 'use client';
 import React from 'react';
-import './cus_account.css'; 
+import './profiles_acc.css'; 
 
 type Props = {
   isOpen: boolean;
