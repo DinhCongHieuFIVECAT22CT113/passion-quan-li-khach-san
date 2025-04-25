@@ -35,7 +35,7 @@ const SignupForm: React.FC = () => {
     const newErrors: Record<string, string> = {};
 
     if (!formData.userName.trim()) {
-      newErrors.userName = 'Vui lòng nhập tên đăng nhập';
+      newErrors.userName = 'Bắt buộc';
     }
 
     if (!validateEmail(formData.email)) {
