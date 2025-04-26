@@ -9,19 +9,19 @@ const staffMembers = [
     id: 1,
     name: 'Công Hiếu',
     role: 'Admin',
-    avatar: '/avatar-placeholder.png'
+    avatar: '/admin-avatar.png'
   },
   {
     id: 2,
     name: 'Chí Tường',
     role: 'Kế Toán',
-    avatar: '/avatar-placeholder.png'
+    avatar: '/emp1-avatar.png'
   },
   {
     id: 3,
     name: 'Giang Trường',
     role: 'Nhân Viên',
-    avatar: '/avatar-placeholder.png'
+    avatar: '/emp2-avatar.png'
   }
 ];
 

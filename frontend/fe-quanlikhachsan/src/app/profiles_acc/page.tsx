@@ -22,6 +22,7 @@ const AccountPage: React.FC = () => {
     name: 'Nguyễn Văn A',
     address: 'Hà Nội, Việt Nam'
   });
+
   const handleLogout = () => {
     localStorage.removeItem('token');
     sessionStorage.clear();
@@ -70,14 +71,11 @@ const AccountPage: React.FC = () => {
 
   return (
     <div className="account-container">
-      {/* Header với nút Home và Logout */}
+      {/* Header với nút Home */}
       <div className="account-header">
         <div className="account-actions">
           <button className="home-btn" onClick={() => (window.location.href = '/home')}>
             Quay trở lại trang chủ
-          </button>
-          <button className="logout-btn" onClick={handleLogout}>
-            <i className="fas fa-sign-out-alt logout-icon"></i> Đăng Xuất
           </button>
         </div>
       </div>
@@ -110,41 +108,40 @@ const AccountPage: React.FC = () => {
         </div>
 
         <div className="profile-content">
-        <div className="profile-info">
-          <h2>{userInfo.name}</h2>
-          <p className="location">{userInfo.address}</p> {/* Hiển thị địa chỉ từ state */}
-          <p className="role">Khách hàng</p>
+          <div className="profile-info">
+            <h2>{userInfo.name}</h2>
+            <p className="location">{userInfo.address}</p>
+            <p className="role">Khách hàng</p>
             <div className="profile-actions">
               <button className="action-btn" onClick={() => setShowAvatarModal(true)}>
                 Đổi ảnh
               </button>
-              <button className="action-btn" onClick={() => setShowChangePasswordModal(true)}>
-                Đổi mật khẩu
-              </button>
-              <button className="action-btn" onClick={() => setShowPaymentOptionsModal(true)}>
-                Tùy chọn Thanh Toán
+              <button className="logout-btn" onClick={handleLogout}>
+                <i className="fas fa-sign-out-alt logout-icon"></i> Đăng Xuất
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Bố cục 2 cột */}
+      {/* Bố cục: Thông tin cá nhân trên, Lịch sử giao dịch dưới */}
       <div className="content-section">
-        {/* Cột trái: Lịch sử giao dịch */}
-        <div className="left-column">
-          <TransactionHistory transactions={transactionHistory} />
+        {/* Cột phải: Thông tin cá nhân (đặt trước) */}
+        <div className="right-column">
+          <PersonalInfoForm 
+            onSave={(data) => setUserInfo(prev => ({
+              ...prev,
+              name: data.name,
+              address: data.address
+            }))} 
+            onChangePassword={() => setShowChangePasswordModal(true)}
+            onPaymentOptions={() => setShowPaymentOptionsModal(true)}
+          />
         </div>
 
-        {/* Cột phải: Thông tin cá nhân */}
-        <div className="right-column">
-        <PersonalInfoForm 
-          onSave={(data) => setUserInfo(prev => ({
-            ...prev,
-            name: data.name,
-            address: data.address
-          }))} 
-        />
+        {/* Cột trái: Lịch sử giao dịch (đặt sau) */}
+        <div className="left-column">
+          <TransactionHistory transactions={transactionHistory} />
         </div>
       </div>
 
