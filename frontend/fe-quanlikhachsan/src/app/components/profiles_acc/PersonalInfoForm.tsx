@@ -4,9 +4,11 @@ import './profiles_acc.css';
 
 interface PersonalInfoFormProps {
   onSave?: (data: { name: string; address: string }) => void;
+  onChangePassword?: () => void;
+  onPaymentOptions?: () => void;
 }
 
-const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ onSave }) => {
+const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ onSave, onChangePassword, onPaymentOptions }) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phoneCode, setPhoneCode] = useState('+84');
@@ -74,7 +76,12 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ onSave }) => {
 
   return (
     <div className="info-card">
-      <h3>Thông tin cá nhân</h3>
+      <div className="info-header">
+        <h3>Thông tin cá nhân</h3>
+        <button className="action-btn" onClick={onChangePassword}>
+          Đổi mật khẩu
+        </button>
+      </div>
 
       <div className="form-group">
         <label>Họ tên:</label>
@@ -124,9 +131,14 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ onSave }) => {
         {errors.idCard && <p className="error">{errors.idCard}</p>}
       </div>
 
-      <button className="save-info-btn" onClick={handleSaveInfo}>
-        Lưu thay đổi
-      </button>
+      <div className="form-actions">
+        <button className="save-info-btn" onClick={handleSaveInfo}>
+          Lưu thay đổi
+        </button>
+        <button className="action-btn" onClick={onPaymentOptions}>
+          Tùy chọn Thanh Toán
+        </button>
+      </div>
 
       {showSaveSuccess && (
         <div className="modal-overlay payment-complete-modal">
