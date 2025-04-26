@@ -5111,11 +5111,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\PTUDW quản lý khách sạn\\code dev\\DEV FE-BE\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj",
+      "projectUniqueName": "D:\\PTUDW quản lý khách sạn\\code dev\\Update_BE\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj",
       "projectName": "be-quanlikhachsanapi",
-      "projectPath": "D:\\PTUDW quản lý khách sạn\\code dev\\DEV FE-BE\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj",
+      "projectPath": "D:\\PTUDW quản lý khách sạn\\code dev\\Update_BE\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj",
       "packagesPath": "C:\\Users\\anhso\\.nuget\\packages\\",
-      "outputPath": "D:\\PTUDW quản lý khách sạn\\code dev\\DEV FE-BE\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\obj\\",
+      "outputPath": "D:\\PTUDW quản lý khách sạn\\code dev\\Update_BE\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\anhso\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -5227,13 +5227,5 @@
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.408/PortableRuntimeIdentifierGraph.json"
       }
     }
-  },
-  "logs": [
-    {
-      "code": "Undefined",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Problem reading the cache file D:\\PTUDW quản lý khách sạn\\code dev\\DEV FE-BE\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\obj\\project.nuget.cache : Unexpected character encountered while parsing value: <. Path '', line 0, position 0."
-    }
-  ]
+  }
 }
