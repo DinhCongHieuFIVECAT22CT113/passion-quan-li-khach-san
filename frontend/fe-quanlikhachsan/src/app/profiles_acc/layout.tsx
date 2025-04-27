@@ -1,5 +1,6 @@
 import '../../styles/globals.css';
 import type { Metadata } from 'next';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 export const metadata: Metadata = {
   title: 'My App',

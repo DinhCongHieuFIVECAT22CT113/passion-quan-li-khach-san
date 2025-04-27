@@ -3,47 +3,44 @@ import React, { useState } from 'react';
 import './profiles_acc.css';
 
 interface PersonalInfoFormProps {
-  onSave?: (data: { name: string; address: string }) => void;
+  onSave?: (data: { hokh: string; tenkh: string }) => void;
   onChangePassword?: () => void;
   onPaymentOptions?: () => void;
 }
 
 const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ onSave, onChangePassword, onPaymentOptions }) => {
-  const [name, setName] = useState('');
+  const [hokh, setHokh] = useState('');
+  const [tenkh, setTenkh] = useState('');
   const [email, setEmail] = useState('');
-  const [phoneCode, setPhoneCode] = useState('+84');
-  const [phone, setPhone] = useState('');
-  const [address, setAddress] = useState('');
-  const [idCard, setIdCard] = useState('');
+  const [soDienThoai, setSoDienThoai] = useState('');
+  const [soCccd, setSoCccd] = useState('');
 
   const [errors, setErrors] = useState({
-    name: '',
+    hokh: '',
+    tenkh: '',
     email: '',
-    phone: '',
-    address: '',
-    idCard: '',
+    soDienThoai: '',
+    soCccd: '',
   });
 
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
 
-  const countryCodes = [{ code: '+84', country: 'Việt Nam' }];
-
   const validateFields = () => {
     const newErrors = {
-      name: name.trim() === '' ? 'Họ tên không được để trống.' : '',
+      hokh: hokh.trim() === '' ? 'Họ không được để trống.' : '',
+      tenkh: tenkh.trim() === '' ? 'Tên không được để trống.' : '',
       email:
         email.trim() === ''
           ? 'Email không được để trống.'
           : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
           ? 'Email không đúng định dạng.'
           : '',
-      phone: phone.trim() === '' ? 'Số điện thoại không được để trống.' : '',
-      address: address.trim() === '' ? 'Địa chỉ không được để trống.' : '',
-      idCard:
-        idCard.trim() === ''
-          ? 'CMND/CCCD không được để trống.'
-          : !/^\d{12}$/.test(idCard)
-          ? 'CMND/CCCD phải có đúng 12 chữ số.'
+      soDienThoai: soDienThoai.trim() === '' ? 'Số điện thoại không được để trống.' : !/^\d+$/.test(soDienThoai) ? 'Số điện thoại không hợp lệ.' : '',
+      soCccd:
+        soCccd.trim() === ''
+          ? 'Số CCCD/CMND không được để trống.'
+          : !/^\d{12}$/.test(soCccd)
+          ? 'Số CCCD/CMND phải có đúng 12 chữ số.'
           : '',
     };
     setErrors(newErrors);
@@ -55,18 +52,17 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ onSave, onChangePas
     if (!validateFields()) return;
 
     console.log('Lưu thông tin:', {
-      name,
+      hokh,
+      tenkh,
       email,
-      phoneCode,
-      phone,
-      address,
-      idCard,
+      soDienThoai,
+      soCccd,
     });
 
     setShowSaveSuccess(true);
-    
+
     if (onSave) {
-      onSave({ name, address });
+      onSave({ hokh, tenkh });
     }
   };
 
@@ -83,52 +79,70 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ onSave, onChangePas
         </button>
       </div>
 
-      <div className="form-group">
-        <label>Họ tên:</label>
-        <input type="text" value={name} onChange={(e) => setName(e.target.value)} />
-        {errors.name && <p className="error">{errors.name}</p>}
+      <div className="row-group">
+        <div className="half-width">
+          <div className="form-group">
+            <label>Họ</label>
+            <input
+              type="text"
+              value={hokh}
+              onChange={(e) => setHokh(e.target.value)}
+              placeholder="Nhập họ của bạn"
+            />
+            {errors.hokh && <p className="error">{errors.hokh}</p>}
+          </div>
+        </div>
+        <div className="half-width">
+          <div className="form-group">
+            <label>Tên</label>
+            <input
+              type="text"
+              value={tenkh}
+              onChange={(e) => setTenkh(e.target.value)}
+              placeholder="Nhập tên của bạn"
+            />
+            {errors.tenkh && <p className="error">{errors.tenkh}</p>}
+          </div>
+        </div>
       </div>
 
       <div className="form-group">
-        <label>Email:</label>
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+        <label>Email</label>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Ví dụ: yourname@example.com"
+        />
         {errors.email && <p className="error">{errors.email}</p>}
       </div>
 
-      <div className="form-group">
-        <label>Số điện thoại:</label>
-        <div className="phone-input-group">
-          <select
-            value={phoneCode}
-            onChange={(e) => setPhoneCode(e.target.value)}
-            className="phone-select"
-          >
-            {countryCodes.map((c) => (
-              <option key={c.code} value={c.code}>
-                {c.code} ({c.country})
-              </option>
-            ))}
-          </select>
-          <input
-            type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            className="phone-number-input"
-          />
+      <div className="row-group">
+        <div className="half-width">
+          <div className="form-group">
+            <label>Số CCCD/CMND</label>
+            <input
+              type="text"
+              value={soCccd}
+              onChange={(e) => setSoCccd(e.target.value)}
+              placeholder="12 chữ số"
+              maxLength={12}
+            />
+            {errors.soCccd && <p className="error">{errors.soCccd}</p>}
+          </div>
         </div>
-        {errors.phone && <p className="error">{errors.phone}</p>}
-      </div>
-
-      <div className="form-group">
-        <label>Địa chỉ:</label>
-        <textarea value={address} onChange={(e) => setAddress(e.target.value)} />
-        {errors.address && <p className="error">{errors.address}</p>}
-      </div>
-
-      <div className="form-group">
-        <label>CMND/CCCD:</label>
-        <input type="text" value={idCard} onChange={(e) => setIdCard(e.target.value)} />
-        {errors.idCard && <p className="error">{errors.idCard}</p>}
+        <div className="half-width">
+          <div className="form-group">
+            <label>Số điện thoại</label>
+            <input
+              type="tel"
+              value={soDienThoai}
+              onChange={(e) => setSoDienThoai(e.target.value)}
+              placeholder="Nhập số điện thoại"
+            />
+            {errors.soDienThoai && <p className="error">{errors.soDienThoai}</p>}
+          </div>
+        </div>
       </div>
 
       <div className="form-actions">

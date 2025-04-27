@@ -11,9 +11,45 @@ const PaymentOptionsModal: React.FC<PaymentOptionsModalProps> = ({ onClose }) =>
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const [showCompleteModal, setShowCompleteModal] = useState(false);
   const [isSaveDisabled, setIsSaveDisabled] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   const internationalCards = ['Visa', 'Mastercard', 'American Express'];
   const vietnameseBanks = ['Vietcombank', 'Techcombank', 'MB Bank'];
+
+  // Fetch current payment method on mount
+  useEffect(() => {
+    const fetchPaymentMethod = async () => {
+      try {
+        const response = await fetch('/api/profile', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+
+        if (response.ok) {
+          const { data } = await response.json();
+          const paymentMethod = data.paymentMethod;
+
+          if (paymentMethod) {
+            if (paymentMethod === 'cash') {
+              setSelectedPaymentMethod('cash');
+            } else {
+              setSelectedPaymentMethod('bank_transfer');
+              setSelectedCard(paymentMethod);
+            }
+          }
+        } else {
+          const errorData = await response.json();
+          console.error('Error fetching payment method:', errorData.message);
+        }
+      } catch (error) {
+        console.error('Error fetching payment method:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPaymentMethod();
+  }, []);
 
   const handlePaymentMethodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
@@ -35,8 +71,29 @@ const PaymentOptionsModal: React.FC<PaymentOptionsModalProps> = ({ onClose }) =>
     }
   }, [selectedPaymentMethod, selectedCard]);
 
-  const handleSave = () => {
-    setShowConfirmationModal(true);
+  const handleSave = async () => {
+    try {
+      const response = await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'updatePaymentMethod',
+          paymentMethod: selectedPaymentMethod,
+          selectedCard: selectedCard || null,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setShowConfirmationModal(true);
+      } else {
+        window.alert(data.message || 'Cập nhật phương thức thanh toán thất bại');
+      }
+    } catch (error) {
+      console.error('Lỗi khi cập nhật phương thức thanh toán:', error);
+      window.alert('Có lỗi xảy ra khi cập nhật phương thức thanh toán. Vui lòng thử lại sau.');
+    }
   };
 
   const handleConfirm = () => {
@@ -48,6 +105,10 @@ const PaymentOptionsModal: React.FC<PaymentOptionsModalProps> = ({ onClose }) =>
     setShowCompleteModal(false);
     onClose();
   };
+
+  if (isLoading) {
+    return <div>Đang tải...</div>;
+  }
 
   return (
     <div className="modal-overlay">

@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
 import './profiles_acc.css'; 
 
 type Props = {
@@ -33,6 +33,11 @@ const ChangePasswordModal: React.FC<Props> = ({
   onChangePassword,
   showSuccess,
 }) => {
+  // States to toggle visibility of each password field
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
   if (!isOpen) return null;
 
   return (
@@ -42,11 +47,20 @@ const ChangePasswordModal: React.FC<Props> = ({
 
         <div className="form-group">
           <label>Mật khẩu hiện tại</label>
-          <input
-            type="password"
-            value={currentPassword}
-            onChange={onCurrentPasswordChange}
-          />
+          <div className="password-input-wrapper">
+            <input
+              type={showCurrentPassword ? 'text' : 'password'}
+              value={currentPassword}
+              onChange={onCurrentPasswordChange}
+            />
+            <button
+              type="button"
+              className="toggle-password-btn"
+              onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+            >
+              <i className={showCurrentPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'}></i>
+            </button>
+          </div>
           {passwordErrors.current && (
             <p style={{ color: 'red', fontSize: '0.9rem' }}>{passwordErrors.current}</p>
           )}
@@ -54,11 +68,20 @@ const ChangePasswordModal: React.FC<Props> = ({
 
         <div className="form-group">
           <label>Mật khẩu mới</label>
-          <input
-            type="password"
-            value={newPassword}
-            onChange={onNewPasswordChange}
-          />
+          <div className="password-input-wrapper">
+            <input
+              type={showNewPassword ? 'text' : 'password'}
+              value={newPassword}
+              onChange={onNewPasswordChange}
+            />
+            <button
+              type="button"
+              className="toggle-password-btn"
+              onClick={() => setShowNewPassword(!showNewPassword)}
+            >
+              <i className={showNewPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'}></i>
+            </button>
+          </div>
           {passwordErrors.new && (
             <p style={{ color: 'red', fontSize: '0.9rem' }}>{passwordErrors.new}</p>
           )}
@@ -66,11 +89,20 @@ const ChangePasswordModal: React.FC<Props> = ({
 
         <div className="form-group">
           <label>Xác nhận mật khẩu</label>
-          <input
-            type="password"
-            value={confirmNewPassword}
-            onChange={onConfirmNewPasswordChange}
-          />
+          <div className="password-input-wrapper">
+            <input
+              type={showConfirmPassword ? 'text' : 'password'}
+              value={confirmNewPassword}
+              onChange={onConfirmNewPasswordChange}
+            />
+            <button
+              type="button"
+              className="toggle-password-btn"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            >
+              <i className={showConfirmPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'}></i>
+            </button>
+          </div>
           {passwordErrors.confirm && (
             <p style={{ color: 'red', fontSize: '0.9rem' }}>{passwordErrors.confirm}</p>
           )}

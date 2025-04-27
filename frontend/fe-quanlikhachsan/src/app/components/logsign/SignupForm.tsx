@@ -1,5 +1,7 @@
 'use client';
 import React, { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import './logsign.css';
 
 const SignupForm: React.FC = () => {
@@ -16,6 +18,8 @@ const SignupForm: React.FC = () => {
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showModal, setShowModal] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const validatePassword = (password: string) => /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/.test(password);
@@ -115,84 +119,102 @@ const SignupForm: React.FC = () => {
         />
         {errors.email && <p className="error">{errors.email}</p>}
 
-{/* Mật khẩu và Xác nhận mật khẩu - chia đôi */}
-<div className="row-group">
-  <div className="half-width">
-    <label>Mật khẩu</label>
-    <input
-      type="password"
-      name="password"
-      value={formData.password}
-      onChange={handleChange}
-      placeholder="Ít nhất 8 ký tự"
-    />
-    {errors.password && <p className="error">{errors.password}</p>}
-  </div>
-  <div className="half-width">
-    <label>Xác nhận mật khẩu</label>
-    <input
-      type="password"
-      name="confirmPassword"
-      value={formData.confirmPassword}
-      onChange={handleChange}
-      placeholder="Nhập lại mật khẩu"
-    />
-    {errors.confirmPassword && <p className="error">{errors.confirmPassword}</p>}
-  </div>
-</div>
+        {/* Mật khẩu và Xác nhận mật khẩu - chia đôi */}
+        <div className="row-group">
+          <div className="half-width">
+            <label>Mật khẩu</label>
+            <div className="password-wrapper">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Ít nhất 8 ký tự"
+              />
+              <button
+                type="button"
+                className="toggle-password"
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+              </button>
+            </div>
+            {errors.password && <p className="error">{errors.password}</p>}
+          </div>
+          <div className="half-width">
+            <label>Xác nhận mật khẩu</label>
+            <div className="password-wrapper">
+              <input
+                type={showConfirmPassword ? 'text' : 'password'}
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                placeholder="Nhập lại mật khẩu"
+              />
+              <button
+                type="button"
+                className="toggle-password"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                <FontAwesomeIcon icon={showConfirmPassword ? faEyeSlash : faEye} />
+              </button>
+            </div>
+            {errors.confirmPassword && <p className="error">{errors.confirmPassword}</p>}
+          </div>
+        </div>
 
-{/* Họ và Tên - chia đôi */}
-<div className="row-group">
-  <div className="half-width">
-    <label>Họ</label>
-    <input
-      type="text"
-      name="hokh"
-      value={formData.hokh}
-      onChange={handleChange}
-      placeholder="Nhập họ của bạn"
-    />
-    {errors.hokh && <p className="error">{errors.hokh}</p>}
-  </div>
-  <div className="half-width">
-    <label>Tên</label>
-    <input
-      type="text"
-      name="tenkh"
-      value={formData.tenkh}
-      onChange={handleChange}
-      placeholder="Nhập tên của bạn"
-    />
-    {errors.tenkh && <p className="error">{errors.tenkh}</p>}
-  </div>
-</div>
+        {/* Họ và Tên - chia đôi */}
+        <div className="row-group">
+          <div className="half-width">
+            <label>Họ</label>
+            <input
+              type="text"
+              name="hokh"
+              value={formData.hokh}
+              onChange={handleChange}
+              placeholder="Nhập họ của bạn"
+            />
+            {errors.hokh && <p className="error">{errors.hokh}</p>}
+          </div>
+          <div className="half-width">
+            <label>Tên</label>
+            <input
+              type="text"
+              name="tenkh"
+              value={formData.tenkh}
+              onChange={handleChange}
+              placeholder="Nhập tên của bạn"
+            />
+            {errors.tenkh && <p className="error">{errors.tenkh}</p>}
+          </div>
+        </div>
 
-{/* Số CCCD và Số điện thoại - chia đôi */}
-<div className="row-group">
-  <div className="half-width">
-    <label>Số CCCD/CMND</label>
-    <input
-      type="text"
-      name="soCccd"
-      value={formData.soCccd}
-      onChange={handleChange}
-      placeholder="12 chữ số"
-      maxLength={12}
-    />
-    {errors.soCccd && <p className="error">{errors.soCccd}</p>}
-  </div>
-  <div className="half-width">
-    <label>Số điện thoại</label>
-    <input
-      type="tel"
-      name="soDienThoai"
-      value={formData.soDienThoai}
-      onChange={handleChange}
-      placeholder="Nhập số điện thoại"
-    />
-    {errors.soDienThoai && <p className="error">{errors.soDienThoai}</p>}
-  </div>
-</div>
+        {/* Số CCCD và Số điện thoại - chia đôi */}
+        <div className="row-group">
+          <div className="half-width">
+            <label>Số CCCD/CMND</label>
+            <input
+              type="text"
+              name="soCccd"
+              value={formData.soCccd}
+              onChange={handleChange}
+              placeholder="12 chữ số"
+              maxLength={12}
+            />
+            {errors.soCccd && <p className="error">{errors.soCccd}</p>}
+          </div>
+          <div className="half-width">
+            <label>Số điện thoại</label>
+            <input
+              type="tel"
+              name="soDienThoai"
+              value={formData.soDienThoai}
+              onChange={handleChange}
+              placeholder="Nhập số điện thoại"
+            />
+            {errors.soDienThoai && <p className="error">{errors.soDienThoai}</p>}
+          </div>
+        </div>
 
         {errors.submit && <p className="error" style={{ textAlign: 'center' }}>{errors.submit}</p>}
 
