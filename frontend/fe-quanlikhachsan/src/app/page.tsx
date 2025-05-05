@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import Image from 'next/image';
-import Header from '@/components/layout/Header';
-import BookingForm from '@/components/forms/BookingForm';
+import Header from '../app/components/layout/Header';
+import BookingForm from '../app/components/forms/BookingForm';
 import styles from './page.module.css';
 
 export default function HomePage() {

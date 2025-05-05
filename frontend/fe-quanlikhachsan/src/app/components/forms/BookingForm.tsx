@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { DatePicker } from '../ui/DatePicker';
-import { api } from '@/lib/api';
+import { api } from '../../lib/api';
 import styles from './BookingForm.module.css';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency } from '../../lib/utils';
 
 interface BookingFormProps {
   minDate?: Date;
