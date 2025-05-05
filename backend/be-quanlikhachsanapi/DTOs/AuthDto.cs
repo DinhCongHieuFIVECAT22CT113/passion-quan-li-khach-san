@@ -40,18 +40,7 @@ namespace be_quanlikhachsanapi.DTOs
         [Required(ErrorMessage = "Mật khẩu là bắt buộc")]
         public string Password { get; set; } = default!;
     }
-    public class ChangePassDto
-    {
-        [Required(ErrorMessage = "Mật khẩu là bắt buộc")]
-        [MinLength(6, ErrorMessage = "Mật khẩu phải có ít nhất 6 ký tự")]
-        public required string Password { get; set; }
-        [Required(ErrorMessage = "Mật khẩu là bắt buộc")]
-        [MinLength(6, ErrorMessage = "Mật khẩu phải có ít nhất 6 ký tự")]
-        public required string NewPassword { get; set; }
-        [Required(ErrorMessage = "Xác nhận mật khẩu là bắt buộc")]
-        [Compare("Password", ErrorMessage = "Mật khẩu mới và xác nhận mật khẩu không khớp.")]
-        public required string ConfirmPassword { get; set; }
-    }
+
     public class UserDto
     {
         public string MaKh { get; set; } = default!;

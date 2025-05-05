@@ -70,6 +70,7 @@ builder.Services.AddScoped<IKhuyenMaiRepository, KhuyenMaiRepository>();
 builder.Services.AddScoped<ICaLamViecRepository, CaLamViecRepository>();
 builder.Services.AddScoped<IPhanCongCaRepository, PhanCongCaRepository>();
 builder.Services.AddScoped<INhanVienRepository, NhanVienRepository>();
+builder.Services.AddScoped<IKhachHangRepository, KhachHangRepository>();
 
 builder.Services.AddScoped<IPasswordHasher<KhachHang>, PasswordHasher<KhachHang>>();
 builder.Services.AddScoped<IPasswordHasher<NhanVien>, PasswordHasher<NhanVien>>();
