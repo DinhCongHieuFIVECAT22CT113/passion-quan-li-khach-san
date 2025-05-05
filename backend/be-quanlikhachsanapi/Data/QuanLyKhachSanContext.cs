@@ -41,8 +41,6 @@ public partial class QuanLyKhachSanContext : DbContext
 
     public virtual DbSet<PhanCong> PhanCongs { get; set; }
 
-    public virtual DbSet<PhanQuyenNhanVien> PhanQuyenNhanViens { get; set; }
-
     public virtual DbSet<Phong> Phongs { get; set; }
 
     public virtual DbSet<PhuongThucThanhToan> PhuongThucThanhToans { get; set; }
@@ -52,7 +50,6 @@ public partial class QuanLyKhachSanContext : DbContext
     public virtual DbSet<Role> Roles { get; set; }
 
     public virtual DbSet<SuDungDichVu> SuDungDichVus { get; set; }
-
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -360,7 +357,7 @@ public partial class QuanLyKhachSanContext : DbContext
                 .HasMaxLength(50)
                 .HasColumnName("HoNV");
             entity.Property(e => e.LuongCoBan).HasColumnType("decimal(18, 2)");
-            entity.Property(e => e.MaCaLam)
+            entity.Property(e => e.MaRole)
                 .HasMaxLength(10)
                 .IsUnicode(false);
             entity.Property(e => e.PasswordHash).HasMaxLength(255);
@@ -375,10 +372,10 @@ public partial class QuanLyKhachSanContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false);
 
-            entity.HasOne(d => d.MaCaLamNavigation).WithMany(p => p.NhanViens)
-                .HasForeignKey(d => d.MaCaLam)
+            entity.HasOne(d => d.MaRoleNavigation).WithMany(p => p.NhanViens)
+                .HasForeignKey(d => d.MaRole)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_NhanVien_CaLamViec");
+                .HasConstraintName("FK_NhanVien_Role");
         });
 
         modelBuilder.Entity<PhanCong>(entity =>
@@ -407,31 +404,6 @@ public partial class QuanLyKhachSanContext : DbContext
                 .HasForeignKey(d => d.MaNv)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_PhanCong_NhanVien");
-        });
-
-        modelBuilder.Entity<PhanQuyenNhanVien>(entity =>
-        {
-            entity.HasKey(e => e.MaNv);
-
-            entity.ToTable("PhanQuyenNhanVien");
-
-            entity.Property(e => e.MaNv)
-                .HasMaxLength(10)
-                .IsUnicode(false)
-                .HasColumnName("MaNV");
-            entity.Property(e => e.MaRole)
-                .HasMaxLength(10)
-                .IsUnicode(false);
-
-            entity.HasOne(d => d.MaNvNavigation).WithOne(p => p.PhanQuyenNhanVien)
-                .HasForeignKey<PhanQuyenNhanVien>(d => d.MaNv)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_PhanQuyen_NhanVien");
-
-            entity.HasOne(d => d.MaRoleNavigation).WithMany(p => p.PhanQuyenNhanViens)
-                .HasForeignKey(d => d.MaRole)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_PhanQuyen_Role");
         });
 
         modelBuilder.Entity<Phong>(entity =>

@@ -17,5 +17,5 @@ public partial class Role
 
     public virtual ICollection<KhachHang> KhachHangs { get; set; } = new List<KhachHang>();
 
-    public virtual ICollection<PhanQuyenNhanVien> PhanQuyenNhanViens { get; set; } = new List<PhanQuyenNhanVien>();
+    public virtual ICollection<NhanVien> NhanViens { get; set; } = new List<NhanVien>();
 }
