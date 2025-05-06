@@ -297,6 +297,16 @@ namespace be_quanlikhachsanapi.Migrations
                         principalColumn: "MaKM");
                 });
 
+            migrationBuilder.CreateIndex(
+                name: "IX_ApDungKM_MaDatPhong",
+                table: "ApDungKM",
+                column: "MaDatPhong");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ApDungKM_MaKM",
+                table: "ApDungKM",
+                column: "MaKM");
+
             migrationBuilder.CreateTable(
                 name: "ChiTietDatPhong",
                 columns: table => new
@@ -344,8 +354,8 @@ namespace be_quanlikhachsanapi.Migrations
                     SoTienConThieu = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
                     SoTienThanhToanDu = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
                     TrangThai = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false, defaultValue: "Chưa thanh toán"),
-                    NgayTao = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    NgaySua = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    NgayTao = table.Column<DateTime>(type: "datetime2(7)", nullable: true),
+                    NgaySua = table.Column<DateTime>(type: "datetime2(7)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -433,16 +443,6 @@ namespace be_quanlikhachsanapi.Migrations
                         principalTable: "HoaDon",
                         principalColumn: "MaHoaDon");
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ApDungKM_MaDatPhong",
-                table: "ApDungKM",
-                column: "MaDatPhong");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ApDungKM_MaKM",
-                table: "ApDungKM",
-                column: "MaKM");
 
             migrationBuilder.CreateIndex(
                 name: "IX_BaoCaoDoanhThu_MaNV",

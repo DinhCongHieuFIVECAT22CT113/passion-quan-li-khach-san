@@ -5106,26 +5106,32 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\anhso\\.nuget\\packages\\": {}
+    "C:\\Users\\AD\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\PTUDW quản lý khách sạn\\code dev\\Update_BE\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj",
+      "projectUniqueName": "D:\\Năm 3\\Kì 2\\Phát triển ứng dụng WEB\\LTBackend\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj",
       "projectName": "be-quanlikhachsanapi",
-      "projectPath": "D:\\PTUDW quản lý khách sạn\\code dev\\Update_BE\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj",
-      "packagesPath": "C:\\Users\\anhso\\.nuget\\packages\\",
-      "outputPath": "D:\\PTUDW quản lý khách sạn\\code dev\\Update_BE\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\obj\\",
+      "projectPath": "D:\\Năm 3\\Kì 2\\Phát triển ứng dụng WEB\\LTBackend\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj",
+      "packagesPath": "C:\\Users\\AD\\.nuget\\packages\\",
+      "outputPath": "D:\\Năm 3\\Kì 2\\Phát triển ứng dụng WEB\\LTBackend\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "C:\\Users\\anhso\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\AD\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
       ],
       "sources": {
-        "https://api.nuget.org/v3/index.json": {},
-        "https://packagesource": {}
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+        "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net8.0": {
@@ -5142,7 +5148,8 @@
         "enableAudit": "true",
         "auditLevel": "low",
         "auditMode": "direct"
-      }
+      },
+      "SdkAnalysisLevel": "9.0.200"
     },
     "frameworks": {
       "net8.0": {
@@ -5224,7 +5231,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.408/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.203/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
