@@ -20,6 +20,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/admin/reviews" className={`${styles.navLink} ${pathname === '/admin/reviews' ? styles.active : ''}`}>Đánh giá</Link>
           <Link href="/admin/staffs" className={`${styles.navLink} ${pathname === '/admin/staffs' ? styles.active : ''}`}>Nhân viên</Link>
           <Link href="/admin/reports" className={`${styles.navLink} ${pathname === '/admin/reports' ? styles.active : ''}`}>Báo cáo</Link>
+          <Link href="/admin/languages" className={`${styles.navLink} ${pathname === '/admin/languages' ? styles.active : ''}`}>Ngôn Ngữ</Link>
+          <Link href="/admin/permissions" className={`${styles.navLink} ${pathname === '/admin/permissions' ? styles.active : ''}`}>Phân Quyền</Link>
         </nav>
       </aside>
       <main className={styles.mainContent}>
