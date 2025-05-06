@@ -116,7 +116,7 @@ export default function RoomsPage() {
                   </span>
                 ))}
               </div>
-              <Link href="/booking" className={styles.bookNowLink}>
+              <Link href="/users/booking" className={styles.bookNowLink}>
                 Đặt ngay
               </Link>
             </div>
