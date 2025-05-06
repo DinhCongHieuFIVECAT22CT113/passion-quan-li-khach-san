@@ -1,13 +1,12 @@
 'use client';
 import React from 'react';
-import './profiles_acc.css'; 
+import styles from './profile.module.css';
 
-// Export để sử dụng ngoài file
 export interface Transaction {
-  room: string; // phòng
-  price: number; // giá
-  time: string; // thời gian
-  guests: number; // số khách
+  room: string;
+  price: number;
+  time: string;
+  guests: number;
 }
 
 interface TransactionHistoryProps {
@@ -16,8 +15,7 @@ interface TransactionHistoryProps {
 
 const TransactionHistory: React.FC<TransactionHistoryProps> = ({ transactions }) => {
   return (
-    <div className="history-card">
-      <h3>Lịch sử giao dịch</h3>
+    <div className={styles.historyCard}>
       {transactions.length > 0 ? (
         <table>
           <thead>
@@ -40,9 +38,7 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({ transactions })
           </tbody>
         </table>
       ) : (
-        <p style={{ fontStyle: 'italic', color: '#777', marginTop: '10px' }}>
-          Chưa có lịch sử giao dịch.
-        </p>
+        <p className={styles.noTransactions}>Chưa có lịch sử giao dịch.</p>
       )}
     </div>
   );

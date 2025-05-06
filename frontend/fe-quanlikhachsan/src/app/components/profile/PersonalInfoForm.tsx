@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import './profiles_acc.css';
+import styles from './profile.module.css';
 
 interface PersonalInfoFormProps {
   onSave?: (data: { hokh: string; tenkh: string }) => void;
@@ -71,17 +71,17 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ onSave, onChangePas
   };
 
   return (
-    <div className="info-card">
-      <div className="info-header">
+    <div className={styles.infoCard}>
+      <div className={styles.infoHeader}>
         <h3>Thông tin cá nhân</h3>
-        <button className="action-btn" onClick={onChangePassword}>
+        <button className={styles.actionBtn} onClick={onChangePassword}>
           Đổi mật khẩu
         </button>
       </div>
 
-      <div className="row-group">
-        <div className="half-width">
-          <div className="form-group">
+      <div className={styles.rowGroup}>
+        <div className={styles.halfWidth}>
+          <div className={styles.formGroup}>
             <label>Họ</label>
             <input
               type="text"
@@ -89,11 +89,11 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ onSave, onChangePas
               onChange={(e) => setHokh(e.target.value)}
               placeholder="Nhập họ của bạn"
             />
-            {errors.hokh && <p className="error">{errors.hokh}</p>}
+            {errors.hokh && <p className={styles.error}>{errors.hokh}</p>}
           </div>
         </div>
-        <div className="half-width">
-          <div className="form-group">
+        <div className={styles.halfWidth}>
+          <div className={styles.formGroup}>
             <label>Tên</label>
             <input
               type="text"
@@ -101,12 +101,12 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ onSave, onChangePas
               onChange={(e) => setTenkh(e.target.value)}
               placeholder="Nhập tên của bạn"
             />
-            {errors.tenkh && <p className="error">{errors.tenkh}</p>}
+            {errors.tenkh && <p className={styles.error}>{errors.tenkh}</p>}
           </div>
         </div>
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>Email</label>
         <input
           type="email"
@@ -114,12 +114,12 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ onSave, onChangePas
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Ví dụ: yourname@example.com"
         />
-        {errors.email && <p className="error">{errors.email}</p>}
+        {errors.email && <p className={styles.error}>{errors.email}</p>}
       </div>
 
-      <div className="row-group">
-        <div className="half-width">
-          <div className="form-group">
+      <div className={styles.rowGroup}>
+        <div className={styles.halfWidth}>
+          <div className={styles.formGroup}>
             <label>Số CCCD/CMND</label>
             <input
               type="text"
@@ -128,11 +128,11 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ onSave, onChangePas
               placeholder="12 chữ số"
               maxLength={12}
             />
-            {errors.soCccd && <p className="error">{errors.soCccd}</p>}
+            {errors.soCccd && <p className={styles.error}>{errors.soCccd}</p>}
           </div>
         </div>
-        <div className="half-width">
-          <div className="form-group">
+        <div className={styles.halfWidth}>
+          <div className={styles.formGroup}>
             <label>Số điện thoại</label>
             <input
               type="tel"
@@ -140,25 +140,25 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ onSave, onChangePas
               onChange={(e) => setSoDienThoai(e.target.value)}
               placeholder="Nhập số điện thoại"
             />
-            {errors.soDienThoai && <p className="error">{errors.soDienThoai}</p>}
+            {errors.soDienThoai && <p className={styles.error}>{errors.soDienThoai}</p>}
           </div>
         </div>
       </div>
 
-      <div className="form-actions">
-        <button className="save-info-btn" onClick={handleSaveInfo}>
+      <div className={styles.formActions}>
+        <button className={styles.saveInfoBtn} onClick={handleSaveInfo}>
           Lưu thay đổi
         </button>
-        <button className="action-btn" onClick={onPaymentOptions}>
+        <button className={styles.actionBtn} onClick={onPaymentOptions}>
           Tùy chọn Thanh Toán
         </button>
       </div>
 
       {showSaveSuccess && (
-        <div className="modal-overlay payment-complete-modal">
-          <div className="modal-box">
+        <div className={styles.modalOverlay}>
+          <div className={styles.modalBox}>
             <h3>Đã lưu thay đổi!</h3>
-            <button className="modal-ok-btn" onClick={handleCloseSuccessModal}>
+            <button className={styles.modalOkBtn} onClick={handleCloseSuccessModal}>
               OK
             </button>
           </div>

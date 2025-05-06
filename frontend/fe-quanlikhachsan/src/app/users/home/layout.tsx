@@ -1,4 +1,4 @@
-import '../../styles/globals.css';
+import '../../../styles/globals.css';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -6,10 +6,6 @@ export const metadata: Metadata = {
   description: 'Welcome to our hotel management system',
 };
 
-export default function HomeLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function HomeLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }

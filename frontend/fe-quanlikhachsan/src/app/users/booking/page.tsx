@@ -59,14 +59,14 @@ export default function BookingPage() {
           <Image src="/images/logo.png" alt="Logo Khách sạn" width={120} height={40} />
         </Link>
         <div className={styles.navLinks}>
-          <Link href="/">Trang chủ</Link>
-          <Link href="/explore">Khám phá</Link>
-          <Link href="/rooms">Phòng</Link>
-          <Link href="/about">Giới thiệu</Link>
+        <Link href="/users/home">Trang chủ</Link>
+          <Link href="/users/about">Giới thiệu</Link>
+          <Link href="/users/explore">Khám phá</Link>
+          <Link href="/users/rooms">Phòng</Link>
         </div>
         <div className={styles.navRight}>
-          <Link href="/profile" className={styles.profileIcon}><FaUser /></Link>
-          <Link href="/booking" className={styles.booking}>
+          <Link href="/users/profile" className={styles.profileIcon}><FaUser /></Link>
+          <Link href="/users/booking" className={styles.bookNowBtn}>
             Đặt ngay
           </Link>
         </div>

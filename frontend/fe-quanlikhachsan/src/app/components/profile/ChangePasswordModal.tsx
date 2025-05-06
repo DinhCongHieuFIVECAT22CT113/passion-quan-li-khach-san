@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import './profiles_acc.css'; 
+import styles from './profile.module.css';
 
 type Props = {
   isOpen: boolean;
@@ -33,7 +33,6 @@ const ChangePasswordModal: React.FC<Props> = ({
   onChangePassword,
   showSuccess,
 }) => {
-  // States to toggle visibility of each password field
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -41,13 +40,13 @@ const ChangePasswordModal: React.FC<Props> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-box">
+    <div className={styles.modalOverlay}>
+      <div className={styles.modalBox}>
         <h3>Đổi mật khẩu</h3>
 
-        <div className="form-group">
+        <div className={styles.formGroup}>
           <label>Mật khẩu hiện tại</label>
-          <div className="password-input-wrapper">
+          <div className={styles.passwordInputWrapper}>
             <input
               type={showCurrentPassword ? 'text' : 'password'}
               value={currentPassword}
@@ -55,20 +54,20 @@ const ChangePasswordModal: React.FC<Props> = ({
             />
             <button
               type="button"
-              className="toggle-password-btn"
+              className={styles.togglePasswordBtn}
               onClick={() => setShowCurrentPassword(!showCurrentPassword)}
             >
               <i className={showCurrentPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'}></i>
             </button>
           </div>
           {passwordErrors.current && (
-            <p style={{ color: 'red', fontSize: '0.9rem' }}>{passwordErrors.current}</p>
+            <p className={styles.error}>{passwordErrors.current}</p>
           )}
         </div>
 
-        <div className="form-group">
+        <div className={styles.formGroup}>
           <label>Mật khẩu mới</label>
-          <div className="password-input-wrapper">
+          <div className={styles.passwordInputWrapper}>
             <input
               type={showNewPassword ? 'text' : 'password'}
               value={newPassword}
@@ -76,20 +75,20 @@ const ChangePasswordModal: React.FC<Props> = ({
             />
             <button
               type="button"
-              className="toggle-password-btn"
+              className={styles.togglePasswordBtn}
               onClick={() => setShowNewPassword(!showNewPassword)}
             >
               <i className={showNewPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'}></i>
             </button>
           </div>
           {passwordErrors.new && (
-            <p style={{ color: 'red', fontSize: '0.9rem' }}>{passwordErrors.new}</p>
+            <p className={styles.error}>{passwordErrors.new}</p>
           )}
         </div>
 
-        <div className="form-group">
+        <div className={styles.formGroup}>
           <label>Xác nhận mật khẩu</label>
-          <div className="password-input-wrapper">
+          <div className={styles.passwordInputWrapper}>
             <input
               type={showConfirmPassword ? 'text' : 'password'}
               value={confirmNewPassword}
@@ -97,27 +96,27 @@ const ChangePasswordModal: React.FC<Props> = ({
             />
             <button
               type="button"
-              className="toggle-password-btn"
+              className={styles.togglePasswordBtn}
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
             >
               <i className={showConfirmPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'}></i>
             </button>
           </div>
           {passwordErrors.confirm && (
-            <p style={{ color: 'red', fontSize: '0.9rem' }}>{passwordErrors.confirm}</p>
+            <p className={styles.error}>{passwordErrors.confirm}</p>
           )}
         </div>
 
-        <div className="modal-actions">
-          <button className="modal-save-btn" onClick={onChangePassword}>
+        <div className={styles.modalActions}>
+          <button className={styles.modalSaveBtn} onClick={onChangePassword}>
             Lưu
           </button>
-          <button className="modal-cancel-btn" onClick={onClose}>
+          <button className={styles.modalCancelBtn} onClick={onClose}>
             Đóng
           </button>
         </div>
 
-        {showSuccess && <p className="success-message">Đổi mật khẩu thành công!</p>}
+        {showSuccess && <p className={styles.successMessage}>Đổi mật khẩu thành công!</p>}
       </div>
     </div>
   );

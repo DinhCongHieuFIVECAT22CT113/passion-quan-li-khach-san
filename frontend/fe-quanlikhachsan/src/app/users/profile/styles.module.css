@@ -233,3 +233,56 @@
     gap: 0.25rem;
   }
 } 
+
+/* Transaction Section */
+.transactionSection {
+  padding: 2rem;
+  margin-top: 2rem;
+  border-top: 1px solid #eee;
+}
+
+.sectionTitle {
+  color: #8B7355;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #8B7355;
+}
+
+.historyCard {
+  background: #f9f9f9;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.historyCard table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.historyCard th {
+  text-align: left;
+  padding: 0.75rem;
+  background: #8B7355;
+  color: white;
+}
+
+.historyCard td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #eee;
+}
+
+.historyCard tr:hover {
+  background: #f5f5f5;
+}
+
+@media (max-width: 768px) {
+  .transactionSection {
+    padding: 1.5rem;
+  }
+  
+  .historyCard {
+    overflow-x: auto;
+  }
+}

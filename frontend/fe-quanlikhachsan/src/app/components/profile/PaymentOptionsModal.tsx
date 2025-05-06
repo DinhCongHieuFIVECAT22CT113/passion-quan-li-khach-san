@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import './profiles_acc.css'; 
+import styles from './profile.module.css';
 
 interface PaymentOptionsModalProps {
   onClose: () => void;
@@ -16,7 +16,6 @@ const PaymentOptionsModal: React.FC<PaymentOptionsModalProps> = ({ onClose }) =>
   const internationalCards = ['Visa', 'Mastercard', 'American Express'];
   const vietnameseBanks = ['Vietcombank', 'Techcombank', 'MB Bank'];
 
-  // Fetch current payment method on mount
   useEffect(() => {
     const fetchPaymentMethod = async () => {
       try {
@@ -111,11 +110,11 @@ const PaymentOptionsModal: React.FC<PaymentOptionsModalProps> = ({ onClose }) =>
   }
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-box">
+    <div className={styles.modalOverlay}>
+      <div className={styles.modalBox}>
         <h3>Chọn phương thức thanh toán</h3>
 
-        <div className="form-group">
+        <div className={styles.formGroup}>
           <label htmlFor="payment-method">Phương thức</label>
           <select id="payment-method" value={selectedPaymentMethod} onChange={handlePaymentMethodChange}>
             <option value="">-- Chọn phương thức --</option>
@@ -125,7 +124,7 @@ const PaymentOptionsModal: React.FC<PaymentOptionsModalProps> = ({ onClose }) =>
         </div>
 
         {selectedPaymentMethod === 'bank_transfer' && (
-          <div className="form-group">
+          <div className={styles.formGroup}>
             <label htmlFor="card-type">Chọn loại thẻ</label>
             <select id="card-type" value={selectedCard} onChange={handleCardChange}>
               <option value="">-- Chọn thẻ --</option>
@@ -143,26 +142,28 @@ const PaymentOptionsModal: React.FC<PaymentOptionsModalProps> = ({ onClose }) =>
           </div>
         )}
 
-        <div className="modal-actions">
-          <button className="modal-save-btn" onClick={handleSave} disabled={isSaveDisabled}>
+        <div className={styles.modalActions}>
+          <button className={styles.modalSaveBtn} onClick={handleSave} disabled={isSaveDisabled}>
             Lưu
           </button>
-          <button className="modal-cancel-btn" onClick={onClose}>
+          <button className={styles.modalCancelBtn} onClick={onClose}>
             Hủy
           </button>
         </div>
       </div>
 
-      {/* Modal xác nhận */}
       {showConfirmationModal && (
-        <div className="modal-overlay payment-confirmation-modal">
-          <div className="modal-box">
+        <div className={`${styles.modalOverlay} ${styles.paymentConfirmationModal}`}>
+          <div className={styles.modalBox}>
             <h3>Xác nhận phương thức thanh toán ?</h3>
-            <div className="modal-actions">
-              <button className="modal-confirm-btn large-button" onClick={handleConfirm}>
+            <div className={styles.modalActions}>
+              <button className={`${styles.modalConfirmBtn} ${styles.largeButton}`} onClick={handleConfirm}>
                 Xác nhận
               </button>
-              <button className="modal-cancel-btn large-button" onClick={() => setShowConfirmationModal(false)}>
+              <button
+                className={`${styles.modalCancelBtn} ${styles.largeButton}`}
+                onClick={() => setShowConfirmationModal(false)}
+              >
                 Hủy
               </button>
             </div>
@@ -170,12 +171,11 @@ const PaymentOptionsModal: React.FC<PaymentOptionsModalProps> = ({ onClose }) =>
         </div>
       )}
 
-      {/* Modal hoàn tất */}
       {showCompleteModal && (
-        <div className="modal-overlay payment-complete-modal">
-          <div className="modal-box">
+        <div className={`${styles.modalOverlay} ${styles.paymentCompleteModal}`}>
+          <div className={styles.modalBox}>
             <h3>Hoàn tất!</h3>
-            <button className="modal-ok-btn" onClick={handleCloseComplete}>
+            <button className={styles.modalOkBtn} onClick={handleCloseComplete}>
               Thoát
             </button>
           </div>

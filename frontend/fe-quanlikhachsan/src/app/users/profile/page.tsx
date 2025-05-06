@@ -1,30 +1,51 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import PersonalInfoForm from '../../app/components/profiles_acc/PersonalInfoForm';
-import ChangePasswordModal from '../../app/components/profiles_acc/ChangePasswordModal';
-import PaymentOptionsModal from '../../app/components/profiles_acc/PaymentOptionsModal';
-import AvatarUploadModal from '../../app/components/profiles_acc/AvatarUploadModal';
-import TransactionHistory, { Transaction } from '../../app/components/profiles_acc/TransactionHistory';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import styles from './styles.module.css';
+import PersonalInfoForm from '../../../app/components/profile/PersonalInfoForm';
+import ChangePasswordModal from '../../../app/components/profile/ChangePasswordModal';
+import PaymentOptionsModal from '../../../app/components/profile/PaymentOptionsModal';
+import AvatarUploadModal from '../../../app/components/profile/AvatarUploadModal';
+import TransactionHistory, { Transaction } from '../../../app/components/profile/TransactionHistory';
 
-const AccountPage: React.FC = () => {
+const ProfilePage: React.FC = () => {
+  const router = useRouter();
+
   // Avatar
   const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
 
-  // Cover Photo
-  const [coverPhotoSrc, setCoverPhotoSrc] = useState<string | null>(null);
-  const [showCoverPhotoModal, setShowCoverPhotoModal] = useState(false);
-
   // User Info
   const [userInfo, setUserInfo] = useState({
     name: 'Nguyễn Văn A',
+    email: 'nguyenvana@example.com',
+    phone: '0123 456 789',
+    address: '123 Đường Láng, Hà Nội',
   });
 
   // Transaction History
   const [transactionHistory, setTransactionHistory] = useState<Transaction[]>([]);
 
+  // Loading state
   const [isLoading, setIsLoading] = useState(true);
+
+  // Modal states for Change Password
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [passwordErrors, setPasswordErrors] = useState<{
+    current?: string;
+    new?: string;
+    confirm?: string;
+  }>({});
+  const [showChangePasswordSuccess, setShowChangePasswordSuccess] = useState(false);
+
+  // Modal state for Payment Options
+  const [showPaymentOptionsModal, setShowPaymentOptionsModal] = useState(false);
 
   // Fetch user profile and transaction history on page load
   useEffect(() => {
@@ -40,9 +61,11 @@ const AccountPage: React.FC = () => {
           const { data } = await profileResponse.json();
           setUserInfo({
             name: `${data.hokh} ${data.tenkh}`,
+            email: data.email || 'nguyenvana@example.com',
+            phone: data.soDienThoai || '0123 456 789',
+            address: data.address || '123 Đường Láng, Hà Nội',
           });
           setAvatarSrc(data.avatarSrc);
-          setCoverPhotoSrc(data.coverPhotoSrc);
         } else {
           const errorData = await profileResponse.json();
           console.error('Error fetching profile:', errorData.message);
@@ -74,25 +97,10 @@ const AccountPage: React.FC = () => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     sessionStorage.clear();
-    window.location.href = '/login';
+    router.push('/login');
   };
 
-  // State cho Modal Đổi mật khẩu
-  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
-  const [currentPassword, setCurrentPassword] = useState('');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmNewPassword, setConfirmNewPassword] = useState('');
-  const [passwordErrors, setPasswordErrors] = useState<{
-    current?: string;
-    new?: string;
-    confirm?: string;
-  }>({});
-  const [showChangePasswordSuccess, setShowChangePasswordSuccess] = useState(false);
-
-  // State cho Modal Tùy chọn Thanh Toán
-  const [showPaymentOptionsModal, setShowPaymentOptionsModal] = useState(false);
-
-  // Xử lý Đổi mật khẩu
+  // Handle Change Password
   const handleChangePassword = async () => {
     const errors: typeof passwordErrors = {};
     if (!currentPassword) errors.current = 'Vui lòng nhập mật khẩu hiện tại.';
@@ -144,78 +152,88 @@ const AccountPage: React.FC = () => {
   };
 
   if (isLoading) {
-    return <div>Đang tải...</div>;
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingSpinner} />
+        <p>Đang tải...</p>
+      </div>
+    );
+  }
+
+  if (!userInfo) {
+    return (
+      <div className={styles.loadingContainer}>
+        <p>Không thể tải thông tin người dùng. Vui lòng thử lại sau.</p>
+      </div>
+    );
   }
 
   return (
-    <div className="account-container">
-      {/* Header với nút Home */}
-      <div className="account-header">
-        <div className="account-actions">
-          <button className="home-btn" onClick={() => (window.location.href = '/home')}>
-            Quay trở lại trang chủ
+    <div className={styles.container}>
+      <nav className={styles.nav}>
+        <div className={styles.navLeft}>
+          <Link href="/">
+            <Image src="/images/logo.png" alt="Logo" width={120} height={40} />
+          </Link>
+        </div>
+        <div className={styles.navCenter}>
+          <Link href="/users/home">Trang chủ</Link>
+          <Link href="/users/about">Giới thiệu</Link>
+          <Link href="/users/explore">Khám phá</Link>
+          <Link href="/users/rooms">Phòng</Link>
+        </div>
+        <div className={styles.navRight}>
+          <button onClick={handleLogout} className={styles.logoutBtn}>
+            Đăng xuất
           </button>
         </div>
-      </div>
+      </nav>
 
-      {/* Phần thông tin người dùng */}
-      <div className="profile-header">
-        {/* Ảnh bìa với layout giống Facebook */}
-        <div className="cover-photo-section">
-          {coverPhotoSrc ? (
-            <img src={coverPhotoSrc} alt="Cover Photo" className="cover-photo" />
-          ) : (
-            <div className="cover-photo-placeholder"></div>
-          )}
-          <button
-            className="edit-cover-btn"
-            onClick={() => setShowCoverPhotoModal(true)}
-          >
-            <i className="fa-solid fa-camera"></i> Chỉnh sửa ảnh bìa
-          </button>
-          {/* Avatar được đặt chồng lên ảnh bìa */}
-          <div className="avatar-section">
-            <div className="avatar-placeholder">
-              {avatarSrc ? (
-                <img src={avatarSrc} alt="Avatar" className="avatar-image" />
-              ) : (
-                <div className="avatar-icon"></div>
-              )}
+      <main className={styles.main}>
+        <div className={styles.profileCard}>
+          <div className={styles.profileHeader}>
+            <h1>Thông tin cá nhân</h1>
+            <button
+              onClick={() => setShowAvatarModal(true)}
+              className={styles.editButton}
+            >
+              Đổi ảnh đại diện
+            </button>
+          </div>
+
+          <div className={styles.profileContent}>
+            <div className={styles.avatarSection}>
+              <div className={styles.avatarWrapper}>
+                <Image
+                  src={avatarSrc || '/default-avatar.png'}
+                  alt="Ảnh đại diện"
+                  className={styles.avatar}
+                  width={150}
+                  height={150}
+                />
+              </div>
+            </div>
+
+            <div className={styles.infoSection}>
+              <PersonalInfoForm
+                onSave={(data) =>
+                  setUserInfo((prev) => ({
+                    ...prev,
+                    name: `${data.hokh} ${data.tenkh}`,
+                  }))
+                }
+                onChangePassword={() => setShowChangePasswordModal(true)}
+                onPaymentOptions={() => setShowPaymentOptionsModal(true)}
+              />
             </div>
           </div>
+
+          <div className={styles.transactionSection}>
+  <h2 className={styles.sectionTitle}>Lịch sử giao dịch</h2>
+  <TransactionHistory transactions={transactionHistory} />
+</div>
         </div>
-
-        <div className="profile-content">
-          <div className="profile-info">
-            <h2>{userInfo.name}</h2>
-            <p className="role">Khách hàng</p>
-            <div className="profile-actions">
-              <button className="action-btn" onClick={() => setShowAvatarModal(true)}>
-                Đổi ảnh
-              </button>
-              <button className="logout-btn" onClick={handleLogout}>
-                <i className="fa-solid fa-right-from-bracket logout-icon"></i> Đăng Xuất
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Bố cục: Thông tin cá nhân trên, Lịch sử giao dịch dưới */}
-      <div className="content-section">
-        {/* Thông tin cá nhân */}
-        <PersonalInfoForm 
-          onSave={(data) => setUserInfo(prev => ({
-            ...prev,
-            name: `${data.hokh} ${data.tenkh}`,
-          }))} 
-          onChangePassword={() => setShowChangePasswordModal(true)}
-          onPaymentOptions={() => setShowPaymentOptionsModal(true)}
-        />
-
-        {/* Lịch sử giao dịch */}
-        <TransactionHistory transactions={transactionHistory} />
-      </div>
+      </main>
 
       {/* Modals */}
       <ChangePasswordModal
@@ -239,7 +257,6 @@ const AccountPage: React.FC = () => {
           onClose={() => setShowAvatarModal(false)}
           onAvatarSelected={(src) => {
             setAvatarSrc(src);
-            // Send to backend
             fetch('/api/profile', {
               method: 'PATCH',
               headers: { 'Content-Type': 'application/json' },
@@ -252,40 +269,12 @@ const AccountPage: React.FC = () => {
               .then((data) => {
                 if (!data.success) {
                   console.error('Error updating avatar:', data.message);
-                  setAvatarSrc(null); // Revert on failure
+                  setAvatarSrc(null);
                 }
               })
               .catch((error) => {
                 console.error('Error updating avatar:', error);
-                setAvatarSrc(null); // Revert on failure
-              });
-          }}
-        />
-      )}
-      {showCoverPhotoModal && (
-        <AvatarUploadModal
-          onClose={() => setShowCoverPhotoModal(false)}
-          onAvatarSelected={(src) => {
-            setCoverPhotoSrc(src);
-            // Send to backend
-            fetch('/api/profile', {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                action: 'updateCoverPhoto',
-                imageUrl: src,
-              }),
-            })
-              .then((res) => res.json())
-              .then((data) => {
-                if (!data.success) {
-                  console.error('Error updating cover photo:', data.message);
-                  setCoverPhotoSrc(null); // Revert on failure
-                }
-              })
-              .catch((error) => {
-                console.error('Error updating cover photo:', error);
-                setCoverPhotoSrc(null); // Revert on failure
+                setAvatarSrc(null);
               });
           }}
         />
@@ -294,4 +283,4 @@ const AccountPage: React.FC = () => {
   );
 };
 
-export default AccountPage;
+export default ProfilePage;

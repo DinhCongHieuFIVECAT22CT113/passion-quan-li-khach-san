@@ -30,14 +30,14 @@ Sứ mệnh của chúng tôi là tạo ra không gian nghỉ dưỡng hoàn h�
           </Link>
         </div>
         <div className={styles.navCenter}>
-          <Link href="/">Trang chủ</Link>
-          <Link href="/about">Giới thiệu</Link>
-          <Link href="/explore">Khám phá</Link>
-          <Link href="/rooms">Phòng</Link>
+        <Link href="/users/home">Trang chủ</Link>
+          <Link href="/users/about">Giới thiệu</Link>
+          <Link href="/users/explore">Khám phá</Link>
+          <Link href="/users/rooms">Phòng</Link>
         </div>
         <div className={styles.navRight}>
-          <Link href="/profile" className={styles.profileIcon}><FaUser /></Link>
-          <Link href="/booking" className={styles.bookNowBtn}>
+          <Link href="/users/profile" className={styles.profileIcon}><FaUser /></Link>
+          <Link href="/users/booking" className={styles.bookNowBtn}>
             Đặt ngay
           </Link>
         </div>
