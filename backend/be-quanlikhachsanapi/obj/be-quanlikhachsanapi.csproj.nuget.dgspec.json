@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Năm 3\\Kì 2\\Phát triển ứng dụng WEB\\LTBackend\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj": {}
+    "F:\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj": {}
   },
   "projects": {
-    "D:\\Năm 3\\Kì 2\\Phát triển ứng dụng WEB\\LTBackend\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj": {
+    "F:\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Năm 3\\Kì 2\\Phát triển ứng dụng WEB\\LTBackend\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj",
+        "projectUniqueName": "F:\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj",
         "projectName": "be-quanlikhachsanapi",
-        "projectPath": "D:\\Năm 3\\Kì 2\\Phát triển ứng dụng WEB\\LTBackend\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj",
-        "packagesPath": "C:\\Users\\AD\\.nuget\\packages\\",
-        "outputPath": "D:\\Năm 3\\Kì 2\\Phát triển ứng dụng WEB\\LTBackend\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\obj\\",
+        "projectPath": "F:\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj",
+        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
+        "outputPath": "F:\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\AD\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -43,8 +43,7 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        },
-        "SdkAnalysisLevel": "9.0.200"
+        }
       },
       "frameworks": {
         "net8.0": {
@@ -126,7 +125,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.203/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.408/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

@@ -73,10 +73,13 @@ builder.Services.AddScoped<IApDungKMRepository, ApDungKMRepository>();
 builder.Services.AddScoped<ISuDungDichVuRepository, SuDungDichVuRepository>();
 builder.Services.AddScoped<IHoaDonRepository, HoaDonRepository>();
 builder.Services.AddScoped<IPhuongThucThanhToanRepository, PhuongThucThanhToanRepository>();
+builder.Services.AddScoped<IKhachHangRepository, KhachHangRepository>();
+builder.Services.AddScoped<INhanVienRepository, NhanVienRepository>();
 // Thêm vào phần đăng ký services
 builder.Services.AddScoped<IDatPhongRepository, DatPhongRepository>();
 
 builder.Services.AddScoped<IPasswordHasher<KhachHang>, PasswordHasher<KhachHang>>();
+builder.Services.AddScoped<IPasswordHasher<NhanVien>, PasswordHasher<NhanVien>>();
 
 
 // Add Authentication
