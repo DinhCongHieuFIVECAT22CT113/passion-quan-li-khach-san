@@ -43,9 +43,10 @@ namespace be_quanlikhachsanapi.DTOs
 
     public class UserDto
     {
-        public string MaKh { get; set; } = default!;
+        public string MaNguoiDung { get; set; } = default!;
         public string UserName { get; set; } = default!;
         public string HoTen { get; set; } = default!;
         public string Token { get; set; } = default!;
+        public string MaRole { get; set; } = default!;
     }
 }

@@ -15,15 +15,18 @@ public class AuthController : ControllerBase
     private readonly QuanLyKhachSanContext _context;
     private readonly ITokenService _tokenService;
     private readonly IPasswordHasher<KhachHang> _passwordHasher;
+    private readonly IPasswordHasher<NhanVien> _passwordHasherNv;
 
     public AuthController(
         QuanLyKhachSanContext context,
         ITokenService tokenService,
-        IPasswordHasher<KhachHang> passwordHasher)
+        IPasswordHasher<KhachHang> passwordHasher,
+        IPasswordHasher<NhanVien> passwordHasherNv)
     {
         _context = context;
         _tokenService = tokenService;
         _passwordHasher = passwordHasher;
+        _passwordHasherNv = passwordHasherNv;
     }
 
     [HttpPost("Đăng ký")]
@@ -100,7 +103,7 @@ public class AuthController : ControllerBase
         // Trả về thông tin người dùng và token
         return new UserDto
         {
-            MaKh = khachHang.MaKh,
+            MaNguoiDung = khachHang.MaKh,
             UserName = khachHang.UserName,
             HoTen = khachHang.HoKh + " " + khachHang.TenKh, // Ghép họ tên
             //Token = _tokenService.CreateToken(khachHang)
@@ -111,31 +114,48 @@ public class AuthController : ControllerBase
     [Consumes("multipart/form-data")]
     public async Task<ActionResult<UserDto>> Login([FromForm] LoginDto loginDto)
     {
-        // Tìm kiếm KhachHang theo UserName thay vì Email
+        // Thử tìm trong bảng KhachHang
         var khachHang = await _context.KhachHangs
             .SingleOrDefaultAsync(x => x.UserName == loginDto.UserName);
 
-        if (khachHang == null)
-            // Cập nhật thông báo lỗi (tùy chọn)
-            return Unauthorized("UserName không tồn tại hoặc không đúng."); 
+        if (khachHang != null)
+        {
+            var result = _passwordHasher.VerifyHashedPassword(
+                khachHang, khachHang.PasswordHash, loginDto.Password);
 
-        var result = _passwordHasher.VerifyHashedPassword(
-            khachHang,
-            khachHang.PasswordHash,
-            loginDto.Password
-        );
+            if (result == PasswordVerificationResult.Failed)
+                return Unauthorized("Mật khẩu không đúng.");
 
-        if (result == PasswordVerificationResult.Failed)
-            // Cập nhật thông báo lỗi (tùy chọn)
-            return Unauthorized("Mật khẩu không đúng."); 
+            return new UserDto
+            {
+                MaNguoiDung = khachHang.MaKh,
+                UserName = khachHang.UserName,
+                HoTen = khachHang.HoKh + " " + khachHang.TenKh,
+                MaRole = khachHang.MaRole ?? "CTM", // Nếu rỗng thì gán mặc định là CTM
+                Token = _tokenService.CreateToken(khachHang)
+            };
+        }
 
-        // Phần trả về giữ nguyên
+        // Nếu không phải KhachHang, tìm trong bảng NhanVien
+        var nhanVien = await _context.NhanViens
+            .SingleOrDefaultAsync(x => x.UserName == loginDto.UserName);
+
+        if (nhanVien == null)
+            return Unauthorized("Tài khoản không tồn tại.");
+
+        var resultNv = _passwordHasherNv.VerifyHashedPassword(
+            nhanVien, nhanVien.PasswordHash, loginDto.Password);
+
+        if (resultNv == PasswordVerificationResult.Failed)
+            return Unauthorized("Mật khẩu không đúng.");
+
         return new UserDto
         {
-            MaKh = khachHang.MaKh,
-            UserName = khachHang.UserName, 
-            HoTen = khachHang.HoKh + " " + khachHang.TenKh,
-            Token = _tokenService.CreateToken(khachHang)
+            MaNguoiDung = nhanVien.MaNv,
+            UserName = nhanVien.UserName,
+            HoTen = nhanVien.HoNv + " " + nhanVien.TenNv,
+            MaRole = nhanVien.MaRole ?? "CRW", // Nếu rỗng thì gán mặc định là CRW
+            Token = _tokenService.CreateToken(nhanVien)
         };
     }
 }
