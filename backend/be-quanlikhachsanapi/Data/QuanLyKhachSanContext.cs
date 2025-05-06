@@ -434,22 +434,27 @@ public partial class QuanLyKhachSanContext : DbContext
         modelBuilder.Entity<PhuongThucThanhToan>(entity =>
         {
             entity.HasKey(e => e.MaPhuongThucThanhToan);
-
-            entity.ToTable("PhuongThucThanhToan");
-
+            
             entity.Property(e => e.MaPhuongThucThanhToan)
                 .HasMaxLength(10)
                 .IsUnicode(false);
+            
             entity.Property(e => e.MaHoaDon)
                 .HasMaxLength(10)
                 .IsUnicode(false);
+            
+            entity.Property(e => e.SoTienCanThanhToan)
+                .HasColumnType("decimal(18, 2)");
+            
             entity.Property(e => e.PhuongThucThanhToan1)
                 .HasMaxLength(150)
                 .HasColumnName("PhuongThucThanhToan");
-            entity.Property(e => e.SoTienCanThanhToan).HasColumnType("decimal(18, 2)");
-            entity.Property(e => e.TrangThai).HasMaxLength(50);
-
-            entity.HasOne(d => d.MaHoaDonNavigation).WithMany(p => p.PhuongThucThanhToans)
+            
+            entity.Property(e => e.TrangThai)
+                .HasMaxLength(50);
+            
+            entity.HasOne(d => d.MaHoaDonNavigation)
+                .WithMany()
                 .HasForeignKey(d => d.MaHoaDon)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_PhuongThucThanhToan_HoaDon");
