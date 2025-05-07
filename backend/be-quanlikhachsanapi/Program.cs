@@ -77,6 +77,7 @@ builder.Services.AddScoped<IKhachHangRepository, KhachHangRepository>();
 builder.Services.AddScoped<INhanVienRepository, NhanVienRepository>();
 // Thêm vào phần đăng ký services
 builder.Services.AddScoped<IDatPhongRepository, DatPhongRepository>();
+builder.Services.AddScoped<IChiTietDatPhongRepository, ChiTietDatPhongRepository>();
 
 builder.Services.AddScoped<IPasswordHasher<KhachHang>, PasswordHasher<KhachHang>>();
 builder.Services.AddScoped<IPasswordHasher<NhanVien>, PasswordHasher<NhanVien>>();
