@@ -1,0 +1,122 @@
+.container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 24px;
+  color: #333;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.dateRange {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: 20px;
+}
+
+.dateInput {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.dateRange span {
+  color: #666;
+}
+
+.timeButton {
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.timeButton:hover {
+  background: #f5f5f5;
+}
+
+.timeButton.active {
+  background: #2563eb;
+  color: white;
+  border-color: #2563eb;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  font-size: 16px;
+  color: #666;
+}
+
+.chartContainer {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  margin-bottom: 30px;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.summaryCard {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.summaryCard h3 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  color: #666;
+}
+
+.amount {
+  margin: 0;
+  font-size: 24px;
+  font-weight: bold;
+  color: #2563eb;
+}
+
+@media (max-width: 768px) {
+  .summary {
+    grid-template-columns: 1fr;
+  }
+  
+  .dateRange {
+    margin-right: 0;
+    margin-bottom: 10px;
+    width: 100%;
+  }
+  
+  .dateInput {
+    flex: 1;
+  }
+} 

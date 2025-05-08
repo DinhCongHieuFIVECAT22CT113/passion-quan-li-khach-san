@@ -1,39 +1,35 @@
 'use client';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import './logsign.css';
 
 const LoginForm: React.FC = () => {
-  const [email, setEmail] = useState('');
+  const [userName, setUserName] = useState('');
   const [password, setPassword] = useState('');
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
-
+  const [errors, setErrors] = useState<{ userName?: string; password?: string }>({});
   const [showForgotModal, setShowForgotModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [forgotEmail, setForgotEmail] = useState('');
-  const [forgotEmailError, setForgotEmailError] = useState('');
+  const [forgotUserName, setForgotUserName] = useState('');
+  const [forgotUserNameError, setForgotUserNameError] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const router = useRouter();
-
-  const validateEmail = (email: string) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-
-  const validatePassword = (password: string) =>
-    /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/.test(password);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const newErrors: typeof errors = {};
 
-    if (!validateEmail(email)) {
-      newErrors.email = 'Email không hợp lệ. Ví dụ: yourname@example.com';
+    if (!userName.trim()) {
+      newErrors.userName = 'Tên tài khoản không được để trống';
     }
 
-    if (!validatePassword(password)) {
-      newErrors.password = 'Mật khẩu phải có ít nhất 8 ký tự gồm chữ, số và ký tự đặc biệt';
+    if (!password.trim()) {
+      newErrors.password = 'Mật khẩu không được để trống';
     }
 
     setErrors(newErrors);
@@ -44,7 +40,7 @@ const LoginForm: React.FC = () => {
         const response = await fetch('/api/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password }),
+          body: JSON.stringify({ userName, password }),
         });
 
         if (response.ok) {
@@ -68,27 +64,27 @@ const LoginForm: React.FC = () => {
     e.preventDefault();
     setShowForgotModal(true);
     setShowSuccessModal(false);
-    setForgotEmail('');
-    setForgotEmailError('');
+    setForgotUserName('');
+    setForgotUserNameError('');
   };
 
   const handleSendVerification = async () => {
-    if (!validateEmail(forgotEmail)) {
-      setForgotEmailError('Vui lòng nhập email hợp lệ');
+    if (!forgotUserName.trim()) {
+      setForgotUserNameError('Vui lòng nhập tên tài khoản');
       return;
     }
 
-    setForgotEmailError('');
+    setForgotUserNameError('');
     setIsSending(true);
 
     try {
       await new Promise(resolve => setTimeout(resolve, 1500));
-      console.log('Email khôi phục đã gửi đến:', forgotEmail);
+      console.log('Email khôi phục đã gửi đến tài khoản:', forgotUserName);
       setShowForgotModal(false);
       setShowSuccessModal(true);
     } catch (error) {
-      console.error('Lỗi khi gửi email:', error);
-      window.alert('Có lỗi xảy ra khi gửi email. Vui lòng thử lại sau.');
+      console.error('Lỗi khi gửi yêu cầu khôi phục:', error);
+      window.alert('Có lỗi xảy ra khi gửi yêu cầu. Vui lòng thử lại sau.');
     } finally {
       setIsSending(false);
     }
@@ -99,30 +95,39 @@ const LoginForm: React.FC = () => {
       <h2>Đăng Nhập</h2>
 
       <form onSubmit={handleSubmit}>
-        <label>Địa chỉ Email</label>
+        <label>Tên tài khoản</label>
         <input
-          type="email"
-          placeholder="Ví dụ: yourname@example.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
+          type="text"
+          placeholder="Nhập tên tài khoản của bạn"
+          value={userName}
+          onChange={(e) => setUserName(e.target.value)}
         />
-        {errors.email && <p className="error">{errors.email}</p>}
+        {errors.userName && <p className="error">{errors.userName}</p>}
 
         <label>Mật khẩu</label>
-        <input
-          type="password"
-          placeholder="Ít nhất 8 ký tự"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <div className="password-wrapper">
+          <input
+            type={showPassword ? 'text' : 'password'}
+            placeholder="Nhập mật khẩu của bạn"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button
+            type="button"
+            className="toggle-password"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+          </button>
+        </div>
         {errors.password && <p className="error">{errors.password}</p>}
 
         <div className="options">
           <label>
-          <input
-            type="checkbox"
-            checked={rememberMe}
-            onChange={(e) => setRememberMe(e.target.checked)}
+            <input
+              type="checkbox"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
             /> Ghi nhớ tôi
           </label>
           <a href="#" onClick={handleForgotPassword}>Quên mật khẩu?</a>
@@ -153,7 +158,6 @@ const LoginForm: React.FC = () => {
         >
           Đăng nhập với Facebook
         </button>
-
       </form>
 
       <p className="footer-text">
@@ -168,29 +172,29 @@ const LoginForm: React.FC = () => {
             <div className="modal-header">
               <h2>Khôi phục mật khẩu</h2>
               <button className="close-btn" onClick={() => setShowForgotModal(false)} disabled={isSending}>
-                &times;
+                ×
               </button>
             </div>
             <div className="modal-body">
-              <p>Vui lòng nhập địa chỉ email của bạn</p>
+              <p>Vui lòng nhập tên tài khoản của bạn</p>
               <input
-                type="email"
-                placeholder="example@email.com"
-                value={forgotEmail}
+                type="text"
+                placeholder="Nhập tên tài khoản"
+                value={forgotUserName}
                 onChange={(e) => {
-                  setForgotEmail(e.target.value);
-                  setForgotEmailError('');
+                  setForgotUserName(e.target.value);
+                  setForgotUserNameError('');
                 }}
                 disabled={isSending}
               />
-              {forgotEmailError && <p className="error-message">{forgotEmailError}</p>}
+              {forgotUserNameError && <p className="error-message">{forgotUserNameError}</p>}
 
               <button
                 className="main-btn"
                 onClick={handleSendVerification}
                 disabled={isSending}
               >
-                {isSending ? 'Đang gửi...' : 'Gửi email xác thực'}
+                {isSending ? 'Đang gửi...' : 'Gửi yêu cầu khôi phục'}
               </button>
             </div>
           </div>
@@ -203,7 +207,7 @@ const LoginForm: React.FC = () => {
             <div className="modal-header">
               <h2>Thông báo</h2>
               <button className="close-btn" onClick={() => setShowSuccessModal(false)}>
-                &times;
+                ×
               </button>
             </div>
             <div className="modal-body" style={{ textAlign: 'center' }}>
@@ -217,9 +221,9 @@ const LoginForm: React.FC = () => {
               >
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
               </svg>
-              <p><strong>Email khôi phục mật khẩu đã được gửi đến:</strong></p>
-              <p style={{ color: '#102c3e', fontWeight: 'bold' }}>{forgotEmail}</p>
-              <p>Vui lòng kiểm tra hộp thư đến của bạn</p>
+              <p><strong>Yêu cầu khôi phục mật khẩu đã được gửi cho tài khoản:</strong></p>
+              <p style={{ color: '#102c3e', fontWeight: 'bold' }}>{forgotUserName}</p>
+              <p>Vui lòng liên hệ quản trị viên hoặc kiểm tra email liên kết với tài khoản</p>
               <div style={{ marginTop: '20px' }}>
                 <button
                   className="main-btn"

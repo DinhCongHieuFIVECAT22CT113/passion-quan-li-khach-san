@@ -305,3 +305,31 @@ footer::before {
   margin-top: -10px;
   margin-bottom: 15px;
 }
+
+/* ===== Password Toggle ===== */
+.password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 40%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #444;
+  font-size: 16px; /* Size for Font Awesome icons */
+  padding: 5px;
+  line-height: 1;
+}
+
+.toggle-password:hover {
+  color: #102c3e;
+}
+
+.password-wrapper input {
+  padding-right: 40px; /* Space for the icon */
+}
