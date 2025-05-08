@@ -69,8 +69,18 @@ builder.Services.AddScoped<IDichVuRepository, DichVuRepository>();
 builder.Services.AddScoped<IKhuyenMaiRepository, KhuyenMaiRepository>();
 builder.Services.AddScoped<ICaLamViecRepository, CaLamViecRepository>();
 builder.Services.AddScoped<IPhanCongCaRepository, PhanCongCaRepository>();
+builder.Services.AddScoped<IApDungKMRepository, ApDungKMRepository>();
+builder.Services.AddScoped<ISuDungDichVuRepository, SuDungDichVuRepository>();
+builder.Services.AddScoped<IHoaDonRepository, HoaDonRepository>();
+builder.Services.AddScoped<IPhuongThucThanhToanRepository, PhuongThucThanhToanRepository>();
+builder.Services.AddScoped<IKhachHangRepository, KhachHangRepository>();
+builder.Services.AddScoped<INhanVienRepository, NhanVienRepository>();
+// Thêm vào phần đăng ký services
+builder.Services.AddScoped<IDatPhongRepository, DatPhongRepository>();
+builder.Services.AddScoped<IChiTietDatPhongRepository, ChiTietDatPhongRepository>();
 
 builder.Services.AddScoped<IPasswordHasher<KhachHang>, PasswordHasher<KhachHang>>();
+builder.Services.AddScoped<IPasswordHasher<NhanVien>, PasswordHasher<NhanVien>>();
 
 
 // Add Authentication
@@ -88,6 +98,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 var app = builder.Build();
+
+// Kiểm tra kết nối cơ sở dữ liệu
+try
+{
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<QuanLyKhachSanContext>();
+    dbContext.Database.OpenConnection();
+    Console.WriteLine("Kết nối cơ sở dữ liệu thành công!");
+    dbContext.Database.CloseConnection();
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Lỗi kết nối cơ sở dữ liệu: {ex.Message}");
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -27,4 +27,11 @@ namespace be_quanlikhachsanapi.DTOs
         [Required(ErrorMessage = "Ngày làm là bắt buộc.")]
         public DateOnly NgayLam { get; set; }
     }
+
+    public class LichLamViecDto
+    {
+        public string MaNv { get; set; } = null!;
+        public string TenCaLam { get; set; } = null!;
+        public DateTime NgayLam { get; set; }
+    }
 }

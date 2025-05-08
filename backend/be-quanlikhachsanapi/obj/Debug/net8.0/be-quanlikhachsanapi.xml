@@ -4,6 +4,141 @@
         <name>be-quanlikhachsanapi</name>
     </assembly>
     <members>
+        <member name="M:be_quanlikhachsanapi.Controllers.ApDungKMController.GetAll">
+            <summary>
+            Lấy danh sách tất cả áp dụng khuyến mãi
+            </summary>
+        </member>
+        <member name="M:be_quanlikhachsanapi.Controllers.ApDungKMController.GetById(System.String)">
+            <summary>
+            Lấy thông tin áp dụng khuyến mãi theo mã
+            </summary>
+        </member>
+        <member name="M:be_quanlikhachsanapi.Controllers.ApDungKMController.GetByDatPhong(System.String)">
+            <summary>
+            Lấy danh sách áp dụng khuyến mãi theo mã đặt phòng
+            </summary>
+        </member>
+        <member name="M:be_quanlikhachsanapi.Controllers.ApDungKMController.Create(be_quanlikhachsanapi.DTOs.CreateApDungKMDTO)">
+            <summary>
+            Tạo mới thông tin áp dụng khuyến mãi
+            </summary>
+        </member>
+        <member name="M:be_quanlikhachsanapi.Controllers.ApDungKMController.Update(System.String,be_quanlikhachsanapi.DTOs.UpdateApDungKMDTO)">
+            <summary>
+            Cập nhật thông tin áp dụng khuyến mãi
+            </summary>
+        </member>
+        <member name="M:be_quanlikhachsanapi.Controllers.ApDungKMController.Delete(System.String)">
+            <summary>
+            Xóa thông tin áp dụng khuyến mãi
+            </summary>
+        </member>
+        <member name="M:be_quanlikhachsanapi.Controllers.HoaDonController.GetAll">
+            <summary>
+            Lấy danh sách tất cả hóa đơn
+            </summary>
+        </member>
+        <member name="M:be_quanlikhachsanapi.Controllers.HoaDonController.GetById(System.String)">
+            <summary>
+            Lấy thông tin hóa đơn theo mã
+            </summary>
+        </member>
+        <member name="M:be_quanlikhachsanapi.Controllers.HoaDonController.GetByDatPhong(System.String)">
+            <summary>
+            Lấy thông tin hóa đơn theo mã đặt phòng
+            </summary>
+        </member>
+        <member name="M:be_quanlikhachsanapi.Controllers.HoaDonController.Create(be_quanlikhachsanapi.DTOs.CreateHoaDonDTO)">
+            <summary>
+            Tạo mới hóa đơn
+            </summary>
+        </member>
+        <member name="M:be_quanlikhachsanapi.Controllers.HoaDonController.Update(System.String,be_quanlikhachsanapi.DTOs.UpdateHoaDonDTO)">
+            <summary>
+            Cập nhật thông tin hóa đơn
+            </summary>
+        </member>
+        <member name="M:be_quanlikhachsanapi.Controllers.HoaDonController.UpdateTrangThai(System.String,System.String)">
+            <summary>
+            Cập nhật trạng thái hóa đơn
+            </summary>
+        </member>
+        <member name="M:be_quanlikhachsanapi.Controllers.HoaDonController.Delete(System.String)">
+            <summary>
+            Xóa hóa đơn
+            </summary>
+        </member>
+        <member name="M:be_quanlikhachsanapi.Controllers.HoaDonController.TinhTongDoanhThu(System.Int32,System.Int32)">
+            <summary>
+            Tính tổng doanh thu theo tháng và năm
+            </summary>
+        </member>
+        <member name="M:be_quanlikhachsanapi.Controllers.PhuongThucThanhToanController.GetAll">
+            <summary>
+            Lấy danh sách tất cả phương thức thanh toán
+            </summary>
+        </member>
+        <member name="M:be_quanlikhachsanapi.Controllers.PhuongThucThanhToanController.GetById(System.String)">
+            <summary>
+            Lấy thông tin phương thức thanh toán theo mã
+            </summary>
+        </member>
+        <member name="M:be_quanlikhachsanapi.Controllers.PhuongThucThanhToanController.GetByHoaDon(System.String)">
+            <summary>
+            Lấy danh sách phương thức thanh toán theo mã hóa đơn
+            </summary>
+        </member>
+        <member name="M:be_quanlikhachsanapi.Controllers.PhuongThucThanhToanController.Create(be_quanlikhachsanapi.DTOs.CreatePhuongThucThanhToanDTO)">
+            <summary>
+            Tạo mới phương thức thanh toán
+            </summary>
+        </member>
+        <member name="M:be_quanlikhachsanapi.Controllers.PhuongThucThanhToanController.Update(System.String,be_quanlikhachsanapi.DTOs.UpdatePhuongThucThanhToanDTO)">
+            <summary>
+            Cập nhật thông tin phương thức thanh toán
+            </summary>
+        </member>
+        <member name="M:be_quanlikhachsanapi.Controllers.PhuongThucThanhToanController.UpdateTrangThai(System.String,System.String)">
+            <summary>
+            Cập nhật trạng thái phương thức thanh toán
+            </summary>
+        </member>
+        <member name="M:be_quanlikhachsanapi.Controllers.PhuongThucThanhToanController.Delete(System.String)">
+            <summary>
+            Xóa phương thức thanh toán
+            </summary>
+        </member>
+        <member name="M:be_quanlikhachsanapi.Controllers.SuDungDichVuController.GetAll">
+            <summary>
+            Lấy danh sách tất cả dịch vụ đã sử dụng
+            </summary>
+        </member>
+        <member name="M:be_quanlikhachsanapi.Controllers.SuDungDichVuController.GetById(System.String)">
+            <summary>
+            Lấy thông tin sử dụng dịch vụ theo mã
+            </summary>
+        </member>
+        <member name="M:be_quanlikhachsanapi.Controllers.SuDungDichVuController.GetByDatPhong(System.String)">
+            <summary>
+            Lấy danh sách dịch vụ đã sử dụng theo mã đặt phòng
+            </summary>
+        </member>
+        <member name="M:be_quanlikhachsanapi.Controllers.SuDungDichVuController.Create(be_quanlikhachsanapi.DTOs.CreateSuDungDichVuDTO)">
+            <summary>
+            Tạo mới thông tin sử dụng dịch vụ
+            </summary>
+        </member>
+        <member name="M:be_quanlikhachsanapi.Controllers.SuDungDichVuController.Update(System.String,be_quanlikhachsanapi.DTOs.UpdateSuDungDichVuDTO)">
+            <summary>
+            Cập nhật thông tin sử dụng dịch vụ
+            </summary>
+        </member>
+        <member name="M:be_quanlikhachsanapi.Controllers.SuDungDichVuController.Delete(System.String)">
+            <summary>
+            Xóa thông tin sử dụng dịch vụ
+            </summary>
+        </member>
         <member name="T:be_quanlikhachsanapi.Migrations.InitialCreate">
             <inheritdoc />
         </member>

@@ -1,27 +1,40 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace be_quanlikhachsanapi.Data;
-
-public partial class SuDungDichVu
+namespace be_quanlikhachsanapi.Data
 {
-    public string MaSuDung { get; set; } = null!;
+    [Table("SuDungDichVu")]
+    public partial class SuDungDichVu
+    {
+        [Key]
+        [StringLength(10)]
+        public string MaSuDung { get; set; } = null!;
 
-    public string? MaDatPhong { get; set; }
+        [StringLength(10)]
+        public string? MaDatPhong { get; set; }
 
-    public string? MaDichVu { get; set; }
+        [StringLength(10)]
+        public string? MaDichVu { get; set; }
 
-    public int? SoLuong { get; set; }
+        public int? SoLuong { get; set; }
 
-    public decimal? TongTien { get; set; }
+        [Column(TypeName = "decimal(18, 2)")]
+        public decimal? TongTien { get; set; }
 
-    public DateTime? NgaySuDung { get; set; }
+        [Column(TypeName = "datetime2(7)")]
+        public DateTime? NgaySuDung { get; set; }
 
-    public byte[]? ThoiGianSuDung { get; set; }
+        [Timestamp]
+        public byte[]? ThoiGianSuDung { get; set; }
 
-    public string? TrangThai { get; set; }
+        [StringLength(50)]
+        public string? TrangThai { get; set; }
 
-    public virtual DatPhong? MaDatPhongNavigation { get; set; }
+        [ForeignKey("MaDatPhong")]
+        public virtual DatPhong? MaDatPhongNavigation { get; set; }
 
-    public virtual DichVu? MaDichVuNavigation { get; set; }
+        [ForeignKey("MaDichVu")]
+        public virtual DichVu? MaDichVuNavigation { get; set; }
+    }
 }
