@@ -5,8 +5,8 @@ import BookingForm from '../app/components/forms/BookingForm';
 import styles from './page.module.css';
 
 export default function HomePage() {
-  // Redirect to welcome page if not authenticated
-  redirect('/welcome');
+  // Redirect to welcome or home page if not authenticated
+  redirect('users/welcome');
 
   return (
     <main>
