@@ -105,7 +105,7 @@ export default function Home() {
         <div className={styles.heroContent}>
           <h1>Trải Nghiệm Đẳng Cấp Chưa Từng Có</h1>
           <p>Khám phá sự thoải mái, sang trọng và những khoảnh khắc khó quên</p>
-          <Link href="/rooms" className={styles.heroButton}>
+          <Link href="/users/rooms" className={styles.heroButton}>
             Xem Phòng
           </Link>
         </div>
@@ -189,7 +189,7 @@ export default function Home() {
             </div>
           </div>
 
-          <button className={styles.searchButton} onClick={() => router.push('/rooms')}>
+          <button className={styles.searchButton} onClick={() => router.push('/users/rooms')}>
             Tìm phòng trống
           </button>
         </div>
