@@ -1,6 +1,8 @@
 'use client';
 import React, { useState } from 'react';
 import styles from './profile.module.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
 type Props = {
   isOpen: boolean;
@@ -57,7 +59,7 @@ const ChangePasswordModal: React.FC<Props> = ({
               className={styles.togglePasswordBtn}
               onClick={() => setShowCurrentPassword(!showCurrentPassword)}
             >
-              <i className={showCurrentPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'}></i>
+              <FontAwesomeIcon icon={showCurrentPassword ? faEyeSlash : faEye} />
             </button>
           </div>
           {passwordErrors.current && (
@@ -78,7 +80,7 @@ const ChangePasswordModal: React.FC<Props> = ({
               className={styles.togglePasswordBtn}
               onClick={() => setShowNewPassword(!showNewPassword)}
             >
-              <i className={showNewPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'}></i>
+              <FontAwesomeIcon icon={showNewPassword ? faEyeSlash : faEye} />
             </button>
           </div>
           {passwordErrors.new && (
@@ -99,7 +101,7 @@ const ChangePasswordModal: React.FC<Props> = ({
               className={styles.togglePasswordBtn}
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
             >
-              <i className={showConfirmPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'}></i>
+              <FontAwesomeIcon icon={showConfirmPassword ? faEyeSlash : faEye} />
             </button>
           </div>
           {passwordErrors.confirm && (
