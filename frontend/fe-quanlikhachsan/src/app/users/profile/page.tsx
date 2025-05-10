@@ -19,12 +19,7 @@ const ProfilePage: React.FC = () => {
   const [showAvatarModal, setShowAvatarModal] = useState(false);
 
   // User Info
-  const [userInfo, setUserInfo] = useState({
-    name: 'Nguyễn Văn A',
-    email: 'nguyenvana@example.com',
-    phone: '0123 456 789',
-    address: '123 Đường Láng, Hà Nội',
-  });
+  const [userInfo, setUserInfo] = useState({});
 
   // Transaction History
   const [transactionHistory, setTransactionHistory] = useState<Transaction[]>([]);
