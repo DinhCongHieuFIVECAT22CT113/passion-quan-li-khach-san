@@ -9,48 +9,48 @@ export default function RoomsPage() {
   const rooms = [
     {
       id: 1,
-      name: 'Phòng Hoàng Gia',
+      name: 'Phòng Gần Hồ',
       price: '4.500.000đ',
-      image: '/images/royal-room.jpg',
+      image: '/images/pool-room.jpg',
       availability: 'Có',
       amenities: ['TV', 'WiFi', 'Điều hòa']
     },
     {
       id: 2,
-      name: 'Phòng Hoàng Gia',
-      price: '4.500.000đ',
-      image: '/images/royal-room.jpg',
+      name: 'Căn Hộ Áp Mái',
+      price: '10.500.000đ',
+      image: '/images/penthouse.jpg',
       availability: 'Có',
       amenities: ['TV', 'WiFi', 'Điều hòa']
     },
     {
       id: 3,
-      name: 'Phòng Hoàng Gia',
-      price: '4.500.000đ',
-      image: '/images/royal-room.jpg',
+      name: 'Phòng Quý Tộc',
+      price: '5.500.000đ',
+      image: '/images/noble-room.jpg',
       availability: 'Có',
       amenities: ['TV', 'WiFi', 'Điều hòa']
     },
     {
       id: 4,
-      name: 'Phòng Hoàng Gia',
-      price: '4.500.000đ',
-      image: '/images/royal-room.jpg',
+      name: 'Căn Hộ Xanh',
+      price: '8.500.000đ',
+      image: '/images/green-apartment.jpg',
       availability: 'Có',
       amenities: ['TV', 'WiFi', 'Điều hòa']
     },
     {
       id: 5,
-      name: 'Phòng Hoàng Gia',
-      price: '4.500.000đ',
-      image: '/images/royal-room.jpg',
+      name: 'Phòng Đơn Giản',
+      price: '2.500.000đ',
+      image: '/images/simp-room.jpg',
       availability: 'Có',
       amenities: ['TV', 'WiFi', 'Điều hòa']
     },
     {
       id: 6,
       name: 'Phòng Hoàng Gia',
-      price: '4.500.000đ',
+      price: '7.500.000đ',
       image: '/images/royal-room.jpg',
       availability: 'Có',
       amenities: ['TV', 'WiFi', 'Điều hòa']
