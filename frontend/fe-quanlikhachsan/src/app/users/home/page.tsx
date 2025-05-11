@@ -6,75 +6,85 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FaStar, FaHotel, FaUtensils, FaUsers, FaSwimmingPool, FaRing, FaUser } from 'react-icons/fa';
 import styles from './styles.module.css';
+import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../../../app/components/profile/LanguageContext';
+import i18n from '../../../app/i18n';
+import { useEffect } from 'react';
 
 export default function Home() {
+  const { t, i18n: i18nInstance } = useTranslation();
+  const { selectedLanguage } = useLanguage();
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
   const router = useRouter();
 
+  useEffect(() => {
+    i18n.changeLanguage(selectedLanguage);
+  }, [selectedLanguage]);
+
   const services = [
     {
-      title: 'Phòng Sang Trọng',
-      description: 'Trải nghiệm sự thoải mái tuyệt đối trong những căn phòng được thiết kế tỉ mỉ',
+      title: t('home.luxuriousRoom'),
+      description: t('home.luxuriousRoomDesc'),
       icon: <FaHotel />,
       image: '/images/room.jpg',
-      link: '/rooms'
+      link: '/rooms',
     },
     {
-      title: 'Ẩm Thực Cao Cấp',
-      description: 'Thưởng thức ẩm thực tinh tế trong không gian sang trọng',
+      title: t('home.diverseCuisine'),
+      description: t('home.diverseCuisineDesc'),
       icon: <FaUtensils />,
       image: '/images/dining.jpg',
-      link: '/dining'
+      link: '/dining',
     },
     {
-      title: 'Phòng Hội Nghị',
-      description: 'Không gian chuyên nghiệp cho nhu cầu kinh doanh của bạn',
+      title: t('home.fiveStarService'),
+      description: t('home.fiveStarServiceDesc'),
       icon: <FaUsers />,
       image: '/images/conference.jpg',
-      link: '/conference'
+      link: '/conference',
     },
     {
-      title: 'Hồ Bơi',
-      description: 'Thư giãn và tận hưởng tại hồ bơi trong xanh của chúng tôi',
+      title: t('home.specialOffers'),
+      description: t('home.specialOffersDesc'),
       icon: <FaSwimmingPool />,
       image: '/images/pool.jpg',
-      link: '/pool'
+      link: '/pool',
     },
     {
-      title: 'Địa Điểm Cưới',
-      description: 'Tạo nên những khoảnh khắc khó quên trong không gian lộng lẫy',
+      title: t('home.specialOffers'),
+      description: t('home.specialOffersDesc'),
       icon: <FaRing />,
       image: '/images/wedding.jpg',
-      link: '/wedding'
-    }
+      link: '/wedding',
+    },
   ];
 
   const offers = [
     {
-      type: 'Gói Phòng',
-      title: 'Kỳ Nghỉ Cuối Tuần',
-      description: 'Lựa chọn hoàn hảo cho các cặp đôi',
+      type: t('home.roomPackage'),
+      title: t('home.weekendGetaway'),
+      description: t('home.weekendGetawayDesc'),
       rating: 5,
       price: 4500000,
-      image: '/images/weekend.jpg'
+      image: '/images/weekend.jpg',
     },
     {
-      type: 'Ưu Đãi Đặc Biệt',
-      title: 'Gói Doanh Nhân',
-      description: 'Lý tưởng cho khách công tác',
+      type: t('home.specialOffer'),
+      title: t('home.businessPackage'),
+      description: t('home.businessPackageDesc'),
       rating: 4.5,
       price: 6900000,
-      image: '/images/business.jpg'
+      image: '/images/business.jpg',
     },
     {
-      type: 'Ưu Đãi Kỳ Nghỉ',
-      title: 'Kỳ Nghỉ Gia Đình',
-      description: 'Tạo kỷ niệm cùng người thân yêu',
+      type: t('home.holidayOffer'),
+      title: t('home.familyHoliday'),
+      description: t('home.familyHolidayDesc'),
       rating: 4.8,
       price: 9200000,
-      image: '/images/family.jpg'
-    }
+      image: '/images/family.jpg',
+    },
   ];
 
   return (
@@ -87,15 +97,17 @@ export default function Home() {
           </Link>
         </div>
         <div className={styles.navCenter}>
-          <Link href="/users/home">Trang chủ</Link>
-          <Link href="/users/about">Giới thiệu</Link>
-          <Link href="/users/explore">Khám phá</Link>
-          <Link href="/users/rooms">Phòng</Link>
+          <Link href="/users/home">{t('profile.home')}</Link>
+          <Link href="/users/about">{t('profile.about')}</Link>
+          <Link href="/users/explore">{t('profile.explore')}</Link>
+          <Link href="/users/rooms">{t('profile.rooms')}</Link>
         </div>
         <div className={styles.navRight}>
-          <Link href="/users/profile" className={styles.profileIcon}><FaUser /></Link>
+          <Link href="/users/profile" className={styles.profileIcon}>
+            <FaUser />
+          </Link>
           <Link href="/users/booking" className={styles.bookNowBtn}>
-            Đặt ngay
+            {t('booking.bookNow')}
           </Link>
         </div>
       </nav>
@@ -103,10 +115,10 @@ export default function Home() {
       {/* Hero Section */}
       <section className={styles.hero}>
         <div className={styles.heroContent}>
-          <h1>Trải Nghiệm Đẳng Cấp Chưa Từng Có</h1>
-          <p>Khám phá sự thoải mái, sang trọng và những khoảnh khắc khó quên</p>
+          <h1>{t('home.title')}</h1>
+          <p>{t('home.description')}</p>
           <Link href="/users/rooms" className={styles.heroButton}>
-            Xem Phòng
+            {t('home.viewRooms')}
           </Link>
         </div>
       </section>
@@ -119,8 +131,8 @@ export default function Home() {
               <Image src="/images/location.jpg" alt="Vị trí" fill style={{ objectFit: 'cover' }} />
             </div>
             <div className={styles.serviceContent}>
-              <h3>Vị trí đắc địa</h3>
-              <p>Nằm tại trung tâm thành phố, thuận tiện di chuyển</p>
+              <h3>{t('home.location')}</h3>
+              <p>{t('home.locationDesc')}</p>
             </div>
           </div>
 
@@ -129,8 +141,8 @@ export default function Home() {
               <Image src="/images/room.jpg" alt="Phòng" fill style={{ objectFit: 'cover' }} />
             </div>
             <div className={styles.serviceContent}>
-              <h3>Phòng sang trọng</h3>
-              <p>Thiết kế hiện đại, đầy đủ tiện nghi cao cấp</p>
+              <h3>{t('home.luxuriousRoom')}</h3>
+              <p>{t('home.luxuriousRoomDesc')}</p>
             </div>
           </div>
 
@@ -139,8 +151,8 @@ export default function Home() {
               <Image src="/images/service.jpg" alt="Dịch vụ" fill style={{ objectFit: 'cover' }} />
             </div>
             <div className={styles.serviceContent}>
-              <h3>Dịch vụ 5 sao</h3>
-              <p>Đội ngũ nhân viên chuyên nghiệp, tận tâm</p>
+              <h3>{t('home.fiveStarService')}</h3>
+              <p>{t('home.fiveStarServiceDesc')}</p>
             </div>
           </div>
 
@@ -149,8 +161,8 @@ export default function Home() {
               <Image src="/images/dining.jpg" alt="Ẩm thực" fill style={{ objectFit: 'cover' }} />
             </div>
             <div className={styles.serviceContent}>
-              <h3>Ẩm thực đa dạng</h3>
-              <p>Nhà hàng với các món ăn Á - Âu đặc sắc</p>
+              <h3>{t('home.diverseCuisine')}</h3>
+              <p>{t('home.diverseCuisineDesc')}</p>
             </div>
           </div>
         </div>
@@ -160,18 +172,18 @@ export default function Home() {
       <section className={styles.bookingForm}>
         <div className={styles.formContent}>
           <div className={styles.formGroup}>
-            <label>Ngày nhận phòng</label>
-            <input type="date" placeholder="Chọn ngày nhận phòng" />
+            <label>{t('home.checkInDate')}</label>
+            <input type="date" placeholder={t('home.checkInDate')} />
           </div>
 
           <div className={styles.formGroup}>
-            <label>Ngày trả phòng</label>
-            <input type="date" placeholder="Chọn ngày trả phòng" />
+            <label>{t('home.checkOutDate')}</label>
+            <input type="date" placeholder={t('home.checkOutDate')} />
           </div>
 
           <div className={styles.guestGroup}>
             <div className={styles.guestCounter}>
-              <label>Người lớn</label>
+              <label>{t('home.adults')}</label>
               <div className={styles.counter}>
                 <button onClick={() => setAdults(Math.max(1, adults - 1))}>-</button>
                 <span>{adults}</span>
@@ -180,7 +192,7 @@ export default function Home() {
             </div>
 
             <div className={styles.guestCounter}>
-              <label>Trẻ em</label>
+              <label>{t('home.children')}</label>
               <div className={styles.counter}>
                 <button onClick={() => setChildren(Math.max(0, children - 1))}>-</button>
                 <span>{children}</span>
@@ -190,7 +202,7 @@ export default function Home() {
           </div>
 
           <button className={styles.searchButton} onClick={() => router.push('/users/rooms')}>
-            Tìm phòng trống
+            {t('home.searchRooms')}
           </button>
         </div>
       </section>
@@ -198,9 +210,11 @@ export default function Home() {
       {/* Special Offers */}
       <section className={styles.specialOffers}>
         <div className={styles.sectionHeader}>
-          <h2>Ưu Đãi Đặc Biệt</h2>
-          <p>Khám phá những ưu đãi đặc biệt cho kỳ nghỉ đáng nhớ</p>
-          <Link href="/offers" className={styles.viewAll}>Xem Tất Cả Ưu Đãi</Link>
+          <h2>{t('home.specialOffers')}</h2>
+          <p>{t('home.specialOffersDesc')}</p>
+          <Link href="/offers" className={styles.viewAll}>
+            {t('home.viewAllOffers')}
+          </Link>
         </div>
         <div className={styles.offerGrid}>
           {offers.map((offer, index) => (
@@ -218,9 +232,8 @@ export default function Home() {
                   ))}
                 </div>
                 <div className={styles.offerPrice}>
-                  <span className={styles.amount}>{offer.price.toLocaleString('vi-VN')}đ
-                  </span>
-                  <span className={styles.perNight}>/ đêm</span>
+                  <span className={styles.amount}>{offer.price.toLocaleString('en-US')}đ</span>
+                  <span className={styles.perNight}>{t('home.perNight')}</span>
                 </div>
               </div>
             </div>
@@ -232,10 +245,10 @@ export default function Home() {
       <footer className={styles.footer}>
         <div className={styles.footerContent}>
           <div className={styles.footerLeft}>
-            <h3>Đăng ký nhận tin & Ưu đãi</h3>
+            <h3>{t('about.subscribe')}</h3>
             <div className={styles.subscribeForm}>
-              <input type="email" placeholder="Nhập email của bạn..." />
-              <button className={styles.subscribeButton}>Đăng ký</button>
+              <input type="email" placeholder={t('about.subscribePlaceholder')} />
+              <button className={styles.subscribeButton}>{t('about.subscribeButton')}</button>
             </div>
           </div>
 
@@ -246,29 +259,27 @@ export default function Home() {
           <div className={styles.footerRight}>
             <div className={styles.footerLinks}>
               <div className={styles.linkGroup}>
-                <h4>Về chúng tôi</h4>
-                <Link href="/location">Vị trí</Link>
+                <h4>{t('about.footerAbout')}</h4>
+                <Link href="/location">{t('about.location')}</Link>
               </div>
 
               <div className={styles.linkGroup}>
-                <h4>Hỗ trợ</h4>
-                <Link href="/faq">Câu hỏi thường gặp</Link>
-                <Link href="/terms">Điều khoản sử dụng</Link>
-                <Link href="/privacy">Chính sách bảo mật</Link>
+                <h4>{t('about.support')}</h4>
+                <Link href="/faq">{t('about.faq')}</Link>
+                <Link href="/terms">{t('about.terms')}</Link>
+                <Link href="/privacy">{t('about.privacy')}</Link>
               </div>
 
               <div className={styles.linkGroup}>
-                <h4>Tải ứng dụng</h4>
-                <Link href="/services">Dịch vụ & Tiện ích</Link>
-                <Link href="/careers">Tuyển dụng</Link>
-                <Link href="/book">Hướng dẫn đặt phòng</Link>
+                <h4>{t('about.downloadApp')}</h4>
+                <Link href="/services">{t('about.services')}</Link>
+                <Link href="/careers">{t('about.careers')}</Link>
+                <Link href="/book">{t('about.howToBook')}</Link>
               </div>
             </div>
           </div>
         </div>
-        <div className={styles.copyright}>
-          © Bản quyền thuộc về Booking Hotels. Đã đăng ký bản quyền.
-        </div>
+        <div className={styles.copyright}>{t('about.copyright')}</div>
       </footer>
     </div>
   );

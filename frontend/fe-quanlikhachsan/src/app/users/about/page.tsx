@@ -4,21 +4,34 @@ import Image from 'next/image';
 import Link from 'next/link';
 import styles from './styles.module.css';
 import { FaUser } from 'react-icons/fa';
+import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../../../app/components/profile/LanguageContext';
+import i18n from '../../../app/i18n';
+import { useEffect, useState } from 'react';
 
 export default function AboutPage() {
+  const { t, i18n: i18nInstance } = useTranslation();
+  const { selectedLanguage } = useLanguage();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    i18n.changeLanguage(selectedLanguage);
+  }, [selectedLanguage]);
+
   const teamMembers = [
     {
       id: 1,
       name: 'Nguyễn Văn A',
       role: 'Quản lý',
       image: '/images/manager.jpg',
-      description: `Khách sạn chúng tôi được thành lập vào năm 2010, là một trong những khách sạn hàng đầu tại Việt Nam về chất lượng dịch vụ và sự sang trọng.
-
-Với đội ngũ nhân viên chuyên nghiệp và tận tâm, chúng tôi luôn nỗ lực mang đến cho quý khách những trải nghiệm tuyệt vời nhất. Từ thiết kế nội thất tinh tế đến dịch vụ chu đáo, mọi chi tiết đều được chăm chút kỹ lưỡng.
-
-Sứ mệnh của chúng tôi là tạo ra không gian nghỉ dưỡng hoàn hảo, nơi mỗi vị khách đều cảm thấy như đang ở nhà. Chúng tôi cam kết mang đến những dịch vụ tốt nhất và những kỷ niệm đáng nhớ cho mọi du khách.`
-    }
+      description: t('about.description'), // Nội dung động, không cần dịch
+    },
   ];
+
+  if (!isClient) {
+    return null;
+  }
 
   return (
     <div className={styles.container}>
@@ -30,15 +43,17 @@ Sứ mệnh của chúng tôi là tạo ra không gian nghỉ dưỡng hoàn h�
           </Link>
         </div>
         <div className={styles.navCenter}>
-        <Link href="/users/home">Trang chủ</Link>
-          <Link href="/users/about">Giới thiệu</Link>
-          <Link href="/users/explore">Khám phá</Link>
-          <Link href="/users/rooms">Phòng</Link>
+          <Link href="/users/home">{t('profile.home')}</Link>
+          <Link href="/users/about">{t('profile.about')}</Link>
+          <Link href="/users/explore">{t('profile.explore')}</Link>
+          <Link href="/users/rooms">{t('profile.rooms')}</Link>
         </div>
         <div className={styles.navRight}>
-          <Link href="/users/profile" className={styles.profileIcon}><FaUser /></Link>
+          <Link href="/users/profile" className={styles.profileIcon}>
+            <FaUser />
+          </Link>
           <Link href="/users/booking" className={styles.bookNowBtn}>
-            Đặt ngay
+            {t('booking.bookNow')}
           </Link>
         </div>
       </nav>
@@ -46,10 +61,8 @@ Sứ mệnh của chúng tôi là tạo ra không gian nghỉ dưỡng hoàn h�
       {/* Hero Section */}
       <section className={styles.hero}>
         <div className={styles.heroContent}>
-          <h1>Về chúng tôi</h1>
-          <p>
-            Khám phá không gian sang trọng và đẳng cấp của chúng tôi, nơi mỗi chi tiết đều được chăm chút tỉ mỉ để mang đến trải nghiệm hoàn hảo nhất cho quý khách.
-          </p>
+          <h1>{t('about.title')}</h1>
+          <p>{t('about.description')}</p>
         </div>
       </section>
 
@@ -67,7 +80,9 @@ Sứ mệnh của chúng tôi là tạo ra không gian nghỉ dưỡng hoàn h�
               />
             </div>
             <div className={styles.memberInfo}>
-              <h2>{member.name} ({member.role})</h2>
+              <h2>
+                {member.name} ({member.role})
+              </h2>
               <div className={styles.memberDescription}>
                 {member.description.split('\n\n').map((paragraph, index) => (
                   <p key={index}>{paragraph}</p>
@@ -80,20 +95,18 @@ Sứ mệnh của chúng tôi là tạo ra không gian nghỉ dưỡng hoàn h�
 
       {/* Clients Section */}
       <section className={styles.clientsSection}>
-        <h2>Đối tác</h2>
-        <div className={styles.clientsGrid}>
-          {/* Add client logos here */}
-        </div>
+        <h2>{t('about.partners')}</h2>
+        <div className={styles.clientsGrid}>{/* Add client logos here */}</div>
       </section>
 
       {/* Footer */}
       <footer className={styles.footer}>
         <div className={styles.footerContent}>
           <div className={styles.newsletter}>
-            <h3>Đăng ký nhận tin & Ưu đãi</h3>
+            <h3>{t('about.subscribe')}</h3>
             <div className={styles.subscribeForm}>
-              <input type="email" placeholder="Nhập email của bạn..." />
-              <button>Đăng ký</button>
+              <input type="email" placeholder={t('about.subscribePlaceholder')} />
+              <button>{t('about.subscribeButton')}</button>
             </div>
           </div>
           <div className={styles.footerLogo}>
@@ -101,27 +114,25 @@ Sứ mệnh của chúng tôi là tạo ra không gian nghỉ dưỡng hoàn h�
           </div>
           <div className={styles.footerLinks}>
             <div>
-              <h4>Về chúng tôi</h4>
-              <Link href="/location">Vị trí</Link>
+              <h4>{t('about.footerAbout')}</h4>
+              <Link href="/location">{t('about.location')}</Link>
             </div>
             <div>
-              <h4>Hỗ trợ</h4>
-              <Link href="/faq">Câu hỏi thường gặp</Link>
-              <Link href="/terms">Điều khoản sử dụng</Link>
-              <Link href="/privacy">Chính sách bảo mật</Link>
+              <h4>{t('about.support')}</h4>
+              <Link href="/faq">{t('about.faq')}</Link>
+              <Link href="/terms">{t('about.terms')}</Link>
+              <Link href="/privacy">{t('about.privacy')}</Link>
             </div>
             <div>
-              <h4>Tải ứng dụng</h4>
-              <Link href="/services">Dịch vụ & Tiện ích</Link>
-              <Link href="/careers">Tuyển dụng</Link>
-              <Link href="/book">Hướng dẫn đặt phòng</Link>
+              <h4>{t('about.downloadApp')}</h4>
+              <Link href="/services">{t('about.services')}</Link>
+              <Link href="/careers">{t('about.careers')}</Link>
+              <Link href="/book">{t('about.howToBook')}</Link>
             </div>
           </div>
         </div>
-        <div className={styles.copyright}>
-          © Bản quyền thuộc về Booking Hotels. Đã đăng ký bản quyền.
-        </div>
+        <div className={styles.copyright}>{t('about.copyright')}</div>
       </footer>
     </div>
   );
-} 
+}

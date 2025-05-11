@@ -18,7 +18,7 @@ const ProfilePage: React.FC = () => {
   const router = useRouter();
   const { t, i18n: i18nInstance } = useTranslation();
   const { languages, selectedLanguage, setSelectedLanguage } = useLanguage();
-  const [isClient, setIsClient] = useState(false); // Kiểm tra xem có đang chạy trên client không
+  const [isClient, setIsClient] = useState(false);
 
   // Avatar
   const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
@@ -56,7 +56,7 @@ const ProfilePage: React.FC = () => {
 
   // Đồng bộ hóa ngôn ngữ chỉ trên client
   useEffect(() => {
-    setIsClient(true); // Đánh dấu là đang chạy trên client
+    setIsClient(true);
     const savedLanguage = localStorage.getItem('selectedLanguage') || 'vi';
     setSelectedLanguage(savedLanguage);
     i18n.changeLanguage(savedLanguage);
@@ -184,7 +184,7 @@ const ProfilePage: React.FC = () => {
     return (
       <div className={styles.loadingContainer}>
         <div className={styles.loadingSpinner} />
-        <p>Loading...</p> {/* Giá trị mặc định không phụ thuộc vào i18n */}
+        <p>Loading...</p>
       </div>
     );
   }
@@ -254,14 +254,14 @@ const ProfilePage: React.FC = () => {
                 <label>{t('profile.language')}</label>
                 <div className={styles.dropdownContainer}>
                   <button onClick={toggleLanguageDropdown} className={styles.dropdownButton}>
-                    {languages.find(lang => lang.code === selectedLanguage)?.name || t('profile.selectLanguage')}
+                    {languages.find((lang) => lang.code === selectedLanguage)?.name || t('profile.selectLanguage')}
                     <span className={styles.dropdownArrow}>▼</span>
                   </button>
                   {isLanguageDropdownOpen && (
                     <div className={styles.dropdownMenu}>
                       {languages
-                        .filter(lang => lang.status === 'Đang sử dụng')
-                        .map(lang => (
+                        .filter((lang) => lang.status === 'Đang sử dụng')
+                        .map((lang) => (
                           <button
                             key={lang.id}
                             onClick={() => handleLanguageChange(lang.code)}
@@ -308,9 +308,7 @@ const ProfilePage: React.FC = () => {
         onChangePassword={handleChangePassword}
         showSuccess={showChangePasswordSuccess}
       />
-      {showPaymentOptionsModal && (
-        <PaymentOptionsModal onClose={() => setShowPaymentOptionsModal(false)} />
-      )}
+      {showPaymentOptionsModal && <PaymentOptionsModal onClose={() => setShowPaymentOptionsModal(false)} />}
       {showAvatarModal && (
         <AvatarUploadModal
           onClose={() => setShowAvatarModal(false)}

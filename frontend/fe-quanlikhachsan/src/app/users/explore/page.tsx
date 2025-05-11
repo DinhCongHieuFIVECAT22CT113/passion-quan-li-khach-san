@@ -4,28 +4,45 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { FaPlay, FaUser } from 'react-icons/fa';
 import styles from './styles.module.css';
+import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../../../app/components/profile/LanguageContext';
+import i18n from '../../../app/i18n';
+import { useEffect, useState } from 'react';
 
 export default function ExplorePage() {
+  const { t, i18n: i18nInstance } = useTranslation();
+  const { selectedLanguage } = useLanguage();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    i18n.changeLanguage(selectedLanguage);
+  }, [selectedLanguage]);
+
   const features = [
     {
       id: 1,
-      title: 'Phòng Sang Trọng',
-      description: 'Trải nghiệm sự thoải mái tuyệt đối trong những căn phòng được thiết kế tỉ mỉ với tiện nghi cao cấp và tầm nhìn tuyệt đẹp.',
-      image: '/images/luxurious-room.jpg'
+      title: t('explore.luxuriousRoom'),
+      description: t('explore.luxuriousRoomDesc'),
+      image: '/images/luxurious-room.jpg',
     },
     {
       id: 2,
-      title: 'Phòng Tập Hiện Đại',
-      description: 'Duy trì sức khỏe trong kỳ nghỉ của bạn với các thiết bị tập luyện hiện đại và cơ sở vật chất chuyên nghiệp.',
-      image: '/images/gym.jpg'
+      title: t('explore.gym'),
+      description: t('explore.gymDesc'),
+      image: '/images/gym.jpg',
     },
     {
       id: 3,
-      title: 'Nhà Hàng Cao Cấp',
-      description: 'Thưởng thức ẩm thực tinh tế do các đầu bếp hàng đầu chế biến trong không gian sang trọng với dịch vụ hoàn hảo.',
-      image: '/images/restaurant.jpg'
-    }
+      title: t('explore.restaurant'),
+      description: t('explore.restaurantDesc'),
+      image: '/images/restaurant.jpg',
+    },
   ];
+
+  if (!isClient) {
+    return null;
+  }
 
   return (
     <div className={styles.container}>
@@ -37,15 +54,17 @@ export default function ExplorePage() {
           </Link>
         </div>
         <div className={styles.navCenter}>
-        <Link href="/users/home">Trang chủ</Link>
-          <Link href="/users/about">Giới thiệu</Link>
-          <Link href="/users/explore">Khám phá</Link>
-          <Link href="/users/rooms">Phòng</Link>
+          <Link href="/users/home">{t('profile.home')}</Link>
+          <Link href="/users/about">{t('profile.about')}</Link>
+          <Link href="/users/explore">{t('profile.explore')}</Link>
+          <Link href="/users/rooms">{t('profile.rooms')}</Link>
         </div>
         <div className={styles.navRight}>
-          <Link href="/users/profile" className={styles.profileIcon}><FaUser /></Link>
+          <Link href="/users/profile" className={styles.profileIcon}>
+            <FaUser />
+          </Link>
           <Link href="/users/booking" className={styles.bookNowBtn}>
-            Đặt ngay
+            {t('booking.bookNow')}
           </Link>
         </div>
       </nav>
@@ -53,34 +72,34 @@ export default function ExplorePage() {
       {/* Hero Section */}
       <section className={styles.hero}>
         <div className={styles.heroContent}>
-          <h1>Khám Phá Khách Sạn</h1>
-          <p>Tham quan trực tuyến các tiện nghi đẳng cấp của chúng tôi</p>
+          <h1>{t('explore.title')}</h1>
+          <p>{t('explore.description')}</p>
           <button className={styles.playButton}>
             <FaPlay />
-            <span>Xem Video</span>
+            <span>{t('explore.playButton')}</span>
           </button>
         </div>
       </section>
 
       {/* Features Section */}
       <section className={styles.features}>
-        <h2 className={styles.sectionTitle}>Tiện Nghi</h2>
+        <h2 className={styles.sectionTitle}>{t('explore.features')}</h2>
         <div className={styles.featureGrid}>
           {features.map((feature) => (
             <div key={feature.id} className={styles.featureCard}>
               <div className={styles.featureImage}>
-                <Image 
-                  src={feature.image} 
-                  alt={feature.title} 
-                  fill 
-                  style={{ objectFit: 'cover' }} 
+                <Image
+                  src={feature.image}
+                  alt={feature.title}
+                  fill
+                  style={{ objectFit: 'cover' }}
                 />
               </div>
               <div className={styles.featureContent}>
                 <h3>{feature.title}</h3>
                 <p>{feature.description}</p>
                 <Link href="/users/rooms" className={styles.learnMore}>
-                  Xem thêm
+                  {t('explore.learnMore')}
                 </Link>
               </div>
             </div>
@@ -92,10 +111,10 @@ export default function ExplorePage() {
       <footer className={styles.footer}>
         <div className={styles.footerContent}>
           <div className={styles.newsletter}>
-            <h3>Đăng ký nhận tin & Ưu đãi</h3>
+            <h3>{t('about.subscribe')}</h3>
             <div className={styles.subscribeForm}>
-              <input type="email" placeholder="Nhập email của bạn..." />
-              <button>Đăng ký</button>
+              <input type="email" placeholder={t('about.subscribePlaceholder')} />
+              <button>{t('about.subscribeButton')}</button>
             </div>
           </div>
           <div className={styles.footerLogo}>
@@ -103,27 +122,25 @@ export default function ExplorePage() {
           </div>
           <div className={styles.footerLinks}>
             <div>
-              <h4>Về chúng tôi</h4>
-              <Link href="/location">Vị trí</Link>
+              <h4>{t('about.footerAbout')}</h4>
+              <Link href="/location">{t('about.location')}</Link>
             </div>
             <div>
-              <h4>Hỗ trợ</h4>
-              <Link href="/faq">Câu hỏi thường gặp</Link>
-              <Link href="/terms">Điều khoản sử dụng</Link>
-              <Link href="/privacy">Chính sách bảo mật</Link>
+              <h4>{t('about.support')}</h4>
+              <Link href="/faq">{t('about.faq')}</Link>
+              <Link href="/terms">{t('about.terms')}</Link>
+              <Link href="/privacy">{t('about.privacy')}</Link>
             </div>
             <div>
-              <h4>Tải ứng dụng</h4>
-              <Link href="/services">Dịch vụ & Tiện ích</Link>
-              <Link href="/careers">Tuyển dụng</Link>
-              <Link href="/book">Hướng dẫn đặt phòng</Link>
+              <h4>{t('about.downloadApp')}</h4>
+              <Link href="/services">{t('about.services')}</Link>
+              <Link href="/careers">{t('about.careers')}</Link>
+              <Link href="/book">{t('about.howToBook')}</Link>
             </div>
           </div>
         </div>
-        <div className={styles.copyright}>
-          © Bản quyền thuộc về Booking Hotels. Đã đăng ký bản quyền.
-        </div>
+        <div className={styles.copyright}>{t('about.copyright')}</div>
       </footer>
     </div>
   );
-} 
+}

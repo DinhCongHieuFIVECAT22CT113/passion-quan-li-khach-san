@@ -5,15 +5,21 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { FaUser } from 'react-icons/fa';
 import styles from './styles.module.css';
+import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../../../app/components/profile/LanguageContext';
+import i18n from '../../../app/i18n';
+import { useEffect } from 'react';
 
 export default function BookingPage() {
+  const { t, i18n: i18nInstance } = useTranslation();
+  const { selectedLanguage } = useLanguage();
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [showNotification, setShowNotification] = useState(false);
   const [formData, setFormData] = useState({
     fullname: '',
     email: '',
     phone: '',
-    message: ''
+    message: '',
   });
 
   const roomImages = [
@@ -23,29 +29,30 @@ export default function BookingPage() {
     '/images/room4.jpg',
   ];
 
+  useEffect(() => {
+    i18n.changeLanguage(selectedLanguage);
+  }, [selectedLanguage]);
+
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Tại đây bạn có thể thêm logic gửi data lên server
     console.log('Form submitted:', formData);
     setShowNotification(true);
-    
-    // Reset form
+
     setFormData({
       fullname: '',
       email: '',
       phone: '',
-      message: ''
+      message: '',
     });
 
-    // Ẩn notification sau 5 giây
     setTimeout(() => {
       setShowNotification(false);
     }, 5000);
@@ -59,30 +66,32 @@ export default function BookingPage() {
           <Image src="/images/logo.png" alt="Logo Khách sạn" width={120} height={40} />
         </Link>
         <div className={styles.navLinks}>
-        <Link href="/users/home">Trang chủ</Link>
-          <Link href="/users/about">Giới thiệu</Link>
-          <Link href="/users/explore">Khám phá</Link>
-          <Link href="/users/rooms">Phòng</Link>
+          <Link href="/users/home">{t('profile.home')}</Link>
+          <Link href="/users/about">{t('profile.about')}</Link>
+          <Link href="/users/explore">{t('profile.explore')}</Link>
+          <Link href="/users/rooms">{t('profile.rooms')}</Link>
         </div>
         <div className={styles.navRight}>
-          <Link href="/users/profile" className={styles.profileIcon}><FaUser /></Link>
+          <Link href="/users/profile" className={styles.profileIcon}>
+            <FaUser />
+          </Link>
           <Link href="/users/booking" className={styles.bookNowBtn}>
-            Đặt ngay
+            {t('booking.bookNow')}
           </Link>
         </div>
       </nav>
 
       {showNotification && (
         <div className={styles.notification}>
-          <p>Cảm ơn quý khách đã đặt phòng! Thông tin chi tiết về phòng sẽ được gửi đến email của quý khách.</p>
+          <p>{t('booking.notification')}</p>
         </div>
       )}
 
       {/* Hero Section */}
       <section className={styles.hero}>
         <div className={styles.heroContent}>
-          <h1>Đặt Phòng</h1>
-          <p>Các phòng ngủ sang trọng và tinh tế trong bộ sưu tập này thể hiện thiết kế nội thất & ý tưởng trang trí độc đáo. Xem hình ảnh và tìm thiết kế phòng ngủ sang trọng hoàn hảo của bạn.</p>
+          <h1>{t('booking.title')}</h1>
+          <p>{t('booking.description')}</p>
         </div>
       </section>
 
@@ -91,8 +100,8 @@ export default function BookingPage() {
         <div className={styles.formContainer}>
           <div className={styles.imageGallery}>
             <div className={styles.mainImage}>
-              <Image 
-                src={roomImages[activeImageIndex]} 
+              <Image
+                src={roomImages[activeImageIndex]}
                 alt="Room View"
                 fill
                 style={{ objectFit: 'cover' }}
@@ -100,13 +109,13 @@ export default function BookingPage() {
             </div>
             <div className={styles.thumbnails}>
               {roomImages.map((image, index) => (
-                <div 
-                  key={index} 
+                <div
+                  key={index}
                   className={`${styles.thumbnail} ${index === activeImageIndex ? styles.active : ''}`}
                   onClick={() => setActiveImageIndex(index)}
                 >
-                  <Image 
-                    src={image} 
+                  <Image
+                    src={image}
                     alt={`Room ${index + 1}`}
                     fill
                     style={{ objectFit: 'cover' }}
@@ -118,11 +127,11 @@ export default function BookingPage() {
 
           <form className={styles.bookingForm} onSubmit={handleSubmit}>
             <div className={styles.formGroup}>
-              <label>Họ và tên</label>
-              <input 
-                type="text" 
+              <label>{t('booking.fullname')}</label>
+              <input
+                type="text"
                 name="fullname"
-                placeholder="VD: Nguyễn Văn A" 
+                placeholder={t('booking.fullnamePlaceholder')}
                 value={formData.fullname}
                 onChange={handleInputChange}
                 required
@@ -130,11 +139,11 @@ export default function BookingPage() {
             </div>
 
             <div className={styles.formGroup}>
-              <label>Email</label>
-              <input 
-                type="email" 
+              <label>{t('booking.email')}</label>
+              <input
+                type="email"
                 name="email"
-                placeholder="nguyenvana@gmail.com" 
+                placeholder={t('booking.emailPlaceholder')}
                 value={formData.email}
                 onChange={handleInputChange}
                 required
@@ -142,11 +151,11 @@ export default function BookingPage() {
             </div>
 
             <div className={styles.formGroup}>
-              <label>Số điện thoại</label>
-              <input 
-                type="tel" 
+              <label>{t('booking.phone')}</label>
+              <input
+                type="tel"
                 name="phone"
-                placeholder="09xxxxxxxx" 
+                placeholder={t('booking.phonePlaceholder')}
                 value={formData.phone}
                 onChange={handleInputChange}
                 required
@@ -154,10 +163,10 @@ export default function BookingPage() {
             </div>
 
             <div className={styles.formGroup}>
-              <label>Lời nhắn</label>
-              <textarea 
+              <label>{t('booking.message')}</label>
+              <textarea
                 name="message"
-                placeholder="Nhập lời nhắn của bạn" 
+                placeholder={t('booking.messagePlaceholder')}
                 rows={5}
                 value={formData.message}
                 onChange={handleInputChange}
@@ -165,7 +174,7 @@ export default function BookingPage() {
             </div>
 
             <button type="submit" className={styles.bookNowBtn}>
-              Đặt ngay
+              {t('booking.bookNow')}
             </button>
           </form>
         </div>
@@ -187,34 +196,34 @@ export default function BookingPage() {
       <footer className={styles.footer}>
         <div className={styles.footerContent}>
           <div className={styles.newsletter}>
-            <h3>Đăng ký nhận tin & Ưu đãi</h3>
+            <h3>{t('about.subscribe')}</h3>
             <div className={styles.subscribeForm}>
-              <input type="email" placeholder="Nhập email của bạn" />
-              <button type="submit">Đăng ký</button>
-            </div>
-          </div>
-          <div className={styles.footerLinks}>
-            <div className={styles.linkColumn}>
-              <Link href="/about">Về chúng tôi</Link>
-              <Link href="/contact">Liên hệ</Link>
-              <Link href="/location">Vị trí</Link>
-            </div>
-            <div className={styles.linkColumn}>
-              <Link href="/faq">Câu hỏi thường gặp</Link>
-              <Link href="/terms">Điều khoản sử dụng</Link>
-              <Link href="/privacy">Chính sách bảo mật</Link>
-            </div>
-            <div className={styles.linkColumn}>
-              <Link href="/services">Dịch vụ & Tiện ích</Link>
-              <Link href="/careers">Tuyển dụng</Link>
-              <Link href="/how-to-book">Hướng dẫn đặt phòng</Link>
+              <input type="email" placeholder={t('about.subscribePlaceholder')} />
+              <button type="submit">{t('about.subscribeButton')}</button>
             </div>
           </div>
           <div className={styles.logo}>
             <Image src="/images/logo.png" alt="Logo Khách sạn" width={150} height={50} />
           </div>
+          <div className={styles.footerLinks}>
+            <div className={styles.linkColumn}>
+              <Link href="/about">{t('about.footerAbout')}</Link>
+              <Link href="/contact">{t('about.support')}</Link>
+              <Link href="/location">{t('about.location')}</Link>
+            </div>
+            <div className={styles.linkColumn}>
+              <Link href="/faq">{t('about.faq')}</Link>
+              <Link href="/terms">{t('about.terms')}</Link>
+              <Link href="/privacy">{t('about.privacy')}</Link>
+            </div>
+            <div className={styles.linkColumn}>
+              <Link href="/services">{t('about.services')}</Link>
+              <Link href="/careers">{t('about.careers')}</Link>
+              <Link href="/how-to-book">{t('about.howToBook')}</Link>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
   );
-} 
+}
