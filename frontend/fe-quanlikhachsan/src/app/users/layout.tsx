@@ -1,4 +1,11 @@
-import React from 'react';
+"use client";
+import { LanguageProvider } from '../../app/components/profile/LanguageContext';
+import { Suspense } from 'react';
+import { I18nextProvider } from 'react-i18next';
+import i18n from '../../app/i18n';
+import { Inter } from 'next/font/google';
+
+const inter = Inter({ subsets: ['latin'] });
 
 export default function UsersLayout({
   children,
@@ -6,9 +13,12 @@ export default function UsersLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="users-layout">
-      <header className="bg-blue-600 text-white p-4">Khu vực người dùng</header>
-      <main className="p-4">{children}</main>
-    </div>
+    <I18nextProvider i18n={i18n}>
+      <LanguageProvider>
+        <Suspense fallback={<div>Loading translations...</div>}>
+          {children}
+        </Suspense>
+      </LanguageProvider>
+    </I18nextProvider>
   );
 }

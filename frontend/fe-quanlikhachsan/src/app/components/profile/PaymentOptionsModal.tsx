@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import styles from './profile.module.css';
+import { useTranslation } from 'react-i18next';
 
 interface PaymentOptionsModalProps {
   onClose: () => void;
 }
 
 const PaymentOptionsModal: React.FC<PaymentOptionsModalProps> = ({ onClose }) => {
+  const { t } = useTranslation();
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('');
   const [selectedCard, setSelectedCard] = useState('');
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
@@ -87,11 +89,11 @@ const PaymentOptionsModal: React.FC<PaymentOptionsModalProps> = ({ onClose }) =>
       if (response.ok) {
         setShowConfirmationModal(true);
       } else {
-        window.alert(data.message || 'Cập nhật phương thức thanh toán thất bại');
+        window.alert(data.message || t('profile.paymentUpdateFailed'));
       }
     } catch (error) {
       console.error('Lỗi khi cập nhật phương thức thanh toán:', error);
-      window.alert('Có lỗi xảy ra khi cập nhật phương thức thanh toán. Vui lòng thử lại sau.');
+      window.alert(t('profile.paymentUpdateError'));
     }
   };
 
@@ -106,34 +108,34 @@ const PaymentOptionsModal: React.FC<PaymentOptionsModalProps> = ({ onClose }) =>
   };
 
   if (isLoading) {
-    return <div>Đang tải...</div>;
+    return <div>{t('profile.loading')}</div>;
   }
 
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modalBox}>
-        <h3>Chọn phương thức thanh toán</h3>
+        <h3>{t('profile.paymentOptions')}</h3>
 
         <div className={styles.formGroup}>
-          <label htmlFor="payment-method">Phương thức</label>
+          <label htmlFor="payment-method">{t('profile.paymentMethod')}</label>
           <select id="payment-method" value={selectedPaymentMethod} onChange={handlePaymentMethodChange}>
-            <option value="">-- Chọn phương thức --</option>
-            <option value="cash">Tiền mặt</option>
-            <option value="bank_transfer">Chuyển khoản</option>
+            <option value="">{t('profile.chooseMethod')}</option>
+            <option value="cash">{t('profile.cash')}</option>
+            <option value="bank_transfer">{t('profile.bankTransfer')}</option>
           </select>
         </div>
 
         {selectedPaymentMethod === 'bank_transfer' && (
           <div className={styles.formGroup}>
-            <label htmlFor="card-type">Chọn loại thẻ</label>
+            <label htmlFor="card-type">{t('profile.chooseCard')}</label>
             <select id="card-type" value={selectedCard} onChange={handleCardChange}>
-              <option value="">-- Chọn thẻ --</option>
-              <optgroup label="Thẻ quốc tế">
+              <option value="">{t('profile.chooseCard')}</option>
+              <optgroup label={t('profile.internationalCards')}>
                 {internationalCards.map((card) => (
                   <option key={card} value={card}>{card}</option>
                 ))}
               </optgroup>
-              <optgroup label="Ngân hàng Việt Nam">
+              <optgroup label={t('profile.vietnameseBanks')}>
                 {vietnameseBanks.map((bank) => (
                   <option key={bank} value={bank}>{bank}</option>
                 ))}
@@ -144,10 +146,10 @@ const PaymentOptionsModal: React.FC<PaymentOptionsModalProps> = ({ onClose }) =>
 
         <div className={styles.modalActions}>
           <button className={styles.modalSaveBtn} onClick={handleSave} disabled={isSaveDisabled}>
-            Lưu
+            {t('profile.save')}
           </button>
           <button className={styles.modalCancelBtn} onClick={onClose}>
-            Hủy
+            {t('profile.cancel')}
           </button>
         </div>
       </div>
@@ -155,16 +157,16 @@ const PaymentOptionsModal: React.FC<PaymentOptionsModalProps> = ({ onClose }) =>
       {showConfirmationModal && (
         <div className={`${styles.modalOverlay} ${styles.paymentConfirmationModal}`}>
           <div className={styles.modalBox}>
-            <h3>Xác nhận phương thức thanh toán ?</h3>
+            <h3>{t('profile.confirmPayment')}</h3>
             <div className={styles.modalActions}>
               <button className={`${styles.modalConfirmBtn} ${styles.largeButton}`} onClick={handleConfirm}>
-                Xác nhận
+                {t('profile.confirm')}
               </button>
               <button
                 className={`${styles.modalCancelBtn} ${styles.largeButton}`}
                 onClick={() => setShowConfirmationModal(false)}
               >
-                Hủy
+                {t('profile.cancel')}
               </button>
             </div>
           </div>
@@ -174,9 +176,9 @@ const PaymentOptionsModal: React.FC<PaymentOptionsModalProps> = ({ onClose }) =>
       {showCompleteModal && (
         <div className={`${styles.modalOverlay} ${styles.paymentCompleteModal}`}>
           <div className={styles.modalBox}>
-            <h3>Hoàn tất!</h3>
+            <h3>{t('profile.complete')}</h3>
             <button className={styles.modalOkBtn} onClick={handleCloseComplete}>
-              Thoát
+              {t('profile.exit')}
             </button>
           </div>
         </div>

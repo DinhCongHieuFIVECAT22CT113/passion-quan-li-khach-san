@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -10,16 +10,28 @@ import ChangePasswordModal from '../../../app/components/profile/ChangePasswordM
 import PaymentOptionsModal from '../../../app/components/profile/PaymentOptionsModal';
 import AvatarUploadModal from '../../../app/components/profile/AvatarUploadModal';
 import TransactionHistory, { Transaction } from '../../../app/components/profile/TransactionHistory';
+import { useLanguage } from '../../../app/components/profile/LanguageContext';
+import { useTranslation } from 'react-i18next';
+import i18n from '../../../app/i18n';
 
 const ProfilePage: React.FC = () => {
   const router = useRouter();
+  const { t, i18n: i18nInstance } = useTranslation();
+  const { languages, selectedLanguage, setSelectedLanguage } = useLanguage();
+  const [isClient, setIsClient] = useState(false); // Kiểm tra xem có đang chạy trên client không
 
   // Avatar
   const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const [isLanguageDropdownOpen, setIsLanguageDropdownOpen] = useState(false);
 
   // User Info
-  const [userInfo, setUserInfo] = useState({});
+  const [userInfo, setUserInfo] = useState({
+    name: 'Nguyễn Văn A',
+    email: 'nguyenvana@example.com',
+    phone: '0123 456 789',
+    address: '123 Đường Láng, Hà Nội',
+  });
 
   // Transaction History
   const [transactionHistory, setTransactionHistory] = useState<Transaction[]>([]);
@@ -41,6 +53,27 @@ const ProfilePage: React.FC = () => {
 
   // Modal state for Payment Options
   const [showPaymentOptionsModal, setShowPaymentOptionsModal] = useState(false);
+
+  // Đồng bộ hóa ngôn ngữ chỉ trên client
+  useEffect(() => {
+    setIsClient(true); // Đánh dấu là đang chạy trên client
+    const savedLanguage = localStorage.getItem('selectedLanguage') || 'vi';
+    setSelectedLanguage(savedLanguage);
+    i18n.changeLanguage(savedLanguage);
+  }, []);
+
+  // Handle Language Change
+  const handleLanguageChange = (code: string) => {
+    setSelectedLanguage(code);
+    i18n.changeLanguage(code);
+    localStorage.setItem('selectedLanguage', code);
+    setIsLanguageDropdownOpen(false);
+  };
+
+  // Toggle Language Dropdown
+  const toggleLanguageDropdown = () => {
+    setIsLanguageDropdownOpen(!isLanguageDropdownOpen);
+  };
 
   // Fetch user profile and transaction history on page load
   useEffect(() => {
@@ -98,13 +131,13 @@ const ProfilePage: React.FC = () => {
   // Handle Change Password
   const handleChangePassword = async () => {
     const errors: typeof passwordErrors = {};
-    if (!currentPassword) errors.current = 'Vui lòng nhập mật khẩu hiện tại.';
+    if (!currentPassword) errors.current = t('profile.currentPasswordRequired');
     if (!newPassword) {
-      errors.new = 'Vui lòng nhập mật khẩu mới.';
+      errors.new = t('profile.newPasswordRequired');
     } else if (!/^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/.test(newPassword)) {
-      errors.new = 'Mật khẩu phải có ít nhất 8 ký tự gồm chữ, số và ký tự đặc biệt.';
+      errors.new = t('profile.newPasswordInvalid');
     }
-    if (newPassword !== confirmNewPassword) errors.confirm = 'Mật khẩu xác nhận không khớp.';
+    if (newPassword !== confirmNewPassword) errors.confirm = t('profile.confirmPasswordMismatch');
 
     setPasswordErrors(errors);
     if (Object.keys(errors).length > 0) return;
@@ -124,7 +157,7 @@ const ProfilePage: React.FC = () => {
       const data = await response.json();
 
       if (response.ok) {
-        console.log('Đổi mật khẩu thành công:', data);
+        console.log('Password changed successfully:', data);
         setShowChangePasswordSuccess(true);
         setTimeout(() => {
           setShowChangePasswordSuccess(false);
@@ -137,20 +170,30 @@ const ProfilePage: React.FC = () => {
         if (data.errors) {
           setPasswordErrors(data.errors);
         } else {
-          window.alert(data.message || 'Đổi mật khẩu thất bại');
+          window.alert(data.message || t('profile.changePasswordFailed'));
         }
       }
     } catch (error) {
-      console.error('Lỗi khi đổi mật khẩu:', error);
-      window.alert('Có lỗi xảy ra khi đổi mật khẩu. Vui lòng thử lại sau.');
+      console.error('Error changing password:', error);
+      window.alert(t('profile.changePasswordError'));
     }
   };
+
+  // Tránh render nội dung phụ thuộc vào ngôn ngữ trước khi client mount
+  if (!isClient) {
+    return (
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingSpinner} />
+        <p>Loading...</p> {/* Giá trị mặc định không phụ thuộc vào i18n */}
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
       <div className={styles.loadingContainer}>
         <div className={styles.loadingSpinner} />
-        <p>Đang tải...</p>
+        <p>{t('profile.loading')}</p>
       </div>
     );
   }
@@ -158,7 +201,7 @@ const ProfilePage: React.FC = () => {
   if (!userInfo) {
     return (
       <div className={styles.loadingContainer}>
-        <p>Không thể tải thông tin người dùng. Vui lòng thử lại sau.</p>
+        <p>{t('profile.noUserData')}</p>
       </div>
     );
   }
@@ -172,14 +215,14 @@ const ProfilePage: React.FC = () => {
           </Link>
         </div>
         <div className={styles.navCenter}>
-          <Link href="/users/home">Trang chủ</Link>
-          <Link href="/users/about">Giới thiệu</Link>
-          <Link href="/users/explore">Khám phá</Link>
-          <Link href="/users/rooms">Phòng</Link>
+          <Link href="/users/home">{t('profile.home')}</Link>
+          <Link href="/users/about">{t('profile.about')}</Link>
+          <Link href="/users/explore">{t('profile.explore')}</Link>
+          <Link href="/users/rooms">{t('profile.rooms')}</Link>
         </div>
         <div className={styles.navRight}>
           <button onClick={handleLogout} className={styles.logoutBtn}>
-            Đăng xuất
+            {t('profile.logout')}
           </button>
         </div>
       </nav>
@@ -187,12 +230,9 @@ const ProfilePage: React.FC = () => {
       <main className={styles.main}>
         <div className={styles.profileCard}>
           <div className={styles.profileHeader}>
-            <h1>Thông tin cá nhân</h1>
-            <button
-              onClick={() => setShowAvatarModal(true)}
-              className={styles.editButton}
-            >
-              Đổi ảnh đại diện
+            <h1>{t('profile.title')}</h1>
+            <button onClick={() => setShowAvatarModal(true)} className={styles.editButton}>
+              {t('profile.changeAvatar')}
             </button>
           </div>
 
@@ -210,6 +250,30 @@ const ProfilePage: React.FC = () => {
             </div>
 
             <div className={styles.infoSection}>
+              <div className={styles.infoGroup}>
+                <label>{t('profile.language')}</label>
+                <div className={styles.dropdownContainer}>
+                  <button onClick={toggleLanguageDropdown} className={styles.dropdownButton}>
+                    {languages.find(lang => lang.code === selectedLanguage)?.name || t('profile.selectLanguage')}
+                    <span className={styles.dropdownArrow}>▼</span>
+                  </button>
+                  {isLanguageDropdownOpen && (
+                    <div className={styles.dropdownMenu}>
+                      {languages
+                        .filter(lang => lang.status === 'Đang sử dụng')
+                        .map(lang => (
+                          <button
+                            key={lang.id}
+                            onClick={() => handleLanguageChange(lang.code)}
+                            className={styles.dropdownItem}
+                          >
+                            {lang.name}
+                          </button>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              </div>
               <PersonalInfoForm
                 onSave={(data) =>
                   setUserInfo((prev) => ({
@@ -224,9 +288,9 @@ const ProfilePage: React.FC = () => {
           </div>
 
           <div className={styles.transactionSection}>
-  <h2 className={styles.sectionTitle}>Lịch sử giao dịch</h2>
-  <TransactionHistory transactions={transactionHistory} />
-</div>
+            <h2 className={styles.sectionTitle}>{t('profile.transactionHistory')}</h2>
+            <TransactionHistory transactions={transactionHistory} />
+          </div>
         </div>
       </main>
 

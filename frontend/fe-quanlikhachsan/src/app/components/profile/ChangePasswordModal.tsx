@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import styles from './profile.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import { useTranslation } from 'react-i18next';
 
 type Props = {
   isOpen: boolean;
@@ -35,6 +36,7 @@ const ChangePasswordModal: React.FC<Props> = ({
   onChangePassword,
   showSuccess,
 }) => {
+  const { t } = useTranslation();
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -44,10 +46,10 @@ const ChangePasswordModal: React.FC<Props> = ({
   return (
     <div className={styles.modalOverlay}>
       <div className={styles.modalBox}>
-        <h3>Đổi mật khẩu</h3>
+        <h3>{t('profile.changePassword')}</h3>
 
         <div className={styles.formGroup}>
-          <label>Mật khẩu hiện tại</label>
+          <label>{t('profile.currentPassword')}</label>
           <div className={styles.passwordInputWrapper}>
             <input
               type={showCurrentPassword ? 'text' : 'password'}
@@ -68,7 +70,7 @@ const ChangePasswordModal: React.FC<Props> = ({
         </div>
 
         <div className={styles.formGroup}>
-          <label>Mật khẩu mới</label>
+          <label>{t('profile.newPassword')}</label>
           <div className={styles.passwordInputWrapper}>
             <input
               type={showNewPassword ? 'text' : 'password'}
@@ -89,7 +91,7 @@ const ChangePasswordModal: React.FC<Props> = ({
         </div>
 
         <div className={styles.formGroup}>
-          <label>Xác nhận mật khẩu</label>
+          <label>{t('profile.confirmPassword')}</label>
           <div className={styles.passwordInputWrapper}>
             <input
               type={showConfirmPassword ? 'text' : 'password'}
@@ -111,14 +113,14 @@ const ChangePasswordModal: React.FC<Props> = ({
 
         <div className={styles.modalActions}>
           <button className={styles.modalSaveBtn} onClick={onChangePassword}>
-            Lưu
+            {t('profile.save')}
           </button>
           <button className={styles.modalCancelBtn} onClick={onClose}>
-            Đóng
+            {t('profile.close')}
           </button>
         </div>
 
-        {showSuccess && <p className={styles.successMessage}>Đổi mật khẩu thành công!</p>}
+        {showSuccess && <p className={styles.successMessage}>{t('profile.passwordSuccess')}</p>}
       </div>
     </div>
   );

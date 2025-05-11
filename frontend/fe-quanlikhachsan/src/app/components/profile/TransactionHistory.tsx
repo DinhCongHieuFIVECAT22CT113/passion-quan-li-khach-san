@@ -1,6 +1,7 @@
 'use client';
 import React from 'react';
 import styles from './profile.module.css';
+import { useTranslation } from 'react-i18next';
 
 export interface Transaction {
   room: string;
@@ -14,16 +15,18 @@ interface TransactionHistoryProps {
 }
 
 const TransactionHistory: React.FC<TransactionHistoryProps> = ({ transactions }) => {
+  const { t } = useTranslation();
+
   return (
     <div className={styles.historyCard}>
       {transactions.length > 0 ? (
         <table>
           <thead>
             <tr>
-              <th>Tên phòng</th>
-              <th>Giá</th>
-              <th>Thời gian</th>
-              <th>Số người</th>
+              <th>{t('profile.roomName')}</th>
+              <th>{t('profile.price')}</th>
+              <th>{t('profile.time')}</th>
+              <th>{t('profile.guests')}</th>
             </tr>
           </thead>
           <tbody>
@@ -38,7 +41,7 @@ const TransactionHistory: React.FC<TransactionHistoryProps> = ({ transactions })
           </tbody>
         </table>
       ) : (
-        <p className={styles.noTransactions}>Chưa có lịch sử giao dịch.</p>
+        <p className={styles.noTransactions}>{t('profile.noTransactions')}</p>
       )}
     </div>
   );

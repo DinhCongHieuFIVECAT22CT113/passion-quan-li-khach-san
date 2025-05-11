@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import styles from './profile.module.css';
+import { useTranslation } from 'react-i18next';
 
 interface AvatarUploadModalProps {
   onClose: () => void;
@@ -8,6 +9,7 @@ interface AvatarUploadModalProps {
 }
 
 const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({ onClose, onAvatarSelected }) => {
+  const { t } = useTranslation();
   const [imageUrl, setImageUrl] = useState('');
 
   const handleUseLink = () => {
@@ -29,10 +31,10 @@ const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({ onClose, onAvatar
   return (
     <div className={styles.modalBackdrop}>
       <div className={styles.modal}>
-        <h3>Chọn ảnh đại diện</h3>
+        <h3>{t('profile.uploadAvatar')}</h3>
 
         <div className={styles.inputGroup}>
-          <label>Dán link ảnh:</label>
+          <label>{t('profile.imageLink')}</label>
           <input
             type="text"
             value={imageUrl}
@@ -40,12 +42,12 @@ const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({ onClose, onAvatar
             placeholder="https://..."
           />
           <button onClick={handleUseLink}>
-            Dùng ảnh từ link
+            {t('profile.useLink')}
           </button>
         </div>
 
         <div className={styles.inputGroup}>
-          <label>Hoặc tải ảnh từ máy:</label>
+          <label>{t('profile.uploadFile')}</label>
           <input
             type="file"
             accept="image/*"
@@ -54,7 +56,7 @@ const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({ onClose, onAvatar
         </div>
 
         <button className={styles.modalCancelBtn} onClick={onClose}>
-          Huỷ
+          {t('profile.cancelUpload')}
         </button>
       </div>
     </div>

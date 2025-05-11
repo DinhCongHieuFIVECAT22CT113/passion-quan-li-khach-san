@@ -1,6 +1,7 @@
 'use client';
 import React, { useState } from 'react';
 import styles from './profile.module.css';
+import { useTranslation } from 'react-i18next';
 
 interface PersonalInfoFormProps {
   onSave?: (data: { hokh: string; tenkh: string }) => void;
@@ -9,6 +10,7 @@ interface PersonalInfoFormProps {
 }
 
 const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ onSave, onChangePassword, onPaymentOptions }) => {
+  const { t } = useTranslation();
   const [hokh, setHokh] = useState('');
   const [tenkh, setTenkh] = useState('');
   const [email, setEmail] = useState('');
@@ -27,20 +29,20 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ onSave, onChangePas
 
   const validateFields = () => {
     const newErrors = {
-      hokh: hokh.trim() === '' ? 'Họ không được để trống.' : '',
-      tenkh: tenkh.trim() === '' ? 'Tên không được để trống.' : '',
+      hokh: hokh.trim() === '' ? `${t('profile.familyName')} ${t('profile.required')}` : '',
+      tenkh: tenkh.trim() === '' ? `${t('profile.givenName')} ${t('profile.required')}` : '',
       email:
         email.trim() === ''
-          ? 'Email không được để trống.'
+          ? `${t('profile.email')} ${t('profile.required')}`
           : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-          ? 'Email không đúng định dạng.'
+          ? t('profile.invalidEmail')
           : '',
-      soDienThoai: soDienThoai.trim() === '' ? 'Số điện thoại không được để trống.' : !/^\d+$/.test(soDienThoai) ? 'Số điện thoại không hợp lệ.' : '',
+      soDienThoai: soDienThoai.trim() === '' ? `${t('profile.phoneNumber')} ${t('profile.required')}` : !/^\d+$/.test(soDienThoai) ? t('profile.invalidPhone') : '',
       soCccd:
         soCccd.trim() === ''
-          ? 'Số CCCD/CMND không được để trống.'
+          ? `${t('profile.idNumber')} ${t('profile.required')}`
           : !/^\d{12}$/.test(soCccd)
-          ? 'Số CCCD/CMND phải có đúng 12 chữ số.'
+          ? t('profile.invalidId')
           : '',
     };
     setErrors(newErrors);
@@ -73,33 +75,33 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ onSave, onChangePas
   return (
     <div className={styles.infoCard}>
       <div className={styles.infoHeader}>
-        <h3>Thông tin cá nhân</h3>
+        <h3>{t('profile.personalInfo')}</h3>
         <button className={styles.actionBtn} onClick={onChangePassword}>
-          Đổi mật khẩu
+          {t('profile.editPassword')}
         </button>
       </div>
 
       <div className={styles.rowGroup}>
         <div className={styles.halfWidth}>
           <div className={styles.formGroup}>
-            <label>Họ</label>
+            <label>{t('profile.familyName')}</label>
             <input
               type="text"
               value={hokh}
               onChange={(e) => setHokh(e.target.value)}
-              placeholder="Nhập họ của bạn"
+              placeholder={t('profile.familyNamePlaceholder')}
             />
             {errors.hokh && <p className={styles.error}>{errors.hokh}</p>}
           </div>
         </div>
         <div className={styles.halfWidth}>
           <div className={styles.formGroup}>
-            <label>Tên</label>
+            <label>{t('profile.givenName')}</label>
             <input
               type="text"
               value={tenkh}
               onChange={(e) => setTenkh(e.target.value)}
-              placeholder="Nhập tên của bạn"
+              placeholder={t('profile.givenNamePlaceholder')}
             />
             {errors.tenkh && <p className={styles.error}>{errors.tenkh}</p>}
           </div>
@@ -107,12 +109,12 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ onSave, onChangePas
       </div>
 
       <div className={styles.formGroup}>
-        <label>Email</label>
+        <label>{t('profile.email')}</label>
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Ví dụ: yourname@example.com"
+          placeholder={t('profile.emailPlaceholder')}
         />
         {errors.email && <p className={styles.error}>{errors.email}</p>}
       </div>
@@ -120,12 +122,12 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ onSave, onChangePas
       <div className={styles.rowGroup}>
         <div className={styles.halfWidth}>
           <div className={styles.formGroup}>
-            <label>Số CCCD/CMND</label>
+            <label>{t('profile.idNumber')}</label>
             <input
               type="text"
               value={soCccd}
               onChange={(e) => setSoCccd(e.target.value)}
-              placeholder="12 chữ số"
+              placeholder={t('profile.idNumberPlaceholder')}
               maxLength={12}
             />
             {errors.soCccd && <p className={styles.error}>{errors.soCccd}</p>}
@@ -133,12 +135,12 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ onSave, onChangePas
         </div>
         <div className={styles.halfWidth}>
           <div className={styles.formGroup}>
-            <label>Số điện thoại</label>
+            <label>{t('profile.phoneNumber')}</label>
             <input
               type="tel"
               value={soDienThoai}
               onChange={(e) => setSoDienThoai(e.target.value)}
-              placeholder="Nhập số điện thoại"
+              placeholder={t('profile.phoneNumberPlaceholder')}
             />
             {errors.soDienThoai && <p className={styles.error}>{errors.soDienThoai}</p>}
           </div>
@@ -147,19 +149,19 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ onSave, onChangePas
 
       <div className={styles.formActions}>
         <button className={styles.saveInfoBtn} onClick={handleSaveInfo}>
-          Lưu thay đổi
+          {t('profile.saveChanges')}
         </button>
         <button className={styles.actionBtn} onClick={onPaymentOptions}>
-          Tùy chọn Thanh Toán
+          {t('profile.paymentOptions')}
         </button>
       </div>
 
       {showSaveSuccess && (
         <div className={styles.modalOverlay}>
           <div className={styles.modalBox}>
-            <h3>Đã lưu thay đổi!</h3>
+            <h3>{t('profile.savedSuccess')}</h3>
             <button className={styles.modalOkBtn} onClick={handleCloseSuccessModal}>
-              OK
+              {t('profile.ok')}
             </button>
           </div>
         </div>
