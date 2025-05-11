@@ -79,7 +79,7 @@ export default function ExplorePage() {
               <div className={styles.featureContent}>
                 <h3>{feature.title}</h3>
                 <p>{feature.description}</p>
-                <Link href="/rooms" className={styles.learnMore}>
+                <Link href="/users/rooms" className={styles.learnMore}>
                   Xem thêm
                 </Link>
               </div>
