@@ -49,7 +49,7 @@ export default function RoomsPage() {
       name: 'Căn Hộ Xanh',
       price: '8.500.000đ',
       image: '/images/green-apartment.jpg',
-      availability: t('rooms.available'),
+      availability: t('rooms.notavailable'),
       amenities: [t('rooms.tv'), t('rooms.wifi'), t('rooms.airConditioning')],
     },
     {
@@ -57,7 +57,7 @@ export default function RoomsPage() {
       name: 'Phòng Đơn Giản',
       price: '2.500.000đ',
       image: '/images/simp-room.jpg',
-      availability: t('rooms.available'),
+      availability: t('rooms.notavailable'),
       amenities: [t('rooms.tv'), t('rooms.wifi'), t('rooms.airConditioning')],
     },
     {
@@ -65,7 +65,7 @@ export default function RoomsPage() {
       name: 'Phòng Hoàng Gia',
       price: '7.500.000đ',
       image: '/images/royal-room.jpg',
-      availability: t('rooms.available'),
+      availability: t('rooms.notavailable'),
       amenities: [t('rooms.tv'), t('rooms.wifi'), t('rooms.airConditioning')],
     },
   ];
@@ -91,8 +91,8 @@ export default function RoomsPage() {
           <Link href="/users/profile" className={styles.profileIcon}>
             <FaUser />
           </Link>
-          <Link href="/users/booking" className={styles.bookNowBtn}>
-            {t('booking.bookNow')}
+          <Link href="/users/select-room" className={styles.bookNowBtn}>
+            {t('rooms.viewRooms')}
           </Link>
         </div>
       </nav>
@@ -137,9 +137,6 @@ export default function RoomsPage() {
                   </span>
                 ))}
               </div>
-              <Link href="/users/booking" className={styles.bookNowLink}>
-                {t('booking.bookNow')}
-              </Link>
             </div>
           </div>
         ))}

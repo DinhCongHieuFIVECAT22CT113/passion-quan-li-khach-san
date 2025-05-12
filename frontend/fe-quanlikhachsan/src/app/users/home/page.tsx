@@ -106,8 +106,8 @@ export default function Home() {
           <Link href="/users/profile" className={styles.profileIcon}>
             <FaUser />
           </Link>
-          <Link href="/users/booking" className={styles.bookNowBtn}>
-            {t('booking.bookNow')}
+          <Link href="/users/rooms" className={styles.bookNowBtn}>
+            {t('home.viewRooms')}
           </Link>
         </div>
       </nav>
@@ -201,7 +201,7 @@ export default function Home() {
             </div>
           </div>
 
-          <button className={styles.searchButton} onClick={() => router.push('/users/rooms')}>
+          <button className={styles.searchButton} onClick={() => router.push('/users/select-room')}>
             {t('home.searchRooms')}
           </button>
         </div>

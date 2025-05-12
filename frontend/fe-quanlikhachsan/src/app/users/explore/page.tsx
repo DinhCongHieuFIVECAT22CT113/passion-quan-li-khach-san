@@ -63,8 +63,8 @@ export default function ExplorePage() {
           <Link href="/users/profile" className={styles.profileIcon}>
             <FaUser />
           </Link>
-          <Link href="/users/booking" className={styles.bookNowBtn}>
-            {t('booking.bookNow')}
+          <Link href="/users/rooms" className={styles.bookNowBtn}>
+            {t('explore.viewRooms')}
           </Link>
         </div>
       </nav>
