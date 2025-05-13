@@ -38,5 +38,15 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(result.Value);
         }
+        [HttpGet("Lịch làm việc")]
+        public IActionResult GetLichLamViecByNhanVien(string maNv)
+        {
+            var result = _phanCongCaRepo.GetLichLamViecByNhanVien(maNv);
+            if (result.StatusCode == 400)
+            {
+                return BadRequest(result.Value);
+            }
+            return Ok(result.Value);
+        }
     }
 }

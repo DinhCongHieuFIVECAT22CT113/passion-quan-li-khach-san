@@ -41,8 +41,6 @@ public partial class QuanLyKhachSanContext : DbContext
 
     public virtual DbSet<PhanCong> PhanCongs { get; set; }
 
-    public virtual DbSet<PhanQuyenNhanVien> PhanQuyenNhanViens { get; set; }
-
     public virtual DbSet<Phong> Phongs { get; set; }
 
     public virtual DbSet<PhuongThucThanhToan> PhuongThucThanhToans { get; set; }
@@ -52,7 +50,6 @@ public partial class QuanLyKhachSanContext : DbContext
     public virtual DbSet<Role> Roles { get; set; }
 
     public virtual DbSet<SuDungDichVu> SuDungDichVus { get; set; }
-
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -265,8 +262,6 @@ public partial class QuanLyKhachSanContext : DbContext
             entity.Property(e => e.NgaySua).HasColumnType("datetime");
             entity.Property(e => e.NgayTao).HasColumnType("datetime");
             entity.Property(e => e.PasswordHash).HasMaxLength(255);
-            entity.Property(e => e.ResetPasswordToken).HasMaxLength(255);
-            entity.Property(e => e.ResetPasswordTokenExpiry).HasColumnType("datetime");
             entity.Property(e => e.Sdt)
                 .HasMaxLength(20)
                 .IsUnicode(false)
@@ -362,7 +357,7 @@ public partial class QuanLyKhachSanContext : DbContext
                 .HasMaxLength(50)
                 .HasColumnName("HoNV");
             entity.Property(e => e.LuongCoBan).HasColumnType("decimal(18, 2)");
-            entity.Property(e => e.MaCaLam)
+            entity.Property(e => e.MaRole)
                 .HasMaxLength(10)
                 .IsUnicode(false);
             entity.Property(e => e.PasswordHash).HasMaxLength(255);
@@ -377,10 +372,10 @@ public partial class QuanLyKhachSanContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false);
 
-            entity.HasOne(d => d.MaCaLamNavigation).WithMany(p => p.NhanViens)
-                .HasForeignKey(d => d.MaCaLam)
+            entity.HasOne(d => d.MaRoleNavigation).WithMany(p => p.NhanViens)
+                .HasForeignKey(d => d.MaRole)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_NhanVien_CaLamViec");
+                .HasConstraintName("FK_NhanVien_Role");
         });
 
         modelBuilder.Entity<PhanCong>(entity =>
@@ -411,31 +406,6 @@ public partial class QuanLyKhachSanContext : DbContext
                 .HasConstraintName("FK_PhanCong_NhanVien");
         });
 
-        modelBuilder.Entity<PhanQuyenNhanVien>(entity =>
-        {
-            entity.HasKey(e => e.MaNv);
-
-            entity.ToTable("PhanQuyenNhanVien");
-
-            entity.Property(e => e.MaNv)
-                .HasMaxLength(10)
-                .IsUnicode(false)
-                .HasColumnName("MaNV");
-            entity.Property(e => e.MaRole)
-                .HasMaxLength(10)
-                .IsUnicode(false);
-
-            entity.HasOne(d => d.MaNvNavigation).WithOne(p => p.PhanQuyenNhanVien)
-                .HasForeignKey<PhanQuyenNhanVien>(d => d.MaNv)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_PhanQuyen_NhanVien");
-
-            entity.HasOne(d => d.MaRoleNavigation).WithMany(p => p.PhanQuyenNhanViens)
-                .HasForeignKey(d => d.MaRole)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_PhanQuyen_Role");
-        });
-
         modelBuilder.Entity<Phong>(entity =>
         {
             entity.HasKey(e => e.MaPhong);
@@ -464,22 +434,27 @@ public partial class QuanLyKhachSanContext : DbContext
         modelBuilder.Entity<PhuongThucThanhToan>(entity =>
         {
             entity.HasKey(e => e.MaPhuongThucThanhToan);
-
-            entity.ToTable("PhuongThucThanhToan");
-
+            
             entity.Property(e => e.MaPhuongThucThanhToan)
                 .HasMaxLength(10)
                 .IsUnicode(false);
+            
             entity.Property(e => e.MaHoaDon)
                 .HasMaxLength(10)
                 .IsUnicode(false);
+            
+            entity.Property(e => e.SoTienCanThanhToan)
+                .HasColumnType("decimal(18, 2)");
+            
             entity.Property(e => e.PhuongThucThanhToan1)
                 .HasMaxLength(150)
                 .HasColumnName("PhuongThucThanhToan");
-            entity.Property(e => e.SoTienCanThanhToan).HasColumnType("decimal(18, 2)");
-            entity.Property(e => e.TrangThai).HasMaxLength(50);
-
-            entity.HasOne(d => d.MaHoaDonNavigation).WithMany(p => p.PhuongThucThanhToans)
+            
+            entity.Property(e => e.TrangThai)
+                .HasMaxLength(50);
+            
+            entity.HasOne(d => d.MaHoaDonNavigation)
+                .WithMany()
                 .HasForeignKey(d => d.MaHoaDon)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_PhuongThucThanhToan_HoaDon");

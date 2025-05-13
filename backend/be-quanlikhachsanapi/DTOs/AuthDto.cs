@@ -40,46 +40,13 @@ namespace be_quanlikhachsanapi.DTOs
         [Required(ErrorMessage = "Mật khẩu là bắt buộc")]
         public string Password { get; set; } = default!;
     }
-    public class ChangePassDto
-    {
-        [Required(ErrorMessage = "Mật khẩu là bắt buộc")]
-        [MinLength(6, ErrorMessage = "Mật khẩu phải có ít nhất 6 ký tự")]
-        public required string Password { get; set; }
-        [Required(ErrorMessage = "Mật khẩu là bắt buộc")]
-        [MinLength(6, ErrorMessage = "Mật khẩu phải có ít nhất 6 ký tự")]
-        public required string NewPassword { get; set; }
-        [Required(ErrorMessage = "Xác nhận mật khẩu là bắt buộc")]
-        [Compare("NewPassword", ErrorMessage = "Mật khẩu mới và xác nhận mật khẩu không khớp.")]
-        public required string ConfirmPassword { get; set; }
-    }
-    public class ForgotPasswordDto
-    {
-        [Required(ErrorMessage = "Email là bắt buộc")]
-        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
-        public required string Email { get; set; }
-    }
-    public class ResetPasswordDto
-    {
-        [Required(ErrorMessage = "Mật khẩu mới là bắt buộc")]
-        [MinLength(6, ErrorMessage = "Mật khẩu phải có ít nhất 6 ký tự")]
-        public required string NewPassword { get; set; }
-        
-        [Required(ErrorMessage = "Xác nhận mật khẩu là bắt buộc")]
-        [Compare("NewPassword", ErrorMessage = "Mật khẩu mới và xác nhận mật khẩu không khớp.")]
-        public required string ConfirmPassword { get; set; }
-        
-        [Required(ErrorMessage = "Token là bắt buộc")]
-        public required string Token { get; set; }
-        
-        [Required(ErrorMessage = "Email là bắt buộc")]
-        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
-        public required string Email { get; set; }
-    }
+
     public class UserDto
     {
-        public string MaKh { get; set; } = default!;
+        public string MaNguoiDung { get; set; } = default!;
         public string UserName { get; set; } = default!;
         public string HoTen { get; set; } = default!;
         public string Token { get; set; } = default!;
+        public string MaRole { get; set; } = default!;
     }
 }

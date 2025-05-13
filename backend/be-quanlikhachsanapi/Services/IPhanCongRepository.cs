@@ -8,7 +8,7 @@ namespace be_quanlikhachsanapi.Services
     {
         JsonResult GiaoCaLam(CreatePhanCongDTO createPhanCongDto);
         JsonResult UpdateCaLam(UpdatePhanCongDTO updatePhanCongDto);
-        //JsonResult GetLichLamViecByNhanVien(string maNhanVien);
+        JsonResult GetLichLamViecByNhanVien(string maNv);
     }
 
     public class PhanCongCaRepository : IPhanCongCaRepository
@@ -81,19 +81,24 @@ namespace be_quanlikhachsanapi.Services
             return new JsonResult(new { message = "Cập nhật ca làm thành công." }) { StatusCode = 200 };
         }
 
-        // public JsonResult GetLichLamViecByNhanVien(string maNhanVien)
-        // {
-        //     var lich = _context.PhanCongCaLams
-        //         .Where(p => p.MaNhanVien == maNhanVien)
-        //         .Select(p => new PhanCongCaDTO
-        //         {
-        //             MaNhanVien = p.MaNhanVien,
-        //             MaCaLam = p.MaCaLam,
-        //             NgayLamViec = p.NgayLamViec
-        //         })
-        //         .ToList();
+        public JsonResult GetLichLamViecByNhanVien(string maNv)
+        {
+            var lich = (from pc in _context.PhanCongs
+                    join clv in _context.CaLamViecs on pc.MaCaLam equals clv.MaCaLam
+                    where pc.MaNv == maNv
+                    select new LichLamViecDto
+                    {
+                        MaNv = pc.MaNv,
+                        TenCaLam = clv.TenCaLam,
+                        NgayLam = pc.NgayLam.ToDateTime(TimeOnly.MinValue)
+                    }).ToList();
 
-        //     return new JsonResult(lich) { StatusCode = 200 };
-        // }
+            if (lich.Count == 0)
+            {
+                return new JsonResult("Không tìm thấy lịch làm việc") { StatusCode = 400 };
+            }
+
+            return new JsonResult(lich) { StatusCode = 200 };
+        }
     }
 }

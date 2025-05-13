@@ -21,11 +21,11 @@ public partial class NhanVien
 
     public string Sdt { get; set; } = null!;
 
-    public string MaCaLam { get; set; } = null!;
-
     public decimal LuongCoBan { get; set; }
 
     public DateTime NgayVaoLam { get; set; }
+
+    public string MaRole { get; set; } = null!;
 
     public DateTime? NgayTao { get; set; }
 
@@ -33,9 +33,7 @@ public partial class NhanVien
 
     public virtual ICollection<BaoCaoDoanhThu> BaoCaoDoanhThus { get; set; } = new List<BaoCaoDoanhThu>();
 
-    public virtual CaLamViec MaCaLamNavigation { get; set; } = null!;
+    public virtual Role MaRoleNavigation { get; set; } = null!;
 
     public virtual ICollection<PhanCong> PhanCongs { get; set; } = new List<PhanCong>();
-
-    public virtual PhanQuyenNhanVien? PhanQuyenNhanVien { get; set; }
 }
