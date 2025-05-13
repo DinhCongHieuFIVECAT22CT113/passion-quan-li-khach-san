@@ -2,14 +2,30 @@ import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   try {
-    const { email, password } = await req.json();
+    const { userName, password } = await req.json();
 
-    if (email === 'user@example.com' && password === 'string') {
+    // Basic validation
+    if (!userName || !userName.trim()) {
+      return NextResponse.json({
+        success: false,
+        message: 'Tên tài khoản không được để trống'
+      }, { status: 400 });
+    }
+
+    if (!password || !password.trim()) {
+      return NextResponse.json({
+        success: false,
+        message: 'Mật khẩu không được để trống'
+      }, { status: 400 });
+    }
+
+    // Mock login logic: Replace with real database check in production
+    if (userName === 'exampleUser' && password === 'string') {
       return NextResponse.json({
         success: true,
         user: {
           id: 1,
-          email,
+          userName,
           name: 'Example User'
         }
       });
@@ -17,7 +33,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       success: false,
-      message: 'Email hoặc mật khẩu không đúng'
+      message: 'Tên tài khoản hoặc mật khẩu không đúng'
     }, { status: 401 });
 
   } catch (error) {
