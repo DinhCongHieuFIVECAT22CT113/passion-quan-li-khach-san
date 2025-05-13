@@ -1,312 +1,61 @@
-/* ===== Layout chính ===== */
-.container {
-  display: flex;
-  justify-content: center; 
-  align-items: center;     
-  min-height: 100vh;      
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #f5f5f5;
-  position: relative;
-  overflow: auto;         
-}
-
 .form-section {
   width: 100%;
-  max-width: 500px;
-  padding: 40px 30px;
+  max-width: 400px;
+  padding: 2rem;
+  position: relative;
   background: white;
-  border-radius: 15px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  z-index: 2;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.back-btn {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: none;
+  border: none;
+  font-size: 24px;
+  color: #666;
+  cursor: pointer;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.3s ease;
+}
+
+.back-btn:hover {
+  color: #333;
 }
 
 .form-section h2 {
-  font-size: 60px;
-  font-weight: 600;
-  margin-bottom: 20px;
-  font-family: 'Playfair Display', serif;
-  color: #2c3e50; /* màu sang trọng */
   text-align: center;
-  letter-spacing: 1px;
-  position: relative;
+  color: #333;
+  margin-bottom: 2rem;
 }
 
-.form-section h2::after {
-  content: "";
-  display: block;
-  width: 60px;
-  height: 3px;
-  background-color: #3498db; /* màu nhấn nhẹ */
-  margin: 10px auto 0;
-  border-radius: 2px;
-}
-
-form {
+.form-section form {
   display: flex;
   flex-direction: column;
-  max-width: 400px;
-  margin: 0 auto;
-  width: 100%;
+  gap: 1rem;
 }
 
-label {
-  font-weight: 600;
-  margin-bottom: 5px;
-  color: #444;
-}
-
-input {
-  background-color: white;
-  color: #000000;
-  padding: 12px 15px;
-  margin-bottom: 15px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  border-color: #102c3e;
-  outline: none;
-  width: 100%;
-  box-sizing: border-box;
-  font-size: 14px;
-}
-
-/* ===== Tùy chọn: Ghi nhớ + Forgot password ===== */
-.options {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 14px;
-  margin-bottom: 15px;
-  width: 100%;
-}
-
-.options label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: normal;
-  margin: 0;
-  white-space: nowrap;
-}
-
-.options a {
-  color: #102c3e;
-  text-decoration: none;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-/* Điều chỉnh checkbox */
-.options input[type="checkbox"] {
-  margin: 0;
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-}
-
-/* ===== Nút chính ===== */
-.main-btn {
-  padding: 12px;
-  background-color: #0d2233;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  margin-bottom: 15px;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: 600;
-  width: 100%;
-}
-
-/* ===== OR ===== */
-.divider {
-  display: flex;
-  align-items: center;
-  text-align: center;
-  font-size: 20px;
-  color: #333;
-  margin: 10px 0;
-  margin-top: -10px;
-  font-weight: 500;
-}
-
-.divider::before,
-.divider::after {
-  content: "";
-  flex: 1;
-  border-bottom: 2px solid #ccc;
-  margin: 0 10px;
-}
-
-/* ===== Google/FaceBook ===== */
-.google-btn, .facebook-btn {
-  padding: 12px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  width: 100%;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-.google-btn {
-  background-color: #e3f2fd;
-  color: #1a73e8;
-}
-
-.facebook-btn {
-  background-color: #1877f2;
-  color: white;
-}
-
-/* ===== Chân trang ===== */
-.footer-text {
-  font-size: 14px;
-  margin-top: 15px;
-  text-align: center;
+.form-section label {
   color: #555;
-}
-
-.footer-text a {   
-  color: #ff0000;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-/* ===== Footer ===== */
-footer {
-  position: relative;
-  text-align: center;
-  font-size: 14px;
-  color: #000;
-  padding-top: 15px;
-  width: 100%;
-  margin-top: 20px;
-  z-index: 3;
-}
-
-footer::before {
-  content: '';
-  display: block;
-  width: 80%;
-  margin: 0 auto 15px auto;
-  border-top: 1px solid #ccc;
-}
-
-/* ===== Bên phải: Hình ảnh ===== */
-.image-section {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: white;
-  overflow: hidden;
-  z-index: 1;
-}
-
-.image-section::before {
-  content: '';
-  display: block;
-  width: 100%;
-  height: 100%;
-  background-image: url('/LogSig.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-}
-
-.error {
-  color: red;
   font-size: 0.9rem;
-  margin-bottom: 8px;
-  margin-top: -15px;
 }
 
-/* Thông Báo Modal */
-.modal-overlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background-color: rgba(0,0,0,0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 999;
-}
-
-.modal-box {
-  background: white;
-  border-radius: 10px;
-  width: 400px;
-  padding: 30px;
-  text-align: center;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 1.2rem;
-  margin-bottom: 10px;
-}
-
-.modal-header h2 {
-  font-family: 'Segoe UI Semibold', 'Segoe UI', sans-serif;
-  font-weight: 600;
-  font-size: 24px;
-  color: #102c3e;
-  margin: 0;
-}
-
-.modal-body {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.modal-body p {
-  margin-top: 5px;
-  margin-bottom: 10px;
-  font-size: 1rem;
-  color: #333;
-}
-
-.close-btn {
-  font-size: 1.5rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #333;
-  transition: color 0.2s ease;
-}
-
-.close-btn:hover {
-  color: red;
-}
-
-/* ===== Layout cho các trường chia đôi ===== */
-.row-group {
-  display: flex;
-  gap: 15px;
+.form-section input[type="text"],
+.form-section input[type="password"] {
   width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
 }
 
-.half-width {
-  flex: 1;
-  min-width: 0; /* Ngăn chặn tràn nội dung */
-}
-
-/* Điều chỉnh lỗi cho các trường chia đôi */
-.row-group .error {
-  margin-top: -10px;
-  margin-bottom: 15px;
-}
-
-/* ===== Password Toggle ===== */
 .password-wrapper {
   position: relative;
   width: 100%;
@@ -315,21 +64,228 @@ footer::before {
 .toggle-password {
   position: absolute;
   right: 10px;
-  top: 40%;
+  top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
+  color: #666;
   cursor: pointer;
-  color: #444;
-  font-size: 16px; /* Size for Font Awesome icons */
-  padding: 5px;
-  line-height: 1;
 }
 
-.toggle-password:hover {
-  color: #102c3e;
+.options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
 }
 
-.password-wrapper input {
-  padding-right: 40px; /* Space for the icon */
+.options a {
+  color: #8B7355;
+  text-decoration: none;
+}
+
+.options a:hover {
+  text-decoration: underline;
+}
+
+.main-btn {
+  width: 100%;
+  padding: 12px;
+  background: #8B7355;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.main-btn:hover {
+  background: #6F5B3E;
+}
+
+.main-btn:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+}
+
+.divider {
+  text-align: center;
+  margin: 1rem 0;
+  color: #666;
+  position: relative;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 45%;
+  height: 1px;
+  background: #ddd;
+}
+
+.divider::before {
+  left: 0;
+}
+
+.divider::after {
+  right: 0;
+}
+
+.google-btn,
+.facebook-btn {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 10px;
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.google-btn {
+  background-color: #DB4437;
+}
+
+.facebook-btn {
+  background-color: #3b5998;
+}
+
+.google-btn:hover {
+  background-color: #c53929;
+}
+
+.facebook-btn:hover {
+  background-color: #2d4373;
+}
+
+.cancel-btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #f5f5f5;
+  color: #333;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn:hover {
+  background-color: #e0e0e0;
+}
+
+.footer-text {
+  text-align: center;
+  margin-top: 2rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.footer-text a {
+  color: #8B7355;
+  text-decoration: none;
+}
+
+.footer-text a:hover {
+  text-decoration: underline;
+}
+
+footer {
+  text-align: center;
+  margin-top: 2rem;
+  color: #999;
+  font-size: 0.8rem;
+}
+
+.error {
+  color: #d32f2f;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-box {
+  background: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 400px;
+  padding: 1.5rem;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #666;
+  cursor: pointer;
+}
+
+.close-btn:hover {
+  color: #333;
+}
+
+.modal-body {
+  color: #666;
+}
+
+.modal-body input {
+  width: 100%;
+  padding: 0.75rem;
+  margin: 1rem 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.error-message {
+  color: #d32f2f;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 480px) {
+  .form-section {
+    padding: 1.5rem;
+  }
+
+  .options {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
 }

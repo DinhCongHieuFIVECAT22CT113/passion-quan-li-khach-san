@@ -173,6 +173,32 @@
 
 .roomInfo {
   padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.roomActions {
+  margin-top: auto;
+}
+
+.viewDetailsButton {
+  display: inline-block;
+  background: #8B7355;
+  color: white;
+  text-decoration: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  width: 100%;
+  text-align: center;
+}
+
+.viewDetailsButton:hover {
+  background: #6F5B3E;
+  transform: translateY(-2px);
 }
 
 .roomHeader {

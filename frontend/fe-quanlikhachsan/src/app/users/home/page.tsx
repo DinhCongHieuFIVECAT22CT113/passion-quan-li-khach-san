@@ -173,12 +173,12 @@ export default function Home() {
         <div className={styles.formContent}>
           <div className={styles.formGroup}>
             <label>{t('home.checkInDate')}</label>
-            <input type="date" placeholder={t('home.checkInDate')} />
+            <input type="date" />
           </div>
 
           <div className={styles.formGroup}>
             <label>{t('home.checkOutDate')}</label>
-            <input type="date" placeholder={t('home.checkOutDate')} />
+            <input type="date" />
           </div>
 
           <div className={styles.guestGroup}>

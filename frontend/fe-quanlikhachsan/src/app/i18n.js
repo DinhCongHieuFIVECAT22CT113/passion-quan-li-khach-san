@@ -197,7 +197,7 @@ const resources = {
       'home.checkOutDate': 'Ngày trả phòng',
       'home.adults': 'Người lớn',
       'home.children': 'Trẻ em',
-      'home.searchRooms': 'Tìm phòng trống',
+      'home.searchRooms': 'Tìm phòng',
       'home.specialOffers': 'Ưu Đãi Đặc Biệt',
       'home.specialOffersDesc': 'Khám phá những ưu đãi đặc biệt cho kỳ nghỉ đáng nhớ',
       'home.viewAllOffers': 'Xem Tất Cả Ưu Đãi',

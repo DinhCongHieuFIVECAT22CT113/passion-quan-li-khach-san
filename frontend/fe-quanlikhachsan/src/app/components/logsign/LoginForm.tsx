@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import './logsign.css';
@@ -19,6 +19,8 @@ const LoginForm: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get('redirectUrl');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,7 +48,11 @@ const LoginForm: React.FC = () => {
         if (response.ok) {
           const data = await response.json();
           console.log('Đăng nhập thành công', data);
-          router.push('/home');
+          if (redirectUrl) {
+            router.push(redirectUrl);
+          } else {
+            router.push('/home');
+          }
         } else {
           const errorData = await response.json();
           window.alert(errorData.message || 'Đăng nhập thất bại');
@@ -92,6 +98,12 @@ const LoginForm: React.FC = () => {
 
   return (
     <div className="form-section">
+      <button 
+        className="back-btn" 
+        onClick={() => router.push('/home')}
+      >
+        ×
+      </button>
       <h2>Đăng Nhập</h2>
 
       <form onSubmit={handleSubmit}>
