@@ -26,9 +26,20 @@ interface FormData {
   name: string;
   email: string;
   phone: string;
+  idNumber: string;
   message: string;
   paymentMethod: string;
   cardType: string;
+}
+
+// Define the shape of errors
+interface Errors {
+  name?: string;
+  email?: string;
+  phone?: string;
+  idNumber?: string;
+  paymentMethod?: string;
+  cardType?: string;
 }
 
 export default function BookingPage() {
@@ -42,11 +53,12 @@ export default function BookingPage() {
     name: '',
     email: '',
     phone: '',
+    idNumber: '',
     message: '',
     paymentMethod: '',
     cardType: '',
   });
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState<Errors>({});
   const [success, setSuccess] = useState('');
 
   useEffect(() => {
@@ -71,28 +83,68 @@ export default function BookingPage() {
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // Xóa lỗi của trường khi người dùng bắt đầu nhập
+    setErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!formData.name || !formData.email || !formData.phone || !formData.paymentMethod) {
-      setError(t('booking.fillAllFields'));
-      setSuccess('');
-      return;
+    const newErrors: Errors = {};
+
+    // Xác thực Họ Tên
+    if (!formData.name) {
+      newErrors.name = t('booking.nameRequired') || 'Vui lòng điền Họ và Tên của bạn';
     }
 
+    // Xác thực Email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!formData.email) {
+      newErrors.email = t('booking.emailRequired') || 'Vui lòng điền Email của bạn';
+    } else if (!emailRegex.test(formData.email)) {
+      newErrors.email = t('booking.invalidEmail') || 'Email không hợp lệ';
+    }
+
+    // Xác thực Số điện thoại
+    if (!formData.phone) {
+      newErrors.phone = t('booking.phoneRequired') || 'Vui lòng điền số điện thoại của bạn';
+    }
+
+    // Xác thực CMND/CCCD
+    const idNumberRegex = /^[0-9]{12}$/;
+    if (!formData.idNumber) {
+      newErrors.idNumber = t('booking.idNumberRequired') || 'Vui lòng điền số CMND/CCCD của bạn';
+    } else if (!idNumberRegex.test(formData.idNumber)) {
+      newErrors.idNumber =
+        t('booking.invalidIdNumber') ||
+        'Số CMND/CCCD phải có tối đa 12 số và không chứa chữ cái hoặc ký tự đặc biệt';
+    }
+
+    // Xác thực Payment Method
+    if (!formData.paymentMethod) {
+      newErrors.paymentMethod =
+        t('booking.paymentMethodRequired') || 'Vui lòng chọn phương thức thanh toán';
+    }
+
+    // Xác thực Card Type nếu chọn thanh toán bằng thẻ
     if (formData.paymentMethod !== 'cash' && !formData.cardType) {
-      setError(t('booking.selectCardType'));
+      newErrors.cardType = t('booking.selectCardType') || 'Vui lòng chọn loại thẻ';
+    }
+
+    // Nếu có lỗi, cập nhật state errors và dừng submit
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       setSuccess('');
       return;
     }
 
-    setError('');
-    setSuccess(t('booking.notification'));
+    // Nếu không có lỗi, tiến hành submit
+    setErrors({});
+    setSuccess(t('booking.notification') || 'Đặt phòng thành công!');
     setFormData({
       name: '',
       email: '',
       phone: '',
+      idNumber: '',
       message: formData.message,
       paymentMethod: '',
       cardType: '',
@@ -100,7 +152,7 @@ export default function BookingPage() {
 
     setTimeout(() => {
       setSuccess('');
-      router.push('/users/profile');
+      router.push('/users/home');
     }, 3000);
   };
 
@@ -174,15 +226,15 @@ export default function BookingPage() {
                   <strong>{t('booking.checkOut')}:</strong> {selectedRoomData.checkOutDate}
                 </p>
                 <p>
-                  <strong>{t('booking.guests')}:</strong> {selectedRoomData.adults} {t('booking.adults')},{' '}
-                  {selectedRoomData.children} {t('booking.children')}
+                  <strong>{t('booking.guests')}:</strong> {selectedRoomData.adults}{' '}
+                  {t('booking.adults')}, {selectedRoomData.children} {t('booking.children')}
                 </p>
               </div>
             ) : (
               <p>{t('booking.noRoomSelected')}</p>
             )}
 
-            <form onSubmit={handleSubmit} className={styles.bookingForm}>
+            <form onSubmit={handleSubmit} className={styles.bookingForm} noValidate>
               <div className={styles.formGroup}>
                 <label htmlFor="name">{t('booking.name')}</label>
                 <input
@@ -191,8 +243,9 @@ export default function BookingPage() {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder={t('booking.namePlaceholder')}
+                  placeholder={t('booking.namePlaceholder') || 'Họ và Tên'}
                 />
+                {errors.name && <p className={styles.error}>{errors.name}</p>}
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="email">{t('booking.email')}</label>
@@ -202,8 +255,9 @@ export default function BookingPage() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder={t('booking.emailPlaceholder')}
+                  placeholder={t('booking.emailPlaceholder') || 'Email'}
                 />
+                {errors.email && <p className={styles.error}>{errors.email}</p>}
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="phone">{t('booking.phone')}</label>
@@ -213,8 +267,21 @@ export default function BookingPage() {
                   name="phone"
                   value={formData.phone}
                   onChange={handleChange}
-                  placeholder={t('booking.phonePlaceholder')}
+                  placeholder={t('booking.phonePlaceholder') || 'Số điện thoại'}
                 />
+                {errors.phone && <p className={styles.error}>{errors.phone}</p>}
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="idNumber">{t('booking.idNumber') || 'CMND/CCCD'}</label>
+                <input
+                  type="text"
+                  id="idNumber"
+                  name="idNumber"
+                  value={formData.idNumber}
+                  onChange={handleChange}
+                  placeholder={t('booking.idNumberPlaceholder') || 'Số CMND/CCCD'}
+                />
+                {errors.idNumber && <p className={styles.error}>{errors.idNumber}</p>}
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="message">{t('booking.specialRequests')}</label>
@@ -223,7 +290,7 @@ export default function BookingPage() {
                   name="message"
                   value={formData.message}
                   onChange={handleChange}
-                  placeholder={t('booking.specialRequestsPlaceholder')}
+                  placeholder={t('booking.specialRequestsPlaceholder') || 'Yêu cầu đặc biệt'}
                   rows={4}
                 />
               </div>
@@ -241,11 +308,17 @@ export default function BookingPage() {
                   <option value="card">{t('profile.internationalCards')}</option>
                   <option value="bankCard">{t('profile.vietnameseBanks')}</option>
                 </select>
+                {errors.paymentMethod && <p className={styles.error}>{errors.paymentMethod}</p>}
               </div>
               {formData.paymentMethod === 'card' || formData.paymentMethod === 'bankCard' ? (
                 <div className={styles.formGroup}>
                   <label htmlFor="cardType">{t('profile.chooseCard')}</label>
-                  <select id="cardType" name="cardType" value={formData.cardType} onChange={handleChange}>
+                  <select
+                    id="cardType"
+                    name="cardType"
+                    value={formData.cardType}
+                    onChange={handleChange}
+                  >
                     <option value="">{t('profile.chooseCard')}</option>
                     {formData.paymentMethod === 'card' && (
                       <>
@@ -260,6 +333,7 @@ export default function BookingPage() {
                       </>
                     )}
                   </select>
+                  {errors.cardType && <p className={styles.error}>{errors.cardType}</p>}
                 </div>
               ) : null}
 
@@ -283,7 +357,6 @@ export default function BookingPage() {
                 </div>
               )}
 
-              {error && <p className={styles.error}>{error}</p>}
               <button type="submit" className={styles.bookNowBtn}>
                 {t('booking.bookNow')}
               </button>
