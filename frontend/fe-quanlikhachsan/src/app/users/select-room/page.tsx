@@ -101,7 +101,7 @@ export default function SelectRoomPage() {
           <Link href="/users/profile" className={styles.profileIcon}>
             <FaUser />
           </Link>
-          <Link href="/users/rooms" className={styles.bookNowBtn}>
+          <Link href="/users/booking" className={styles.bookNowBtn}>
             {t('select.rooms')}
           </Link>
         </div>

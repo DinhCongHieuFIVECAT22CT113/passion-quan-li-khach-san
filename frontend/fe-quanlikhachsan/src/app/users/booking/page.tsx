@@ -137,7 +137,7 @@ export default function BookingPage() {
           <Link href="/users/profile" className={styles.profileIcon}>
             <FaUser />
           </Link>
-          <Link href="/users/booking" className={styles.bookNowBtn}>
+          <Link href="/users/rooms" className={styles.bookNowBtn}>
             {t('booking.rooms')}
           </Link>
         </div>

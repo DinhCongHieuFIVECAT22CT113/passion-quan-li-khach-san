@@ -156,7 +156,7 @@ const resources = {
       'selectRoom.selectRoom': 'Chọn phòng',
       'selectRoom.searchRooms': 'Tìm phòng',
       'selectRoom.price': 'Giá Phòng',
-      'select.rooms': 'Xem Phòng',
+      'select.rooms': 'Thông Tin Đặt Phòng',
 
       // Explore Page
       'explore.title': 'Khám Phá Khách Sạn',
@@ -369,7 +369,7 @@ const resources = {
       "selectRoom.selectRoom": "Select Room",
       "selectRoom.searchRooms": "Search Rooms",
       "selectRoom.price": "Room Price",
-      "select.rooms": "View Rooms",
+      "select.rooms": "Reservation Information",
 
       // Explore Page
       "explore.title": "Explore the Hotel",
@@ -582,7 +582,7 @@ const resources = {
 'selectRoom.selectRoom': '部屋を選択',
 'selectRoom.searchRooms': '部屋を検索',
 'selectRoom.price': '部屋料金',
-'select.rooms': '部屋を見る',
+'select.rooms': '予約情報',
 
 // Explore Page
 'explore.title': 'ホテル探検',
@@ -795,7 +795,7 @@ const resources = {
 'selectRoom.selectRoom': '选择房间',
 'selectRoom.searchRooms': '搜索房间',
 'selectRoom.price': '房间价格',
-'select.rooms': '查看房间',
+'select.rooms': '预约信息',
 
 // Explore Page
 'explore.title': '探索酒店',
@@ -1008,7 +1008,7 @@ const resources = {
   "selectRoom.selectRoom": "Выбрать комнату",
   "selectRoom.searchRooms": "Найти комнаты",
   "selectRoom.price": "Цена комнаты",
-  "select.rooms": "Посмотреть комнаты",
+  "select.rooms": "Информация о бронировании",
 
   // Explore Page
   "explore.title": "Исследуйте отель",
@@ -1221,7 +1221,7 @@ const resources = {
   "selectRoom.selectRoom": "Zimmer auswählen",
   "selectRoom.searchRooms": "Zimmer suchen",
   "selectRoom.price": "Zimmerpreis",
-  "select.rooms": "Zimmer anzeigen",
+  "select.rooms": "Reservierungsinformationen",
 
   // Explore Page
   "explore.title": "Erforschen Sie das Hotel",
@@ -1434,7 +1434,7 @@ const resources = {
   "selectRoom.selectRoom": "Sélectionner une chambre",
   "selectRoom.searchRooms": "Rechercher des chambres",
   "selectRoom.price": "Prix de la chambre",
-  "select.rooms": "Voir les chambres",
+  "select.rooms": "Informations de réservation",
 
   // Explore Page
   "explore.title": "Explorer l'hôtel",
@@ -1647,7 +1647,7 @@ const resources = {
   "selectRoom.selectRoom": "เลือกห้อง",
   "selectRoom.searchRooms": "ค้นหาห้อง",
   "selectRoom.price": "ราคาห้องพัก",
-  "select.rooms": "ดูห้องพัก",
+  "select.rooms": "ข้อมูลการจอง",
 
   // Explore Page
   "explore.title": "สำรวจโรงแรม",
@@ -1860,7 +1860,7 @@ const resources = {
 'selectRoom.selectRoom': '객실 선택',
 'selectRoom.searchRooms': '객실 검색',
 'selectRoom.price': '객실 요금',
-'select.rooms': '객실 보기',
+'select.rooms': '예약정보',
 
 // Explore Page
 'explore.title': '호텔 탐험',
