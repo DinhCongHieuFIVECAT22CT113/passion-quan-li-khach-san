@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "ytOdAe4Gb2A=",
+  "dgSpecHash": "vEkpBGjZ2l0=",
   "success": true,
   "projectFilePath": "D:\\PTUDW quản lý khách sạn\\code dev\\DEV FE-BE\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj",
   "expectedPackageFiles": [
@@ -102,12 +102,5 @@
     "C:\\Users\\anhso\\.nuget\\packages\\system.threading.tasks.extensions\\4.5.4\\system.threading.tasks.extensions.4.5.4.nupkg.sha512",
     "C:\\Users\\anhso\\.nuget\\packages\\system.windows.extensions\\6.0.0\\system.windows.extensions.6.0.0.nupkg.sha512"
   ],
-  "logs": [
-    {
-      "code": "Undefined",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "Problem reading the cache file D:\\PTUDW quản lý khách sạn\\code dev\\DEV FE-BE\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\obj\\project.nuget.cache : Unexpected character encountered while parsing value: <. Path '', line 0, position 0."
-    }
-  ]
+  "logs": []
 }

@@ -51,6 +51,10 @@ public partial class QuanLyKhachSanContext : DbContext
 
     public virtual DbSet<SuDungDichVu> SuDungDichVus { get; set; }
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Server=CONG-HIEU\\CONGHIEU;Database=QuanLyKhachSan;Trusted_Connection=True;TrustServerCertificate=True");
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<ApDungKm>(entity =>
@@ -434,27 +438,22 @@ public partial class QuanLyKhachSanContext : DbContext
         modelBuilder.Entity<PhuongThucThanhToan>(entity =>
         {
             entity.HasKey(e => e.MaPhuongThucThanhToan);
-            
+
+            entity.ToTable("PhuongThucThanhToan");
+
             entity.Property(e => e.MaPhuongThucThanhToan)
                 .HasMaxLength(10)
                 .IsUnicode(false);
-            
             entity.Property(e => e.MaHoaDon)
                 .HasMaxLength(10)
                 .IsUnicode(false);
-            
-            entity.Property(e => e.SoTienCanThanhToan)
-                .HasColumnType("decimal(18, 2)");
-            
             entity.Property(e => e.PhuongThucThanhToan1)
                 .HasMaxLength(150)
                 .HasColumnName("PhuongThucThanhToan");
-            
-            entity.Property(e => e.TrangThai)
-                .HasMaxLength(50);
-            
-            entity.HasOne(d => d.MaHoaDonNavigation)
-                .WithMany()
+            entity.Property(e => e.SoTienCanThanhToan).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.TrangThai).HasMaxLength(50);
+
+            entity.HasOne(d => d.MaHoaDonNavigation).WithMany(p => p.PhuongThucThanhToans)
                 .HasForeignKey(d => d.MaHoaDon)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_PhuongThucThanhToan_HoaDon");
