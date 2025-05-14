@@ -1,10 +1,10 @@
-// Controllers/AuthController.cs
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
 using be_quanlikhachsanapi.Data;
 using be_quanlikhachsanapi.DTOs;
 using be_quanlikhachsanapi.Services;
 using Microsoft.EntityFrameworkCore;
+using be_quanlikhachsanapi.ViewModel;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -16,17 +16,23 @@ public class AuthController : ControllerBase
     private readonly ITokenService _tokenService;
     private readonly IPasswordHasher<KhachHang> _passwordHasher;
     private readonly IPasswordHasher<NhanVien> _passwordHasherNv;
+    private readonly ISendEmailServices _sendEmail;
+    private readonly IConfiguration _confMail;
 
     public AuthController(
         QuanLyKhachSanContext context,
         ITokenService tokenService,
         IPasswordHasher<KhachHang> passwordHasher,
-        IPasswordHasher<NhanVien> passwordHasherNv)
+        IPasswordHasher<NhanVien> passwordHasherNv,
+        ISendEmailServices sendEmail,
+        IConfiguration confMail)
     {
         _context = context;
         _tokenService = tokenService;
         _passwordHasher = passwordHasher;
         _passwordHasherNv = passwordHasherNv;
+        _sendEmail = sendEmail;
+        _confMail = confMail;
     }
 
     [HttpPost("Đăng ký")]
@@ -100,6 +106,19 @@ public class AuthController : ControllerBase
         _context.KhachHangs.Add(khachHang);
         await _context.SaveChangesAsync();
 
+        var email = new EmailModel
+        {
+            ToEmail = khachHang.Email,
+            Subject = "Tài khoản của bạn đã được khởi tạo thành công",
+            Body = $"Xin chào {khachHang.HoKh} {khachHang.TenKh},\n\n" +
+                $"Thông tin tài khoản của bạn:\n- Username: {khachHang.UserName}\n- Mật khẩu: {registerDto.Password}\n\n" +
+                "Vui lòng đăng nhập để thay đổi mật khẩu sau lần đăng nhập đầu tiên.\n\n" +
+                "Trân trọng,\nHệ thống Quản Lý Khách Sạn."
+        };
+
+        // Gửi Email
+        _sendEmail.SendEmail(email);
+        
         // Trả về thông tin người dùng và token
         return new UserDto
         {
