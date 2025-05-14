@@ -8,13 +8,14 @@ import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../../../app/components/profile/LanguageContext';
 import i18n from '../../../app/i18n';
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 export default function RoomInformationPage() {
-  const { t, i18n: i18nInstance } = useTranslation();
+  const { t } = useTranslation();
   const { selectedLanguage } = useLanguage();
   const [isClient, setIsClient] = useState(false);
   const searchParams = useSearchParams();
+  const router = useRouter();
   const roomId = searchParams.get('id');
 
   useEffect(() => {
@@ -42,53 +43,151 @@ export default function RoomInformationPage() {
 
   const rooms: Record<string, Room> = {
     1: {
-      name: 'Phòng Gần Hồ',
+      name: t('rooms.room1Name'),
       price: '4.500.000đ',
       image: '/images/pool-room.jpg',
-      description: 'Phòng sang trọng với view nhìn ra hồ bơi, không gian thoáng đãng và yên tĩnh.',
+      description: t('rooms.room1Description'),
       amenities: [
-        { icon: <FaBed />, name: 'Giường King Size' },
-        { icon: <FaWifi />, name: 'Wifi Tốc Độ Cao' },
-        { icon: <FaTv />, name: 'TV Màn Hình Phẳng' },
-        { icon: <FaSnowflake />, name: 'Điều Hòa' }
+        { icon: <FaBed />, name: t('rooms.bedKingSize') },
+        { icon: <FaWifi />, name: t('rooms.highSpeedWifi') },
+        { icon: <FaTv />, name: t('rooms.flatScreenTV') },
+        { icon: <FaSnowflake />, name: t('rooms.airConditioning') },
       ],
       size: '40m²',
       maxGuests: 2,
-      bedType: 'King Size',
-      view: 'Hồ bơi',
+      bedType: t('rooms.bedKingSize'),
+      view: t('rooms.poolView'),
       additionalFeatures: [
-        'Minibar đầy đủ',
-        'Phòng tắm sang trọng',
-        'Dịch vụ phòng 24/7',
-        'Két sắt cá nhân'
-      ]
+        t('rooms.minibar'),
+        t('rooms.luxuryBathroom'),
+        t('rooms.roomService247'),
+        t('rooms.safeBox'),
+      ],
     },
     2: {
-      name: 'Căn Hộ Áp Mái',
+      name: t('rooms.room2Name'),
       price: '10.500.000đ',
       image: '/images/penthouse.jpg',
-      description: 'Căn hộ cao cấp với tầm nhìn panorama ra thành phố, thiết kế hiện đại và sang trọng.',
+      description: t('rooms.room2Description'),
       amenities: [
-        { icon: <FaBed />, name: 'Giường King Size' },
-        { icon: <FaWifi />, name: 'Wifi Tốc Độ Cao' },
-        { icon: <FaTv />, name: 'TV Màn Hình Phẳng' },
-        { icon: <FaSnowflake />, name: 'Điều Hòa' }
+        { icon: <FaBed />, name: t('rooms.bedKingSize') },
+        { icon: <FaWifi />, name: t('rooms.highSpeedWifi') },
+        { icon: <FaTv />, name: t('rooms.flatScreenTV') },
+        { icon: <FaSnowflake />, name: t('rooms.airConditioning') },
       ],
       size: '120m²',
       maxGuests: 4,
-      bedType: '2 King Size',
-      view: 'Toàn cảnh thành phố',
+      bedType: `2 ${t('rooms.bedKingSize')}`,
+      view: t('rooms.cityView'),
       additionalFeatures: [
-        'Bếp đầy đủ tiện nghi',
-        'Phòng khách riêng biệt',
-        'Ban công rộng',
-        'Jacuzzi riêng'
-      ]
+        t('rooms.fullKitchen'),
+        t('rooms.separateLivingRoom'),
+        t('rooms.largeBalcony'),
+        t('rooms.privateJacuzzi'),
+      ],
     },
-    // Thêm thông tin cho các phòng khác tương tự
+    3: {
+      name: t('rooms.room3Name'),
+      price: '5.500.000đ',
+      image: '/images/noble-room.jpg',
+      description: t('rooms.room3Description'),
+      amenities: [
+        { icon: <FaBed />, name: t('rooms.bedQueen') },
+        { icon: <FaWifi />, name: t('rooms.highSpeedWifi') },
+        { icon: <FaTv />, name: t('rooms.flatScreenTV') },
+        { icon: <FaSnowflake />, name: t('rooms.airConditioning') },
+      ],
+      size: '35m²',
+      maxGuests: 3,
+      bedType: t('rooms.bedQueen'),
+      view: t('rooms.cityView'),
+      additionalFeatures: [
+        t('rooms.hairDryer'),
+        t('rooms.kettle'),
+        t('rooms.toiletries'),
+        t('rooms.workDesk'),
+      ],
+    },
+    4: {
+      name: t('rooms.room4Name'),
+      price: '8.500.000đ',
+      image: '/images/green-apartment.jpg',
+      description: t('rooms.room4Description'),
+      amenities: [
+        { icon: <FaBed />, name: `2 ${t('rooms.bedQueen')}` },
+        { icon: <FaWifi />, name: t('rooms.highSpeedWifi') },
+        { icon: <FaTv />, name: t('rooms.flatScreenTV') },
+        { icon: <FaSnowflake />, name: t('rooms.airConditioning') },
+      ],
+      size: '60m²',
+      maxGuests: 5,
+      bedType: `2 ${t('rooms.bedQueen')}`,
+      view: t('rooms.parkView'),
+      additionalFeatures: [
+        t('rooms.miniFridge'),
+        t('rooms.smallKitchen'),
+        t('rooms.workDesk'),
+        t('rooms.greenBalcony'),
+      ],
+    },
+    5: {
+      name: t('rooms.room5Name'),
+      price: '2.500.000đ',
+      image: '/images/simp-room.jpg',
+      description: t('rooms.room5Description'),
+      amenities: [
+        { icon: <FaBed />, name: t('rooms.bedSingle') },
+        { icon: <FaWifi />, name: t('rooms.highSpeedWifi') },
+        { icon: <FaTv />, name: t('rooms.flatScreenTV') },
+        { icon: <FaSnowflake />, name: t('rooms.airConditioning') },
+      ],
+      size: '20m²',
+      maxGuests: 2,
+      bedType: t('rooms.bedSingle'),
+      view: t('rooms.seaView'),
+      additionalFeatures: [
+        t('rooms.standingShower'),
+        t('rooms.dressingMirror'),
+        t('rooms.privateBalcony'),
+      ],
+    },
+    6: {
+      name: t('rooms.room6Name'),
+      price: '7.500.000đ',
+      image: '/images/royal-room.jpg',
+      description: t('rooms.room6Description'),
+      amenities: [
+        { icon: <FaBed />, name: t('rooms.bedKingSize') },
+        { icon: <FaWifi />, name: t('rooms.highSpeedWifi') },
+        { icon: <FaTv />, name: t('rooms.flatScreenTV') },
+        { icon: <FaSnowflake />, name: t('rooms.airConditioning') },
+      ],
+      size: '50m²',
+      maxGuests: 3,
+      bedType: t('rooms.bedKingSize'),
+      view: t('rooms.cityView'),
+      additionalFeatures: [
+        t('rooms.bathtub'),
+        t('rooms.premiumMinibar'),
+        t('rooms.roomService247'),
+        t('rooms.safeBox'),
+      ],
+    },
   };
 
   const room = roomId ? rooms[roomId] : null;
+
+  const handleBookNow = () => {
+    if (room) {
+      const roomData = {
+        name: room.name,
+        price: room.price,
+        image: room.image,
+      };
+      localStorage.setItem('selectedRoomData', JSON.stringify(roomData));
+      router.push('/users/booking');
+    }
+  };
 
   if (!isClient || !room) {
     return null;
@@ -112,7 +211,7 @@ export default function RoomInformationPage() {
             <FaUser />
           </Link>
           <Link href="/users/booking" className={styles.bookNowBtn}>
-            {t('đặt phòng')}
+            {t('rooms.booking')}
           </Link>
         </div>
       </nav>
@@ -125,14 +224,14 @@ export default function RoomInformationPage() {
           </div>
           <div className={styles.roomOverview}>
             <h1>{room.name}</h1>
-            <p className={styles.price}>{room.price} / đêm</p>
+            <p className={styles.price}>{room.price} {t('rooms.perNight')}</p>
             <p className={styles.description}>{room.description}</p>
           </div>
         </div>
 
         <div className={styles.roomDetails}>
           <section className={styles.amenities}>
-            <h2>Tiện Nghi</h2>
+            <h2>{t('rooms.amenities')}</h2>
             <div className={styles.amenitiesGrid}>
               {room.amenities.map((amenity: Amenity, index: number) => (
                 <div key={index} className={styles.amenityItem}>
@@ -144,25 +243,25 @@ export default function RoomInformationPage() {
           </section>
 
           <section className={styles.specifications}>
-            <h2>Thông Số Phòng</h2>
+            <h2>{t('rooms.roomSpecs')}</h2>
             <div className={styles.specGrid}>
               <div className={styles.specItem}>
-                <strong>Diện tích:</strong> {room.size}
+                <strong>{t('rooms.size')}:</strong> {room.size}
               </div>
               <div className={styles.specItem}>
-                <strong>Số khách tối đa:</strong> {room.maxGuests} người
+                <strong>{t('rooms.maxGuests')}:</strong> {room.maxGuests} {t('rooms.people')}
               </div>
               <div className={styles.specItem}>
-                <strong>Loại giường:</strong> {room.bedType}
+                <strong>{t('rooms.bedType')}:</strong> {room.bedType}
               </div>
               <div className={styles.specItem}>
-                <strong>Hướng nhìn:</strong> {room.view}
+                <strong>{t('rooms.view')}:</strong> {room.view}
               </div>
             </div>
           </section>
 
           <section className={styles.additionalFeatures}>
-            <h2>Tính Năng Bổ Sung</h2>
+            <h2>{t('rooms.additionalFeatures')}</h2>
             <ul className={styles.featuresList}>
               {room.additionalFeatures.map((feature: string, index: number) => (
                 <li key={index}>{feature}</li>
@@ -171,9 +270,9 @@ export default function RoomInformationPage() {
           </section>
 
           <div className={styles.bookingActions}>
-            <Link href={`/users/booking`} className={styles.bookButton}>
-              Đặt Phòng Ngay
-            </Link>
+            <button onClick={handleBookNow} className={styles.bookButton}>
+              {t('rooms.bookNow')}
+            </button>
           </div>
         </div>
       </main>
@@ -181,11 +280,42 @@ export default function RoomInformationPage() {
       {/* Footer */}
       <footer className={styles.footer}>
         <div className={styles.footerContent}>
-          <div className={styles.footerLogo}>
-            <Image src="/images/hotel-logo.png" alt="Logo Khách sạn" width={150} height={60} />
+          <div className={styles.footerLeft}>
+            <h3>{t('about.subscribe')}</h3>
+            <div className={styles.subscribeForm}>
+              <input type="email" placeholder={t('about.subscribePlaceholder')} />
+              <button className={styles.subscribeButton}>{t('about.subscribeButton')}</button>
+            </div>
           </div>
-          <div className={styles.copyright}>{t('about.copyright')}</div>
+
+          <div className={styles.footerCenter}>
+            <Image src="/images/logo.png" alt={t('about.hotelLogo')} width={150} height={60} />
+          </div>
+
+          <div className={styles.footerRight}>
+            <div className={styles.footerLinks}>
+              <div className={styles.linkGroup}>
+                <h4>{t('about.footerAbout')}</h4>
+                <Link href="/location">{t('about.location')}</Link>
+              </div>
+
+              <div className={styles.linkGroup}>
+                <h4>{t('about.support')}</h4>
+                <Link href="/faq">{t('about.faq')}</Link>
+                <Link href="/terms">{t('about.terms')}</Link>
+                <Link href="/privacy">{t('about.privacy')}</Link>
+              </div>
+
+              <div className={styles.linkGroup}>
+                <h4>{t('about.downloadApp')}</h4>
+                <Link href="/services">{t('about.services')}</Link>
+                <Link href="/careers">{t('about.careers')}</Link>
+                <Link href="/book">{t('about.howToBook')}</Link>
+              </div>
+            </div>
+          </div>
         </div>
+        <div className={styles.copyright}>{t('about.copyright')}</div>
       </footer>
     </div>
   );
