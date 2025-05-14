@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { Suspense } from 'react';
 import LoginForm from '../../app/components/logsign/LoginForm';
 import './page.css';
 
@@ -7,7 +7,9 @@ const LoginPage: React.FC = () => {
   return (
     <div className="login-container">
       <div className="form-wrapper">
-        <LoginForm />
+        <Suspense fallback={<div>Đang tải...</div>}>
+          <LoginForm />
+        </Suspense>
       </div>
       <div className="image-section">
         <h2>Chào mừng đến với Passion Horizon</h2>

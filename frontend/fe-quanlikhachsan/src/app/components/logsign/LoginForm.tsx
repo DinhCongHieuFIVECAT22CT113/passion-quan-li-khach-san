@@ -51,7 +51,7 @@ const LoginForm: React.FC = () => {
           if (redirectUrl) {
             router.push(redirectUrl);
           } else {
-            router.push('/home');
+            router.push('/users/home');
           }
         } else {
           const errorData = await response.json();
@@ -100,7 +100,7 @@ const LoginForm: React.FC = () => {
     <div className="form-section">
       <button 
         className="back-btn" 
-        onClick={() => router.push('/home')}
+        onClick={() => router.push('/users/home')}
       >
         ×
       </button>
