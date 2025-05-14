@@ -17,15 +17,7 @@ const nextConfig = {
         'localhost',
       ],
     },
-    // Cấu hình API rewrites để chuyển tiếp request đến backend API
-    async rewrites() {
-      return [
-        {
-          source: '/api/:path*',
-          destination: 'https://localhost:7181/api/:path*' // URL của backend API
-        }
-      ]
-    }
+    // Không sử dụng rewrites vì chúng ta sẽ gọi trực tiếp đến backend API
   };
   
   module.exports = nextConfig;

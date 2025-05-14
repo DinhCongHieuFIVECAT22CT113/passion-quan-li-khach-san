@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import './logsign.css';
 import { loginUser } from '../../../lib/api';
+import { API_BASE_URL } from '../../../lib/config';
 
 const LoginForm: React.FC = () => {
   const [userName, setUserName] = useState('');
@@ -22,7 +23,7 @@ const LoginForm: React.FC = () => {
 
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectUrl = searchParams.get('redirectUrl');
+  const redirectUrl = searchParams?.get('redirectUrl') || '';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,8 +44,13 @@ const LoginForm: React.FC = () => {
       setLoginError('');
       
       try {
-        // Gọi API đăng nhập thực từ backend
+        // Gọi API đăng nhập trực tiếp đến backend
+        console.log(`Đang thử đăng nhập với tài khoản: ${userName}`);
+        console.log(`URL backend: ${API_BASE_URL}/Auth/Đăng nhập`);
+        
         const userData = await loginUser({ userName, password });
+        
+        console.log('Đăng nhập thành công, dữ liệu nhận được:', userData);
         
         // Lưu token vào localStorage
         localStorage.setItem('token', userData.token);
@@ -52,8 +58,6 @@ const LoginForm: React.FC = () => {
         localStorage.setItem('userRole', userData.maRole || '');
         localStorage.setItem('userId', userData.maNguoiDung);
         
-        console.log('Đăng nhập thành công', userData);
-
         // Điều hướng người dùng
         if (redirectUrl) {
           router.push(redirectUrl);
@@ -69,7 +73,23 @@ const LoginForm: React.FC = () => {
         }
       } catch (error) {
         console.error('Lỗi khi đăng nhập:', error);
-        setLoginError(error instanceof Error ? error.message : 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
+        let errorMessage = '';
+        
+        if (error instanceof Error) {
+          errorMessage = error.message;
+          
+          // Kiểm tra lỗi Failed to fetch để hiển thị thông báo cụ thể hơn
+          if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+            errorMessage = `Không thể kết nối đến server backend tại ${API_BASE_URL}. Vui lòng kiểm tra:
+            1. Server backend đã chạy chưa
+            2. URL (${API_BASE_URL}) có chính xác không
+            3. CORS đã được cấu hình đúng chưa`;
+          }
+        } else {
+          errorMessage = 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin và kết nối đến server.';
+        }
+        
+        setLoginError(`Lỗi: ${errorMessage}`);
       } finally {
         setIsLoading(false);
       }

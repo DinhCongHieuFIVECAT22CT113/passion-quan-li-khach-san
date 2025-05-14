@@ -7,6 +7,7 @@ import { FaStar, FaWifi, FaTv, FaSnowflake, FaBath, FaUser } from 'react-icons/f
 import styles from './styles.module.css';
 import { getRooms, getRoomTypes } from '../../../lib/api';
 import { Room, RoomType } from '../../../types/auth';
+import { API_BASE_URL } from '../../../lib/config';
 
 export default function RoomsPage() {
   const [roomTypes, setRoomTypes] = useState<RoomType[]>([]);
@@ -21,11 +22,29 @@ export default function RoomsPage() {
       setLoading(true);
       try {
         // Gọi API lấy danh sách loại phòng từ backend
+        console.log(`Đang gọi API lấy danh sách loại phòng từ: ${API_BASE_URL}/LoaiPhong`);
         const data = await getRoomTypes();
         setRoomTypes(data || []);
+        console.log('Dữ liệu loại phòng nhận được:', data);
       } catch (err) {
         console.error('Lỗi khi lấy danh sách phòng:', err);
-        setError('Không thể tải danh sách phòng. Vui lòng thử lại sau.');
+        let errorMessage = '';
+        
+        if (err instanceof Error) {
+          errorMessage = err.message;
+          
+          // Kiểm tra lỗi Failed to fetch để hiển thị thông báo cụ thể hơn
+          if (errorMessage.includes('Failed to fetch') || errorMessage.includes('NetworkError')) {
+            errorMessage = `Không thể kết nối đến server backend tại ${API_BASE_URL}. Vui lòng kiểm tra:
+            1. Server backend đã chạy chưa
+            2. URL (${API_BASE_URL}) có chính xác không
+            3. CORS đã được cấu hình đúng chưa`;
+          }
+        } else {
+          errorMessage = 'Không thể tải danh sách phòng';
+        }
+        
+        setError(`Lỗi kết nối đến server backend: ${errorMessage}`);
       } finally {
         setLoading(false);
       }
