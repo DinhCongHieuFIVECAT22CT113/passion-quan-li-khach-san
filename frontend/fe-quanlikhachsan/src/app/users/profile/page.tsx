@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, ChangeEvent, FC } from 'react';
+import AuthCheck from '../../../app/components/auth/AuthCheck';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -14,7 +15,14 @@ import { useLanguage } from '../../../app/components/profile/LanguageContext';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../../app/i18n';
 
-const ProfilePage: React.FC = () => {
+interface Language {
+  id: string;
+  code: string;
+  name: string;
+  status: string;
+}
+
+const ProfilePage: FC = () => {
   const router = useRouter();
   const { t, i18n: i18nInstance } = useTranslation();
   const { languages, selectedLanguage, setSelectedLanguage } = useLanguage();
@@ -182,161 +190,169 @@ const ProfilePage: React.FC = () => {
   // Tránh render nội dung phụ thuộc vào ngôn ngữ trước khi client mount
   if (!isClient) {
     return (
-      <div className={styles.loadingContainer}>
-        <div className={styles.loadingSpinner} />
-        <p>Loading...</p>
-      </div>
+      <AuthCheck>
+        <div className={styles.loadingContainer}>
+          <div className={styles.loadingSpinner} />
+          <p>Loading...</p>
+        </div>
+      </AuthCheck>
     );
   }
 
   if (isLoading) {
     return (
-      <div className={styles.loadingContainer}>
-        <div className={styles.loadingSpinner} />
-        <p>{t('profile.loading')}</p>
-      </div>
+      <AuthCheck>
+        <div className={styles.loadingContainer}>
+          <div className={styles.loadingSpinner} />
+          <p>{t('profile.loading')}</p>
+        </div>
+      </AuthCheck>
     );
   }
 
   if (!userInfo) {
     return (
-      <div className={styles.loadingContainer}>
-        <p>{t('profile.noUserData')}</p>
-      </div>
+      <AuthCheck>
+        <div className={styles.loadingContainer}>
+          <p>{t('profile.noUserData')}</p>
+        </div>
+      </AuthCheck>
     );
   }
 
   return (
-    <div className={styles.container}>
-      <nav className={styles.nav}>
-        <div className={styles.navLeft}>
-          <Link href="/">
-            <Image src="/images/logo.png" alt="Logo" width={120} height={40} />
-          </Link>
-        </div>
-        <div className={styles.navCenter}>
-          <Link href="/users/home">{t('profile.home')}</Link>
-          <Link href="/users/about">{t('profile.about')}</Link>
-          <Link href="/users/explore">{t('profile.explore')}</Link>
-          <Link href="/users/rooms">{t('profile.rooms')}</Link>
-        </div>
-        <div className={styles.navRight}>
-          <button onClick={handleLogout} className={styles.logoutBtn}>
-            {t('profile.logout')}
-          </button>
-        </div>
-      </nav>
-
-      <main className={styles.main}>
-        <div className={styles.profileCard}>
-          <div className={styles.profileHeader}>
-            <h1>{t('profile.title')}</h1>
-            <button onClick={() => setShowAvatarModal(true)} className={styles.editButton}>
-              {t('profile.changeAvatar')}
+    <AuthCheck>
+      <div className={styles.container}>
+        <nav className={styles.nav}>
+          <div className={styles.navLeft}>
+            <Link href="/">
+              <Image src="/images/logo.png" alt="Logo" width={120} height={40} />
+            </Link>
+          </div>
+          <div className={styles.navCenter}>
+            <Link href="/users/home">{t('profile.home')}</Link>
+            <Link href="/users/about">{t('profile.about')}</Link>
+            <Link href="/users/explore">{t('profile.explore')}</Link>
+            <Link href="/users/rooms">{t('profile.rooms')}</Link>
+          </div>
+          <div className={styles.navRight}>
+            <button onClick={handleLogout} className={styles.logoutBtn}>
+              {t('profile.logout')}
             </button>
           </div>
+        </nav>
 
-          <div className={styles.profileContent}>
-            <div className={styles.avatarSection}>
-              <div className={styles.avatarWrapper}>
-                <Image
-                  src={avatarSrc || '/default-avatar.png'}
-                  alt="Ảnh đại diện"
-                  className={styles.avatar}
-                  width={150}
-                  height={150}
+        <main className={styles.main}>
+          <div className={styles.profileCard}>
+            <div className={styles.profileHeader}>
+              <h1>{t('profile.title')}</h1>
+              <button onClick={() => setShowAvatarModal(true)} className={styles.editButton}>
+                {t('profile.changeAvatar')}
+              </button>
+            </div>
+
+            <div className={styles.profileContent}>
+              <div className={styles.avatarSection}>
+                <div className={styles.avatarWrapper}>
+                  <Image
+                    src={avatarSrc || '/default-avatar.png'}
+                    alt="Ảnh đại diện"
+                    className={styles.avatar}
+                    width={150}
+                    height={150}
+                  />
+                </div>
+              </div>
+
+              <div className={styles.infoSection}>
+                <div className={styles.infoGroup}>
+                  <label>{t('profile.language')}</label>
+                  <div className={styles.dropdownContainer}>
+                    <button onClick={toggleLanguageDropdown} className={styles.dropdownButton}>
+                      {languages.find((lang) => lang.code === selectedLanguage)?.name || t('profile.selectLanguage')}
+                      <span className={styles.dropdownArrow}>▼</span>
+                    </button>
+                    {isLanguageDropdownOpen && (
+                      <div className={styles.dropdownMenu}>
+                        {languages
+                          .filter((lang) => lang.status === 'Đang sử dụng')
+                          .map((lang) => (
+                            <button
+                              key={lang.id}
+                              onClick={() => handleLanguageChange(lang.code)}
+                              className={styles.dropdownItem}
+                            >
+                              {lang.name}
+                            </button>
+                          ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <PersonalInfoForm
+                  onSave={(data) =>
+                    setUserInfo((prev) => ({
+                      ...prev,
+                      name: `${data.hokh} ${data.tenkh}`,
+                    }))
+                  }
+                  onChangePassword={() => setShowChangePasswordModal(true)}
+                  onPaymentOptions={() => setShowPaymentOptionsModal(true)}
                 />
               </div>
             </div>
 
-            <div className={styles.infoSection}>
-              <div className={styles.infoGroup}>
-                <label>{t('profile.language')}</label>
-                <div className={styles.dropdownContainer}>
-                  <button onClick={toggleLanguageDropdown} className={styles.dropdownButton}>
-                    {languages.find((lang) => lang.code === selectedLanguage)?.name || t('profile.selectLanguage')}
-                    <span className={styles.dropdownArrow}>▼</span>
-                  </button>
-                  {isLanguageDropdownOpen && (
-                    <div className={styles.dropdownMenu}>
-                      {languages
-                        .filter((lang) => lang.status === 'Đang sử dụng')
-                        .map((lang) => (
-                          <button
-                            key={lang.id}
-                            onClick={() => handleLanguageChange(lang.code)}
-                            className={styles.dropdownItem}
-                          >
-                            {lang.name}
-                          </button>
-                        ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-              <PersonalInfoForm
-                onSave={(data) =>
-                  setUserInfo((prev) => ({
-                    ...prev,
-                    name: `${data.hokh} ${data.tenkh}`,
-                  }))
-                }
-                onChangePassword={() => setShowChangePasswordModal(true)}
-                onPaymentOptions={() => setShowPaymentOptionsModal(true)}
-              />
+            <div className={styles.transactionSection}>
+              <h2 className={styles.sectionTitle}>{t('profile.transactionHistory')}</h2>
+              <TransactionHistory transactions={transactionHistory} />
             </div>
           </div>
+        </main>
 
-          <div className={styles.transactionSection}>
-            <h2 className={styles.sectionTitle}>{t('profile.transactionHistory')}</h2>
-            <TransactionHistory transactions={transactionHistory} />
-          </div>
-        </div>
-      </main>
-
-      {/* Modals */}
-      <ChangePasswordModal
-        isOpen={showChangePasswordModal}
-        onClose={() => setShowChangePasswordModal(false)}
-        currentPassword={currentPassword}
-        newPassword={newPassword}
-        confirmNewPassword={confirmNewPassword}
-        passwordErrors={passwordErrors}
-        onCurrentPasswordChange={(e) => setCurrentPassword(e.target.value)}
-        onNewPasswordChange={(e) => setNewPassword(e.target.value)}
-        onConfirmNewPasswordChange={(e) => setConfirmNewPassword(e.target.value)}
-        onChangePassword={handleChangePassword}
-        showSuccess={showChangePasswordSuccess}
-      />
-      {showPaymentOptionsModal && <PaymentOptionsModal onClose={() => setShowPaymentOptionsModal(false)} />}
-      {showAvatarModal && (
-        <AvatarUploadModal
-          onClose={() => setShowAvatarModal(false)}
-          onAvatarSelected={(src) => {
-            setAvatarSrc(src);
-            fetch('/api/profile', {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                action: 'updateAvatar',
-                imageUrl: src,
-              }),
-            })
-              .then((res) => res.json())
-              .then((data) => {
-                if (!data.success) {
-                  console.error('Error updating avatar:', data.message);
-                  setAvatarSrc(null);
-                }
-              })
-              .catch((error) => {
-                console.error('Error updating avatar:', error);
-                setAvatarSrc(null);
-              });
-          }}
+        {/* Modals */}
+        <ChangePasswordModal
+          isOpen={showChangePasswordModal}
+          onClose={() => setShowChangePasswordModal(false)}
+          currentPassword={currentPassword}
+          newPassword={newPassword}
+          confirmNewPassword={confirmNewPassword}
+          passwordErrors={passwordErrors}
+          onCurrentPasswordChange={(e) => setCurrentPassword(e.target.value)}
+          onNewPasswordChange={(e) => setNewPassword(e.target.value)}
+          onConfirmNewPasswordChange={(e) => setConfirmNewPassword(e.target.value)}
+          onChangePassword={handleChangePassword}
+          showSuccess={showChangePasswordSuccess}
         />
-      )}
-    </div>
+        {showPaymentOptionsModal && <PaymentOptionsModal onClose={() => setShowPaymentOptionsModal(false)} />}
+        {showAvatarModal && (
+          <AvatarUploadModal
+            onClose={() => setShowAvatarModal(false)}
+            onAvatarSelected={(src) => {
+              setAvatarSrc(src);
+              fetch('/api/profile', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  action: 'updateAvatar',
+                  imageUrl: src,
+                }),
+              })
+                .then((res) => res.json())
+                .then((data) => {
+                  if (!data.success) {
+                    console.error('Error updating avatar:', data.message);
+                    setAvatarSrc(null);
+                  }
+                })
+                .catch((error) => {
+                  console.error('Error updating avatar:', error);
+                  setAvatarSrc(null);
+                });
+            }}
+          />
+        )}
+      </div>
+    </AuthCheck>
   );
 };
 

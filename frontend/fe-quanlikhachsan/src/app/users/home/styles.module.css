@@ -152,15 +152,14 @@
 
 /* Booking Section */
 .bookingSection {
-  margin-top: -100px;
-  padding: 0 5%;
+  padding: 2rem 5%;
   position: relative;
   z-index: 2;
 }
 
 .bookingForm {
   max-width: 800px;
-  margin: -100px auto 0;
+  margin: 2rem auto;
   padding: 2rem;
   background: white;
   border-radius: 8px;
@@ -171,9 +170,10 @@
 
 .formContent {
   display: grid;
-  grid-template-columns: repeat(2, 1fr) 2fr auto;
+  grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
-  align-items: end;
+  align-items: start;
+  padding: 1rem;
 }
 
 .formGroup {
@@ -195,12 +195,14 @@
 }
 
 .guestGroup {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
+  grid-column: span 2;
 }
 
 .guestCounter {
-  flex: 1;
+  width: 100%;
 }
 
 .guestCounter label {
@@ -249,6 +251,9 @@
   font-size: 0.9rem;
   white-space: nowrap;
   height: fit-content;
+  grid-column: span 2;
+  margin-top: 1rem;
+  width: 100%;
 }
 
 .searchButton:hover {
@@ -257,8 +262,9 @@
 
 /* Services Section */
 .services {
-  padding: 2rem 5%;
+  padding: 4rem 5% 2rem;
   background: #f8f8f8;
+  margin-top: 2rem;
 }
 
 .sectionHeader {

@@ -116,28 +116,33 @@ export default function RoomsPage() {
             <div className={styles.roomImage}>
               <Image src={room.image} alt={room.name} fill style={{ objectFit: 'cover' }} />
             </div>
-            <div className={styles.roomInfo}>
-              <div className={styles.roomHeader}>
-                <h3>{room.name}</h3>
-                <span className={styles.availability}>
-                  {t('rooms.status')}: {room.availability}
-                </span>
-              </div>
-              <div className={styles.price}>{room.price}</div>
-              <div className={styles.amenities}>
-                {room.amenities.map((amenity, index) => (
-                  <span key={index} className={styles.amenity}>
-                    <Image
-                      src={`/images/${amenity.toLowerCase()}-icon.png`}
-                      alt={amenity}
-                      width={20}
-                      height={20}
-                    />
-                    {amenity}
+              <div className={styles.roomInfo}>
+                <div className={styles.roomHeader}>
+                  <h3>{room.name}</h3>
+                  <span className={styles.availability}>
+                    {t('rooms.status')}: {room.availability}
                   </span>
-                ))}
+                </div>
+                <div className={styles.price}>{room.price}</div>
+                <div className={styles.amenities}>
+                  {room.amenities.map((amenity, index) => (
+                    <span key={index} className={styles.amenity}>
+                      <Image
+                        src={`/images/${amenity.toLowerCase()}-icon.png`}
+                        alt={amenity}
+                        width={20}
+                        height={20}
+                      />
+                      {amenity}
+                    </span>
+                  ))}
+                </div>
+                <div className={styles.roomActions}>
+                  <Link href={`/users/roomsinformation?id=${room.id}`} className={styles.viewDetailsButton}>
+                    Xem thông tin phòng
+                  </Link>
+                </div>
               </div>
-            </div>
           </div>
         ))}
       </section>

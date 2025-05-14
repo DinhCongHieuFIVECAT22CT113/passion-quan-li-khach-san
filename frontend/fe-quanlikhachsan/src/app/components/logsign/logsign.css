@@ -1,312 +1,100 @@
-/* ===== Layout chính ===== */
-.container {
-  display: flex;
-  justify-content: center; 
-  align-items: center;     
-  min-height: 100vh;      
-  font-family: 'Segoe UI', sans-serif;
-  background-color: #f5f5f5;
-  position: relative;
-  overflow: auto;         
-}
-
 .form-section {
   width: 100%;
-  max-width: 500px;
-  padding: 40px 30px;
-  background: white;
-  border-radius: 15px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  z-index: 2;
+  max-width: 600px; /* Mở rộng gấp 1.5 lần từ 400px */
+  padding: 2.5rem;
+  position: relative;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.back-btn {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  background: none;
+  border: none;
+  font-size: 28px;
+  color: #8B7355;
+  cursor: pointer;
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  border-radius: 50%;
+}
+
+.back-btn:hover {
+  background: rgba(139, 115, 85, 0.1);
+  transform: scale(1.1);
 }
 
 .form-section h2 {
-  font-size: 60px;
-  font-weight: 600;
-  margin-bottom: 20px;
-  font-family: 'Playfair Display', serif;
-  color: #2c3e50; /* màu sang trọng */
   text-align: center;
-  letter-spacing: 1px;
-  position: relative;
+  color: #102c3e;
+  margin-bottom: 2.5rem;
+  font-size: 2rem;
+  font-weight: 600;
+  letter-spacing: -0.5px;
 }
 
-.form-section h2::after {
-  content: "";
-  display: block;
-  width: 60px;
-  height: 3px;
-  background-color: #3498db; /* màu nhấn nhẹ */
-  margin: 10px auto 0;
-  border-radius: 2px;
-}
-
-form {
+.form-section form {
   display: flex;
   flex-direction: column;
-  max-width: 400px;
-  margin: 0 auto;
-  width: 100%;
+  gap: 1.2rem;
 }
 
-label {
-  font-weight: 600;
-  margin-bottom: 5px;
-  color: #444;
-}
-
-input {
-  background-color: white;
-  color: #000000;
-  padding: 12px 15px;
-  margin-bottom: 15px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  border-color: #102c3e;
-  outline: none;
-  width: 100%;
-  box-sizing: border-box;
-  font-size: 14px;
-}
-
-/* ===== Tùy chọn: Ghi nhớ + Forgot password ===== */
-.options {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 14px;
-  margin-bottom: 15px;
-  width: 100%;
-}
-
-.options label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: normal;
-  margin: 0;
-  white-space: nowrap;
-}
-
-.options a {
-  color: #102c3e;
-  text-decoration: none;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-/* Điều chỉnh checkbox */
-.options input[type="checkbox"] {
-  margin: 0;
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-}
-
-/* ===== Nút chính ===== */
-.main-btn {
-  padding: 12px;
-  background-color: #0d2233;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  margin-bottom: 15px;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: 600;
-  width: 100%;
-}
-
-/* ===== OR ===== */
-.divider {
-  display: flex;
-  align-items: center;
-  text-align: center;
-  font-size: 20px;
-  color: #333;
-  margin: 10px 0;
-  margin-top: -10px;
+.form-section label {
+  color: #495057;
+  font-size: 0.95rem;
   font-weight: 500;
+  margin-bottom: 0.3rem;
 }
 
-.divider::before,
-.divider::after {
-  content: "";
-  flex: 1;
-  border-bottom: 2px solid #ccc;
-  margin: 0 10px;
-}
-
-/* ===== Google/FaceBook ===== */
-.google-btn, .facebook-btn {
-  padding: 12px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
+.form-section input[type="text"],
+.form-section input[type="password"],
+.form-section input[type="tel"] {
   width: 100%;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 10px;
-}
-
-.google-btn {
-  background-color: #e3f2fd;
-  color: #1a73e8;
-}
-
-.facebook-btn {
-  background-color: #1877f2;
-  color: white;
-}
-
-/* ===== Chân trang ===== */
-.footer-text {
-  font-size: 14px;
-  margin-top: 15px;
-  text-align: center;
-  color: #555;
-}
-
-.footer-text a {   
-  color: #ff0000;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-/* ===== Footer ===== */
-footer {
-  position: relative;
-  text-align: center;
-  font-size: 14px;
-  color: #000;
-  padding-top: 15px;
-  width: 100%;
-  margin-top: 20px;
-  z-index: 3;
-}
-
-footer::before {
-  content: '';
-  display: block;
-  width: 80%;
-  margin: 0 auto 15px auto;
-  border-top: 1px solid #ccc;
-}
-
-/* ===== Bên phải: Hình ảnh ===== */
-.image-section {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: white;
-  overflow: hidden;
-  z-index: 1;
-}
-
-.image-section::before {
-  content: '';
-  display: block;
-  width: 100%;
-  height: 100%;
-  background-image: url('/LogSig.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-}
-
-.error {
-  color: red;
-  font-size: 0.9rem;
-  margin-bottom: 8px;
-  margin-top: -15px;
-}
-
-/* Thông Báo Modal */
-.modal-overlay {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background-color: rgba(0,0,0,0.6);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 999;
-}
-
-.modal-box {
-  background: white;
-  border-radius: 10px;
-  width: 400px;
-  padding: 30px;
-  text-align: center;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 1.2rem;
-  margin-bottom: 10px;
-}
-
-.modal-header h2 {
-  font-family: 'Segoe UI Semibold', 'Segoe UI', sans-serif;
-  font-weight: 600;
-  font-size: 24px;
-  color: #102c3e;
-  margin: 0;
-}
-
-.modal-body {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.modal-body p {
-  margin-top: 5px;
-  margin-bottom: 10px;
+  padding: 0.9rem;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
   font-size: 1rem;
-  color: #333;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
+  color: #102c3e; /* Màu chữ rõ hơn */
 }
 
-.close-btn {
-  font-size: 1.5rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: #333;
-  transition: color 0.2s ease;
+.form-section input[type="text"]::placeholder,
+.form-section input[type="password"]::placeholder,
+.form-section input[type="tel"]::placeholder {
+  color: #a0a0a0; /* Màu placeholder nhẹ nhàng */
 }
 
-.close-btn:hover {
-  color: red;
+.form-section input[type="text"]:focus,
+.form-section input[type="password"]:focus,
+.form-section input[type="tel"]:focus {
+  border-color: #8B7355;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(139, 115, 85, 0.1);
+  outline: none;
 }
 
-/* ===== Layout cho các trường chia đôi ===== */
-.row-group {
-  display: flex;
-  gap: 15px;
-  width: 100%;
-}
-
-.half-width {
-  flex: 1;
-  min-width: 0; /* Ngăn chặn tràn nội dung */
-}
-
-/* Điều chỉnh lỗi cho các trường chia đôi */
-.row-group .error {
-  margin-top: -10px;
-  margin-bottom: 15px;
-}
-
-/* ===== Password Toggle ===== */
 .password-wrapper {
   position: relative;
   width: 100%;
@@ -314,22 +102,324 @@ footer::before {
 
 .toggle-password {
   position: absolute;
-  right: 10px;
-  top: 40%;
+  right: 12px;
+  top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
+  color: #8B7355;
   cursor: pointer;
-  color: #444;
-  font-size: 16px; /* Size for Font Awesome icons */
-  padding: 5px;
-  line-height: 1;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
 }
 
 .toggle-password:hover {
+  background: rgba(139, 115, 85, 0.1);
+}
+
+.options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  margin: 0.5rem 0;
+}
+
+.options label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.options input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #8B7355;
+}
+
+.options a {
+  color: #8B7355;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.options a:hover {
+  color: #6F5B3E;
+  text-decoration: underline;
+}
+
+.main-btn {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, #8B7355, #6F5B3E);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 0.5rem;
+}
+
+.main-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 115, 85, 0.3);
+}
+
+.main-btn:active {
+  transform: translateY(0);
+}
+
+.main-btn:disabled {
+  background: #cccccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.divider {
+  text-align: center;
+  margin: 1.5rem 0;
+  color: #6c757d;
+  position: relative;
+  font-size: 0.9rem;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 45%;
+  height: 1px;
+  background: #dee2e6;
+}
+
+.divider::before {
+  left: 0;
+}
+
+.divider::after {
+  right: 0;
+}
+
+.google-btn,
+.facebook-btn {
+  width: 100%;
+  padding: 0.9rem;
+  margin-bottom: 12px;
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.google-btn {
+  background-color: #DB4437;
+}
+
+.facebook-btn {
+  background-color: #3b5998;
+}
+
+.google-btn:hover,
+.facebook-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.google-btn:active,
+.facebook-btn:active {
+  transform: translateY(0);
+}
+
+.footer-text {
+  text-align: center;
+  margin-top: 2rem;
+  font-size: 0.95rem;
+  color: #495057;
+}
+
+.footer-text a {
+  color: #8B7355;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.footer-text a:hover {
+  color: #6F5B3E;
+  text-decoration: underline;
+}
+
+footer {
+  text-align: center;
+  margin-top: 2rem;
+  color: #6c757d;
+  font-size: 0.85rem;
+}
+
+.error {
+  color: #dc3545;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.modal-box {
+  background: white;
+  border-radius: 20px;
+  width: 90%;
+  max-width: 400px;
+  padding: 2rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
   color: #102c3e;
 }
 
-.password-wrapper input {
-  padding-right: 40px; /* Space for the icon */
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  background: rgba(108, 117, 125, 0.1);
+  color: #495057;
+}
+
+.modal-body {
+  color: #495057;
+}
+
+.modal-body input {
+  width: 100%;
+  padding: 0.9rem;
+  margin: 1rem 0;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  background: #f8f9fa;
+}
+
+.modal-body input:focus {
+  border-color: #8B7355;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(139, 115, 85, 0.1);
+  outline: none;
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Signup Form Specific Styles */
+.row-group {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.half-width {
+  flex: 1;
+  min-width: 0;
+}
+
+.half-width input {
+  width: 100%;
+}
+
+@media (max-width: 480px) {
+  .row-group {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .half-width {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-section {
+    padding: 2rem;
+    margin: 1rem;
+    border-radius: 16px;
+  }
+
+  .options {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+
+  .modal-box {
+    margin: 1rem;
+    padding: 1.5rem;
+  }
 }
