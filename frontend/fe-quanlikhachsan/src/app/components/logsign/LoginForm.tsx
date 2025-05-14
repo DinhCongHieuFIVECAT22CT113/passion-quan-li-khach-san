@@ -69,6 +69,7 @@ const LoginForm: React.FC = () => {
             router.push('/employe/dashboard');
           } else {
             router.push('/users/home');
+            router.push('/users/home');
           }
         }
       } catch (error) {
@@ -130,7 +131,7 @@ const LoginForm: React.FC = () => {
     <div className="form-section">
       <button 
         className="back-btn" 
-        onClick={() => router.push('/home')}
+        onClick={() => router.push('/users/home')}
       >
         ×
       </button>
