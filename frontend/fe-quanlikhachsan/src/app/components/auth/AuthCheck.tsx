@@ -2,27 +2,64 @@
 
 import { useEffect, ReactNode, FC, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { getUserInfo, APP_CONFIG } from '../../../lib/config';
 
 interface AuthCheckProps {
   children: ReactNode;
+  requireAuth?: boolean;
+  requiredRoles?: string[];
 }
 
-const AuthCheck: FC<AuthCheckProps> = ({ children }) => {
+const AuthCheck: FC<AuthCheckProps> = ({ 
+  children, 
+  requireAuth = true,
+  requiredRoles = []
+}) => {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) {
+    const userInfo = getUserInfo();
+    
+    if (requireAuth && !userInfo?.isAuthenticated) {
       const currentPath = window.location.pathname + window.location.search;
-      router.push(`/login?redirectUrl=${encodeURIComponent(currentPath)}`);
+      router.push(`${APP_CONFIG.routes.login}?redirectUrl=${encodeURIComponent(currentPath)}`);
+    } else if (requireAuth && requiredRoles.length > 0) {
+      // Kiểm tra quyền truy cập
+      const hasRequiredRole = userInfo?.userRole && requiredRoles.includes(userInfo.userRole);
+      
+      if (!hasRequiredRole) {
+        // Chuyển hướng dựa vào role
+        if (userInfo?.isAdmin) {
+          router.push(APP_CONFIG.routes.adminDashboard);
+        } else if (userInfo?.isEmployee) {
+          router.push(APP_CONFIG.routes.employeeDashboard);
+        } else {
+          router.push(APP_CONFIG.routes.home);
+        }
+      } else {
+        setIsAuthorized(true);
+      }
     } else {
+      setIsAuthorized(true);
+    }
+    
+    // Nếu không yêu cầu xác thực hoặc đã xác thực thành công
+    if (!requireAuth || userInfo?.isAuthenticated) {
       setIsAuthenticated(true);
     }
-  }, [router]);
+    
+    setIsLoading(false);
+  }, [router, requireAuth, requiredRoles]);
 
-  // Không render children cho đến khi xác thực xong
-  if (!isAuthenticated) {
+  // Không render children cho đến khi kiểm tra xác thực xong
+  if (isLoading) {
+    return null;
+  }
+
+  if (requireAuth && (!isAuthenticated || !isAuthorized)) {
     return null;
   }
 

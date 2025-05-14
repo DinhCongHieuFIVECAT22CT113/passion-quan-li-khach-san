@@ -14,8 +14,18 @@ const nextConfig = {
         'via.placeholder.com',
         'raw.githubusercontent.com',
         'ui-avatars.com',
+        'localhost',
       ],
     },
+    // Cấu hình API rewrites để chuyển tiếp request đến backend API
+    async rewrites() {
+      return [
+        {
+          source: '/api/:path*',
+          destination: 'https://localhost:7181/api/:path*' // URL của backend API
+        }
+      ]
+    }
   };
   
   module.exports = nextConfig;

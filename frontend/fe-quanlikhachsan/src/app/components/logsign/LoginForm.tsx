@@ -4,6 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import './logsign.css';
+import { loginUser } from '../../../lib/api';
 
 const LoginForm: React.FC = () => {
   const [userName, setUserName] = useState('');
@@ -17,6 +18,7 @@ const LoginForm: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState('');
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -38,28 +40,36 @@ const LoginForm: React.FC = () => {
 
     if (Object.keys(newErrors).length === 0) {
       setIsLoading(true);
+      setLoginError('');
+      
       try {
-        const response = await fetch('/api/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userName, password }),
-        });
+        // Gọi API đăng nhập thực từ backend
+        const userData = await loginUser({ userName, password });
+        
+        // Lưu token vào localStorage
+        localStorage.setItem('token', userData.token);
+        localStorage.setItem('userName', userData.userName);
+        localStorage.setItem('userRole', userData.maRole || '');
+        localStorage.setItem('userId', userData.maNguoiDung);
+        
+        console.log('Đăng nhập thành công', userData);
 
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Đăng nhập thành công', data);
-          if (redirectUrl) {
-            router.push(redirectUrl);
-          } else {
-            router.push('/home');
-          }
+        // Điều hướng người dùng
+        if (redirectUrl) {
+          router.push(redirectUrl);
         } else {
-          const errorData = await response.json();
-          window.alert(errorData.message || 'Đăng nhập thất bại');
+          // Điều hướng dựa trên role
+          if (userData.maRole === 'R01') {
+            router.push('/admin/dashboard');
+          } else if (userData.maRole === 'R02' || userData.maRole === 'R03') {
+            router.push('/employe/dashboard');
+          } else {
+            router.push('/users/home');
+          }
         }
       } catch (error) {
         console.error('Lỗi khi đăng nhập:', error);
-        window.alert('Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại sau.');
+        setLoginError(error instanceof Error ? error.message : 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin.');
       } finally {
         setIsLoading(false);
       }
@@ -105,6 +115,10 @@ const LoginForm: React.FC = () => {
         ×
       </button>
       <h2>Đăng Nhập</h2>
+
+      {loginError && (
+        <div className="error-message alert">{loginError}</div>
+      )}
 
       <form onSubmit={handleSubmit}>
         <label>Tên tài khoản</label>

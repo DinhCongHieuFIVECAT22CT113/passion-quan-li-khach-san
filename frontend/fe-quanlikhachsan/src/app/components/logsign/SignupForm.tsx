@@ -1,7 +1,9 @@
 'use client';
 import React, { useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useRouter } from 'next/navigation';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { registerUser } from '../../../lib/api';
 import './logsign.css';
 
 const SignupForm: React.FC = () => {
@@ -9,233 +11,240 @@ const SignupForm: React.FC = () => {
     userName: '',
     password: '',
     confirmPassword: '',
+    hoKh: '',
+    tenKh: '',
     email: '',
-    hokh: '',
-    tenkh: '',
     soCccd: '',
-    soDienThoai: ''
+    soDienThoai: '',
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [showModal, setShowModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [signupError, setSignupError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
-  const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  const validatePassword = (password: string) => /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/.test(password);
-  const validatePhone = (phone: string) => /^\d+$/.test(phone);
-  const validateCCCD = (cccd: string) => /^\d{12}$/.test(cccd);
+  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
+
+    // Xóa lỗi khi người dùng bắt đầu nhập lại
+    if (errors[name]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+  };
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    // Kiểm tra các trường bắt buộc
+    if (!formData.userName.trim()) newErrors.userName = 'Tên tài khoản không được để trống';
+    if (!formData.password.trim()) newErrors.password = 'Mật khẩu không được để trống';
+    if (!formData.confirmPassword.trim()) newErrors.confirmPassword = 'Xác nhận mật khẩu không được để trống';
+    if (!formData.hoKh.trim()) newErrors.hoKh = 'Họ không được để trống';
+    if (!formData.tenKh.trim()) newErrors.tenKh = 'Tên không được để trống';
+    if (!formData.email.trim()) newErrors.email = 'Email không được để trống';
+    if (!formData.soCccd.trim()) newErrors.soCccd = 'Số CCCD/CMND không được để trống';
+    if (!formData.soDienThoai.trim()) newErrors.soDienThoai = 'Số điện thoại không được để trống';
+
+    // Kiểm tra mật khẩu khớp nhau
+    if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = 'Mật khẩu xác nhận không khớp';
+    }
+
+    // Kiểm tra định dạng email
+    if (formData.email && !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email)) {
+      newErrors.email = 'Email không hợp lệ';
+    }
+
+    // Kiểm tra định dạng số CCCD
+    if (formData.soCccd && !/^\d{12}$/.test(formData.soCccd)) {
+      newErrors.soCccd = 'Số CCCD phải có 12 chữ số';
+    }
+
+    // Kiểm tra định dạng số điện thoại
+    if (formData.soDienThoai && !/^0\d{9}$/.test(formData.soDienThoai)) {
+      newErrors.soDienThoai = 'Số điện thoại không hợp lệ (phải bắt đầu bằng số 0 và có 10 chữ số)';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newErrors: Record<string, string> = {};
+    setSignupError('');
+    setSuccessMessage('');
 
-    if (!formData.userName.trim()) {
-      newErrors.userName = 'Bắt buộc';
-    }
-
-    if (!validateEmail(formData.email)) {
-      newErrors.email = 'Email không hợp lệ.';
-    }
-
-    if (!validatePassword(formData.password)) {
-      newErrors.password = 'gồm chữ, số, ký tự đặc biệt';
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Mật khẩu không khớp';
-    }
-
-    if (!formData.hokh.trim()) {
-      newErrors.hokh = 'Bắt buộc';
-    }
-
-    if (!formData.tenkh.trim()) {
-      newErrors.tenkh = 'Bắt buộc';
-    }
-
-    if (!validateCCCD(formData.soCccd)) {
-      newErrors.soCccd = 'Số CCCD phải có 12 chữ số';
-    }
-
-    if (!validatePhone(formData.soDienThoai)) {
-      newErrors.soDienThoai = 'Bắt buộc';
-    }
-
-    setErrors(newErrors);
-
-    if (Object.keys(newErrors).length === 0) {
+    if (validateForm()) {
+      setIsLoading(true);
       try {
-        // Gửi dữ liệu đến backend
-        const response = await fetch('/api/signup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(formData)
-        });        
-
-        if (response.ok) {
-          setShowModal(true);
-        } else {
-          const errorData = await response.json();
-          throw new Error(errorData.message || 'Đăng ký thất bại');
-        }
+        // Gọi API đăng ký từ backend thực
+        const result = await registerUser(formData);
+        
+        setSuccessMessage('Đăng ký thành công! Vui lòng kiểm tra email để kích hoạt tài khoản.');
+        
+        // Reset form sau khi đăng ký thành công
+        setFormData({
+          userName: '',
+          password: '',
+          confirmPassword: '',
+          hoKh: '',
+          tenKh: '',
+          email: '',
+          soCccd: '',
+          soDienThoai: '',
+        });
+        
+        // Chuyển hướng đến trang đăng nhập sau 3 giây
+        setTimeout(() => {
+          router.push('/login');
+        }, 3000);
       } catch (error) {
-        setErrors({ submit: error instanceof Error ? error.message : 'Có lỗi xảy ra' });
+        console.error('Lỗi khi đăng ký:', error);
+        setSignupError(error instanceof Error ? error.message : 'Có lỗi xảy ra khi đăng ký. Vui lòng thử lại sau.');
+      } finally {
+        setIsLoading(false);
       }
     }
   };
 
   return (
     <div className="form-section">
+      <button 
+        className="back-btn" 
+        onClick={() => router.push('/home')}
+      >
+        ×
+      </button>
       <h2>Đăng Ký</h2>
+      
+      {signupError && (
+        <div className="error-message alert">{signupError}</div>
+      )}
+      
+      {successMessage && (
+        <div className="success-message alert">{successMessage}</div>
+      )}
+
       <form onSubmit={handleSubmit}>
-        {/* Tên đăng nhập */}
-        <label>Tên Tài Khoản</label>
-        <input
-          type="text"
-          name="userName"
-          value={formData.userName}
-          onChange={handleChange}
-          placeholder="Nhập tên tài khoản của bạn"
-        />
-        {errors.userName && <p className="error">{errors.userName}</p>}
-
-        {/* Email */}
-        <label>Email</label>
-        <input
-          type="text"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          placeholder="Ví dụ: yourname@example.com"
-        />
-        {errors.email && <p className="error">{errors.email}</p>}
-
-        {/* Mật khẩu và Xác nhận mật khẩu - chia đôi */}
-        <div className="row-group">
-          <div className="half-width">
-            <label>Mật khẩu</label>
-            <div className="password-wrapper">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Ít nhất 8 ký tự"
-              />
-              <button
-                type="button"
-                className="toggle-password"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
-              </button>
-            </div>
-            {errors.password && <p className="error">{errors.password}</p>}
-          </div>
-          <div className="half-width">
-            <label>Xác nhận mật khẩu</label>
-            <div className="password-wrapper">
-              <input
-                type={showConfirmPassword ? 'text' : 'password'}
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                placeholder="Nhập lại mật khẩu"
-              />
-              <button
-                type="button"
-                className="toggle-password"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                <FontAwesomeIcon icon={showConfirmPassword ? faEyeSlash : faEye} />
-              </button>
-            </div>
-            {errors.confirmPassword && <p className="error">{errors.confirmPassword}</p>}
-          </div>
-        </div>
-
-        {/* Họ và Tên - chia đôi */}
-        <div className="row-group">
-          <div className="half-width">
+        <div className="name-group">
+          <div className="form-group">
             <label>Họ</label>
             <input
               type="text"
-              name="hokh"
-              value={formData.hokh}
+              name="hoKh"
+              placeholder="Họ"
+              value={formData.hoKh}
               onChange={handleChange}
-              placeholder="Nhập họ của bạn"
             />
-            {errors.hokh && <p className="error">{errors.hokh}</p>}
+            {errors.hoKh && <p className="error">{errors.hoKh}</p>}
           </div>
-          <div className="half-width">
+          
+          <div className="form-group">
             <label>Tên</label>
             <input
               type="text"
-              name="tenkh"
-              value={formData.tenkh}
+              name="tenKh"
+              placeholder="Tên"
+              value={formData.tenKh}
               onChange={handleChange}
-              placeholder="Nhập tên của bạn"
             />
-            {errors.tenkh && <p className="error">{errors.tenkh}</p>}
+            {errors.tenKh && <p className="error">{errors.tenKh}</p>}
           </div>
         </div>
 
-        {/* Số CCCD và Số điện thoại - chia đôi */}
-        <div className="row-group">
-          <div className="half-width">
-            <label>Số CCCD/CMND</label>
-            <input
-              type="text"
-              name="soCccd"
-              value={formData.soCccd}
-              onChange={handleChange}
-              placeholder="12 chữ số"
-              maxLength={12}
-            />
-            {errors.soCccd && <p className="error">{errors.soCccd}</p>}
-          </div>
-          <div className="half-width">
-            <label>Số điện thoại</label>
-            <input
-              type="tel"
-              name="soDienThoai"
-              value={formData.soDienThoai}
-              onChange={handleChange}
-              placeholder="Nhập số điện thoại"
-            />
-            {errors.soDienThoai && <p className="error">{errors.soDienThoai}</p>}
-          </div>
+        <label>Tên tài khoản</label>
+        <input
+          type="text"
+          name="userName"
+          placeholder="Tạo tên tài khoản"
+          value={formData.userName}
+          onChange={handleChange}
+        />
+        {errors.userName && <p className="error">{errors.userName}</p>}
+
+        <label>Email</label>
+        <input
+          type="email"
+          name="email"
+          placeholder="Email của bạn"
+          value={formData.email}
+          onChange={handleChange}
+        />
+        {errors.email && <p className="error">{errors.email}</p>}
+
+        <label>Số CCCD/CMND</label>
+        <input
+          type="text"
+          name="soCccd"
+          placeholder="Nhập số CCCD/CMND"
+          value={formData.soCccd}
+          onChange={handleChange}
+        />
+        {errors.soCccd && <p className="error">{errors.soCccd}</p>}
+
+        <label>Số điện thoại</label>
+        <input
+          type="tel"
+          name="soDienThoai"
+          placeholder="Nhập số điện thoại"
+          value={formData.soDienThoai}
+          onChange={handleChange}
+        />
+        {errors.soDienThoai && <p className="error">{errors.soDienThoai}</p>}
+
+        <label>Mật khẩu</label>
+        <div className="password-wrapper">
+          <input
+            type={showPassword ? 'text' : 'password'}
+            name="password"
+            placeholder="Tạo mật khẩu"
+            value={formData.password}
+            onChange={handleChange}
+          />
+          <button
+            type="button"
+            className="toggle-password"
+            onClick={() => setShowPassword(!showPassword)}
+          >
+            <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+          </button>
         </div>
+        {errors.password && <p className="error">{errors.password}</p>}
 
-        {errors.submit && <p className="error" style={{ textAlign: 'center' }}>{errors.submit}</p>}
+        <label>Xác nhận mật khẩu</label>
+        <div className="password-wrapper">
+          <input
+            type={showConfirmPassword ? 'text' : 'password'}
+            name="confirmPassword"
+            placeholder="Nhập lại mật khẩu"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+          />
+          <button
+            type="button"
+            className="toggle-password"
+            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+          >
+            <FontAwesomeIcon icon={showConfirmPassword ? faEyeSlash : faEye} />
+          </button>
+        </div>
+        {errors.confirmPassword && <p className="error">{errors.confirmPassword}</p>}
 
-        <button type="submit" className="main-btn">Đăng ký</button>
-
-        <div className="divider">Hoặc</div>
-
-        <button
-          type="button"
-          className="google-btn"
-          onClick={() => window.open("https://accounts.google.com/signin", "_blank")}
+        <button 
+          type="submit" 
+          className="main-btn"
+          disabled={isLoading}
         >
-          Đăng nhập bằng Google
-        </button>
-
-        <button
-          type="button"
-          className="facebook-btn"
-          onClick={() => window.open("https://www.facebook.com/login", "_blank")}
-        >
-          Đăng nhập bằng Facebook
+          {isLoading ? 'Đang xử lý...' : 'Đăng ký'}
         </button>
       </form>
 
@@ -244,21 +253,6 @@ const SignupForm: React.FC = () => {
       </p>
 
       <footer>© 2025 PASSION HORIZON</footer>
-
-      {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-box">
-            <div className="modal-header">
-              <h3>Thông báo</h3>
-              <button className="close-btn" onClick={() => setShowModal(false)}>×</button>
-            </div>
-            <hr />
-            <div className="modal-body">
-              <p><strong>Đã gửi link xác thực, vui lòng kiểm tra email</strong></p>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
