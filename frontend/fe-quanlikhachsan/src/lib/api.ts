@@ -113,7 +113,6 @@ export const getRooms = async () => {
     method: 'GET',
     mode: 'cors',
     credentials: 'include',
-    headers: getAuthHeaders(),
   });
 
   return handleResponse(response);
@@ -127,7 +126,6 @@ export const getRoomTypes = async () => {
     method: 'GET',
     mode: 'cors',
     credentials: 'include',
-    headers: getAuthHeaders(),
   });
 
   return handleResponse(response);
@@ -148,7 +146,6 @@ export const bookRoom = async (bookingData: any) => {
     mode: 'cors',
     credentials: 'include',
     body: formData,
-    headers: getFormDataHeaders(),
   });
 
   return handleResponse(response);
@@ -162,7 +159,6 @@ export const getCustomerProfile = async (maKh: string) => {
     method: 'GET',
     mode: 'cors',
     credentials: 'include',
-    headers: getAuthHeaders(),
   });
 
   return handleResponse(response);
@@ -197,7 +193,6 @@ export const getBookingHistory = async (maKh: string) => {
     method: 'GET',
     mode: 'cors',
     credentials: 'include',
-    headers: getAuthHeaders(),
   });
 
   // Lọc đặt phòng theo khách hàng (frontend filtering)
@@ -245,7 +240,6 @@ export const getServices = async () => {
     method: 'GET',
     mode: 'cors',
     credentials: 'include',
-    headers: getAuthHeaders(),
   });
 
   return handleResponse(response);
@@ -259,7 +253,6 @@ export const getPromotions = async () => {
     method: 'GET',
     mode: 'cors',
     credentials: 'include',
-    headers: getAuthHeaders(),
   });
 
   return handleResponse(response);

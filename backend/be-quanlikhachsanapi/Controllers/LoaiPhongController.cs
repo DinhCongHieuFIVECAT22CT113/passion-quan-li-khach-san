@@ -17,7 +17,6 @@ namespace be_quanlikhachsanapi.Controllers
         }
 
         [HttpGet("Lấy danh sách tất cả loại phòng")]
-        [Consumes("multipart/form-data")]
         public IActionResult GetAll()
         {
             var loaiPhongs = _loaiPhongRepo.GetAll();
@@ -29,7 +28,6 @@ namespace be_quanlikhachsanapi.Controllers
         }
 
         [HttpGet("Tìm loại phòng theo ID")]
-        [Consumes("multipart/form-data")]
         public IActionResult GetByID(string maLoaiPhong)
         {
             var loaiPhong = _loaiPhongRepo.GetLoaiPhongById(maLoaiPhong);
