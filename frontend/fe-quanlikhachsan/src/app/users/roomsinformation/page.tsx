@@ -16,7 +16,7 @@ export default function RoomInformationPage() {
   const [isClient, setIsClient] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
-  const roomId = searchParams.get('id');
+  const roomId = searchParams?.get('id');
 
   useEffect(() => {
     setIsClient(true);
