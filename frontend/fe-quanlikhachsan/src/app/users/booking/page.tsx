@@ -12,13 +12,13 @@ import i18n from '../../../app/i18n';
 
 // Define the shape of selectedRoomData
 interface RoomData {
-  name: string;
+  name?: string;
   image?: string;
-  price: string;
-  checkInDate: string;
-  checkOutDate: string;
-  adults: number;
-  children: number;
+  price?: string;
+  checkInDate?: string;
+  checkOutDate?: string;
+  adults?: number;
+  children?: number;
 }
 
 // Define the shape of formData
@@ -30,6 +30,10 @@ interface FormData {
   message: string;
   paymentMethod: string;
   cardType: string;
+  checkInDate: string;
+  checkOutDate: string;
+  adults: number;
+  children: number;
 }
 
 // Define the shape of errors
@@ -40,6 +44,9 @@ interface Errors {
   idNumber?: string;
   paymentMethod?: string;
   cardType?: string;
+  checkInDate?: string;
+  checkOutDate?: string;
+  adults?: string;
 }
 
 export default function BookingPage() {
@@ -57,6 +64,10 @@ export default function BookingPage() {
     message: '',
     paymentMethod: '',
     cardType: '',
+    checkInDate: '',
+    checkOutDate: '',
+    adults: 1,
+    children: 0,
   });
   const [errors, setErrors] = useState<Errors>({});
   const [success, setSuccess] = useState('');
@@ -69,11 +80,25 @@ export default function BookingPage() {
   useEffect(() => {
     const data = JSON.parse(localStorage.getItem('selectedRoomData') || '{}');
     if (data.name) {
-      setSelectedRoomData(data);
+      setSelectedRoomData({
+        name: data.name || 'Unknown Room',
+        image: data.image || '/images/default-room.jpg',
+        price: data.price || '0đ',
+        checkInDate: data.checkInDate || '',
+        checkOutDate: data.checkOutDate || '',
+        adults: data.adults || 1,
+        children: data.children || 0,
+      });
       setMainImage(data.image || '/images/default-room.jpg');
       setFormData((prev) => ({
         ...prev,
-        message: `${t('booking.bookingFor')} ${data.name} ${t('booking.from')} ${data.checkInDate} ${t('booking.to')} ${data.checkOutDate}`,
+        message: data.name
+          ? `${t('booking.bookingFor')} ${data.name} ${data.checkInDate ? t('booking.from') + ' ' + data.checkInDate : ''} ${data.checkOutDate ? t('booking.to') + ' ' + data.checkOutDate : ''}`
+          : t('booking.noRoomSelected'),
+        checkInDate: data.checkInDate || '',
+        checkOutDate: data.checkOutDate || '',
+        adults: data.adults || 1,
+        children: data.children || 0,
       }));
     }
   }, [t]);
@@ -82,21 +107,29 @@ export default function BookingPage() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    // Xóa lỗi của trường khi người dùng bắt đầu nhập
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === 'adults' || name === 'children' ? parseInt(value) || 0 : value,
+    }));
     setErrors((prev) => ({ ...prev, [name]: '' }));
+    if (name === 'checkInDate' || name === 'checkOutDate' || name === 'adults' || name === 'children') {
+      setSelectedRoomData((prev) => ({
+        ...prev,
+        [name]: name === 'adults' || name === 'children' ? parseInt(value) || 0 : value,
+      }));
+    }
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const newErrors: Errors = {};
 
-    // Xác thực Họ Tên
+    // Validate Name
     if (!formData.name) {
       newErrors.name = t('booking.nameRequired') || 'Vui lòng điền Họ và Tên của bạn';
     }
 
-    // Xác thực Email
+    // Validate Email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email) {
       newErrors.email = t('booking.emailRequired') || 'Vui lòng điền Email của bạn';
@@ -104,12 +137,12 @@ export default function BookingPage() {
       newErrors.email = t('booking.invalidEmail') || 'Email không hợp lệ';
     }
 
-    // Xác thực Số điện thoại
+    // Validate Phone
     if (!formData.phone) {
       newErrors.phone = t('booking.phoneRequired') || 'Vui lòng điền số điện thoại của bạn';
     }
 
-    // Xác thực CMND/CCCD
+    // Validate ID Number
     const idNumberRegex = /^[0-9]{12}$/;
     if (!formData.idNumber) {
       newErrors.idNumber = t('booking.idNumberRequired') || 'Vui lòng điền số CMND/CCCD của bạn';
@@ -119,25 +152,48 @@ export default function BookingPage() {
         'Số CMND/CCCD phải có tối đa 12 số và không chứa chữ cái hoặc ký tự đặc biệt';
     }
 
-    // Xác thực Payment Method
+    // Validate Payment Method
     if (!formData.paymentMethod) {
       newErrors.paymentMethod =
         t('booking.paymentMethodRequired') || 'Vui lòng chọn phương thức thanh toán';
     }
 
-    // Xác thực Card Type nếu chọn thanh toán bằng thẻ
+    // Validate Card Type if payment is by card
     if (formData.paymentMethod !== 'cash' && !formData.cardType) {
       newErrors.cardType = t('booking.selectCardType') || 'Vui lòng chọn loại thẻ';
     }
 
-    // Nếu có lỗi, cập nhật state errors và dừng submit
+    // Validate Room Data
+    if (!selectedRoomData?.name) {
+      newErrors.name = t('booking.noRoomSelected') || 'Vui lòng chọn phòng';
+    }
+    if (!formData.checkInDate) {
+      newErrors.checkInDate = t('booking.checkInRequired') || 'Vui lòng chọn ngày nhận phòng';
+    }
+    if (!formData.checkOutDate) {
+      newErrors.checkOutDate = t('booking.checkOutRequired') || 'Vui lòng chọn ngày trả phòng';
+    }
+    if (!formData.adults || formData.adults < 1) {
+      newErrors.adults = t('booking.adultsRequired') || 'Vui lòng chọn số người lớn';
+    }
+
+    // If there are errors, update state and stop submission
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       setSuccess('');
       return;
     }
 
-    // Nếu không có lỗi, tiến hành submit
+    // Update localStorage with formData
+    localStorage.setItem('selectedRoomData', JSON.stringify({
+      ...selectedRoomData,
+      checkInDate: formData.checkInDate,
+      checkOutDate: formData.checkOutDate,
+      adults: formData.adults,
+      children: formData.children,
+    }));
+
+    // If no errors, proceed with submission
     setErrors({});
     setSuccess(t('booking.notification') || 'Đặt phòng thành công!');
     setFormData({
@@ -148,6 +204,10 @@ export default function BookingPage() {
       message: formData.message,
       paymentMethod: '',
       cardType: '',
+      checkInDate: '',
+      checkOutDate: '',
+      adults: 1,
+      children: 0,
     });
 
     setTimeout(() => {
@@ -214,20 +274,23 @@ export default function BookingPage() {
 
           <div>
             <h2>{t('booking.bookingDetails')}</h2>
-            {selectedRoomData ? (
+            {selectedRoomData?.name ? (
               <div className={styles.roomSummary}>
                 <p>
                   <strong>{t('booking.room')}:</strong> {selectedRoomData.name}
                 </p>
                 <p>
-                  <strong>{t('booking.checkIn')}:</strong> {selectedRoomData.checkInDate}
+                  <strong>{t('booking.checkIn')}:</strong>{' '}
+                  {formData.checkInDate || t('booking.notSelected')}
                 </p>
                 <p>
-                  <strong>{t('booking.checkOut')}:</strong> {selectedRoomData.checkOutDate}
+                  <strong>{t('booking.checkOut')}:</strong>{' '}
+                  {formData.checkOutDate || t('booking.notSelected')}
                 </p>
                 <p>
-                  <strong>{t('booking.guests')}:</strong> {selectedRoomData.adults}{' '}
-                  {t('booking.adults')}, {selectedRoomData.children} {t('booking.children')}
+                  <strong>{t('booking.guests')}:</strong>{' '}
+                  {formData.adults || 1} {t('booking.adults')},{' '}
+                  {formData.children || 0} {t('booking.children')}
                 </p>
               </div>
             ) : (
@@ -235,6 +298,7 @@ export default function BookingPage() {
             )}
 
             <form onSubmit={handleSubmit} className={styles.bookingForm} noValidate>
+              {/* Guest Information */}
               <div className={styles.formGroup}>
                 <label htmlFor="name">{t('booking.name')}</label>
                 <input
@@ -283,6 +347,54 @@ export default function BookingPage() {
                 />
                 {errors.idNumber && <p className={styles.error}>{errors.idNumber}</p>}
               </div>
+
+              {/* Room and Stay Details */}
+              <div className={styles.formGroup}>
+                <label htmlFor="checkInDate">{t('booking.checkIn')}</label>
+                <input
+                  type="date"
+                  id="checkInDate"
+                  name="checkInDate"
+                  value={formData.checkInDate}
+                  onChange={handleChange}
+                />
+                {errors.checkInDate && <p className={styles.error}>{errors.checkInDate}</p>}
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="checkOutDate">{t('booking.checkOut')}</label>
+                <input
+                  type="date"
+                  id="checkOutDate"
+                  name="checkOutDate"
+                  value={formData.checkOutDate}
+                  onChange={handleChange}
+                />
+                {errors.checkOutDate && <p className={styles.error}>{errors.checkOutDate}</p>}
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="adults">{t('booking.adults')}</label>
+                <input
+                  type="number"
+                  id="adults"
+                  name="adults"
+                  value={formData.adults}
+                  onChange={handleChange}
+                  min="1"
+                />
+                {errors.adults && <p className={styles.error}>{errors.adults}</p>}
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="children">{t('booking.children')}</label>
+                <input
+                  type="number"
+                  id="children"
+                  name="children"
+                  value={formData.children}
+                  onChange={handleChange}
+                  min="0"
+                />
+              </div>
+
               <div className={styles.formGroup}>
                 <label htmlFor="message">{t('booking.specialRequests')}</label>
                 <textarea
@@ -295,6 +407,7 @@ export default function BookingPage() {
                 />
               </div>
 
+              {/* Payment Information */}
               <div className={styles.formGroup}>
                 <label htmlFor="paymentMethod">{t('profile.paymentMethod')}</label>
                 <select
@@ -337,7 +450,7 @@ export default function BookingPage() {
                 </div>
               ) : null}
 
-              {selectedRoomData && (
+              {selectedRoomData?.price && (
                 <div className={styles.priceBreakdown}>
                   <h3>{t('booking.priceBreakdown')}</h3>
                   <p>
@@ -345,14 +458,16 @@ export default function BookingPage() {
                     {priceDetails.basePrice.toLocaleString('vi-VN')}đ
                   </p>
                   <p>
-                    <strong>{t('booking.tax')} (10%):</strong> {priceDetails.tax.toLocaleString('vi-VN')}đ
+                    <strong>{t('booking.tax')} (10%):</strong>{' '}
+                    {priceDetails.tax.toLocaleString('vi-VN')}đ
                   </p>
                   <p>
                     <strong>{t('booking.serviceFee')} (5%):</strong>{' '}
                     {priceDetails.serviceFee.toLocaleString('vi-VN')}đ
                   </p>
                   <p>
-                    <strong>{t('booking.total')}:</strong> {priceDetails.total.toLocaleString('vi-VN')}đ
+                    <strong>{t('booking.total')}:</strong>{' '}
+                    {priceDetails.total.toLocaleString('vi-VN')}đ
                   </p>
                 </div>
               )}

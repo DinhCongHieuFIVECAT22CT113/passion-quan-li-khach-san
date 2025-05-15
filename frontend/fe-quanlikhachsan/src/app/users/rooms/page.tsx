@@ -22,7 +22,7 @@ export default function RoomsPage() {
   const rooms = [
     {
       id: 1,
-      name: 'Phòng Gần Hồ',
+      name: t('rooms.room1Name'),
       price: '4.500.000đ',
       image: '/images/pool-room.jpg',
       availability: t('rooms.available'),
@@ -30,7 +30,7 @@ export default function RoomsPage() {
     },
     {
       id: 2,
-      name: 'Căn Hộ Áp Mái',
+      name: t('rooms.room2Name'),
       price: '10.500.000đ',
       image: '/images/penthouse.jpg',
       availability: t('rooms.available'),
@@ -38,7 +38,7 @@ export default function RoomsPage() {
     },
     {
       id: 3,
-      name: 'Phòng Quý Tộc',
+      name: t('rooms.room3Name'),
       price: '5.500.000đ',
       image: '/images/noble-room.jpg',
       availability: t('rooms.available'),
@@ -46,26 +46,26 @@ export default function RoomsPage() {
     },
     {
       id: 4,
-      name: 'Căn Hộ Xanh',
+      name: t('rooms.room4Name'),
       price: '8.500.000đ',
       image: '/images/green-apartment.jpg',
-      availability: t('rooms.notavailable'),
+      availability: t('rooms.available'),
       amenities: [t('rooms.tv'), t('rooms.wifi'), t('rooms.airConditioning')],
     },
     {
       id: 5,
-      name: 'Phòng Đơn Giản',
+      name: t('rooms.room5Name'),
       price: '2.500.000đ',
       image: '/images/simp-room.jpg',
-      availability: t('rooms.notavailable'),
+      availability: t('rooms.available'),
       amenities: [t('rooms.tv'), t('rooms.wifi'), t('rooms.airConditioning')],
     },
     {
       id: 6,
-      name: 'Phòng Hoàng Gia',
+      name: t('rooms.room6Name'),
       price: '7.500.000đ',
       image: '/images/royal-room.jpg',
-      availability: t('rooms.notavailable'),
+      availability: t('rooms.available'),
       amenities: [t('rooms.tv'), t('rooms.wifi'), t('rooms.airConditioning')],
     },
   ];
@@ -91,8 +91,8 @@ export default function RoomsPage() {
           <Link href="/users/profile" className={styles.profileIcon}>
             <FaUser />
           </Link>
-          <Link href="/users/select-room" className={styles.bookNowBtn}>
-            {t('rooms.viewRooms')}
+          <Link href="/users/booking" className={styles.bookNowBtn}>
+            {t('rooms.booking')}
           </Link>
         </div>
       </nav>
@@ -116,33 +116,33 @@ export default function RoomsPage() {
             <div className={styles.roomImage}>
               <Image src={room.image} alt={room.name} fill style={{ objectFit: 'cover' }} />
             </div>
-              <div className={styles.roomInfo}>
-                <div className={styles.roomHeader}>
-                  <h3>{room.name}</h3>
-                  <span className={styles.availability}>
-                    {t('rooms.status')}: {room.availability}
-                  </span>
-                </div>
-                <div className={styles.price}>{room.price}</div>
-                <div className={styles.amenities}>
-                  {room.amenities.map((amenity, index) => (
-                    <span key={index} className={styles.amenity}>
-                      <Image
-                        src={`/images/${amenity.toLowerCase()}-icon.png`}
-                        alt={amenity}
-                        width={20}
-                        height={20}
-                      />
-                      {amenity}
-                    </span>
-                  ))}
-                </div>
-                <div className={styles.roomActions}>
-                  <Link href={`/users/roomsinformation?id=${room.id}`} className={styles.viewDetailsButton}>
-                    Xem thông tin phòng
-                  </Link>
-                </div>
+            <div className={styles.roomInfo}>
+              <div className={styles.roomHeader}>
+                <h3>{room.name}</h3>
+                <span className={styles.availability}>
+                  {t('rooms.status')}: {room.availability}
+                </span>
               </div>
+              <div className={styles.price}>{room.price}</div>
+              <div className={styles.amenities}>
+                {room.amenities.map((amenity, index) => (
+                  <span key={index} className={styles.amenity}>
+                    <Image
+                      src={`/images/${amenity.toLowerCase()}-icon.png`}
+                      alt={amenity}
+                      width={20}
+                      height={20}
+                    />
+                    {amenity}
+                  </span>
+                ))}
+              </div>
+              <div className={styles.roomActions}>
+                <Link href={`/users/roomsinformation?id=${room.id}`} className={styles.viewDetailsButton}>
+                  {t('rooms.viewDetails')}
+                </Link>
+              </div>
+            </div>
           </div>
         ))}
       </section>
@@ -158,7 +158,7 @@ export default function RoomsPage() {
             </div>
           </div>
           <div className={styles.footerLogo}>
-            <Image src="/images/hotel-logo.png" alt="Logo Khách sạn" width={150} height={60} />
+            <Image src="/images/hotel-logo.png" alt="Hotel Logo" width={150} height={60} />
           </div>
           <div className={styles.footerLinks}>
             <div>

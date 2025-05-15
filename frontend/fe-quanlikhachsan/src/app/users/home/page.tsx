@@ -10,26 +10,20 @@ import { useTranslation } from 'react-i18next';
 import { useLanguage, LanguageProvider } from '../../../app/components/profile/LanguageContext';
 import i18n from '../../../app/i18n';
 
-function HomeContent() {
-  const { t } = useTranslation();
+export default function Home() {
+  const { t, i18n: i18nInstance } = useTranslation();
   const { selectedLanguage } = useLanguage();
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
+  const [isReady, setIsReady] = useState(false);
   const router = useRouter();
 
   // State to track if language is ready to avoid hydration mismatch
   const [isLanguageReady, setIsLanguageReady] = useState(false);
 
   useEffect(() => {
-    i18n.changeLanguage(selectedLanguage).then(() => {
-      setIsLanguageReady(true);
-    });
+    i18n.changeLanguage(selectedLanguage);
   }, [selectedLanguage]);
-
-  // If language not ready, render null or loading to avoid hydration mismatch
-  if (!isLanguageReady) {
-    return null;
-  }
 
   const services = [
     {
@@ -174,45 +168,6 @@ function HomeContent() {
               <p>{t('home.diverseCuisineDesc')}</p>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* Booking Form */}
-      <section className={styles.bookingForm}>
-        <div className={styles.formContent}>
-          <div className={styles.formGroup}>
-            <label>{t('home.checkInDate')}</label>
-            <input type="date" />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label>{t('home.checkOutDate')}</label>
-            <input type="date" />
-          </div>
-
-          <div className={styles.guestGroup}>
-            <div className={styles.guestCounter}>
-              <label>{t('home.adults')}</label>
-              <div className={styles.counter}>
-                <button onClick={() => setAdults(Math.max(1, adults - 1))}>-</button>
-                <span>{adults}</span>
-                <button onClick={() => setAdults(adults + 1)}>+</button>
-              </div>
-            </div>
-
-            <div className={styles.guestCounter}>
-              <label>{t('home.children')}</label>
-              <div className={styles.counter}>
-                <button onClick={() => setChildren(Math.max(0, children - 1))}>-</button>
-                <span>{children}</span>
-                <button onClick={() => setChildren(children + 1)}>+</button>
-              </div>
-            </div>
-          </div>
-
-          <button className={styles.searchButton} onClick={() => router.push('/users/select-room')}>
-            {t('home.searchRooms')}
-          </button>
         </div>
       </section>
 

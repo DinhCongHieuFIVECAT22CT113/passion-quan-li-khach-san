@@ -11,6 +11,11 @@ const AuthCheck: FC<AuthCheckProps> = ({ children }) => {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  // Bỏ qua xác thực trong chế độ development
+  if (process.env.NODE_ENV === 'development') {
+    return <>{children}</>;
+  }
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
