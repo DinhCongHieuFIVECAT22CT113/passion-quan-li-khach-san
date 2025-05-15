@@ -59,6 +59,19 @@ builder.Services.AddCors(options =>
         });
 });
 
+// THÊM CORS policy mới với credentials
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowCredentials",
+        builder =>
+        {
+            builder.WithOrigins("http://localhost:3000")
+                   .AllowAnyMethod()
+                   .AllowAnyHeader()
+                   .AllowCredentials();
+        });
+});
+
 // Add custom services
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<ISendEmailServices, SendEmailServices>();
@@ -126,7 +139,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("AllowAll");
+app.UseCors("AllowCredentials");
 app.UseAuthentication();
 app.UseAuthorization();
 

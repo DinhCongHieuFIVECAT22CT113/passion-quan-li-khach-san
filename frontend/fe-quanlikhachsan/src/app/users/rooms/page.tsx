@@ -16,7 +16,7 @@ export default function RoomsPage() {
   const [selectedFilter, setSelectedFilter] = useState('all');
   const [priceRange, setPriceRange] = useState([500000, 5000000]);
   const [capacity, setCapacity] = useState(2);
-  
+
   useEffect(() => {
     const fetchRooms = async () => {
       setLoading(true);
@@ -98,9 +98,9 @@ export default function RoomsPage() {
       {/* Header */}
       <header className={styles.header}>
         <div className={styles.navLeft}>
-          <Link href="/">
+        <Link href="/">
             <Image src="/images/logo.png" alt="Logo" width={120} height={40} />
-          </Link>
+        </Link>
         </div>
         <div className={styles.navCenter}>
           <Link href="/users/home">Trang chủ</Link>
@@ -188,7 +188,7 @@ export default function RoomsPage() {
         ) : (
           filteredRoomTypes.map((roomType) => (
             <div key={roomType.maLoaiPhong} className={styles.roomCard}>
-              <div className={styles.roomImage}>
+            <div className={styles.roomImage}>
                 <Image
                   src={roomType.hinhAnh || "/images/room-placeholder.jpg"}
                   alt={roomType.tenLoaiPhong}
@@ -207,7 +207,7 @@ export default function RoomsPage() {
                     <FaStar />
                     <FaStar />
                     <FaStar />
-                  </div>
+            </div>
                   <span>5.0</span>
                 </div>
                 <p className={styles.roomDescription}>
@@ -246,10 +246,10 @@ export default function RoomsPage() {
                   </Link>
                 </div>
               </div>
-            </div>
+          </div>
           ))
         )}
-      </div>
+        </div>
     </div>
   );
 }
