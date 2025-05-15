@@ -16,16 +16,32 @@ export const APP_CONFIG = {
     login: '/login',
     signup: '/signup',
     userProfile: '/users/profile',
-    adminDashboard: '/admin/dashboard',
-    employeeDashboard: '/employe/dashboard',
+    adminDashboard: '/admin/rooms',
+    managerDashboard: '/employe/dashboard',
+    employeeDashboard: '/employe/bookings',
+    accountantDashboard: '/employe/invoices',
+    customerDashboard: '/users/home',
   },
   
   // Các mã role của người dùng
   roles: {
-    admin: 'R01',
-    manager: 'R02',
-    employee: 'R03',
-    customer: 'R04',
+    admin: 'R00',    // Admin - Toàn quyền
+    manager: 'R01',  // Quản lý - Quản lý nhân sự, báo cáo, phòng, dịch vụ
+    employee: 'R02', // Nhân viên - Xử lý nghiệp vụ thường ngày
+    accountant: 'R03', // Kế toán - Quản lý hóa đơn, thanh toán
+    customer: 'R04',  // Khách hàng - Chỉ được sử dụng frontend
+  },
+
+  // Các đường dẫn phù hợp với từng vai trò
+  roleRoutes: {
+    'R00': '/admin/rooms',  // Admin đến trang rooms thay vì dashboard
+    'R01': '/employe/dashboard', // Quản lý đến trang quản lý
+    'R02': '/employe/bookings', // Nhân viên đến trang đặt phòng
+    'R03': '/employe/invoices', // Kế toán đến trang hóa đơn
+    'R04': '/users/home',       // Khách hàng đến trang home
+    // Mã legacy cho tương thích ngược
+    'CTM': '/users/home',
+    'CRW': '/employe/bookings',
   }
 };
 
@@ -37,23 +53,59 @@ export const hasRole = (userRole: string | null | undefined, requiredRoles: stri
 
 // Hàm lấy thông tin người dùng từ localStorage
 export const getUserInfo = () => {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === 'undefined') {
+    console.log('getUserInfo: Running on server, cannot access localStorage');
+    return null;
+  }
   
-  const token = localStorage.getItem('token');
-  const userName = localStorage.getItem('userName');
-  const userRole = localStorage.getItem('userRole');
-  const userId = localStorage.getItem('userId');
+  try {
+    const token = localStorage.getItem('token');
+    const userName = localStorage.getItem('userName');
+    const userRole = localStorage.getItem('userRole');
+    const userId = localStorage.getItem('userId');
+    
+    if (!token || !userName) {
+      console.log('getUserInfo: Missing token or username');
+      return null;
+    }
+    
+    // Lấy giá trị role, sử dụng 'R04' làm mặc định nếu không có
+    const role = userRole || 'R04';
+    
+    // Debug: Log thông tin người dùng
+    console.log('getUserInfo: User authenticated', { userName, role, userId });
+    
+    return {
+      token,
+      userName,
+      userRole: role,
+      userId,
+      isAuthenticated: !!token,
+      isAdmin: role === APP_CONFIG.roles.admin,                 // R00
+      isManager: role === APP_CONFIG.roles.manager,             // R01
+      isEmployee: role === APP_CONFIG.roles.employee,           // R02
+      isAccountant: role === APP_CONFIG.roles.accountant,       // R03
+      isCustomer: role === APP_CONFIG.roles.customer,           // R04
+      // Kiểm tra loại người dùng (staff = tất cả nhân viên)
+      isStaff: role === APP_CONFIG.roles.admin || 
+              role === APP_CONFIG.roles.manager || 
+              role === APP_CONFIG.roles.employee || 
+              role === APP_CONFIG.roles.accountant,
+    };
+  } catch (error) {
+    console.error('getUserInfo: Error accessing localStorage', error);
+    return null;
+  }
+};
+
+// Hàm lấy trang chuyển hướng theo role
+export const getRedirectPathByRole = (role: string | null | undefined): string => {
+  if (!role) {
+    console.log('getRedirectPathByRole: No role provided, using default home path');
+    return APP_CONFIG.routes.home;
+  }
   
-  if (!token || !userName) return null;
-  
-  return {
-    token,
-    userName,
-    userRole,
-    userId,
-    isAuthenticated: !!token,
-    isAdmin: userRole === APP_CONFIG.roles.admin,
-    isEmployee: userRole === APP_CONFIG.roles.employee || userRole === APP_CONFIG.roles.manager,
-    isCustomer: userRole === APP_CONFIG.roles.customer,
-  };
+  const redirectPath = APP_CONFIG.roleRoutes[role as keyof typeof APP_CONFIG.roleRoutes] || APP_CONFIG.routes.home;
+  console.log(`getRedirectPathByRole: Role ${role} -> Path ${redirectPath}`);
+  return redirectPath;
 }; 

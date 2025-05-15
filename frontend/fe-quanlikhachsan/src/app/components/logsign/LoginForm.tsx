@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import './logsign.css';
 import { loginUser } from '../../../lib/api';
-import { API_BASE_URL } from '../../../lib/config';
+import { API_BASE_URL, getRedirectPathByRole } from '../../../lib/config';
 
 const LoginForm: React.FC = () => {
   const [userName, setUserName] = useState('');
@@ -52,25 +52,32 @@ const LoginForm: React.FC = () => {
         
         console.log('Đăng nhập thành công, dữ liệu nhận được:', userData);
         
+        // Kiểm tra dữ liệu người dùng
+        if (!userData || !userData.token) {
+          throw new Error('Dữ liệu đăng nhập không hợp lệ. Vui lòng thử lại.');
+        }
+        
         // Lưu token vào localStorage
         localStorage.setItem('token', userData.token);
-        localStorage.setItem('userName', userData.userName);
+        localStorage.setItem('userName', userData.userName || '');
         localStorage.setItem('userRole', userData.maRole || '');
-        localStorage.setItem('userId', userData.maNguoiDung);
+        localStorage.setItem('userId', userData.maNguoiDung || '');
+        
+        console.log('Đã lưu thông tin người dùng:', {
+          userName: userData.userName,
+          userRole: userData.maRole,
+          userId: userData.maNguoiDung
+        });
         
         // Điều hướng người dùng
         if (redirectUrl) {
+          console.log('Chuyển hướng đến:', redirectUrl);
           router.push(redirectUrl);
         } else {
-          // Điều hướng dựa trên role
-          if (userData.maRole === 'R01') {
-            router.push('/admin/dashboard');
-          } else if (userData.maRole === 'R02' || userData.maRole === 'R03') {
-            router.push('/employe/dashboard');
-          } else {
-            router.push('/users/home');
-            router.push('/users/home');
-          }
+          // Sử dụng hàm getRedirectPathByRole để xác định trang chuyển hướng
+          const redirectPath = getRedirectPathByRole(userData.maRole);
+          console.log('Chuyển hướng theo role đến:', redirectPath);
+          router.push(redirectPath);
         }
       } catch (error) {
         console.error('Lỗi khi đăng nhập:', error);
@@ -89,6 +96,12 @@ const LoginForm: React.FC = () => {
         } else {
           errorMessage = 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin và kết nối đến server.';
         }
+        
+        // Xóa thông tin đăng nhập nếu có lỗi
+        localStorage.removeItem('token');
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('userId');
         
         setLoginError(`Lỗi: ${errorMessage}`);
       } finally {

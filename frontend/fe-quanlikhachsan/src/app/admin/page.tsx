@@ -8,8 +8,15 @@ export default function AdminRedirect() {
     router.replace("/admin/rooms");
   }, [router]);
   return (
-    <div>
-      <p>Redirecting to Rooms...</p>
+    <div style={{ 
+      display: 'flex', 
+      justifyContent: 'center', 
+      alignItems: 'center', 
+      height: '100vh',
+      flexDirection: 'column'
+    }}>
+      <h1>Passion Admin</h1>
+      <p>Đang chuyển hướng đến trang quản lý phòng...</p>
     </div>
   );
 }

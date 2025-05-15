@@ -1,215 +1,178 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { getUserInfo } from '../../../lib/config';
 import styles from '../AdminLayout.module.css';
 
-// Định nghĩa kiểu dữ liệu cho quyền
-interface Permission {
-  id: number;
-  role: string;
-  permissions: string;
-  users: number;
-  status: string;
-}
+// Định nghĩa danh sách vai trò
+const roleDefinitions = [
+  { id: 'R00', name: 'Admin', description: 'Toàn quyền: quản lý hệ thống, người dùng, phân quyền, dữ liệu, cấu hình.' },
+  { id: 'R01', name: 'Quản lý', description: 'Quản lý nhân sự, báo cáo, phòng, dịch vụ. Không can thiệp cấp hệ thống.' },
+  { id: 'R02', name: 'Nhân viên', description: 'Xử lý nghiệp vụ thường ngày: đặt phòng, check-in/out, hỗ trợ khách hàng.' },
+  { id: 'R03', name: 'Kế toán', description: 'Quản lý hóa đơn, thanh toán, báo cáo tài chính.' },
+  { id: 'R04', name: 'Khách hàng', description: 'Không có quyền trong hệ thống quản trị. Chỉ dùng để lưu thông tin khách đặt phòng.' },
+];
 
-// Định nghĩa kiểu dữ liệu cho form (không bao gồm id)
-interface PermissionForm {
-  role: string;
-  permissions: string;
-  users: number;
-  status: string;
-}
+// Danh sách các quyền chi tiết
+const permissions = [
+  { id: 'user_view', name: 'Xem người dùng', module: 'Người dùng' },
+  { id: 'user_create', name: 'Tạo người dùng', module: 'Người dùng' },
+  { id: 'user_edit', name: 'Sửa người dùng', module: 'Người dùng' },
+  { id: 'user_delete', name: 'Xóa người dùng', module: 'Người dùng' },
+  
+  { id: 'room_view', name: 'Xem phòng', module: 'Phòng' },
+  { id: 'room_create', name: 'Tạo phòng', module: 'Phòng' },
+  { id: 'room_edit', name: 'Sửa phòng', module: 'Phòng' },
+  { id: 'room_delete', name: 'Xóa phòng', module: 'Phòng' },
+  
+  { id: 'booking_view', name: 'Xem đặt phòng', module: 'Đặt phòng' },
+  { id: 'booking_create', name: 'Tạo đặt phòng', module: 'Đặt phòng' },
+  { id: 'booking_edit', name: 'Sửa đặt phòng', module: 'Đặt phòng' },
+  { id: 'booking_cancel', name: 'Hủy đặt phòng', module: 'Đặt phòng' },
+  
+  { id: 'invoice_view', name: 'Xem hóa đơn', module: 'Hóa đơn' },
+  { id: 'invoice_create', name: 'Tạo hóa đơn', module: 'Hóa đơn' },
+  { id: 'invoice_edit', name: 'Sửa hóa đơn', module: 'Hóa đơn' },
+  { id: 'invoice_delete', name: 'Xóa hóa đơn', module: 'Hóa đơn' },
+  
+  { id: 'report_view', name: 'Xem báo cáo', module: 'Báo cáo' },
+  { id: 'report_create', name: 'Tạo báo cáo', module: 'Báo cáo' },
+];
+
+// Ánh xạ quyền cho mỗi vai trò
+const rolePermissions = {
+  'R00': permissions.map(p => p.id), // Admin có tất cả quyền
+  'R01': [ // Quản lý có hầu hết quyền trừ những quyền hệ thống
+    'user_view', 'user_create', 'user_edit',
+    'room_view', 'room_create', 'room_edit', 'room_delete',
+    'booking_view', 'booking_create', 'booking_edit', 'booking_cancel',
+    'invoice_view', 'invoice_create', 'invoice_edit',
+    'report_view', 'report_create',
+  ],
+  'R02': [ // Nhân viên chỉ có quyền liên quan đến phòng và đặt phòng
+    'room_view',
+    'booking_view', 'booking_create', 'booking_edit', 'booking_cancel',
+  ],
+  'R03': [ // Kế toán chỉ có quyền liên quan đến hóa đơn và báo cáo
+    'invoice_view', 'invoice_create', 'invoice_edit', 'invoice_delete',
+    'report_view', 'report_create',
+  ],
+  'R04': [], // Khách hàng không có quyền trong hệ thống quản trị
+};
 
 export default function PermissionsPage() {
-  // Dữ liệu mẫu ban đầu
-  const [permissions, setPermissions] = useState<Permission[]>([
-    { id: 1, role: 'Quản trị viên', permissions: 'Toàn quyền', users: 5, status: 'Hoạt động' },
-    { id: 2, role: 'Nhân viên', permissions: 'Xem, sửa', users: 10, status: 'Hoạt động' },
-    { id: 3, role: 'Khách', permissions: 'Xem', users: 20, status: 'Ngừng' },
-  ]);
-
-  // Trạng thái modal
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [currentPerm, setCurrentPerm] = useState<Permission | null>(null);
-  const [formData, setFormData] = useState<PermissionForm>({ role: '', permissions: '', users: 0, status: 'Hoạt động' });
-
-  // Mở modal để thêm hoặc sửa
-  const openModal = (perm: Permission | null = null) => {
-    if (perm) {
-      setIsEditMode(true);
-      setCurrentPerm(perm);
-      setFormData({ role: perm.role, permissions: perm.permissions, users: perm.users, status: perm.status });
+  const [selectedRole, setSelectedRole] = useState('R00');
+  const [rolePerms, setRolePerms] = useState<string[]>([]);
+  const [isAdmin, setIsAdmin] = useState(false);
+  
+  useEffect(() => {
+    const userInfo = getUserInfo();
+    if (userInfo) {
+      setIsAdmin(userInfo.isAdmin);
+    }
+    
+    // Lấy quyền cho vai trò đã chọn
+    setRolePerms(rolePermissions[selectedRole as keyof typeof rolePermissions] || []);
+  }, [selectedRole]);
+  
+  // Nhóm quyền theo module
+  const modulePermissions = permissions.reduce((acc, perm) => {
+    if (!acc[perm.module]) {
+      acc[perm.module] = [];
+    }
+    acc[perm.module].push(perm);
+    return acc;
+  }, {} as Record<string, typeof permissions>);
+  
+  const handleRoleChange = (roleId: string) => {
+    setSelectedRole(roleId);
+    setRolePerms(rolePermissions[roleId as keyof typeof rolePermissions] || []);
+  };
+  
+  // Giả lập cập nhật quyền
+  const handlePermissionChange = (permId: string, checked: boolean) => {
+    if (checked) {
+      setRolePerms(prev => [...prev, permId]);
     } else {
-      setIsEditMode(false);
-      setFormData({ role: '', permissions: '', users: 0, status: 'Hoạt động' });
+      setRolePerms(prev => prev.filter(id => id !== permId));
     }
-    setIsModalOpen(true);
+    
+    // Trong thực tế, bạn sẽ gọi API để cập nhật quyền
+    console.log(`Cập nhật quyền ${permId} cho vai trò ${selectedRole}: ${checked ? 'Thêm' : 'Xóa'}`);
   };
-
-  // Đóng modal
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setCurrentPerm(null);
-    setFormData({ role: '', permissions: '', users: 0, status: 'Hoạt động' });
-  };
-
-  // Xử lý thay đổi input trong form
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: name === 'users' ? parseInt(value) || 0 : value }));
-  };
-
-  // Thêm hoặc sửa vai trò
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isEditMode && currentPerm) {
-      // Sửa vai trò
-      setPermissions((prev) =>
-        prev.map((perm) =>
-          perm.id === currentPerm.id ? { ...perm, ...formData } : perm
-        )
-      );
-    } else {
-      // Thêm vai trò mới
-      const newPerm = {
-        id: permissions.length > 0 ? Math.max(...permissions.map(p => p.id)) + 1 : 1,
-        ...formData,
-      };
-      setPermissions((prev) => [...prev, newPerm]);
-    }
-    closeModal();
-  };
-
-  // Xóa vai trò
-  const handleDelete = (id: number) => {
-    if (confirm('Bạn có chắc muốn xóa vai trò này không?')) {
-      setPermissions((prev) => prev.filter((perm) => perm.id !== id));
-    }
-  };
-
+  
   return (
-    <div className={styles.mainContent}>
-      {/* Tiêu đề và nút Thêm */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <h1>Quản lý phân quyền</h1>
-        <button
-          onClick={() => openModal()}
-          style={{ padding: '8px 16px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-        >
-          + Thêm vai trò
-        </button>
-      </div>
-
-      {/* Bảng danh sách vai trò */}
-      <table style={{ width: '100%', borderCollapse: 'collapse', background: '#fff', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' }}>
-        <thead>
-          <tr style={{ background: '#f8f9fa', textAlign: 'left' }}>
-            <th style={{ padding: '12px' }}>ID</th>
-            <th style={{ padding: '12px' }}>Vai trò</th>
-            <th style={{ padding: '12px' }}>Quyền</th>
-            <th style={{ padding: '12px' }}>Số người dùng</th>
-            <th style={{ padding: '12px' }}>Trạng thái</th>
-            <th style={{ padding: '12px' }}>Hành động</th>
-          </tr>
-        </thead>
-        <tbody>
-          {permissions.map((perm) => (
-            <tr key={perm.id} style={{ borderBottom: '1px solid #e9ecef' }}>
-              <td style={{ padding: '12px' }}>{perm.id}</td>
-              <td style={{ padding: '12px' }}>{perm.role}</td>
-              <td style={{ padding: '12px' }}>{perm.permissions}</td>
-              <td style={{ padding: '12px' }}>{perm.users}</td>
-              <td style={{ padding: '12px', color: perm.status === 'Hoạt động' ? 'green' : 'red' }}>{perm.status}</td>
-              <td style={{ padding: '12px' }}>
-                <button
-                  onClick={() => openModal(perm)}
-                  style={{ marginRight: '8px', padding: '6px 12px', background: '#ffc107', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                >
-                  Sửa
-                </button>
-                <button
-                  onClick={() => handleDelete(perm.id)}
-                  style={{ padding: '6px 12px', background: '#dc3545', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                >
-                  Xóa
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {/* Modal để thêm/sửa vai trò */}
-      {isModalOpen && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <div style={{ background: '#fff', padding: '24px', borderRadius: '8px', width: '400px', maxWidth: '90%' }}>
-            <h2>{isEditMode ? 'Sửa vai trò' : 'Thêm vai trò'}</h2>
-            <form onSubmit={handleSubmit}>
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '4px' }}>Vai trò</label>
-                <input
-                  type="text"
-                  name="role"
-                  value={formData.role}
-                  onChange={handleInputChange}
-                  required
-                  style={{ width: '100%', padding: '8px', border: '1px solid #ced4da', borderRadius: '4px' }}
-                />
-              </div>
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '4px' }}>Quyền</label>
-                <input
-                  type="text"
-                  name="permissions"
-                  value={formData.permissions}
-                  onChange={handleInputChange}
-                  required
-                  style={{ width: '100%', padding: '8px', border: '1px solid #ced4da', borderRadius: '4px' }}
-                />
-              </div>
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '4px' }}>Số người dùng</label>
-                <input
-                  type="number"
-                  name="users"
-                  value={formData.users}
-                  onChange={handleInputChange}
-                  min="0"
-                  required
-                  style={{ width: '100%', padding: '8px', border: '1px solid #ced4da', borderRadius: '4px' }}
-                />
-              </div>
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', marginBottom: '4px' }}>Trạng thái</label>
-                <select
-                  name="status"
-                  value={formData.status}
-                  onChange={handleInputChange}
-                  style={{ width: '100%', padding: '8px', border: '1px solid #ced4da', borderRadius: '4px' }}
-                >
-                  <option value="Hoạt động">Hoạt động</option>
-                  <option value="Ngừng">Ngừng</option>
-                </select>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  style={{ padding: '8px 16px', background: '#6c757d', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                >
-                  Hủy
-                </button>
-                <button
-                  type="submit"
-                  style={{ padding: '8px 16px', background: '#007bff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-                >
-                  {isEditMode ? 'Lưu' : 'Thêm'}
-                </button>
-              </div>
-            </form>
-          </div>
+    <div className="permissions-container" style={{padding: '24px', maxWidth: '1200px', margin: '0 auto'}}>
+      <h1>Quản lý phân quyền</h1>
+      
+      {!isAdmin && (
+        <div style={{background: '#f8d7da', color: '#721c24', padding: '12px', borderRadius: '4px', marginBottom: '20px'}}>
+          Bạn không có quyền truy cập trang này. Chỉ Admin mới có thể quản lý phân quyền.
         </div>
       )}
+      
+      <div style={{display: 'flex', gap: '20px', marginTop: '20px'}}>
+        <div style={{width: '300px'}}>
+          <h2 style={{marginBottom: '16px', fontSize: '18px'}}>Vai trò</h2>
+          <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
+            {roleDefinitions.map(role => (
+              <div 
+                key={role.id} 
+                style={{
+                  padding: '12px', 
+                  border: `1px solid ${selectedRole === role.id ? '#3182ce' : '#e2e8f0'}`,
+                  borderRadius: '4px',
+                  background: selectedRole === role.id ? '#ebf8ff' : '#fff',
+                  cursor: 'pointer'
+                }}
+                onClick={() => handleRoleChange(role.id)}
+              >
+                <h3 style={{fontWeight: 'bold'}}>{role.name} ({role.id})</h3>
+                <p style={{fontSize: '14px', color: '#4a5568', marginTop: '4px'}}>{role.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        <div style={{flex: 1}}>
+          <h2 style={{marginBottom: '16px', fontSize: '18px'}}>Quyền hạn cho {roleDefinitions.find(r => r.id === selectedRole)?.name}</h2>
+          
+          {Object.entries(modulePermissions).map(([module, perms]) => (
+            <div key={module} style={{marginBottom: '24px'}}>
+              <h3 style={{borderBottom: '1px solid #e2e8f0', paddingBottom: '8px', marginBottom: '12px'}}>{module}</h3>
+              <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '12px'}}>
+                {perms.map(perm => (
+                  <div key={perm.id} style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                    <input 
+                      type="checkbox" 
+                      id={perm.id} 
+                      checked={rolePerms.includes(perm.id)}
+                      onChange={(e) => handlePermissionChange(perm.id, e.target.checked)}
+                      disabled={!isAdmin || selectedRole === 'R00'} // Admin (R00) luôn có tất cả quyền
+                    />
+                    <label htmlFor={perm.id}>{perm.name}</label>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+          
+          {isAdmin && selectedRole !== 'R00' && (
+            <button 
+              style={{
+                background: '#3182ce', 
+                color: 'white', 
+                padding: '10px 16px', 
+                borderRadius: '4px',
+                border: 'none',
+                cursor: 'pointer'
+              }}
+              onClick={() => alert('Đã lưu cấu hình phân quyền!')}
+            >
+              Lưu thay đổi
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

@@ -2,28 +2,69 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { getUserInfo, APP_CONFIG } from '../../lib/config';
 
-const navs = [
-  { href: "/employe/bookings", label: "Đặt phòng" },
-  { href: "/employe/rooms", label: "Phòng" },
-  { href: "/employe/services", label: "Dịch vụ" },
-  { href: "/employe/invoices", label: "Hóa đơn" },
+// Danh sách tất cả các mục menu có thể có
+const allNavItems = [
+  { href: "/employe/dashboard", label: "Tổng quan", roles: ["R01"] }, // Chỉ quản lý
+  { href: "/employe/bookings", label: "Đặt phòng", roles: ["R01", "R02"] }, // Quản lý và nhân viên
+  { href: "/employe/rooms", label: "Phòng", roles: ["R01", "R02"] }, // Quản lý và nhân viên
+  { href: "/employe/services", label: "Dịch vụ", roles: ["R01", "R02"] }, // Quản lý và nhân viên 
+  { href: "/employe/invoices", label: "Hóa đơn", roles: ["R01", "R03"] }, // Quản lý và kế toán
+  { href: "/employe/reports", label: "Báo cáo", roles: ["R01", "R03"] }, // Quản lý và kế toán
+  { href: "/employe/staff", label: "Nhân viên", roles: ["R01"] }, // Chỉ quản lý
 ];
 
 export default function NhanVienSidebarClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [profile, setProfile] = useState<{ name: string; role: string } | null>(null);
+  const [navItems, setNavItems] = useState<typeof allNavItems>([]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const info = localStorage.getItem("staffInfo");
-      if (info) setProfile(JSON.parse(info));
+      const userInfo = getUserInfo();
+      
+      if (userInfo) {
+        // Lấy role hiện tại
+        const role = userInfo.userRole;
+        
+        // Cấu hình menu dựa theo role
+        const filteredNavs = allNavItems.filter(item => 
+          item.roles.includes(role) || 
+          // Hỗ trợ legacy code nếu cần thiết
+          (role === 'CRW' && item.roles.includes("R02"))
+        );
+        
+        setNavItems(filteredNavs);
+        
+        // Lưu thông tin profile
+        setProfile({
+          name: userInfo.userName || 'Nhân viên',
+          role: getRoleName(role)
+        });
+      }
     }
   }, []);
 
+  // Hàm lấy tên vai trò dựa vào mã vai trò
+  const getRoleName = (roleCode: string) => {
+    switch(roleCode) {
+      case 'R01': return 'Quản lý';
+      case 'R02': return 'Nhân viên';
+      case 'R03': return 'Kế toán';
+      case 'CRW': return 'Nhân viên'; // Legacy code
+      default: return 'Nhân viên';
+    }
+  };
+
   const handleLogout = () => {
-    localStorage.removeItem("staffInfo");
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("token");
+      localStorage.removeItem("userName");
+      localStorage.removeItem("userRole");
+      localStorage.removeItem("userId");
+    }
     router.push("/login");
   };
 
@@ -32,10 +73,11 @@ export default function NhanVienSidebarClient({ children }: { children: React.Re
       <aside style={{width:240, background:'#232946', color:'#fff', display:'flex', flexDirection:'column', justifyContent:'space-between', padding:'32px 0 24px 0', boxShadow:'2px 0 16px #0002'}}>
         <div>
           <div style={{display:'flex', alignItems:'center', gap:10, fontWeight:700, fontSize:'1.3rem', margin:'0 0 32px 32px'}}>
-            <span role="img" aria-label="staff">🧑‍💼</span> Nhân viên
+            <span role="img" aria-label="staff">🧑‍💼</span> 
+            {profile?.role || 'Nhân viên'}
           </div>
           <nav style={{display:'flex', flexDirection:'column', gap:6}}>
-            {navs.map(nav => (
+            {navItems.map(nav => (
               <Link
                 key={nav.href}
                 href={nav.href}

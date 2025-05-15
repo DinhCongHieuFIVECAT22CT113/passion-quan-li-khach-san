@@ -14,6 +14,7 @@ const getAuthHeaders = () => {
   const token = getToken();
   return {
     'Content-Type': 'application/json',
+    'Accept': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 };
@@ -22,6 +23,7 @@ const getAuthHeaders = () => {
 const getFormDataHeaders = () => {
   const token = getToken();
   return {
+    'Accept': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 };
@@ -30,9 +32,22 @@ const getFormDataHeaders = () => {
 const handleResponse = async (response: Response) => {
   if (!response.ok) {
     try {
+      // Thử parse lỗi JSON từ server
       const errorData = await response.json();
       const errorMessage = errorData.message || response.statusText;
       console.error('API error:', errorData);
+      
+      if (response.status === 401) {
+        // Xóa thông tin đăng nhập nếu server báo unauthorized
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('token');
+          localStorage.removeItem('userName');
+          localStorage.removeItem('userRole');
+          localStorage.removeItem('userId');
+        }
+        throw new Error('Không có quyền truy cập hoặc phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+      }
+      
       throw new Error(errorMessage);
     } catch (e) {
       console.error('Response error:', response.status, response.statusText);
@@ -41,7 +56,14 @@ const handleResponse = async (response: Response) => {
       } else if (response.status === 404) {
         throw new Error(`API endpoint không tồn tại (404): ${response.url}`);
       } else if (response.status === 401) {
-        throw new Error('Không có quyền truy cập. Vui lòng đăng nhập lại.');
+        // Xóa thông tin đăng nhập nếu server báo unauthorized
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('token');
+          localStorage.removeItem('userName');
+          localStorage.removeItem('userRole');
+          localStorage.removeItem('userId');
+        }
+        throw new Error('Phiên đăng nhập đã hết hạn hoặc không hợp lệ. Vui lòng đăng nhập lại.');
       } else if (response.status === 403) {
         throw new Error('Bạn không có quyền thực hiện hành động này.');
       } else {
@@ -71,14 +93,23 @@ export const loginUser = async (loginData: UserLoginDto): Promise<UserDto> => {
 
   console.log(`Đang gọi API đăng nhập: ${API_BASE_URL}/Auth/Đăng nhập`, loginData.userName);
   
-  const response = await fetch(`${API_BASE_URL}/Auth/Đăng nhập`, {
-    method: 'POST',
-    mode: 'cors',
-    credentials: 'include',
-    body: formData,
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/Auth/Đăng nhập`, {
+      method: 'POST',
+      mode: 'cors',
+      credentials: 'include',
+      body: formData,
+      headers: {
+        // Không thêm Content-Type vì đang sử dụng FormData
+        'Accept': 'application/json',
+      }
+    });
 
-  return handleResponse(response);
+    return handleResponse(response);
+  } catch (error) {
+    console.error('Lỗi kết nối API:', error);
+    throw new Error('Không thể kết nối đến API. Vui lòng kiểm tra server backend và kết nối mạng.');
+  }
 };
 
 // API Đăng ký - chính xác từ Swagger
@@ -256,4 +287,58 @@ export const getPromotions = async () => {
   });
 
   return handleResponse(response);
+};
+
+// Helper function để tạo request với token và xử lý refresh token khi cần
+const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
+  // Kiểm tra token
+  const token = getToken();
+  
+  // Thiết lập headers
+  const headers = {
+    ...options.headers,
+    'Accept': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+  
+  try {
+    // Thực hiện request
+    const response = await fetch(url, {
+      ...options,
+      headers,
+      mode: 'cors',
+      credentials: 'include',
+    });
+    
+    // Xử lý lỗi 401 (token hết hạn)
+    if (response.status === 401) {
+      // Xóa thông tin người dùng hiện tại
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('token');
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('userId');
+      }
+      
+      // Nếu ở môi trường client, chuyển hướng người dùng đến trang đăng nhập
+      if (typeof window !== 'undefined') {
+        console.log('Phiên đăng nhập hết hạn, chuyển hướng đến trang đăng nhập');
+        window.location.href = '/login';
+      }
+      
+      throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
+    }
+    
+    return response;
+  } catch (error) {
+    console.error('Error in fetchWithAuth:', error);
+    throw error;
+  }
+};
+
+// Hàm để làm mới token (có thể triển khai khi cần)
+const refreshToken = async () => {
+  // Triển khai hàm refresh token khi API hỗ trợ
+  console.log('refreshToken not implemented yet');
+  return null;
 }; 
