@@ -63,7 +63,7 @@ export default function ReviewManager() {
   };
 
   const handleDelete = (id: number) => {
-    if (window.confirm('Are you sure you want to delete this review?')) {
+    if (window.confirm('Bạn có chắc chắn muốn xóa đánh giá này không?')) {
       setReviews(reviews.filter(review => review.id !== id));
     }
   };
@@ -108,9 +108,9 @@ export default function ReviewManager() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2>Review Management</h2>
+        <h2>Quản lý Đánh giá</h2>
         <button className={styles.addBtn} onClick={() => setShowModal(true)}>
-          Add New Review
+          Thêm đánh giá mới
         </button>
       </div>
 
@@ -118,12 +118,12 @@ export default function ReviewManager() {
         <table className={styles.table}>
           <thead>
             <tr>
-              <th>Customer</th>
-              <th>Rating</th>
-              <th>Comment</th>
-              <th>Date</th>
-              <th>Status</th>
-              <th>Actions</th>
+              <th>Khách hàng</th>
+              <th>Đánh giá</th>
+              <th>Nhận xét</th>
+              <th>Ngày</th>
+              <th>Trạng thái</th>
+              <th>Thao tác</th>
             </tr>
           </thead>
           <tbody>
@@ -136,8 +136,8 @@ export default function ReviewManager() {
                 <td>{review.comment}</td>
                 <td>{review.date}</td>
                 <td>
-                  {review.isApproved ? 'Approved' : 'Pending'}
-                  {review.isHidden && ' (Hidden)'}
+                  {review.isApproved ? 'Đã phê duyệt' : 'Chờ duyệt'}
+                  {review.isHidden && ' (Đã ẩn)'}
                 </td>
                 <td>
                   {!review.isApproved && (
@@ -145,26 +145,26 @@ export default function ReviewManager() {
                       className={styles.approveBtn}
                       onClick={() => handleApprove(review.id)}
                     >
-                      Approve
+                      Phê duyệt
                     </button>
                   )}
                   <button
                     className={styles.hideBtn}
                     onClick={() => handleHide(review.id)}
                   >
-                    {review.isHidden ? 'Show' : 'Hide'}
+                    {review.isHidden ? 'Hiện' : 'Ẩn'}
                   </button>
                   <button
                     className={styles.editBtn}
                     onClick={() => handleEdit(review)}
                   >
-                    Edit
+                    sửa
                   </button>
                   <button
                     className={styles.deleteBtn}
                     onClick={() => handleDelete(review.id)}
                   >
-                    Delete
+                    xóa
                   </button>
                 </td>
               </tr>
@@ -176,10 +176,10 @@ export default function ReviewManager() {
       {showModal && (
         <div className={styles.modal}>
           <div className={styles.modalContent}>
-            <h3>{editingReview ? 'Edit Review' : 'Add New Review'}</h3>
+            <h3>{editingReview ? 'Sửa đánh giá' : 'Thêm đánh giá mới'}</h3>
             <form onSubmit={handleSubmit}>
               <div>
-                <label>Customer Name:</label>
+                <label>Tên khách hàng:</label>
                 <input
                   type="text"
                   name="customerName"
@@ -189,7 +189,7 @@ export default function ReviewManager() {
                 />
               </div>
               <div>
-                <label>Rating:</label>
+                <label>Đánh giá:</label>
                 <select
                   name="rating"
                   value={formData.rating}
@@ -198,13 +198,13 @@ export default function ReviewManager() {
                 >
                   {[1, 2, 3, 4, 5].map(num => (
                     <option key={num} value={num}>
-                      {num} {num === 1 ? 'Star' : 'Stars'}
+                      {num} {num === 1 ? 'Sao' : 'Sao'}
                     </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label>Comment:</label>
+                <label>Nhận xét:</label>
                 <textarea
                   name="comment"
                   value={formData.comment}
@@ -220,7 +220,7 @@ export default function ReviewManager() {
                     checked={formData.isApproved}
                     onChange={handleInputChange}
                   />
-                  Approved
+                  Đã phê duyệt
                 </label>
                 <label>
                   <input
@@ -229,12 +229,12 @@ export default function ReviewManager() {
                     checked={formData.isHidden}
                     onChange={handleInputChange}
                   />
-                  Hidden
+                  Đã ẩn
                 </label>
               </div>
               <div className={styles.buttonGroup}>
                 <button type="submit" className={styles.addBtn}>
-                  {editingReview ? 'Update' : 'Add'}
+                  {editingReview ? 'Cập nhật' : 'Thêm'}
                 </button>
                 <button
                   type="button"
@@ -251,7 +251,7 @@ export default function ReviewManager() {
                     });
                   }}
                 >
-                  Cancel
+                  Hủy
                 </button>
               </div>
             </form>
@@ -260,4 +260,4 @@ export default function ReviewManager() {
       )}
     </div>
   );
-} 
+}

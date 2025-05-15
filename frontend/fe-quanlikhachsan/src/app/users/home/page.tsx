@@ -1,26 +1,35 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FaStar, FaHotel, FaUtensils, FaUsers, FaSwimmingPool, FaRing, FaUser } from 'react-icons/fa';
 import styles from './styles.module.css';
 import { useTranslation } from 'react-i18next';
-import { useLanguage } from '../../../app/components/profile/LanguageContext';
+import { useLanguage, LanguageProvider } from '../../../app/components/profile/LanguageContext';
 import i18n from '../../../app/i18n';
-import { useEffect } from 'react';
 
-export default function Home() {
-  const { t, i18n: i18nInstance } = useTranslation();
+function HomeContent() {
+  const { t } = useTranslation();
   const { selectedLanguage } = useLanguage();
   const [adults, setAdults] = useState(2);
   const [children, setChildren] = useState(0);
   const router = useRouter();
 
+  // State to track if language is ready to avoid hydration mismatch
+  const [isLanguageReady, setIsLanguageReady] = useState(false);
+
   useEffect(() => {
-    i18n.changeLanguage(selectedLanguage);
+    i18n.changeLanguage(selectedLanguage).then(() => {
+      setIsLanguageReady(true);
+    });
   }, [selectedLanguage]);
+
+  // If language not ready, render null or loading to avoid hydration mismatch
+  if (!isLanguageReady) {
+    return null;
+  }
 
   const services = [
     {
@@ -282,5 +291,13 @@ export default function Home() {
         <div className={styles.copyright}>{t('about.copyright')}</div>
       </footer>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <LanguageProvider>
+      <HomeContent />
+    </LanguageProvider>
   );
 }

@@ -22,7 +22,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: linear-gradient(90deg, #2563eb 60%, #b8c1ec 100%);
+  background: linear-gradient(90deg, #2563eb 60%, #2563eb 100%);
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -34,7 +34,7 @@
   transition: background 0.2s, box-shadow 0.2s;
 }
 .addBtn:hover {
-  background: linear-gradient(90deg, #1d4ed8 60%, #b8c1ec 100%);
+  background: linear-gradient(90deg, #1d4ed8 60%, #2563eb 100%);
   box-shadow: 0 4px 16px #2563eb33;
 }
 

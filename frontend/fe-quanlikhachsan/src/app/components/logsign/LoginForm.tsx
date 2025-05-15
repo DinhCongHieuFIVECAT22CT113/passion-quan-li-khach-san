@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
@@ -17,10 +17,15 @@ const LoginForm: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isClient, setIsClient] = useState(false); // ✅ Thêm
 
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectUrl = searchParams.get('redirectUrl');
+
+  useEffect(() => {
+    setIsClient(true); // ✅ Đảm bảo đang ở phía client
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,11 +60,11 @@ const LoginForm: React.FC = () => {
           }
         } else {
           const errorData = await response.json();
-          window.alert(errorData.message || 'Đăng nhập thất bại');
+          if (isClient) window.alert(errorData.message || 'Đăng nhập thất bại'); // ✅ Fix
         }
       } catch (error) {
         console.error('Lỗi khi đăng nhập:', error);
-        window.alert('Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại sau.');
+        if (isClient) window.alert('Có lỗi xảy ra khi đăng nhập. Vui lòng thử lại sau.'); // ✅ Fix
       } finally {
         setIsLoading(false);
       }
@@ -90,7 +95,7 @@ const LoginForm: React.FC = () => {
       setShowSuccessModal(true);
     } catch (error) {
       console.error('Lỗi khi gửi yêu cầu khôi phục:', error);
-      window.alert('Có lỗi xảy ra khi gửi yêu cầu. Vui lòng thử lại sau.');
+      if (isClient) window.alert('Có lỗi xảy ra khi gửi yêu cầu. Vui lòng thử lại sau.'); // ✅ Fix
     } finally {
       setIsSending(false);
     }
@@ -158,7 +163,9 @@ const LoginForm: React.FC = () => {
         <button
           type="button"
           className="google-btn"
-          onClick={() => window.open("https://accounts.google.com/signin", "_blank")}
+          onClick={() => {
+            if (isClient) window.open("https://accounts.google.com/signin", "_blank"); // ✅ Fix
+          }}
         >
           Đăng nhập với Google
         </button>
@@ -166,7 +173,9 @@ const LoginForm: React.FC = () => {
         <button
           type="button"
           className="facebook-btn"
-          onClick={() => window.open("https://www.facebook.com/login", "_blank")}
+          onClick={() => {
+            if (isClient) window.open("https://www.facebook.com/login", "_blank"); // ✅ Fix
+          }}
         >
           Đăng nhập với Facebook
         </button>
