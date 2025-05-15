@@ -1,8 +1,9 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { getUserInfo, APP_CONFIG } from '../../lib/config';
+import { useLogout } from '../../lib/hooks';
 
 // Danh sách tất cả các mục menu có thể có
 const allNavItems = [
@@ -17,9 +18,9 @@ const allNavItems = [
 
 export default function NhanVienSidebarClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const router = useRouter();
   const [profile, setProfile] = useState<{ name: string; role: string } | null>(null);
   const [navItems, setNavItems] = useState<typeof allNavItems>([]);
+  const handleLogout = useLogout();
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -56,16 +57,6 @@ export default function NhanVienSidebarClient({ children }: { children: React.Re
       case 'CRW': return 'Nhân viên'; // Legacy code
       default: return 'Nhân viên';
     }
-  };
-
-  const handleLogout = () => {
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("token");
-      localStorage.removeItem("userName");
-      localStorage.removeItem("userRole");
-      localStorage.removeItem("userId");
-    }
-    router.push("/login");
   };
 
   return (

@@ -1,13 +1,25 @@
 'use client';
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import styles from "./AdminLayout.module.css";
 import AuthCheck from '../components/auth/AuthCheck';
-import { APP_CONFIG } from '../../lib/config';
+import { APP_CONFIG, getUserInfo } from '../../lib/config';
+import { useLogout } from '../../lib/hooks';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const [userName, setUserName] = useState<string>('Admin');
+  const handleLogout = useLogout();
+  
+  useEffect(() => {
+    // Lấy thông tin người dùng nếu có
+    const userInfo = getUserInfo();
+    if (userInfo) {
+      setUserName(userInfo.userName || 'Admin');
+    }
+  }, []);
+  
   return (
     <AuthCheck requireAuth={true} requiredRoles={[APP_CONFIG.roles.admin]}>
       <div className={styles.adminContainer}>
@@ -26,6 +38,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link href="/admin/languages" className={`${styles.navLink} ${pathname === '/admin/languages' ? styles.active : ''}`}>Ngôn Ngữ</Link>
             <Link href="/admin/permissions" className={`${styles.navLink} ${pathname === '/admin/permissions' ? styles.active : ''}`}>Phân Quyền</Link>
           </nav>
+          
+          {/* Phần thông tin người dùng và nút đăng xuất */}
+          <div className={styles.userSection}>
+            <div className={styles.userInfo}>
+              <div className={styles.userAvatar}>
+                {userName.charAt(0).toUpperCase()}
+              </div>
+              <div className={styles.userName}>{userName}</div>
+            </div>
+            <button onClick={handleLogout} className={styles.logoutButton}>
+              Đăng xuất
+            </button>
+          </div>
         </aside>
         <main className={styles.mainContent}>
           {children}
