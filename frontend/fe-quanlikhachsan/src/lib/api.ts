@@ -10,8 +10,18 @@ const getToken = () => {
 };
 
 // Helper function để tạo headers với token
-const getAuthHeaders = () => {
+export const getAuthHeaders = (method = 'GET') => {
   const token = getToken();
+  
+  // Với các phương thức GET và OPTIONS, không cần gửi Content-Type
+  if (method === 'GET' || method === 'OPTIONS') {
+    return {
+      'Accept': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
+  }
+  
+  // Các phương thức khác như POST, PUT, DELETE có thể cần Content-Type
   return {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
@@ -20,7 +30,7 @@ const getAuthHeaders = () => {
 };
 
 // Helper function để tạo headers cho form data
-const getFormDataHeaders = () => {
+export const getFormDataHeaders = () => {
   const token = getToken();
   return {
     'Accept': 'application/json',
@@ -29,7 +39,7 @@ const getFormDataHeaders = () => {
 };
 
 // Helper function để xử lý response
-const handleResponse = async (response: Response) => {
+export const handleResponse = async (response: Response) => {
   if (!response.ok) {
     try {
       // Thử parse lỗi JSON từ server
@@ -94,18 +104,18 @@ export const loginUser = async (loginData: UserLoginDto): Promise<UserDto> => {
   console.log(`Đang gọi API đăng nhập: ${API_BASE_URL}/Auth/Đăng nhập`, loginData.userName);
   
   try {
-    const response = await fetch(`${API_BASE_URL}/Auth/Đăng nhập`, {
-      method: 'POST',
-      mode: 'cors',
-      credentials: 'include',
-      body: formData,
+  const response = await fetch(`${API_BASE_URL}/Auth/Đăng nhập`, {
+    method: 'POST',
+    mode: 'cors',
+    credentials: 'include',
+    body: formData,
       headers: {
         // Không thêm Content-Type vì đang sử dụng FormData
         'Accept': 'application/json',
       }
-    });
+  });
 
-    return handleResponse(response);
+  return handleResponse(response);
   } catch (error) {
     console.error('Lỗi kết nối API:', error);
     throw new Error('Không thể kết nối đến API. Vui lòng kiểm tra server backend và kết nối mạng.');
@@ -144,6 +154,7 @@ export const getRooms = async () => {
     method: 'GET',
     mode: 'cors',
     credentials: 'include',
+    headers: getAuthHeaders('GET'),
   });
 
   return handleResponse(response);
@@ -157,6 +168,7 @@ export const getRoomTypes = async () => {
     method: 'GET',
     mode: 'cors',
     credentials: 'include',
+    headers: getAuthHeaders('GET'),
   });
 
   return handleResponse(response);
@@ -190,6 +202,7 @@ export const getCustomerProfile = async (maKh: string) => {
     method: 'GET',
     mode: 'cors',
     credentials: 'include',
+    headers: getAuthHeaders('GET'),
   });
 
   return handleResponse(response);
@@ -224,6 +237,7 @@ export const getBookingHistory = async (maKh: string) => {
     method: 'GET',
     mode: 'cors',
     credentials: 'include',
+    headers: getAuthHeaders('GET'),
   });
 
   // Lọc đặt phòng theo khách hàng (frontend filtering)
@@ -271,6 +285,7 @@ export const getServices = async () => {
     method: 'GET',
     mode: 'cors',
     credentials: 'include',
+    headers: getAuthHeaders('GET'),
   });
 
   return handleResponse(response);
@@ -284,6 +299,7 @@ export const getPromotions = async () => {
     method: 'GET',
     mode: 'cors',
     credentials: 'include',
+    headers: getAuthHeaders('GET'),
   });
 
   return handleResponse(response);
@@ -341,4 +357,209 @@ const refreshToken = async () => {
   // Triển khai hàm refresh token khi API hỗ trợ
   console.log('refreshToken not implemented yet');
   return null;
+};
+
+// API Lấy danh sách hóa đơn - endpoint từ Swagger
+export const getInvoices = async () => {
+  console.log(`Đang gọi API lấy danh sách hóa đơn: ${API_BASE_URL}/HoaDon/Lấy danh sách tất cả hóa đơn`);
+  
+  const response = await fetch(`${API_BASE_URL}/HoaDon/Lấy danh sách tất cả hóa đơn`, {
+    method: 'GET',
+    mode: 'cors',
+    credentials: 'include',
+    headers: getAuthHeaders('GET'),
+  });
+
+  return handleResponse(response);
+};
+
+// API Lấy chi tiết hóa đơn theo ID - endpoint từ Swagger
+export const getInvoiceById = async (maHoaDon: string) => {
+  console.log(`Đang gọi API lấy chi tiết hóa đơn: ${API_BASE_URL}/HoaDon/Tìm hóa đơn theo ID?maHoaDon=${maHoaDon}`);
+  
+  const response = await fetch(`${API_BASE_URL}/HoaDon/Tìm hóa đơn theo ID?maHoaDon=${maHoaDon}`, {
+    method: 'GET',
+    mode: 'cors',
+    credentials: 'include',
+    headers: getAuthHeaders('GET'),
+  });
+
+  return handleResponse(response);
+};
+
+// API Tạo hóa đơn mới - endpoint từ Swagger
+export const createInvoice = async (invoiceData: any) => {
+  console.log(`Đang gọi API tạo hóa đơn mới: ${API_BASE_URL}/HoaDon/Tạo hóa đơn mới`);
+  
+  const formData = new FormData();
+  for (const key in invoiceData) {
+    if (invoiceData[key] !== undefined && invoiceData[key] !== null) {
+      formData.append(key, String(invoiceData[key]));
+    }
+  }
+  
+  const response = await fetch(`${API_BASE_URL}/HoaDon/Tạo hóa đơn mới`, {
+    method: 'POST',
+    mode: 'cors',
+    credentials: 'include',
+    body: formData,
+    headers: getFormDataHeaders(),
+  });
+
+  return handleResponse(response);
+};
+
+// API Cập nhật hóa đơn - endpoint từ Swagger
+export const updateInvoice = async (maHoaDon: string, invoiceData: any) => {
+  console.log(`Đang gọi API cập nhật hóa đơn: ${API_BASE_URL}/HoaDon/Cập nhật hóa đơn?maHoaDon=${maHoaDon}`);
+  
+  const formData = new FormData();
+  for (const key in invoiceData) {
+    if (invoiceData[key] !== undefined && invoiceData[key] !== null) {
+      formData.append(key, String(invoiceData[key]));
+    }
+  }
+  
+  const response = await fetch(`${API_BASE_URL}/HoaDon/Cập nhật hóa đơn?maHoaDon=${maHoaDon}`, {
+    method: 'PUT',
+    mode: 'cors',
+    credentials: 'include',
+    body: formData,
+    headers: getFormDataHeaders(),
+  });
+
+  return handleResponse(response);
+};
+
+// API Xóa hóa đơn - endpoint từ Swagger
+export const deleteInvoice = async (maHoaDon: string) => {
+  console.log(`Đang gọi API xóa hóa đơn: ${API_BASE_URL}/HoaDon/Xóa hóa đơn?maHoaDon=${maHoaDon}`);
+  
+  const response = await fetch(`${API_BASE_URL}/HoaDon/Xóa hóa đơn?maHoaDon=${maHoaDon}`, {
+    method: 'DELETE',
+    mode: 'cors',
+    credentials: 'include',
+    headers: getAuthHeaders('DELETE'),
+  });
+
+  return handleResponse(response);
+};
+
+// API Tính tổng doanh thu theo tháng và năm - endpoint từ Swagger
+export const calculateRevenue = async (thang: number, nam: number) => {
+  console.log(`Đang gọi API tính tổng doanh thu: ${API_BASE_URL}/HoaDon/Tính tổng doanh thu?thang=${thang}&nam=${nam}`);
+  
+  const response = await fetch(`${API_BASE_URL}/HoaDon/Tính tổng doanh thu?thang=${thang}&nam=${nam}`, {
+    method: 'GET',
+    mode: 'cors',
+    credentials: 'include',
+    headers: getAuthHeaders('GET'),
+  });
+
+  return handleResponse(response);
+};
+
+// API để lấy danh sách nhân viên
+export const getStaffs = async () => {
+  console.log(`Đang gọi API lấy danh sách nhân viên: ${API_BASE_URL}/NhanVien/Lấy danh sách tất cả nhân viên`);
+  
+  const response = await fetch(`${API_BASE_URL}/NhanVien/Lấy danh sách tất cả nhân viên`, {
+    method: 'GET',
+    mode: 'cors',
+    credentials: 'include',
+    headers: getAuthHeaders('GET'),
+  });
+
+  return handleResponse(response);
+};
+
+// API để tạo nhân viên mới
+export const createStaff = async (staffData: any) => {
+  console.log(`Đang gọi API tạo nhân viên mới: ${API_BASE_URL}/NhanVien/Tạo nhân viên mới`);
+  
+  const formData = new FormData();
+  for (const key in staffData) {
+    if (staffData[key] !== undefined && staffData[key] !== null) {
+      formData.append(key, String(staffData[key]));
+    }
+  }
+  
+  const response = await fetch(`${API_BASE_URL}/NhanVien/Tạo nhân viên mới`, {
+    method: 'POST',
+    mode: 'cors',
+    credentials: 'include',
+    body: formData,
+    headers: getFormDataHeaders(),
+  });
+
+  return handleResponse(response);
+};
+
+// API để cập nhật nhân viên
+export const updateStaff = async (staffData: any) => {
+  console.log(`Đang gọi API cập nhật nhân viên: ${API_BASE_URL}/NhanVien/Cập nhật nhân viên`);
+  
+  const formData = new FormData();
+  for (const key in staffData) {
+    if (staffData[key] !== undefined && staffData[key] !== null) {
+      formData.append(key, String(staffData[key]));
+    }
+  }
+  
+  const response = await fetch(`${API_BASE_URL}/NhanVien/Cập nhật nhân viên`, {
+    method: 'PUT',
+    mode: 'cors',
+    credentials: 'include',
+    body: formData,
+    headers: getFormDataHeaders(),
+  });
+
+  return handleResponse(response);
+};
+
+// API để xóa nhân viên
+export const deleteStaff = async (maNV: string) => {
+  console.log(`Đang gọi API xóa nhân viên: ${API_BASE_URL}/NhanVien/Xóa nhân viên?id=${maNV}`);
+  
+  const response = await fetch(`${API_BASE_URL}/NhanVien/Xóa nhân viên?id=${maNV}`, {
+    method: 'DELETE',
+    mode: 'cors',
+    credentials: 'include',
+    headers: getAuthHeaders('DELETE'),
+  });
+
+  return handleResponse(response);
+};
+
+// API để lấy danh sách đánh giá
+export const getReviews = async () => {
+  console.log(`Đang gọi API lấy danh sách đánh giá: ${API_BASE_URL}/DanhGia/Lấy danh sách tất cả đánh giá`);
+  
+  const response = await fetch(`${API_BASE_URL}/DanhGia/Lấy danh sách tất cả đánh giá`, {
+    method: 'GET',
+    mode: 'cors',
+    credentials: 'include',
+    headers: getAuthHeaders('GET'),
+  });
+
+  return handleResponse(response);
+};
+
+// API để duyệt đánh giá
+export const approveReview = async (maDG: string, isApproved: boolean) => {
+  console.log(`Đang gọi API duyệt đánh giá: ${API_BASE_URL}/DanhGia/Duyệt đánh giá`);
+  
+  const formData = new FormData();
+  formData.append('maDG', maDG);
+  formData.append('trangThai', isApproved ? 'Đã duyệt' : 'Chưa duyệt');
+  
+  const response = await fetch(`${API_BASE_URL}/DanhGia/Duyệt đánh giá`, {
+    method: 'PUT',
+    mode: 'cors',
+    credentials: 'include',
+    body: formData,
+    headers: getFormDataHeaders(),
+  });
+
+  return handleResponse(response);
 }; 

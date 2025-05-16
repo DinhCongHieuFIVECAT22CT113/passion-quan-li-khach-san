@@ -228,4 +228,42 @@
     padding: 18px 6vw 14px 6vw;
     min-width: 0;
   }
+}
+
+.loading {
+  padding: 20px;
+  text-align: center;
+  color: #4b5563;
+  font-style: italic;
+}
+
+.error {
+  padding: 16px;
+  margin: 20px 0;
+  background: #fee2e2;
+  color: #b91c1c;
+  border-radius: 8px;
+  border: 1px solid #fca5a5;
+  font-weight: 500;
+}
+
+.approved {
+  background-color: #d1fae5;
+  color: #047857;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.pending {
+  background-color: #fef3c7;
+  color: #d97706;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.hidden {
+  color: #6b7280;
+  font-style: italic;
 } 

@@ -152,4 +152,107 @@
     padding: 18px 8px 12px 8px;
     min-width: 90vw;
   }
+}
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+  font-size: 1.2rem;
+  color: #4b5563;
+}
+.error {
+  background-color: #fee2e2;
+  color: #b91c1c;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+.search {
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  font-size: 1rem;
+  background: #f9fafb;
+  min-width: 180px;
+  transition: border-color 0.2s;
+}
+.search:focus {
+  outline: none;
+  border-color: #2563eb;
+}
+.status-cancelled {
+  background: #e5e7eb;
+  color: #4b5563;
+}
+.status-pending {
+  background: #dbeafe;
+  color: #1e40af;
+}
+.bookingDetails {
+  margin-bottom: 20px;
+  background: #f9fafb;
+  padding: 16px;
+  border-radius: 8px;
+}
+.detailRow {
+  display: flex;
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e5e7eb;
+}
+.detailRow:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+.detailLabel {
+  font-weight: 600;
+  width: 120px;
+  color: #4b5563;
+}
+.detailValue {
+  flex: 1;
+}
+.cancelBtn {
+  background: #9ca3af;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 0.97em;
+  transition: background 0.2s;
+}
+.cancelBtn:hover {
+  background: #6b7280;
+}
+.buttonGroup {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.modal form div {
+  margin-bottom: 10px;
+}
+.modal form label {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 500;
+  color: #374151;
+}
+.modal form textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+  font-size: 1em;
+  background: #f9fafb;
+  resize: vertical;
+  min-height: 80px;
+}
+.modal form textarea:focus {
+  outline: none;
+  border-color: #2563eb;
 } 

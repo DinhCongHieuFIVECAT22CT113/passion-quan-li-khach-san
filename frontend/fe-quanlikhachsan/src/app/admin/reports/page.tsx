@@ -14,6 +14,7 @@ import {
   ChartOptions
 } from 'chart.js';
 import styles from './Reports.module.css';
+import { calculateRevenue, getInvoices } from '../../../lib/api';
 
 // Đăng ký các components của ChartJS
 ChartJS.register(
@@ -37,6 +38,7 @@ export default function RevenueReport() {
   const [endDate, setEndDate] = useState<string>('');
   const [revenueData, setRevenueData] = useState<RevenueData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Khởi tạo ngày bắt đầu và kết thúc mặc định
   useEffect(() => {
@@ -55,43 +57,104 @@ export default function RevenueReport() {
     }
   }, [startDate, endDate, timeRange]);
 
-  // Hàm lấy dữ liệu doanh thu (sẽ được thay thế bằng API call thực tế)
+  // Hàm lấy dữ liệu doanh thu từ API
   const fetchRevenueData = async () => {
     setIsLoading(true);
+    setError(null);
     try {
-      // TODO: Thay thế bằng API call thực tế
-      const mockData = generateMockData();
-      setRevenueData(mockData);
-    } catch (error) {
+      if (timeRange === 'month') {
+        // Trường hợp theo tháng
+        const startMonth = new Date(startDate).getMonth() + 1;
+        const startYear = new Date(startDate).getFullYear();
+        const endMonth = new Date(endDate).getMonth() + 1;
+        const endYear = new Date(endDate).getFullYear();
+        
+        const data: RevenueData[] = [];
+        
+        // Tạo mảng các tháng cần lấy dữ liệu
+        let currentMonth = startMonth;
+        let currentYear = startYear;
+        
+        while (
+          new Date(currentYear, currentMonth - 1, 1) <= 
+          new Date(endYear, endMonth - 1, 1)
+        ) {
+          try {
+            // Gọi API tính doanh thu theo tháng
+            const monthlyRevenue = await calculateRevenue(currentMonth, currentYear);
+            
+            data.push({
+              date: `${currentYear}-${currentMonth.toString().padStart(2, '0')}-01`,
+              amount: monthlyRevenue || 0
+            });
+          } catch (err) {
+            console.error(`Lỗi khi lấy doanh thu tháng ${currentMonth}/${currentYear}:`, err);
+            data.push({
+              date: `${currentYear}-${currentMonth.toString().padStart(2, '0')}-01`,
+              amount: 0
+            });
+          }
+          
+          // Tăng tháng
+          if (currentMonth === 12) {
+            currentMonth = 1;
+            currentYear++;
+          } else {
+            currentMonth++;
+          }
+        }
+        
+        setRevenueData(data);
+      } else {
+        // Trường hợp theo ngày - lấy tất cả hóa đơn và tính toán
+        const invoices = await getInvoices();
+        
+        // Lọc hóa đơn trong khoảng thời gian đã chọn
+        const startDateObj = new Date(startDate);
+        const endDateObj = new Date(endDate);
+        endDateObj.setHours(23, 59, 59); // Đặt thời gian cuối ngày
+        
+        // Tạo mảng các ngày trong khoảng
+        const dateArray: RevenueData[] = [];
+        const currentDate = new Date(startDateObj);
+        
+        while (currentDate <= endDateObj) {
+          dateArray.push({
+            date: currentDate.toISOString().split('T')[0],
+            amount: 0
+          });
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+        
+        // Tính tổng doanh thu cho từng ngày
+        invoices.forEach((invoice: any) => {
+          if (
+            invoice.ngayTao && 
+            invoice.trangThai === "Đã thanh toán" &&
+            invoice.tongTien
+          ) {
+            const invoiceDate = new Date(invoice.ngayTao);
+            const dateString = invoiceDate.toISOString().split('T')[0];
+            
+            // Kiểm tra nếu ngày nằm trong khoảng đã chọn
+            if (invoiceDate >= startDateObj && invoiceDate <= endDateObj) {
+              // Tìm ngày trong mảng và cộng dồn doanh thu
+              const dateIndex = dateArray.findIndex(item => item.date === dateString);
+              if (dateIndex !== -1) {
+                dateArray[dateIndex].amount += invoice.tongTien;
+              }
+            }
+          }
+        });
+        
+        setRevenueData(dateArray);
+      }
+    } catch (error: any) {
+      setError(error.message || "Có lỗi xảy ra khi tải dữ liệu doanh thu");
       console.error('Error fetching revenue data:', error);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Hàm tạo dữ liệu mẫu
-  const generateMockData = (): RevenueData[] => {
-    const data: RevenueData[] = [];
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    
-    if (timeRange === 'day') {
-      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-        data.push({
-          date: d.toISOString().split('T')[0],
-          amount: Math.floor(Math.random() * 10000000) + 5000000
-        });
-      }
-    } else {
-      for (let d = new Date(start); d <= end; d.setMonth(d.getMonth() + 1)) {
-        data.push({
-          date: d.toISOString().split('T')[0],
-          amount: Math.floor(Math.random() * 100000000) + 150000000
-        });
-      }
-    }
-    
-    return data;
   };
 
   // Chuẩn bị dữ liệu cho biểu đồ
@@ -100,7 +163,7 @@ export default function RevenueReport() {
       const date = new Date(item.date);
       return timeRange === 'day' 
         ? `${date.getDate()}/${date.getMonth() + 1}`
-        : `Tháng ${date.getMonth() + 1}`;
+        : `Tháng ${date.getMonth() + 1}/${date.getFullYear()}`;
     }),
     datasets: [{
       label: `Doanh thu theo ${timeRange === 'day' ? 'ngày' : 'tháng'} (VNĐ)`,
@@ -137,7 +200,7 @@ export default function RevenueReport() {
   // Tính toán các thống kê
   const totalRevenue = revenueData.reduce((sum, item) => sum + item.amount, 0);
   const averageRevenue = totalRevenue / (revenueData.length || 1);
-  const maxRevenue = Math.max(...revenueData.map(item => item.amount));
+  const maxRevenue = Math.max(...(revenueData.map(item => item.amount).length ? revenueData.map(item => item.amount) : [0]));
 
   return (
     <div className={styles.container}>
@@ -176,6 +239,8 @@ export default function RevenueReport() {
 
       {isLoading ? (
         <div className={styles.loading}>Đang tải dữ liệu...</div>
+      ) : error ? (
+        <div className={styles.error}>Lỗi: {error}</div>
       ) : (
         <>
           <div className={styles.chartContainer}>

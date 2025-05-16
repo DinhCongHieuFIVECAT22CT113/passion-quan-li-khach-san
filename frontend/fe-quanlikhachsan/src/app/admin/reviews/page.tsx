@@ -1,59 +1,96 @@
 'use client';
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./ReviewManager.module.css";
+import { getReviews, approveReview } from "../../../lib/api";
 
 interface Review {
-  id: number;
-  customerName: string;
-  rating: number;
-  comment: string;
-  date: string;
-  isApproved: boolean;
-  isHidden: boolean;
+  maDG: string;
+  maKH: string;
+  tenKhachHang?: string;
+  danhGia: number;
+  noiDung: string;
+  ngayTao: string;
+  trangThai: string;
+  anHien: boolean;
 }
 
 export default function ReviewManager() {
-  const [reviews, setReviews] = useState<Review[]>([
-    {
-      id: 1,
-      customerName: 'John Doe',
-      rating: 5,
-      comment: 'Great experience! The staff was very helpful.',
-      date: '2024-03-15',
-      isApproved: true,
-      isHidden: false
-    },
-    {
-      id: 2,
-      customerName: 'Jane Smith',
-      rating: 4,
-      comment: 'Nice hotel but the room was a bit small.',
-      date: '2024-03-14',
-      isApproved: false,
-      isHidden: false
-    }
-  ]);
-
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editingReview, setEditingReview] = useState<Review | null>(null);
   const [formData, setFormData] = useState<Partial<Review>>({
-    customerName: '',
-    rating: 5,
-    comment: '',
-    isApproved: false,
-    isHidden: false
+    tenKhachHang: '',
+    danhGia: 5,
+    noiDung: '',
+    trangThai: 'Chưa duyệt',
+    anHien: false
   });
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleApprove = (id: number) => {
-    setReviews(reviews.map(review => 
-      review.id === id ? { ...review, isApproved: true } : review
-    ));
+  // Lấy danh sách đánh giá từ API
+  useEffect(() => {
+    const fetchReviews = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const data = await getReviews();
+        
+        // Thêm tên khách hàng nếu không có
+        const reviewsWithNames = data.map((review: Review) => {
+          if (!review.tenKhachHang) {
+            return {
+              ...review,
+              tenKhachHang: `Khách hàng ${review.maKH}`
+            };
+          }
+          return review;
+        });
+        
+        setReviews(reviewsWithNames);
+      } catch (err: any) {
+        setError(err.message || "Có lỗi xảy ra khi tải dữ liệu đánh giá");
+        console.error("Error fetching reviews:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchReviews();
+  }, []);
+
+  const handleApprove = async (maDG: string) => {
+    try {
+      await approveReview(maDG, true);
+      setReviews(reviews.map(review => 
+        review.maDG === maDG ? { ...review, trangThai: 'Đã duyệt' } : review
+      ));
+    } catch (err: any) {
+      alert(`Lỗi khi duyệt đánh giá: ${err.message}`);
+      console.error("Error approving review:", err);
+    }
   };
 
-  const handleHide = (id: number) => {
-    setReviews(reviews.map(review => 
-      review.id === id ? { ...review, isHidden: !review.isHidden } : review
-    ));
+  const handleHide = async (review: Review) => {
+    try {
+      // Tạo đối tượng để cập nhật trạng thái ẩn/hiện
+      const updatedReview = {
+        ...review,
+        anHien: !review.anHien
+      };
+      
+      // Gọi API cập nhật đánh giá (tùy thuộc vào backend)
+      // Điều này sẽ phụ thuộc vào cách API của bạn xử lý việc ẩn/hiện đánh giá
+      // await updateReview(updatedReview);
+      
+      // Cập nhật state
+      setReviews(reviews.map(r => 
+        r.maDG === review.maDG ? updatedReview : r
+      ));
+    } catch (err: any) {
+      alert(`Lỗi khi thay đổi trạng thái hiển thị: ${err.message}`);
+      console.error("Error toggling review visibility:", err);
+    }
   };
 
   const handleEdit = (review: Review) => {
@@ -62,39 +99,48 @@ export default function ReviewManager() {
     setShowModal(true);
   };
 
-  const handleDelete = (id: number) => {
-    if (window.confirm('Are you sure you want to delete this review?')) {
-      setReviews(reviews.filter(review => review.id !== id));
+  const handleDelete = async (maDG: string) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa đánh giá này?')) {
+      try {
+        // API xóa đánh giá (cần thêm vào API.ts)
+        // await deleteReview(maDG);
+        
+        // Cập nhật state
+        setReviews(reviews.filter(review => review.maDG !== maDG));
+      } catch (err: any) {
+        alert(`Lỗi khi xóa đánh giá: ${err.message}`);
+        console.error("Error deleting review:", err);
+      }
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingReview) {
-      setReviews(reviews.map(review => 
-        review.id === editingReview.id ? { ...review, ...formData } : review
-      ));
-    } else {
-      const newReview: Review = {
-        id: reviews.length + 1,
-        customerName: formData.customerName || '',
-        rating: formData.rating || 5,
-        comment: formData.comment || '',
-        date: new Date().toISOString().split('T')[0],
-        isApproved: formData.isApproved || false,
-        isHidden: formData.isHidden || false
-      };
-      setReviews([...reviews, newReview]);
+    try {
+      if (editingReview) {
+        // Cập nhật đánh giá
+        // await updateReview(formData);
+        
+        setReviews(reviews.map(review => 
+          review.maDG === editingReview.maDG ? { ...review, ...formData } : review
+        ));
+      } else {
+        // Thêm đánh giá mới (thường không cần thiết vì đánh giá do khách hàng tạo)
+        alert("Chức năng thêm đánh giá không được hỗ trợ. Đánh giá thường do khách hàng tạo.");
+      }
+      setShowModal(false);
+      setEditingReview(null);
+      setFormData({
+        tenKhachHang: '',
+        danhGia: 5,
+        noiDung: '',
+        trangThai: 'Chưa duyệt',
+        anHien: false
+      });
+    } catch (err: any) {
+      alert(`Lỗi: ${err.message}`);
+      console.error("Error updating review:", err);
     }
-    setShowModal(false);
-    setEditingReview(null);
-    setFormData({
-      customerName: '',
-      rating: 5,
-      comment: '',
-      isApproved: false,
-      isHidden: false
-    });
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -108,150 +154,163 @@ export default function ReviewManager() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h2>Review Management</h2>
-        <button className={styles.addBtn} onClick={() => setShowModal(true)}>
-          Add New Review
-        </button>
+        <h2>Quản lý đánh giá</h2>
       </div>
 
-      <div style={{ overflowX: 'auto' }}>
-        <table className={styles.table}>
-          <thead>
-            <tr>
-              <th>Customer</th>
-              <th>Rating</th>
-              <th>Comment</th>
-              <th>Date</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {reviews.map(review => (
-              <tr key={review.id}>
-                <td>{review.customerName}</td>
-                <td className={styles.rating}>
-                  {'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
-                </td>
-                <td>{review.comment}</td>
-                <td>{review.date}</td>
-                <td>
-                  {review.isApproved ? 'Approved' : 'Pending'}
-                  {review.isHidden && ' (Hidden)'}
-                </td>
-                <td>
-                  {!review.isApproved && (
-                    <button
-                      className={styles.approveBtn}
-                      onClick={() => handleApprove(review.id)}
-                    >
-                      Approve
-                    </button>
-                  )}
-                  <button
-                    className={styles.hideBtn}
-                    onClick={() => handleHide(review.id)}
-                  >
-                    {review.isHidden ? 'Show' : 'Hide'}
-                  </button>
-                  <button
-                    className={styles.editBtn}
-                    onClick={() => handleEdit(review)}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    className={styles.deleteBtn}
-                    onClick={() => handleDelete(review.id)}
-                  >
-                    Delete
-                  </button>
-                </td>
+      {isLoading && <div className={styles.loading}>Đang tải dữ liệu đánh giá...</div>}
+      {error && <div className={styles.error}>Lỗi: {error}</div>}
+      
+      {!isLoading && !error && (
+        <div style={{ overflowX: 'auto' }}>
+          <table className={styles.table}>
+            <thead>
+              <tr>
+                <th>Mã ĐG</th>
+                <th>Khách hàng</th>
+                <th>Đánh giá</th>
+                <th>Nội dung</th>
+                <th>Ngày tạo</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {reviews.length === 0 ? (
+                <tr>
+                  <td colSpan={7} style={{textAlign: 'center', padding: '16px'}}>Không có dữ liệu đánh giá</td>
+                </tr>
+              ) : (
+                reviews.map(review => (
+                  <tr key={review.maDG}>
+                    <td>{review.maDG}</td>
+                    <td>{review.tenKhachHang || `Khách hàng ${review.maKH}`}</td>
+                    <td className={styles.rating}>
+                      {'★'.repeat(review.danhGia)}{'☆'.repeat(5 - review.danhGia)}
+                    </td>
+                    <td>{review.noiDung}</td>
+                    <td>{new Date(review.ngayTao).toLocaleDateString('vi-VN')}</td>
+                    <td>
+                      <span className={
+                        review.trangThai === 'Đã duyệt' ? styles.approved :
+                        review.trangThai === 'Chưa duyệt' ? styles.pending :
+                        ''
+                      }>
+                        {review.trangThai}
+                      </span>
+                      {review.anHien && <span className={styles.hidden}> (Đã ẩn)</span>}
+                    </td>
+                    <td>
+                      {review.trangThai !== 'Đã duyệt' && (
+                        <button
+                          className={styles.approveBtn}
+                          onClick={() => handleApprove(review.maDG)}
+                        >
+                          Duyệt
+                        </button>
+                      )}
+                      <button
+                        className={styles.hideBtn}
+                        onClick={() => handleHide(review)}
+                      >
+                        {review.anHien ? 'Hiện' : 'Ẩn'}
+                      </button>
+                      <button
+                        className={styles.editBtn}
+                        onClick={() => handleEdit(review)}
+                      >
+                        Sửa
+                      </button>
+                      <button
+                        className={styles.deleteBtn}
+                        onClick={() => handleDelete(review.maDG)}
+                      >
+                        Xóa
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {showModal && (
         <div className={styles.modal}>
           <div className={styles.modalContent}>
-            <h3>{editingReview ? 'Edit Review' : 'Add New Review'}</h3>
+            <h3>{editingReview ? 'Sửa đánh giá' : 'Thêm đánh giá'}</h3>
             <form onSubmit={handleSubmit}>
               <div>
-                <label>Customer Name:</label>
+                <label>Khách hàng:</label>
                 <input
                   type="text"
-                  name="customerName"
-                  value={formData.customerName}
+                  name="tenKhachHang"
+                  value={formData.tenKhachHang || ''}
                   onChange={handleInputChange}
                   required
+                  readOnly={true}
                 />
               </div>
               <div>
-                <label>Rating:</label>
+                <label>Đánh giá:</label>
                 <select
-                  name="rating"
-                  value={formData.rating}
+                  name="danhGia"
+                  value={formData.danhGia}
                   onChange={handleInputChange}
                   required
                 >
                   {[1, 2, 3, 4, 5].map(num => (
                     <option key={num} value={num}>
-                      {num} {num === 1 ? 'Star' : 'Stars'}
+                      {num} {num === 1 ? 'sao' : 'sao'}
                     </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label>Comment:</label>
+                <label>Nội dung:</label>
                 <textarea
-                  name="comment"
-                  value={formData.comment}
+                  name="noiDung"
+                  value={formData.noiDung || ''}
                   onChange={handleInputChange}
+                  rows={5}
                   required
-                />
+                ></textarea>
+              </div>
+              <div>
+                <label>Trạng thái:</label>
+                <select
+                  name="trangThai"
+                  value={formData.trangThai}
+                  onChange={handleInputChange}
+                >
+                  <option value="Chưa duyệt">Chưa duyệt</option>
+                  <option value="Đã duyệt">Đã duyệt</option>
+                </select>
               </div>
               <div className={styles.checkboxGroup}>
                 <label>
                   <input
                     type="checkbox"
-                    name="isApproved"
-                    checked={formData.isApproved}
+                    name="anHien"
+                    checked={formData.anHien}
                     onChange={handleInputChange}
                   />
-                  Approved
-                </label>
-                <label>
-                  <input
-                    type="checkbox"
-                    name="isHidden"
-                    checked={formData.isHidden}
-                    onChange={handleInputChange}
-                  />
-                  Hidden
+                  Ẩn đánh giá này
                 </label>
               </div>
-              <div className={styles.buttonGroup}>
-                <button type="submit" className={styles.addBtn}>
-                  {editingReview ? 'Update' : 'Add'}
+              <div className={styles.formActions}>
+                <button type="submit" className={styles.submitBtn}>
+                  {editingReview ? 'Lưu thay đổi' : 'Thêm đánh giá'}
                 </button>
                 <button
                   type="button"
-                  className={styles.hideBtn}
+                  className={styles.cancelBtn}
                   onClick={() => {
                     setShowModal(false);
                     setEditingReview(null);
-                    setFormData({
-                      customerName: '',
-                      rating: 5,
-                      comment: '',
-                      isApproved: false,
-                      isHidden: false
-                    });
                   }}
                 >
-                  Cancel
+                  Hủy
                 </button>
               </div>
             </form>
