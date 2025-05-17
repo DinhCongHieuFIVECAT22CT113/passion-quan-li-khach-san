@@ -45,7 +45,7 @@
 /* Hero Section */
 .hero {
   height: 60vh;
-  background-image: url('/images/booking-hero.jpg');
+  background-image: url('/heros/booking-hero.jpg');
   background-size: cover;
   background-position: center;
   display: flex;
@@ -242,17 +242,6 @@
 .bookNowBtn:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-/* Map Section */
-.mapSection {
-  padding: 4rem;
-}
-
-.mapSection h2 {
-  font-size: 1.5rem;
-  color: #333;
-  margin-bottom: 1rem;
 }
 
 /* Footer */

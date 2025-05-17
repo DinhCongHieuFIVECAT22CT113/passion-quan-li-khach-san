@@ -1,9 +1,8 @@
 /* ===== Base Styles ===== */
 .pageContainer {
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding-top: 80px; /* Add padding for fixed header */
+  min-height: 100vh;
   font-family: 'Poppins', sans-serif;
   color: #333;
   background-color: #f8f9fa;
@@ -86,15 +85,19 @@
 
 /* ===== Hero Section ===== */
 .heroSection {
-  height: 50vh;
-  min-height: 400px;
   position: relative;
-  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/images/rooms-hero.jpg');
+  height: 60vh;
+  min-height: 400px;
+  max-height: 600px;
+  background-image: url('/heros/room-hero.jpg');
   background-size: cover;
   background-position: center;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-top: 70px;
+  padding: 1rem;
+  text-align: center;
   color: white;
 }
 
@@ -291,7 +294,7 @@
 
 /* ===== Main Content ===== */
 .mainContent {
-  max-width: 1200px;
+  max-width: 1600px; /* Tăng max-width để có thêm không gian */
   margin: 0 auto;
   padding: 2rem;
   flex: 1;
@@ -355,16 +358,57 @@
 /* ===== Room Grid ===== */
 .roomGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(5, 1fr); /* Giảm số cột xuống 5 để có thêm không gian */
   gap: 2rem;
+  width: 100%;
 }
 
+/* Đặt kích thước tối thiểu cho card */
 .roomCard {
   background-color: white;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
   transition: all 0.3s ease;
+  min-width: 280px; /* Đảm bảo card không bị co nhỏ quá */
+}
+
+/* Responsive adjustments */
+@media (max-width: 1440px) {
+  .mainContent {
+    max-width: 1200px; /* Giảm max-width trên màn hình nhỏ hơn */
+  }
+  .roomGrid {
+    grid-template-columns: repeat(4, 1fr); /* 4 cột */
+  }
+}
+
+@media (max-width: 1024px) {
+  .mainContent {
+    max-width: 900px;
+  }
+  .roomGrid {
+    grid-template-columns: repeat(3, 1fr); /* 3 cột */
+  }
+}
+
+@media (max-width: 768px) {
+  .mainContent {
+    max-width: 100%; /* Full width trên màn hình nhỏ */
+    padding: 1rem;
+  }
+  .roomGrid {
+    grid-template-columns: repeat(2, 1fr); /* 2 cột */
+  }
+}
+
+@media (max-width: 480px) {
+  .roomGrid {
+    grid-template-columns: 1fr; /* 1 cột */
+  }
+  .roomCard {
+    min-width: 100%; /* Card chiếm toàn bộ chiều rộng trên mobile */
+  }
 }
 
 .roomCard:hover {
@@ -643,6 +687,25 @@
   background-color: #7d6942;
 }
 
+/* ===== Nút Áp dụng trong bộ lọc ===== */
+.applyButton {
+  background-color: #9c8250;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 0.8rem 1.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.applyButton:hover {
+  background-color: #7d6942;
+  transform: translateY(-2px);
+}
+
 /* ===== Responsive Design ===== */
 @media (max-width: 1024px) {
   .footerContent {
@@ -682,14 +745,6 @@
     flex-direction: column;
   }
   
-  .roomGrid {
-    grid-template-columns: 1fr;
-  }
-  
-  .filterGrid {
-    grid-template-columns: 1fr;
-  }
-  
   .footerLinks {
     grid-template-columns: 1fr;
     gap: 1.5rem;
@@ -724,4 +779,4 @@
     width: 100%;
     text-align: center;
   }
-} 
+}

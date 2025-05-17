@@ -10,9 +10,10 @@ import { useLanguage } from '../../components/profile/LanguageContext';
 import i18n from '../../i18n';
 import { API_BASE_URL } from '../../../lib/config';
 import Header from '../../components/layout/Header';
+import Footer from '../../components/layout/Footer';
 
 interface Promotion {
-  maKhuyenMai: string;
+  maMK: string;
   tenKhuyenMai: string;
   moTa: string;
   ngayBatDau: string;
@@ -68,16 +69,16 @@ export default function PromotionsPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const savePromotion = (maKhuyenMai: string) => {
+  const savePromotion = (maMK: string) => {
     const updatedSavedPromotions = [...savedPromotions];
     
-    if (savedPromotions.includes(maKhuyenMai)) {
+    if (savedPromotions.includes(maMK)) {
       // Nếu đã lưu, xóa khỏi danh sách
-      const index = updatedSavedPromotions.indexOf(maKhuyenMai);
+      const index = updatedSavedPromotions.indexOf(maMK);
       updatedSavedPromotions.splice(index, 1);
     } else {
       // Nếu chưa lưu, thêm vào danh sách
-      updatedSavedPromotions.push(maKhuyenMai);
+      updatedSavedPromotions.push(maMK);
     }
     
     setSavedPromotions(updatedSavedPromotions);
@@ -126,7 +127,7 @@ export default function PromotionsPage() {
     if (filter === 'active') {
       return isPromotionActive(promotion);
     } else if (filter === 'saved') {
-      return savedPromotions.includes(promotion.maKhuyenMai);
+      return savedPromotions.includes(promotion.maMK);
     } else {
       return true; // 'all'
     }
@@ -228,10 +229,10 @@ export default function PromotionsPage() {
                     </button>
                   </div>
                   <button 
-                    onClick={() => savePromotion(selectedPromotion.maKhuyenMai)} 
-                    className={`${styles.saveButton} ${savedPromotions.includes(selectedPromotion.maKhuyenMai) ? styles.saved : ''}`}
+                    onClick={() => savePromotion(selectedPromotion.maMK)} 
+                    className={`${styles.saveButton} ${savedPromotions.includes(selectedPromotion.maMK) ? styles.saved : ''}`}
                   >
-                    {savedPromotions.includes(selectedPromotion.maKhuyenMai) ? 'Đã lưu' : 'Lưu mã'}
+                    {savedPromotions.includes(selectedPromotion.maMK) ? 'Đã lưu' : 'Lưu mã'}
                   </button>
                 </div>
               </div>
@@ -243,10 +244,10 @@ export default function PromotionsPage() {
                 <div className={styles.termsContent}>
                   <p>{selectedPromotion.dieuKien || 'Áp dụng cho tất cả các đặt phòng trong thời gian khuyến mãi.'}</p>
                   <ul>
-                    <li>Chỉ áp dụng cho đặt phòng trực tuyến</li>
-                    <li>Không áp dụng đồng thời với các khuyến mãi khác</li>
-                    <li>Thời gian áp dụng có thể thay đổi mà không báo trước</li>
-                    <li>Mỗi khách hàng chỉ được sử dụng một lần</li>
+                    <li key="online-booking">Chỉ áp dụng cho đặt phòng trực tuyến</li>
+                    <li key="no-combine">Không áp dụng đồng thời với các khuyến mãi khác</li>
+                    <li key="time-change">Thời gian áp dụng có thể thay đổi mà không báo trước</li>
+                    <li key="one-per-customer">Mỗi khách hàng chỉ được sử dụng một lần</li>
                   </ul>
                 </div>
               </div>
@@ -254,10 +255,10 @@ export default function PromotionsPage() {
               <div className={styles.howToUse}>
                 <h3>Cách sử dụng mã giảm giá</h3>
                 <ol>
-                  <li>Chọn phòng và dịch vụ bạn muốn đặt</li>
-                  <li>Nhập mã giảm giá tại trang thanh toán</li>
-                  <li>Giá tiền sẽ được giảm tự động theo phần trăm khuyến mãi</li>
-                  <li>Hoàn tất quá trình đặt phòng</li>
+                  <li key="step-1">Chọn phòng và dịch vụ bạn muốn đặt</li>
+                  <li key="step-2">Nhập mã giảm giá tại trang thanh toán</li>
+                  <li key="step-3">Giá tiền sẽ được giảm tự động theo phần trăm khuyến mãi</li>
+                  <li key="step-4">Hoàn tất quá trình đặt phòng</li>
                 </ol>
               </div>
               
@@ -300,7 +301,7 @@ export default function PromotionsPage() {
               {filteredPromotions.length > 0 ? (
                 filteredPromotions.map((promotion) => (
                   <div 
-                    key={promotion.maKhuyenMai} 
+                    key={promotion.maMK} //  Add key here!  This is crucial.
                     className={styles.promotionCard}
                     onClick={() => handlePromotionClick(promotion)}
                   >
@@ -318,7 +319,7 @@ export default function PromotionsPage() {
                       <div className={`${styles.promotionStatus} ${isPromotionActive(promotion) ? styles.active : styles.expired}`}>
                         {isPromotionActive(promotion) ? 'Đang áp dụng' : 'Hết hạn'}
                       </div>
-                      {savedPromotions.includes(promotion.maKhuyenMai) && (
+                      {savedPromotions.includes(promotion.maMK) && (
                         <div className={styles.savedBadge}>
                           <FaCheck />
                         </div>
@@ -370,43 +371,7 @@ export default function PromotionsPage() {
       </main>
       
       {/* Footer */}
-      <footer className={styles.footer}>
-        <div className={styles.footerContent}>
-          <div className={styles.footerLogo}>
-            <Image src="/images/logo.png" alt="Logo" width={150} height={50} />
-            <p>Trải nghiệm lưu trú đẳng cấp và sang trọng</p>
-          </div>
-          
-          <div className={styles.footerLinks}>
-            <div className={styles.linkGroup}>
-              <h4>Liên kết</h4>
-              <Link href="/users/home">Trang chủ</Link>
-              <Link href="/users/about">Giới thiệu</Link>
-              <Link href="/users/rooms">Phòng</Link>
-              <Link href="/users/services">Dịch vụ</Link>
-              <Link href="/users/promotions">Khuyến mãi</Link>
-            </div>
-            
-            <div className={styles.linkGroup}>
-              <h4>Chính sách</h4>
-              <Link href="/privacy">Bảo mật</Link>
-              <Link href="/terms">Điều khoản</Link>
-              <Link href="/faq">FAQ</Link>
-            </div>
-            
-            <div className={styles.linkGroup}>
-              <h4>Liên hệ</h4>
-              <p>Email: info@hotel.com</p>
-              <p>Phone: +84 123 456 789</p>
-              <p>Address: 123 Street, City</p>
-            </div>
-          </div>
-        </div>
-        
-        <div className={styles.copyright}>
-          <p>&copy; {new Date().getFullYear()} Luxury Hotel. All rights reserved.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
-} 
+}

@@ -9,6 +9,7 @@ import { useLanguage } from '../../../app/components/profile/LanguageContext';
 import i18n from '../../../app/i18n';
 import { useEffect, useState } from 'react';
 import Header from '../../components/layout/Header';
+import Footer from '../../components/layout/Footer';
 
 export default function ExplorePage() {
   const { t, i18n: i18nInstance } = useTranslation();
@@ -25,19 +26,19 @@ export default function ExplorePage() {
       id: 1,
       title: t('explore.luxuriousRoom'),
       description: t('explore.luxuriousRoomDesc'),
-      image: '/images/luxurious-room.jpg',
+      image: '/images/reviews/room.jpg',
     },
     {
       id: 2,
       title: t('explore.gym'),
       description: t('explore.gymDesc'),
-      image: '/images/gym.jpg',
+      image: '/images/reviews/gym.jpg',
     },
     {
       id: 3,
       title: t('explore.restaurant'),
       description: t('explore.restaurantDesc'),
-      image: '/images/restaurant.jpg',
+      image: '/images/reviews/restaurant.jpg',
     },
   ];
 
@@ -89,39 +90,7 @@ export default function ExplorePage() {
       </section>
 
       {/* Footer */}
-      <footer className={styles.footer}>
-        <div className={styles.footerContent}>
-          <div className={styles.newsletter}>
-            <h3>{t('about.subscribe')}</h3>
-            <div className={styles.subscribeForm}>
-              <input type="email" placeholder={t('about.subscribePlaceholder')} />
-              <button>{t('about.subscribeButton')}</button>
-            </div>
-          </div>
-          <div className={styles.footerLogo}>
-            <Image src="/images/hotel-logo.png" alt="Logo Khách sạn" width={150} height={60} />
-          </div>
-          <div className={styles.footerLinks}>
-            <div>
-              <h4>{t('about.footerAbout')}</h4>
-              <Link href="/location">{t('about.location')}</Link>
-            </div>
-            <div>
-              <h4>{t('about.support')}</h4>
-              <Link href="/faq">{t('about.faq')}</Link>
-              <Link href="/terms">{t('about.terms')}</Link>
-              <Link href="/privacy">{t('about.privacy')}</Link>
-            </div>
-            <div>
-              <h4>{t('about.downloadApp')}</h4>
-              <Link href="/services">{t('about.services')}</Link>
-              <Link href="/careers">{t('about.careers')}</Link>
-              <Link href="/book">{t('about.howToBook')}</Link>
-            </div>
-          </div>
-        </div>
-        <div className={styles.copyright}>{t('about.copyright')}</div>
-      </footer>
+      <Footer />
     </div>
   );
 }

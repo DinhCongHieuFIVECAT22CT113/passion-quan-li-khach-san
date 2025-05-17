@@ -94,7 +94,7 @@
   height: 50vh;
   min-height: 400px;
   position: relative;
-  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/images/promotions-hero.jpg');
+  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/heros/promotions-hero.jpg');
   background-size: cover;
   background-position: center;
   display: flex;
@@ -133,7 +133,7 @@
 /* Main Content */
 .mainContent {
   flex: 1;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 3rem 2rem;
 }
@@ -186,8 +186,34 @@
 /* Promotions Grid */
 .promotionsGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  grid-template-columns: repeat(5, 1fr); /* 5 cards per row */
   gap: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+@media (max-width: 1200px) {
+  .promotionsGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .promotionsGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .promotionsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .promotionsGrid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .promotionCard {
@@ -197,6 +223,7 @@
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
+  min-width: 220px; /* Ensure cards are wide enough */
 }
 
 .promotionCard:hover {
@@ -706,4 +733,4 @@
   margin-top: 2rem;
   border-top: 1px solid #444;
   color: #888;
-} 
+}

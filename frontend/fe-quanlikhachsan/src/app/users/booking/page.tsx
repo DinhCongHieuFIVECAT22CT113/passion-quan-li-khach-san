@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../../../app/components/profile/LanguageContext';
 import i18n from '../../../app/i18n';
 import Header from '../../components/layout/Header';
+import Footer from '../../components/layout/Footer';
 
 // Define the shape of selectedRoomData
 interface RoomData {
@@ -466,54 +467,10 @@ export default function BookingPage() {
               </div>
             </div>
           </section>
-
-          <section className={styles.mapSection}>
-            <h2>{t('home.location')}</h2>
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.757135614257!2d105.84125361476292!3d21.007025386010126!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ac428c3336e5%3A0x384d11d7f7f3b4a8!2zQ29wYWNhYmFuYSBNYXJrZXQgLSBUaOG7jyBMw6A!5e0!3m2!1svi!2s!4v1647901645957!5m2!1svi!2s"
-              width="100%"
-              height="450"
-              style={{ border: 0 }}
-              allowFullScreen
-              loading="lazy"
-            ></iframe>
-          </section>
         </div>
       </main>
 
-      <footer className={styles.footer}>
-        <div className={styles.footerContent}>
-          <div className={styles.newsletter}>
-            <h3>{t('about.subscribe')}</h3>
-            <div className={styles.subscribeForm}>
-              <input type="email" placeholder={t('about.subscribePlaceholder')} />
-              <button>{t('about.subscribeButton')}</button>
-            </div>
-          </div>
-          <div className={styles.footerLogo}>
-            <Image src="/images/hotel-logo.png" alt="Logo Khách sạn" width={150} height={60} />
-          </div>
-          <div className={styles.footerLinks}>
-            <div className={styles.linkColumn}>
-              <h4>{t('about.footerAbout')}</h4>
-              <Link href="/location">{t('about.location')}</Link>
-            </div>
-            <div className={styles.linkColumn}>
-              <h4>{t('about.support')}</h4>
-              <Link href="/faq">{t('about.faq')}</Link>
-              <Link href="/terms">{t('about.terms')}</Link>
-              <Link href="/privacy">{t('about.privacy')}</Link>
-            </div>
-            <div className={styles.linkColumn}>
-              <h4>{t('about.downloadApp')}</h4>
-              <Link href="/services">{t('about.services')}</Link>
-              <Link href="/careers">{t('about.careers')}</Link>
-              <Link href="/book">{t('about.howToBook')}</Link>
-            </div>
-          </div>
-        </div>
-        <div className={styles.copyright}>{t('about.copyright')}</div>
-      </footer>
+      <Footer />
     </div>
   );
 }
