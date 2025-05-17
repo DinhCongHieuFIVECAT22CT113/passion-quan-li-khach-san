@@ -8,6 +8,7 @@ import styles from './styles.module.css';
 import { getRooms, getRoomTypes } from '../../../lib/api';
 import { Room, RoomType } from '../../../types/auth';
 import { API_BASE_URL } from '../../../lib/config';
+import Header from '../../components/layout/Header';
 
 // Hàm hỗ trợ để đảm bảo đường dẫn hình ảnh hợp lệ
 const getValidImageSrc = (imagePath: string | undefined): string => {
@@ -133,26 +134,7 @@ export default function RoomsPage() {
   return (
     <div className={styles.pageContainer}>
       {/* Header */}
-      <header className={styles.header}>
-        <div className={styles.headerContent}>
-          <div className={styles.logoContainer}>
-            <Link href="/">
-              <Image src="/images/logo.png" alt="Logo" width={120} height={40} />
-            </Link>
-          </div>
-          <nav className={styles.mainNav}>
-            <Link href="/users/home">Trang chủ</Link>
-            <Link href="/users/about">Giới thiệu</Link>
-            <Link href="/users/explore">Khám phá</Link>
-            <Link href="/users/rooms" className={styles.active}>Phòng</Link>
-          </nav>
-          <div className={styles.userActions}>
-            <Link href="/users/profile" className={styles.profileIconLink}>
-              <FaUser className={styles.userIcon} />
-            </Link>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Hero Section */}
       <section className={styles.heroSection}>

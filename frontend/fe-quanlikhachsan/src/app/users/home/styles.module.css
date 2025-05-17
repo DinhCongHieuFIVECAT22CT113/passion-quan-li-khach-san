@@ -3,116 +3,23 @@
   background: #ffffff;
   display: flex;
   flex-direction: column;
-}
-
-/* Navigation */
-.nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 5%;
-  background: white;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.navLeft {
-  flex: 0 0 auto;
-}
-
-.navCenter {
-  display: flex;
-  gap: 2.5rem;
-  justify-content: center;
-  flex: 1;
-}
-
-.navCenter a {
-  color: #333;
-  text-decoration: none;
-  font-size: 0.95rem;
-  font-weight: 500;
-  transition: all 0.3s ease;
-  position: relative;
-}
-
-.navCenter a:hover {
-  color: #8B7355;
-}
-
-.navCenter a::after {
-  content: '';
-  position: absolute;
-  width: 0;
-  height: 2px;
-  bottom: -4px;
-  left: 0;
-  background-color: #8B7355;
-  transition: width 0.3s ease;
-}
-
-.navCenter a:hover::after {
-  width: 100%;
-}
-
-.navRight {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.profileIcon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  color: #333;
-  transition: all 0.3s ease;
-}
-
-.profileIcon:hover {
-  color: #8B7355;
-  transform: scale(1.1);
-}
-
-.profileIcon svg {
-  width: 18px;
-  height: 18px;
-}
-
-.bookNowBtn {
-  background: #8B7355;
-  color: white;
-  text-decoration: none;
-  padding: 0.6rem 1.5rem;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-.bookNowBtn:hover {
-  background: #6F5B3E;
-  transform: translateY(-2px);
+  padding-top: 80px; /* Add padding for fixed header */
 }
 
 /* Hero Section */
 .hero {
-  height: 100vh;
-  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-    url('/images/hero.jpg');
+  height: calc(100vh - 80px);
+  min-height: 600px;
+  width: 100%;
+  position: relative;
+  background-image: url('/images/hero-bg.jpg');
   background-size: cover;
   background-position: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
   color: white;
+  text-align: center;
   padding: 0 1rem;
 }
 

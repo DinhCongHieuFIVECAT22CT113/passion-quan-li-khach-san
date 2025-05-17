@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../../../app/components/profile/LanguageContext';
 import i18n from '../../../app/i18n';
 import { useEffect, useState } from 'react';
+import Header from '../../components/layout/Header';
 
 export default function AboutPage() {
   const { t, i18n: i18nInstance } = useTranslation();
@@ -35,28 +36,8 @@ export default function AboutPage() {
 
   return (
     <div className={styles.container}>
-      {/* Navigation */}
-      <nav className={styles.nav}>
-        <div className={styles.navLeft}>
-          <Link href="/">
-            <Image src="/images/logo.png" alt="Logo Khách sạn" width={120} height={40} />
-          </Link>
-        </div>
-        <div className={styles.navCenter}>
-          <Link href="/users/home">{t('profile.home')}</Link>
-          <Link href="/users/about">{t('profile.about')}</Link>
-          <Link href="/users/explore">{t('profile.explore')}</Link>
-          <Link href="/users/rooms">{t('profile.rooms')}</Link>
-        </div>
-        <div className={styles.navRight}>
-          <Link href="/users/profile" className={styles.profileIcon}>
-            <FaUser />
-          </Link>
-          <Link href="/users/rooms" className={styles.bookNowBtn}>
-            {t('about.viewRooms')}
-          </Link>
-        </div>
-      </nav>
+      {/* Header */}
+      <Header />
 
       {/* Hero Section */}
       <section className={styles.hero}>

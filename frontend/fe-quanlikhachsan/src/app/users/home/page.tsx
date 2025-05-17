@@ -4,11 +4,12 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { FaStar, FaHotel, FaUtensils, FaUsers, FaSwimmingPool, FaRing, FaUser } from 'react-icons/fa';
+import { FaStar, FaHotel, FaUtensils, FaUsers, FaSwimmingPool, FaRing } from 'react-icons/fa';
 import styles from './styles.module.css';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../../../app/components/profile/LanguageContext';
 import i18n from '../../../app/i18n';
+import Header from '../../components/layout/Header';
 
 export default function Home() {
   const { t } = useTranslation();
@@ -93,28 +94,8 @@ export default function Home() {
 
   return (
     <div className={styles.container}>
-      {/* Navigation */}
-      <nav className={styles.nav}>
-        <div className={styles.navLeft}>
-          <Link href="/">
-            <Image src="/images/logo.png" alt="Hotel Logo" width={120} height={40} />
-          </Link>
-        </div>
-        <div className={styles.navCenter}>
-          <Link href="/users/home">{t('profile.home')}</Link>
-          <Link href="/users/about">{t('profile.about')}</Link>
-          <Link href="/users/explore">{t('profile.explore')}</Link>
-          <Link href="/users/rooms">{t('profile.rooms')}</Link>
-        </div>
-        <div className={styles.navRight}>
-          <Link href="/users/profile" className={styles.profileIcon}>
-            <FaUser />
-          </Link>
-          <Link href="/users/rooms" className={styles.bookNowBtn}>
-            {t('home.viewRooms')}
-          </Link>
-        </div>
-      </nav>
+      {/* Header */}
+      <Header />
 
       {/* Hero Section */}
       <section className={styles.hero}>

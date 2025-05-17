@@ -14,6 +14,7 @@ import TransactionHistory, { Transaction } from '../../../app/components/profile
 import { useLanguage } from '../../../app/components/profile/LanguageContext';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../../app/i18n';
+import Header from '../../components/layout/Header';
 
 interface Language {
   id: string;
@@ -223,24 +224,8 @@ const ProfilePage: FC = () => {
   return (
     <AuthCheck>
       <div className={styles.container}>
-        <nav className={styles.nav}>
-          <div className={styles.navLeft}>
-            <Link href="/">
-              <Image src="/images/logo.png" alt="Logo" width={120} height={40} />
-            </Link>
-          </div>
-          <div className={styles.navCenter}>
-            <Link href="/users/home">{t('profile.home')}</Link>
-            <Link href="/users/about">{t('profile.about')}</Link>
-            <Link href="/users/explore">{t('profile.explore')}</Link>
-            <Link href="/users/rooms">{t('profile.rooms')}</Link>
-          </div>
-          <div className={styles.navRight}>
-            <button onClick={handleLogout} className={styles.logoutBtn}>
-              {t('profile.logout')}
-            </button>
-          </div>
-        </nav>
+        {/* Header */}
+        <Header />
 
         <main className={styles.main}>
           <div className={styles.profileCard}>
@@ -248,6 +233,9 @@ const ProfilePage: FC = () => {
               <h1>{t('profile.title')}</h1>
               <button onClick={() => setShowAvatarModal(true)} className={styles.editButton}>
                 {t('profile.changeAvatar')}
+              </button>
+              <button onClick={handleLogout} className={styles.logoutBtn}>
+                {t('profile.logout')}
               </button>
             </div>
 

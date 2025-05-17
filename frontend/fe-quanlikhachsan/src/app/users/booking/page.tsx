@@ -9,6 +9,7 @@ import styles from './styles.module.css';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../../../app/components/profile/LanguageContext';
 import i18n from '../../../app/i18n';
+import Header from '../../components/layout/Header';
 
 // Define the shape of selectedRoomData
 interface RoomData {
@@ -233,264 +234,252 @@ export default function BookingPage() {
 
   return (
     <div className={styles.container}>
-      {success && <div className={styles.notification}>{success}</div>}
+      {/* Header */}
+      <Header />
 
-      <nav className={styles.nav}>
-        <Link href="/">
-          <Image src="/images/logo.png" alt="Hotel Logo" width={120} height={40} />
-        </Link>
-        <div className={styles.navLinks}>
-          <Link href="/users/home">{t('profile.home')}</Link>
-          <Link href="/users/about">{t('profile.about')}</Link>
-          <Link href="/users/explore">{t('profile.explore')}</Link>
-          <Link href="/users/rooms">{t('profile.rooms')}</Link>
-        </div>
-        <div className={styles.navRight}>
-          <Link href="/users/profile" className={styles.profileIcon}>
-            <FaUser />
-          </Link>
-          <Link href="/users/rooms" className={styles.bookNowBtn}>
-            {t('booking.rooms')}
-          </Link>
-        </div>
-      </nav>
+      {/* Main Content */}
+      <main className={styles.main}>
+        <div className={styles.bookingContainer}>
+          {success && <div className={styles.notification}>{success}</div>}
 
-      <section className={styles.hero}>
-        <div className={styles.heroContent}>
-          <h1>{t('booking.title')}</h1>
-          <p>{t('booking.description')}</p>
-        </div>
-      </section>
-
-      <section className={styles.bookingSection}>
-        <div className={styles.formContainer}>
-          <div className={styles.imageGallery}>
-            <div className={styles.mainImage}>
-              {mainImage && (
-                <Image src={mainImage} alt="Main Room" fill style={{ objectFit: 'cover' }} />
-              )}
+          <section className={styles.hero}>
+            <div className={styles.heroContent}>
+              <h1>{t('booking.title')}</h1>
+              <p>{t('booking.description')}</p>
             </div>
-          </div>
+          </section>
 
-          <div>
-            <h2>{t('booking.bookingDetails')}</h2>
-            {selectedRoomData?.name ? (
-              <div className={styles.roomSummary}>
-                <p>
-                  <strong>{t('booking.room')}:</strong> {selectedRoomData.name}
-                </p>
-                <p>
-                  <strong>{t('booking.checkIn')}:</strong>{' '}
-                  {formData.checkInDate || t('booking.notSelected')}
-                </p>
-                <p>
-                  <strong>{t('booking.checkOut')}:</strong>{' '}
-                  {formData.checkOutDate || t('booking.notSelected')}
-                </p>
-                <p>
-                  <strong>{t('booking.guests')}:</strong>{' '}
-                  {formData.adults || 1} {t('booking.adults')},{' '}
-                  {formData.children || 0} {t('booking.children')}
-                </p>
-              </div>
-            ) : (
-              <p>{t('booking.noRoomSelected')}</p>
-            )}
-
-            <form onSubmit={handleSubmit} className={styles.bookingForm} noValidate>
-              {/* Guest Information */}
-              <div className={styles.formGroup}>
-                <label htmlFor="name">{t('booking.name')}</label>
-                <input
-                  type="text"
-                  id="name"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  placeholder={t('booking.namePlaceholder') || 'Họ và Tên'}
-                />
-                {errors.name && <p className={styles.error}>{errors.name}</p>}
-              </div>
-              <div className={styles.formGroup}>
-                <label htmlFor="email">{t('booking.email')}</label>
-                <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder={t('booking.emailPlaceholder') || 'Email'}
-                />
-                {errors.email && <p className={styles.error}>{errors.email}</p>}
-              </div>
-              <div className={styles.formGroup}>
-                <label htmlFor="phone">{t('booking.phone')}</label>
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  placeholder={t('booking.phonePlaceholder') || 'Số điện thoại'}
-                />
-                {errors.phone && <p className={styles.error}>{errors.phone}</p>}
-              </div>
-              <div className={styles.formGroup}>
-                <label htmlFor="idNumber">{t('booking.idNumber') || 'CMND/CCCD'}</label>
-                <input
-                  type="text"
-                  id="idNumber"
-                  name="idNumber"
-                  value={formData.idNumber}
-                  onChange={handleChange}
-                  placeholder={t('booking.idNumberPlaceholder') || 'Số CMND/CCCD'}
-                />
-                {errors.idNumber && <p className={styles.error}>{errors.idNumber}</p>}
-              </div>
-
-              {/* Room and Stay Details */}
-              <div className={styles.formGroup}>
-                <label htmlFor="checkInDate">{t('booking.checkIn')}</label>
-                <input
-                  type="date"
-                  id="checkInDate"
-                  name="checkInDate"
-                  value={formData.checkInDate}
-                  onChange={handleChange}
-                />
-                {errors.checkInDate && <p className={styles.error}>{errors.checkInDate}</p>}
-              </div>
-              <div className={styles.formGroup}>
-                <label htmlFor="checkOutDate">{t('booking.checkOut')}</label>
-                <input
-                  type="date"
-                  id="checkOutDate"
-                  name="checkOutDate"
-                  value={formData.checkOutDate}
-                  onChange={handleChange}
-                />
-                {errors.checkOutDate && <p className={styles.error}>{errors.checkOutDate}</p>}
-              </div>
-              <div className={styles.formGroup}>
-                <label htmlFor="adults">{t('booking.adults')}</label>
-                <input
-                  type="number"
-                  id="adults"
-                  name="adults"
-                  value={formData.adults}
-                  onChange={handleChange}
-                  min="1"
-                />
-                {errors.adults && <p className={styles.error}>{errors.adults}</p>}
-              </div>
-              <div className={styles.formGroup}>
-                <label htmlFor="children">{t('booking.children')}</label>
-                <input
-                  type="number"
-                  id="children"
-                  name="children"
-                  value={formData.children}
-                  onChange={handleChange}
-                  min="0"
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label htmlFor="message">{t('booking.specialRequests')}</label>
-                <textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  placeholder={t('booking.specialRequestsPlaceholder') || 'Yêu cầu đặc biệt'}
-                  rows={4}
-                />
-              </div>
-
-              {/* Payment Information */}
-              <div className={styles.formGroup}>
-                <label htmlFor="paymentMethod">{t('profile.paymentMethod')}</label>
-                <select
-                  id="paymentMethod"
-                  name="paymentMethod"
-                  value={formData.paymentMethod}
-                  onChange={handleChange}
-                >
-                  <option value="">{t('profile.chooseMethod')}</option>
-                  <option value="cash">{t('profile.cash')}</option>
-                  <option value="card">{t('profile.internationalCards')}</option>
-                  <option value="bankCard">{t('profile.vietnameseBanks')}</option>
-                </select>
-                {errors.paymentMethod && <p className={styles.error}>{errors.paymentMethod}</p>}
-              </div>
-              {formData.paymentMethod === 'card' || formData.paymentMethod === 'bankCard' ? (
-                <div className={styles.formGroup}>
-                  <label htmlFor="cardType">{t('profile.chooseCard')}</label>
-                  <select
-                    id="cardType"
-                    name="cardType"
-                    value={formData.cardType}
-                    onChange={handleChange}
-                  >
-                    <option value="">{t('profile.chooseCard')}</option>
-                    {formData.paymentMethod === 'card' && (
-                      <>
-                        <option value="visa">Visa</option>
-                        <option value="mastercard">MasterCard</option>
-                      </>
-                    )}
-                    {formData.paymentMethod === 'bankCard' && (
-                      <>
-                        <option value="vietcombank">Vietcombank</option>
-                        <option value="techcombank">Techcombank</option>
-                      </>
-                    )}
-                  </select>
-                  {errors.cardType && <p className={styles.error}>{errors.cardType}</p>}
+          <section className={styles.bookingSection}>
+            <div className={styles.formContainer}>
+              <div className={styles.imageGallery}>
+                <div className={styles.mainImage}>
+                  {mainImage && (
+                    <Image src={mainImage} alt="Main Room" fill style={{ objectFit: 'cover' }} />
+                  )}
                 </div>
-              ) : null}
+              </div>
 
-              {selectedRoomData?.price && (
-                <div className={styles.priceBreakdown}>
-                  <h3>{t('booking.priceBreakdown')}</h3>
-                  <p>
-                    <strong>{t('booking.basePrice')}:</strong>{' '}
-                    {priceDetails.basePrice.toLocaleString('vi-VN')}đ
-                  </p>
-                  <p>
-                    <strong>{t('booking.tax')} (10%):</strong>{' '}
-                    {priceDetails.tax.toLocaleString('vi-VN')}đ
-                  </p>
-                  <p>
-                    <strong>{t('booking.serviceFee')} (5%):</strong>{' '}
-                    {priceDetails.serviceFee.toLocaleString('vi-VN')}đ
-                  </p>
-                  <p>
-                    <strong>{t('booking.total')}:</strong>{' '}
-                    {priceDetails.total.toLocaleString('vi-VN')}đ
-                  </p>
-                </div>
-              )}
+              <div>
+                <h2>{t('booking.bookingDetails')}</h2>
+                {selectedRoomData?.name ? (
+                  <div className={styles.roomSummary}>
+                    <p>
+                      <strong>{t('booking.room')}:</strong> {selectedRoomData.name}
+                    </p>
+                    <p>
+                      <strong>{t('booking.checkIn')}:</strong>{' '}
+                      {formData.checkInDate || t('booking.notSelected')}
+                    </p>
+                    <p>
+                      <strong>{t('booking.checkOut')}:</strong>{' '}
+                      {formData.checkOutDate || t('booking.notSelected')}
+                    </p>
+                    <p>
+                      <strong>{t('booking.guests')}:</strong>{' '}
+                      {formData.adults || 1} {t('booking.adults')},{' '}
+                      {formData.children || 0} {t('booking.children')}
+                    </p>
+                  </div>
+                ) : (
+                  <p>{t('booking.noRoomSelected')}</p>
+                )}
 
-              <button type="submit" className={styles.bookNowBtn}>
-                {t('booking.bookNow')}
-              </button>
-            </form>
-          </div>
+                <form onSubmit={handleSubmit} className={styles.bookingForm} noValidate>
+                  {/* Guest Information */}
+                  <div className={styles.formGroup}>
+                    <label htmlFor="name">{t('booking.name')}</label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      placeholder={t('booking.namePlaceholder') || 'Họ và Tên'}
+                    />
+                    {errors.name && <p className={styles.error}>{errors.name}</p>}
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label htmlFor="email">{t('booking.email')}</label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder={t('booking.emailPlaceholder') || 'Email'}
+                    />
+                    {errors.email && <p className={styles.error}>{errors.email}</p>}
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label htmlFor="phone">{t('booking.phone')}</label>
+                    <input
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder={t('booking.phonePlaceholder') || 'Số điện thoại'}
+                    />
+                    {errors.phone && <p className={styles.error}>{errors.phone}</p>}
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label htmlFor="idNumber">{t('booking.idNumber') || 'CMND/CCCD'}</label>
+                    <input
+                      type="text"
+                      id="idNumber"
+                      name="idNumber"
+                      value={formData.idNumber}
+                      onChange={handleChange}
+                      placeholder={t('booking.idNumberPlaceholder') || 'Số CMND/CCCD'}
+                    />
+                    {errors.idNumber && <p className={styles.error}>{errors.idNumber}</p>}
+                  </div>
+
+                  {/* Room and Stay Details */}
+                  <div className={styles.formGroup}>
+                    <label htmlFor="checkInDate">{t('booking.checkIn')}</label>
+                    <input
+                      type="date"
+                      id="checkInDate"
+                      name="checkInDate"
+                      value={formData.checkInDate}
+                      onChange={handleChange}
+                    />
+                    {errors.checkInDate && <p className={styles.error}>{errors.checkInDate}</p>}
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label htmlFor="checkOutDate">{t('booking.checkOut')}</label>
+                    <input
+                      type="date"
+                      id="checkOutDate"
+                      name="checkOutDate"
+                      value={formData.checkOutDate}
+                      onChange={handleChange}
+                    />
+                    {errors.checkOutDate && <p className={styles.error}>{errors.checkOutDate}</p>}
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label htmlFor="adults">{t('booking.adults')}</label>
+                    <input
+                      type="number"
+                      id="adults"
+                      name="adults"
+                      value={formData.adults}
+                      onChange={handleChange}
+                      min="1"
+                    />
+                    {errors.adults && <p className={styles.error}>{errors.adults}</p>}
+                  </div>
+                  <div className={styles.formGroup}>
+                    <label htmlFor="children">{t('booking.children')}</label>
+                    <input
+                      type="number"
+                      id="children"
+                      name="children"
+                      value={formData.children}
+                      onChange={handleChange}
+                      min="0"
+                    />
+                  </div>
+
+                  <div className={styles.formGroup}>
+                    <label htmlFor="message">{t('booking.specialRequests')}</label>
+                    <textarea
+                      id="message"
+                      name="message"
+                      value={formData.message}
+                      onChange={handleChange}
+                      placeholder={t('booking.specialRequestsPlaceholder') || 'Yêu cầu đặc biệt'}
+                      rows={4}
+                    />
+                  </div>
+
+                  {/* Payment Information */}
+                  <div className={styles.formGroup}>
+                    <label htmlFor="paymentMethod">{t('profile.paymentMethod')}</label>
+                    <select
+                      id="paymentMethod"
+                      name="paymentMethod"
+                      value={formData.paymentMethod}
+                      onChange={handleChange}
+                    >
+                      <option value="">{t('profile.chooseMethod')}</option>
+                      <option value="cash">{t('profile.cash')}</option>
+                      <option value="card">{t('profile.internationalCards')}</option>
+                      <option value="bankCard">{t('profile.vietnameseBanks')}</option>
+                    </select>
+                    {errors.paymentMethod && <p className={styles.error}>{errors.paymentMethod}</p>}
+                  </div>
+                  {formData.paymentMethod === 'card' || formData.paymentMethod === 'bankCard' ? (
+                    <div className={styles.formGroup}>
+                      <label htmlFor="cardType">{t('profile.chooseCard')}</label>
+                      <select
+                        id="cardType"
+                        name="cardType"
+                        value={formData.cardType}
+                        onChange={handleChange}
+                      >
+                        <option value="">{t('profile.chooseCard')}</option>
+                        {formData.paymentMethod === 'card' && (
+                          <>
+                            <option value="visa">Visa</option>
+                            <option value="mastercard">MasterCard</option>
+                          </>
+                        )}
+                        {formData.paymentMethod === 'bankCard' && (
+                          <>
+                            <option value="vietcombank">Vietcombank</option>
+                            <option value="techcombank">Techcombank</option>
+                          </>
+                        )}
+                      </select>
+                      {errors.cardType && <p className={styles.error}>{errors.cardType}</p>}
+                    </div>
+                  ) : null}
+
+                  {selectedRoomData?.price && (
+                    <div className={styles.priceBreakdown}>
+                      <h3>{t('booking.priceBreakdown')}</h3>
+                      <p>
+                        <strong>{t('booking.basePrice')}:</strong>{' '}
+                        {priceDetails.basePrice.toLocaleString('vi-VN')}đ
+                      </p>
+                      <p>
+                        <strong>{t('booking.tax')} (10%):</strong>{' '}
+                        {priceDetails.tax.toLocaleString('vi-VN')}đ
+                      </p>
+                      <p>
+                        <strong>{t('booking.serviceFee')} (5%):</strong>{' '}
+                        {priceDetails.serviceFee.toLocaleString('vi-VN')}đ
+                      </p>
+                      <p>
+                        <strong>{t('booking.total')}:</strong>{' '}
+                        {priceDetails.total.toLocaleString('vi-VN')}đ
+                      </p>
+                    </div>
+                  )}
+
+                  <button type="submit" className={styles.bookNowBtn}>
+                    {t('booking.bookNow')}
+                  </button>
+                </form>
+              </div>
+            </div>
+          </section>
+
+          <section className={styles.mapSection}>
+            <h2>{t('home.location')}</h2>
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.757135614257!2d105.84125361476292!3d21.007025386010126!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ac428c3336e5%3A0x384d11d7f7f3b4a8!2zQ29wYWNhYmFuYSBNYXJrZXQgLSBUaOG7jyBMw6A!5e0!3m2!1svi!2s!4v1647901645957!5m2!1svi!2s"
+              width="100%"
+              height="450"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+            ></iframe>
+          </section>
         </div>
-      </section>
-
-      <section className={styles.mapSection}>
-        <h2>{t('home.location')}</h2>
-        <iframe
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.757135614257!2d105.84125361476292!3d21.007025386010126!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ac428c3336e5%3A0x384d11d7f7f3b4a8!2zQ29wYWNhYmFuYSBNYXJrZXQgLSBUaOG7jyBMw6A!5e0!3m2!1svi!2s!4v1647901645957!5m2!1svi!2s"
-          width="100%"
-          height="450"
-          style={{ border: 0 }}
-          allowFullScreen
-          loading="lazy"
-        ></iframe>
-      </section>
+      </main>
 
       <footer className={styles.footer}>
         <div className={styles.footerContent}>

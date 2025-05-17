@@ -1,6 +1,8 @@
 .container {
   min-height: 100vh;
-  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  padding-top: 80px; /* Add padding for fixed header */
 }
 
 /* Navigation */
@@ -102,17 +104,16 @@
 /* Hero Section */
 .hero {
   height: 60vh;
-  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-    url('/images/about-hero.jpg');
+  min-height: 400px;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/images/about-hero.jpg');
   background-size: cover;
   background-position: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
   color: white;
-  padding: 0 5%;
-  margin-top: 60px;
+  text-align: center;
+  padding: 0 2rem;
 }
 
 .heroContent {

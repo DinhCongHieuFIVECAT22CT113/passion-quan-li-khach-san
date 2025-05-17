@@ -1,39 +1,37 @@
 .container {
   min-height: 100vh;
-  background: #ffffff;
   display: flex;
   flex-direction: column;
+  background-color: #f8f9fa;
 }
 
+/* Navigation */
 .nav {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 5%;
-  background: white;
-  position: fixed;
+  padding: 1rem 2rem;
+  background-color: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: sticky;
   top: 0;
-  left: 0;
-  right: 0;
   z-index: 100;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .navLinks {
   display: flex;
-  gap: 2.5rem;
+  gap: 2rem;
 }
 
 .navLinks a {
   color: #333;
   text-decoration: none;
-  font-size: 0.95rem;
   font-weight: 500;
-  transition: all 0.3s ease;
+  transition: color 0.3s ease;
 }
 
 .navLinks a:hover {
-  color: #8B7355;
+  color: #007bff;
 }
 
 .navRight {
@@ -46,264 +44,761 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #f0f0f0;
   color: #333;
+  text-decoration: none;
   transition: all 0.3s ease;
 }
 
 .profileIcon:hover {
-  color: #8B7355;
-  transform: scale(1.1);
+  background-color: #e0e0e0;
 }
 
 .bookNowBtn {
-  background: #8B7355;
+  background-color: #007bff;
   color: white;
-  text-decoration: none;
-  padding: 0.6rem 1.5rem;
+  padding: 0.5rem 1.5rem;
   border-radius: 4px;
-  font-size: 0.9rem;
+  text-decoration: none;
   font-weight: 500;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease;
 }
 
 .bookNowBtn:hover {
-  background: #6F5B3E;
-  transform: translateY(-2px);
+  background-color: #0069d9;
 }
 
+/* Main Content */
 .main {
-  margin-top: 80px;
-  padding: 2rem 5%;
+  flex: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  width: 100%;
 }
 
+/* Breadcrumbs */
+.breadcrumbs {
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.breadcrumbs a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+.breadcrumbs a:hover {
+  text-decoration: underline;
+}
+
+/* Room Header */
 .roomHeader {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
 }
 
-.roomImage {
+.roomHeader h1 {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.roomRating {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.starFilled {
+  color: #ffb700;
+}
+
+.starEmpty {
+  color: #ddd;
+}
+
+.ratingValue {
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-left: 0.25rem;
+}
+
+.reviewCount {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+/* Image Gallery */
+.imageGallery {
+  margin-bottom: 2rem;
+}
+
+.mainImageContainer {
   position: relative;
-  height: 400px;
+  height: 500px;
   border-radius: 8px;
   overflow: hidden;
+  margin-bottom: 1rem;
 }
 
-.roomOverview {
+.mainImage {
+  object-fit: cover;
+  cursor: pointer;
+}
+
+.galleryButton {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(255, 255, 255, 0.8);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 5;
+}
+
+.galleryButton:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+.prevButton {
+  left: 20px;
+}
+
+.nextButton {
+  right: 20px;
+}
+
+.expandButton {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background-color: rgba(255, 255, 255, 0.8);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 5;
+}
+
+.expandButton:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+}
+
+.thumbnailsContainer {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.thumbnail {
+  flex: 0 0 auto;
+  width: 100px;
+  height: 70px;
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.thumbnail:hover {
+  opacity: 0.9;
+}
+
+.activeThumbnail {
+  opacity: 1;
+  border-color: #007bff;
+}
+
+.thumbnailImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Room Content */
+.roomContent {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-}
-
-.roomOverview h1 {
-  font-size: 2.5rem;
-  color: #333;
-  margin-bottom: 1rem;
-}
-
-.price {
-  font-size: 1.5rem;
-  color: #8B7355;
-  font-weight: 600;
-  margin-bottom: 1rem;
-}
-
-.description {
-  font-size: 1.1rem;
-  color: #666;
-  line-height: 1.6;
-}
-
-.roomDetails {
-  display: grid;
   gap: 3rem;
 }
 
-.amenities h2,
-.specifications h2,
-.additionalFeatures h2 {
-  font-size: 1.8rem;
-  color: #333;
-  margin-bottom: 1.5rem;
+/* Room Details */
+.roomDetails {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 2rem;
 }
 
+@media (max-width: 992px) {
+  .roomDetails {
+    grid-template-columns: 1fr;
+  }
+}
+
+.roomDescription {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.roomDescription h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.roomDescription p {
+  color: #555;
+  line-height: 1.7;
+  margin-bottom: 2rem;
+}
+
+.roomDescription h3 {
+  font-size: 1.4rem;
+  margin: 2rem 0 1rem;
+  color: #333;
+}
+
+/* Room Specifications */
+.roomSpecs {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.specItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.specIcon {
+  color: #007bff;
+  font-size: 1.5rem;
+  margin-top: 0.25rem;
+}
+
+.specItem h4 {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.specItem p {
+  margin: 0;
+  color: #666;
+}
+
+/* Amenities */
 .amenitiesGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
 }
 
 .amenityItem {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  background: #f8f8f8;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+.amenityIcon {
+  color: #007bff;
+  font-size: 1.1rem;
+}
+
+/* Booking Box */
+.bookingBox {
+  background-color: #fff;
   border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  height: fit-content;
+  position: sticky;
+  top: 100px;
 }
 
-.amenityItem svg {
-  font-size: 1.5rem;
-  color: #8B7355;
+.priceBox {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 1.5rem;
 }
 
-.specGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.5rem;
-}
-
-.specItem {
-  padding: 1rem;
-  background: #f8f8f8;
-  border-radius: 8px;
-}
-
-.specItem strong {
+.price {
+  font-size: 2rem;
+  font-weight: 700;
   color: #333;
+}
+
+.perNight {
+  font-size: 1rem;
+  color: #666;
+  margin-left: 0.5rem;
+}
+
+.dateSelection h3 {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.dateInputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.dateInput label {
   display: block;
   margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: #555;
 }
 
-.featuresList {
-  list-style: none;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
+.inputWithIcon {
+  position: relative;
 }
 
-.featuresList li {
-  padding: 1rem;
-  background: #f8f8f8;
-  border-radius: 8px;
+.calendarIcon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
   color: #666;
 }
 
-.bookingActions {
-  margin-top: 3rem;
-  text-align: center;
+.dateInput input {
+  width: 100%;
+  padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.availabilityInfo {
+  margin-bottom: 1.5rem;
+}
+
+.availabilityInfo h4 {
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+  color: #333;
+}
+
+.availabilityCalendar p {
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 0.75rem;
+}
+
+.calendarDays {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.calendarDay {
+  background-color: #f8f9fa;
+  padding: 0.5rem;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.8rem;
+}
+
+.dayLabel {
+  margin-bottom: 0.25rem;
+  color: #333;
+}
+
+.availableIcon {
+  color: #28a745;
+}
+
+.priceSummary {
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #eee;
+}
+
+.summaryRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.totalRow {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #333;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
 }
 
 .bookButton {
-  display: inline-block;
-  background: #8B7355;
+  background-color: #007bff;
   color: white;
-  text-decoration: none;
-  padding: 1rem 3rem;
+  border: none;
+  width: 100%;
+  padding: 1rem;
   border-radius: 4px;
-  font-size: 1.1rem;
-  font-weight: 500;
-  transition: all 0.3s ease;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1.5rem;
+  transition: background-color 0.3s ease;
 }
 
 .bookButton:hover {
-  background: #6F5B3E;
-  transform: translateY(-2px);
+  background-color: #0069d9;
+}
+
+/* Reviews Section */
+.reviewsSection {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.reviewsSection h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.reviewsSummary {
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.averageRating {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.ratingNumber {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.ratingStars {
+  display: flex;
+  gap: 0.25rem;
+  font-size: 1.2rem;
+}
+
+.totalReviews {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.reviewsList {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.reviewCard {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.reviewHeader {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.reviewUser {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.userAvatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f0f0f0;
+  color: #333;
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+
+.userInfo h4 {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+  color: #333;
+}
+
+.reviewDate {
+  font-size: 0.85rem;
+  color: #777;
+}
+
+.reviewRating {
+  display: flex;
+  gap: 0.25rem;
+  font-size: 1rem;
+}
+
+.reviewComment {
+  color: #555;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Full Image Modal */
+.fullImageModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.fullImageContainer {
+  position: relative;
+  width: 90%;
+  height: 90%;
+  max-width: 1200px;
+}
+
+.closeModalButton {
+  position: absolute;
+  top: -40px;
+  right: 0;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 2rem;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.fullImage {
+  object-fit: contain;
+}
+
+.fullImageButton {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(255, 255, 255, 0.2);
+  border: none;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 5;
+}
+
+.fullImageButton:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.fullImagePrev {
+  left: 20px;
+}
+
+.fullImageNext {
+  right: 20px;
+}
+
+.imageCounter {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+}
+
+/* Loading and Error States */
+.loadingContainer,
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  padding: 2rem;
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top: 4px solid #007bff;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.errorContainer h2 {
+  color: #dc3545;
+  margin-bottom: 1rem;
+}
+
+.backButton {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background-color 0.3s ease;
+}
+
+.backButton:hover {
+  background-color: #0069d9;
 }
 
 /* Footer */
 .footer {
-  background-color: #1a1a1a;
+  background-color: #222;
   color: #fff;
-  padding: 4rem 5%;
-  margin-top: auto;
-  width: 100%;
+  padding: 3rem 2rem 1rem;
 }
 
 .footerContent {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 2rem;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 1rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 3rem;
 }
 
-.footerLeft {
-  max-width: 100%;
+@media (max-width: 992px) {
+  .footerContent {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
 }
 
 .footerLeft h3 {
   font-size: 1.2rem;
-  font-weight: 500;
-  margin-bottom: 1.5rem;
-  color: #fff;
+  margin-bottom: 1rem;
 }
 
 .subscribeForm {
   display: flex;
-  gap: 1rem;
 }
 
 .subscribeForm input {
   flex: 1;
-  padding: 0.75rem 1rem;
-  border: 1px solid #333;
-  border-radius: 4px;
-  background-color: transparent;
-  color: #fff;
-  font-size: 0.9rem;
-}
-
-.subscribeForm input::placeholder {
-  color: #999;
+  padding: 0.75rem;
+  border: none;
+  border-radius: 4px 0 0 4px;
 }
 
 .subscribeButton {
-  padding: 0.75rem 1.5rem;
-  background-color: #a08d5d;
+  background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 4px;
+  padding: 0 1.5rem;
+  border-radius: 0 4px 4px 0;
   cursor: pointer;
-  font-size: 0.9rem;
-  white-space: nowrap;
+  transition: background-color 0.3s ease;
 }
 
 .subscribeButton:hover {
-  background-color: #8a7a50;
+  background-color: #0069d9;
 }
 
 .footerCenter {
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-}
-
-.footerRight {
-  display: flex;
-  justify-content: flex-end;
+  align-items: center;
 }
 
 .footerLinks {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 2rem;
-  width: 100%;
 }
 
-.linkGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+@media (max-width: 576px) {
+  .footerLinks {
+    grid-template-columns: 1fr;
+  }
 }
 
 .linkGroup h4 {
-  font-size: 1rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
   color: #fff;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
 }
 
 .linkGroup a {
-  color: #999;
+  display: block;
+  color: #aaa;
+  margin-bottom: 0.5rem;
   text-decoration: none;
-  font-size: 0.9rem;
-  transition: color 0.3s;
+  transition: color 0.3s ease;
 }
 
 .linkGroup a:hover {
@@ -311,78 +806,11 @@
 }
 
 .copyright {
+  max-width: 1200px;
+  margin: 0 auto;
   text-align: center;
   padding-top: 2rem;
   margin-top: 2rem;
-  border-top: 1px solid #333;
-  color: #999;
-  font-size: 0.9rem;
-}
-
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .footerContent {
-    grid-template-columns: 1fr;
-    gap: 3rem;
-  }
-
-  .footerCenter {
-    order: -1;
-  }
-
-  .footerRight {
-    justify-content: flex-start;
-  }
-
-  .footerLinks {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2rem;
-  }
-
-  .roomHeader {
-    grid-template-columns: 1fr;
-  }
-
-  .roomImage {
-    height: 300px;
-  }
-
-  .amenitiesGrid,
-  .specGrid,
-  .featuresList {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 768px) {
-  .footer {
-    padding: 3rem 1rem;
-  }
-
-  .footerLinks {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
-
-  .subscribeForm {
-    flex-direction: column;
-  }
-
-  .subscribeButton {
-    width: 100%;
-  }
-
-  .roomHeader {
-    grid-template-columns: 1fr;
-  }
-
-  .roomImage {
-    height: 300px;
-  }
-
-  .amenitiesGrid,
-  .specGrid,
-  .featuresList {
-    grid-template-columns: 1fr;
-  }
+  border-top: 1px solid #444;
+  color: #888;
 }

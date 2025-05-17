@@ -1,0 +1,709 @@
+.pageContainer {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-top: 80px;
+  background-color: #f8f9fa;
+}
+
+/* Header Styles */
+.header {
+  background-color: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.logoContainer {
+  flex: 1;
+}
+
+.mainNav {
+  flex: 2;
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.mainNav a {
+  color: #333;
+  text-decoration: none;
+  font-weight: 500;
+  position: relative;
+  padding: 0.5rem 0;
+}
+
+.mainNav a:hover {
+  color: #ff6b6b;
+}
+
+.mainNav a.active {
+  color: #ff6b6b;
+}
+
+.mainNav a.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: #ff6b6b;
+}
+
+.userActions {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.profileIconLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #f0f0f0;
+  color: #333;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.profileIconLink:hover {
+  background-color: #e0e0e0;
+}
+
+.userIcon {
+  font-size: 1.2rem;
+}
+
+/* Hero Section */
+.heroSection {
+  height: 50vh;
+  min-height: 400px;
+  position: relative;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/images/promotions-hero.jpg');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.heroOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.heroContent {
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+  padding: 0 2rem;
+}
+
+.heroContent h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.heroContent p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+/* Main Content */
+.mainContent {
+  flex: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+}
+
+.sectionHeader {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.sectionHeader h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.sectionHeader p {
+  font-size: 1.1rem;
+  color: #666;
+}
+
+/* Filter Tabs */
+.filterTabs {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 3rem;
+  gap: 1rem;
+}
+
+.filterTabs button {
+  background: none;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 30px;
+  transition: all 0.3s ease;
+  color: #555;
+}
+
+.filterTabs button:hover {
+  background-color: #f0f0f0;
+}
+
+.filterTabs button.activeTab {
+  background-color: #ff6b6b;
+  color: white;
+  font-weight: 500;
+}
+
+/* Promotions Grid */
+.promotionsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 2rem;
+}
+
+.promotionCard {
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  cursor: pointer;
+}
+
+.promotionCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.promotionImageContainer {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+
+.promotionImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.promotionCard:hover .promotionImage {
+  transform: scale(1.05);
+}
+
+.promotionDiscount {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  background-color: #ff6b6b;
+  color: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.promotionStatus {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.promotionStatus.active {
+  background-color: rgba(46, 213, 115, 0.9);
+  color: white;
+}
+
+.promotionStatus.expired {
+  background-color: rgba(255, 71, 87, 0.9);
+  color: white;
+}
+
+.savedBadge {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #ff6b6b;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+}
+
+.promotionContent {
+  padding: 1.5rem;
+}
+
+.promotionContent h3 {
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+  color: #333;
+}
+
+.promotionPeriod {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #666;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.periodIcon {
+  color: #ff6b6b;
+}
+
+.promotionShortDesc {
+  color: #666;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+  height: 80px;
+  overflow: hidden;
+}
+
+.promotionCardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.promotionCode {
+  background-color: #f8f9fa;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-family: monospace;
+  font-weight: 600;
+  color: #333;
+}
+
+.viewDetailBtn {
+  background-color: transparent;
+  border: 1px solid #ff6b6b;
+  color: #ff6b6b;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.viewDetailBtn:hover {
+  background-color: #ff6b6b;
+  color: white;
+}
+
+/* Promotion Detail */
+.promotionDetail {
+  background-color: white;
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.backButton {
+  background-color: transparent;
+  border: none;
+  color: #ff6b6b;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding: 0;
+}
+
+.promotionDetailHeader {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+@media (max-width: 768px) {
+  .promotionDetailHeader {
+    grid-template-columns: 1fr;
+  }
+}
+
+.promotionDetailImage {
+  position: relative;
+  height: 400px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.detailImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.promotionBadge {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background-color: #ff6b6b;
+  color: white;
+  padding: 0.75rem;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 70px;
+  height: 70px;
+}
+
+.percentIcon {
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.promotionBadge span {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.promotionDetailInfo h2 {
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.promotionMeta {
+  margin-bottom: 1.5rem;
+}
+
+.metaItem {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  color: #555;
+}
+
+.metaIcon {
+  color: #ff6b6b;
+  font-size: 1.1rem;
+}
+
+.promotionDescription {
+  color: #555;
+  line-height: 1.8;
+  margin-bottom: 2rem;
+}
+
+.promotionCode {
+  margin-top: 2rem;
+}
+
+.codeBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.codeBox span {
+  font-family: monospace;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.copyButton {
+  background-color: #ff6b6b;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.3s ease;
+}
+
+.copyButton:hover {
+  background-color: #ff5252;
+}
+
+.copyButton:disabled {
+  background-color: #4caf50;
+  cursor: default;
+}
+
+.saveButton {
+  background-color: transparent;
+  border: 1px solid #ff6b6b;
+  color: #ff6b6b;
+  padding: 0.75rem;
+  border-radius: 4px;
+  width: 100%;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.saveButton:hover {
+  background-color: #fff0f0;
+}
+
+.saveButton.saved {
+  background-color: #ff6b6b;
+  color: white;
+}
+
+.promotionDetailContent {
+  margin-top: 3rem;
+}
+
+.promotionTerms {
+  background-color: #f8f9fa;
+  padding: 2rem;
+  border-radius: 8px;
+  margin-bottom: 2rem;
+}
+
+.promotionTerms h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.termsContent p {
+  margin-bottom: 1rem;
+  color: #555;
+  line-height: 1.6;
+}
+
+.termsContent ul {
+  list-style-type: disc;
+  margin-left: 1.5rem;
+  color: #555;
+}
+
+.termsContent li {
+  margin-bottom: 0.5rem;
+}
+
+.howToUse {
+  margin-bottom: 2rem;
+}
+
+.howToUse h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.howToUse ol {
+  list-style-type: decimal;
+  margin-left: 1.5rem;
+  color: #555;
+}
+
+.howToUse li {
+  margin-bottom: 0.75rem;
+  padding-left: 0.5rem;
+}
+
+.callToAction {
+  text-align: center;
+  margin-top: 3rem;
+}
+
+.bookNowButton {
+  display: inline-block;
+  background-color: #ff6b6b;
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 4px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.bookNowButton:hover {
+  background-color: #ff5252;
+}
+
+/* No Promotions */
+.noPromotions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 0;
+  text-align: center;
+}
+
+.noPromotions h3 {
+  font-size: 1.5rem;
+  margin: 1rem 0;
+  color: #333;
+}
+
+.noPromotions p {
+  color: #666;
+}
+
+/* Loading and Error States */
+.loadingContainer,
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  padding: 2rem;
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top: 4px solid #ff6b6b;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.reloadButton {
+  background-color: #ff6b6b;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+/* Footer */
+.footer {
+  background-color: #222;
+  color: #fff;
+  padding: 3rem 2rem 1rem;
+}
+
+.footerContent {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 3rem;
+}
+
+@media (max-width: 768px) {
+  .footerContent {
+    grid-template-columns: 1fr;
+  }
+}
+
+.footerLogo {
+  margin-bottom: 1.5rem;
+}
+
+.footerLogo p {
+  margin-top: 1rem;
+  color: #aaa;
+}
+
+.footerLinks {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+@media (max-width: 576px) {
+  .footerLinks {
+    grid-template-columns: 1fr;
+  }
+}
+
+.linkGroup h4 {
+  color: #fff;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+}
+
+.linkGroup a {
+  display: block;
+  color: #aaa;
+  margin-bottom: 0.5rem;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.linkGroup a:hover {
+  color: #fff;
+}
+
+.linkGroup p {
+  color: #aaa;
+  margin-bottom: 0.5rem;
+}
+
+.copyright {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+  padding-top: 2rem;
+  margin-top: 2rem;
+  border-top: 1px solid #444;
+  color: #888;
+} 

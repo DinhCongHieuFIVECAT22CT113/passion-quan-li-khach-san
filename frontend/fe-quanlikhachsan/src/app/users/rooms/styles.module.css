@@ -1,8 +1,9 @@
 /* ===== Base Styles ===== */
 .pageContainer {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  padding-top: 80px; /* Add padding for fixed header */
   font-family: 'Poppins', sans-serif;
   color: #333;
   background-color: #f8f9fa;
@@ -85,19 +86,15 @@
 
 /* ===== Hero Section ===== */
 .heroSection {
-  position: relative;
-  height: 60vh;
+  height: 50vh;
   min-height: 400px;
-  max-height: 600px;
-  background-image: url('/images/luxury-hotel-room.jpg');
+  position: relative;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/images/rooms-hero.jpg');
   background-size: cover;
   background-position: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 70px;
-  padding: 1rem;
-  text-align: center;
   color: white;
 }
 
