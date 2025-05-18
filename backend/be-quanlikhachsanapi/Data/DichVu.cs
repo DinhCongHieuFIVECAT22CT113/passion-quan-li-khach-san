@@ -9,6 +9,8 @@ public partial class DichVu
 
     public string TenDichVu { get; set; } = null!;
 
+    public string? Thumbnail { get; set; }
+
     public string? MoTa { get; set; }
 
     public decimal DonGia { get; set; }

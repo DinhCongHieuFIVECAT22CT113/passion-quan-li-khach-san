@@ -7,7 +7,7 @@ namespace be_quanlikhachsanapi.DTOs
         public string MaDichVu { get; set; } = default!;
 
         public string TenDichVu { get; set; } = default!;
-
+        public string? Thumbnail { get; set; }
         public string? MoTa { get; set; }
 
         public decimal DonGia { get; set; }
@@ -18,6 +18,9 @@ namespace be_quanlikhachsanapi.DTOs
         [Required]
         [MaxLength(100)]
         public string TenDichVu { get; set; } = default!;
+        [Required(ErrorMessage = "Hình ảnh là bắt buộc.")]
+        [MaxLength(500)]
+        public string? Thumbnail { get; set; }
 
         public string? MoTa { get; set; }
 
@@ -36,6 +39,9 @@ namespace be_quanlikhachsanapi.DTOs
         [Required]
         [MaxLength(100)]
         public string TenDichVu { get; set; } = default!;
+        [Required(ErrorMessage = "Hình ảnh là bắt buộc.")]
+        [MaxLength(500)]
+        public string? Thumbnail { get; set; }
 
         public string? MoTa { get; set; }
 

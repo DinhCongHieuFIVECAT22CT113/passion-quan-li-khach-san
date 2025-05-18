@@ -29,6 +29,7 @@ namespace be_quanlikhachsanapi.Services
             {
                 MaKm = km.MaKm,
                 TenKhuyenMai = km.TenKhuyenMai,
+                Thumbnail = km.Thumbnail,
                 MoTa = km.MoTa,
                 MaGiamGia = km.MaGiamGia,
                 PhanTramGiam = km.PhanTramGiam,
@@ -49,6 +50,7 @@ namespace be_quanlikhachsanapi.Services
             {
                 MaKm = khuyenMai.MaKm,
                 TenKhuyenMai = khuyenMai.TenKhuyenMai,
+                Thumbnail = khuyenMai.Thumbnail,
                 MoTa = khuyenMai.MoTa,
                 MaGiamGia = khuyenMai.MaGiamGia,
                 PhanTramGiam = khuyenMai.PhanTramGiam,
@@ -81,6 +83,7 @@ namespace be_quanlikhachsanapi.Services
             {
                 MaKm = newMaKhuyenMai,
                 TenKhuyenMai = createKhuyenMai.TenKhuyenMai,
+                Thumbnail = createKhuyenMai.Thumbnail,
                 MoTa = createKhuyenMai.MoTa,
                 MaGiamGia = createKhuyenMai.MaGiamGia,
                 PhanTramGiam = createKhuyenMai.PhanTramGiam,
@@ -115,6 +118,7 @@ namespace be_quanlikhachsanapi.Services
             else
             {
                 khuyenMai.TenKhuyenMai = updateKhuyenMai.TenKhuyenMai;
+                khuyenMai.Thumbnail = updateKhuyenMai.Thumbnail;
                 khuyenMai.MoTa = updateKhuyenMai.MoTa;
                 khuyenMai.MaGiamGia = updateKhuyenMai.MaGiamGia;
                 khuyenMai.PhanTramGiam = updateKhuyenMai.PhanTramGiam;

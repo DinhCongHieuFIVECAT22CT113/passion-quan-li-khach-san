@@ -9,6 +9,8 @@ public partial class KhuyenMai
 
     public string TenKhuyenMai { get; set; } = null!;
 
+    public string? Thumbnail { get; set; }
+
     public string MoTa { get; set; } = null!;
 
     public string MaGiamGia { get; set; } = null!;
