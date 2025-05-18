@@ -18,7 +18,7 @@ namespace be_quanlikhachsanapi.Services
         JsonResult CreateKhachHang(CreateKhachHangDto createKhachHang);
         JsonResult UpdateKhachHang(string MaKh, UpdateKhachHangDto updateKhachHang);
         JsonResult DeleteKhachHang(string MaKh);
-        JsonResult ChangePassword(string UserName, ChangePassDto changePassDto);
+        //JsonResult ChangePassword(string UserName, ChangePassDto changePassDto);
         JsonResult ResetPassword(string UserName);
     }
     public class KhachHangRepository : IKhachHangRepository
@@ -201,58 +201,58 @@ namespace be_quanlikhachsanapi.Services
             };
         }
 
-        public JsonResult ChangePassword(string userName, ChangePassDto changePassDto)
-        {
-            var khachHang = _context.KhachHangs.FirstOrDefault(kh => kh.UserName == userName);
-            if (khachHang == null)
-            {
-                return new JsonResult("Không tìm thấy khách hàng với username đã cho.")
-                {
-                    StatusCode = StatusCodes.Status404NotFound
-                };
-            }
+        // public JsonResult ChangePassword(string userName, ChangePassDto changePassDto)
+        // {
+        //     var khachHang = _context.KhachHangs.FirstOrDefault(kh => kh.UserName == userName);
+        //     if (khachHang == null)
+        //     {
+        //         return new JsonResult("Không tìm thấy khách hàng với username đã cho.")
+        //         {
+        //             StatusCode = StatusCodes.Status404NotFound
+        //         };
+        //     }
 
-            // Kiểm tra mật khẩu cũ
-            var isOldPasswordValid = _passwordHasher.VerifyHashedPassword(khachHang, khachHang.PasswordHash, changePassDto.Password);
-            if (isOldPasswordValid == PasswordVerificationResult.Failed)
-            {
-                return new JsonResult("Mật khẩu cũ không chính xác.")
-                {
-                    StatusCode = StatusCodes.Status400BadRequest
-                };
-            }
+        //     // Kiểm tra mật khẩu cũ
+        //     var isOldPasswordValid = _passwordHasher.VerifyHashedPassword(khachHang, khachHang.PasswordHash, changePassDto.Password);
+        //     if (isOldPasswordValid == PasswordVerificationResult.Failed)
+        //     {
+        //         return new JsonResult("Mật khẩu cũ không chính xác.")
+        //         {
+        //             StatusCode = StatusCodes.Status400BadRequest
+        //         };
+        //     }
 
-            // So sánh mật khẩu mới và xác nhận mật khẩu
-            if (changePassDto.NewPassword != changePassDto.ConfirmPassword)
-            {
-                return new JsonResult("Mật khẩu xác nhận không khớp.")
-                {
-                    StatusCode = StatusCodes.Status400BadRequest
-                };
-            }
+        //     // So sánh mật khẩu mới và xác nhận mật khẩu
+        //     if (changePassDto.NewPassword != changePassDto.ConfirmPassword)
+        //     {
+        //         return new JsonResult("Mật khẩu xác nhận không khớp.")
+        //         {
+        //             StatusCode = StatusCodes.Status400BadRequest
+        //         };
+        //     }
 
-            // Cập nhật mật khẩu mới
-            khachHang.PasswordHash = _passwordHasher.HashPassword(khachHang, changePassDto.NewPassword);
-            _context.SaveChanges();
+        //     // Cập nhật mật khẩu mới
+        //     khachHang.PasswordHash = _passwordHasher.HashPassword(khachHang, changePassDto.NewPassword);
+        //     _context.SaveChanges();
 
-            // Gửi email xác nhận
-            var email = new EmailModel
-            {
-                ToEmail = khachHang.Email,
-                Subject = "Mật khẩu đăng nhập vừa được thay đổi",
-                Body = "Bạn vừa thay đổi mật khẩu thành công. Nếu bạn không thực hiện điều này, vui lòng liên hệ với chúng tôi ngay."
-            };
-            bool emailSent = _sendEmail.SendEmail(email);
-            if (!emailSent)
-            {
-                Console.WriteLine("Không thể gửi email. Kiểm tra lại cấu hình SMTP.");
-            }
+        //     // Gửi email xác nhận
+        //     var email = new EmailModel
+        //     {
+        //         ToEmail = khachHang.Email,
+        //         Subject = "Mật khẩu đăng nhập vừa được thay đổi",
+        //         Body = "Bạn vừa thay đổi mật khẩu thành công. Nếu bạn không thực hiện điều này, vui lòng liên hệ với chúng tôi ngay."
+        //     };
+        //     bool emailSent = _sendEmail.SendEmail(email);
+        //     if (!emailSent)
+        //     {
+        //         Console.WriteLine("Không thể gửi email. Kiểm tra lại cấu hình SMTP.");
+        //     }
 
-            return new JsonResult("Đã thay đổi mật khẩu thành công.")
-            {
-                StatusCode = StatusCodes.Status200OK
-            };
-        }
+        //     return new JsonResult("Đã thay đổi mật khẩu thành công.")
+        //     {
+        //         StatusCode = StatusCodes.Status200OK
+        //     };
+        // }
 
         public JsonResult ResetPassword(string userName)
         {

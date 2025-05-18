@@ -188,12 +188,7 @@ public class AuthController : ControllerBase
     [Consumes("multipart/form-data")]
     public async Task<ActionResult<UserDto>> ChangePassword([FromForm] ChangePassDto changePassDto)
     {
-        var userName = User.Claims.FirstOrDefault(c => c.Type == "username")?.Value;
-
-        if (string.IsNullOrEmpty(userName))
-        {
-            return Unauthorized("Không tìm thấy thông tin người dùng.");
-        }
+        var userName = changePassDto.UserName;
 
         var khachHang = _context.KhachHangs.FirstOrDefault(kh => kh.UserName == userName);
         var nhanVien = _context.NhanViens.FirstOrDefault(nv => nv.UserName == userName);
