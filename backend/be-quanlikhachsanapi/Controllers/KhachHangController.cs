@@ -76,17 +76,17 @@ namespace be_quanlikhachsanapi.Controllers
             return Ok(khachHang);
         }
 
-        [HttpPost("Đổi mật khẩu")]
-        [Consumes("multipart/form-data")]
-        public IActionResult ChangePassword(string userName, [FromForm] ChangePassDto changePassDto)
-        {
-            var khachHang = _khachHangRepo.ChangePassword(userName, changePassDto);
-            if (khachHang == null)
-            {
-                return NotFound("Không tìm thấy khách hàng với ID đã cho.");
-            }
-            return Ok(khachHang);
-        }
+        // [HttpPost("Đổi mật khẩu")]
+        // [Consumes("multipart/form-data")]
+        // public IActionResult ChangePassword(string userName, [FromForm] ChangePassDto changePassDto)
+        // {
+        //     var khachHang = _khachHangRepo.ChangePassword(userName, changePassDto);
+        //     if (khachHang == null)
+        //     {
+        //         return NotFound("Không tìm thấy khách hàng với ID đã cho.");
+        //     }
+        //     return Ok(khachHang);
+        // }
         [HttpPost("Khôi phục mật khẩu")]
         [Consumes("multipart/form-data")]
         public IActionResult ResetPassword(string userName)
