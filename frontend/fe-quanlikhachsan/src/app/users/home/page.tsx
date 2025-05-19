@@ -11,6 +11,33 @@ import { useLanguage } from '../../../app/components/profile/LanguageContext';
 import i18n from '../../../app/i18n';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
+import { getRoomTypes, getPromotions } from '../../../lib/api';
+
+// Định nghĩa interface cho RoomType
+interface RoomType {
+  maLoaiPhong: string;
+  tenLoaiPhong: string;
+  moTa?: string;
+  donGia?: number;
+  soNguoi?: number;
+  dienTich?: number;
+  hinhAnh?: string;
+  trangThai?: string;
+}
+
+// Định nghĩa interface cho Promotion
+interface Promotion {
+  maMK: string;
+  tenKhuyenMai: string;
+  moTa: string;
+  ngayBatDau: string;
+  ngayKetThuc: string;
+  phanTramGiam: number;
+  dieuKien?: string;
+  maGiamGia: string;
+  hinhAnh?: string;
+  trangThai?: string;
+}
 
 export default function Home() {
   const { t } = useTranslation();
@@ -19,12 +46,64 @@ export default function Home() {
   const [children, setChildren] = useState(0);
   const [isReady, setIsReady] = useState(false);
   const router = useRouter();
+  
+  // Thêm state cho dữ liệu từ API với kiểu dữ liệu đã định nghĩa
+  const [featuredRooms, setFeaturedRooms] = useState<RoomType[]>([]);
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     i18n.changeLanguage(selectedLanguage).then(() => {
       setIsReady(true);
     });
+    
+    // Lấy dữ liệu từ API
+    fetchData();
   }, [selectedLanguage]);
+
+  // Hàm lấy dữ liệu từ API
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      // Lấy danh sách loại phòng nổi bật
+      const roomTypesData = await getRoomTypes();
+      // Chỉ lấy 3 phòng đầu tiên để hiển thị
+      setFeaturedRooms(roomTypesData.slice(0, 3));
+      
+      // Lấy danh sách khuyến mãi
+      const promotionsData = await getPromotions();
+      // Lọc chỉ lấy những khuyến mãi còn hiệu lực
+      const activePromotions = promotionsData.filter((promo: Promotion) => {
+        const now = new Date();
+        const startDate = new Date(promo.ngayBatDau);
+        const endDate = new Date(promo.ngayKetThuc);
+        return now >= startDate && now <= endDate;
+      });
+      // Chỉ lấy 3 khuyến mãi đầu tiên để hiển thị
+      setPromotions(activePromotions.slice(0, 3));
+    } catch (err) {
+      console.error('Lỗi khi lấy dữ liệu:', err);
+      setError('Không thể tải dữ liệu từ server.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Hàm lấy đường dẫn hình ảnh hợp lệ
+  const getValidImageSrc = (imagePath?: string): string => {
+    if (!imagePath) return '/images/room-placeholder.jpg';
+    
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return imagePath;
+    }
+    
+    if (imagePath.startsWith('/')) {
+      return imagePath;
+    }
+    
+    return '/images/room-placeholder.jpg';
+  };
 
   if (!isReady) return null; 
 
@@ -34,62 +113,35 @@ export default function Home() {
       description: t('home.luxuriousRoomDesc'),
       icon: <FaHotel />,
       image: '/images/reviews/room.jpg',
-      link: '/rooms',
+      link: '/users/rooms',
     },
     {
       title: t('home.diverseCuisine'),
       description: t('home.diverseCuisineDesc'),
       icon: <FaUtensils />,
       image: '/images/reviews/dining.jpg',
-      link: '/dining',
+      link: '/users/services',
     },
     {
       title: t('home.fiveStarService'),
       description: t('home.fiveStarServiceDesc'),
       icon: <FaUsers />,
       image: '/images/reviews/conference.jpg',
-      link: '/conference',
+      link: '/users/services',
     },
     {
       title: t('home.specialOffers'),
       description: t('home.specialOffersDesc'),
       icon: <FaSwimmingPool />,
       image: '/images/reviews/pool.jpg',
-      link: '/pool',
+      link: '/users/services',
     },
     {
       title: t('home.specialOffers'),
       description: t('home.specialOffersDesc'),
       icon: <FaRing />,
       image: '/images/reviews/wedding.jpg',
-      link: '/wedding',
-    },
-  ];
-
-  const offers = [
-    {
-      type: t('home.roomPackage'),
-      title: t('home.weekendGetaway'),
-      description: t('home.weekendGetawayDesc'),
-      rating: 5,
-      price: 4500000,
-      image: '/images/reviews/weekend.jpg',
-    },
-    {
-      type: t('home.specialOffer'),
-      title: t('home.businessPackage'),
-      description: t('home.businessPackageDesc'),
-      rating: 4.5,
-      price: 6900000,
-      image: '/images/reviews/business.jpg',
-    },
-    {
-      type: t('home.holidayOffer'),
-      title: t('home.familyHoliday'),
-      description: t('home.familyHolidayDesc'),
-      rating: 4.8,
-      price: 9200000,
-      image: '/images/reviews/family.jpg',
+      link: '/users/services',
     },
   ];
 
@@ -154,7 +206,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Special Offers */}
+      {/* Special Offers - Hiển thị từ API */}
       <section className={styles.specialOffers}>
         <div className={styles.sectionHeader}>
           <h2>{t('home.specialOffers')}</h2>
@@ -163,41 +215,66 @@ export default function Home() {
             {t('home.viewAllOffers')}
           </Link>
         </div>
-        <div className={styles.offerGrid}>
-          {offers.map((offer, index) => (
-            <div key={index} className={styles.offerCard}>
-              <div className={styles.offerImage}>
-                <Image src={offer.image} alt={offer.title} fill style={{ objectFit: 'cover' }} />
-                <div className={styles.offerType}>{offer.type}</div>
-              </div>
-              <div className={styles.offerContent}>
-                <h3>{offer.title}</h3>
-                <p>{offer.description}</p>
-                <div className={styles.offerRating}>
-                  {[...Array(5)].map((_, i) => (
-                    <FaStar key={i} className={i < Math.floor(offer.rating) ? styles.starActive : styles.star} />
-                  ))}
+
+        {loading ? (
+          <div className={styles.loadingContainer}>
+            <div className={styles.spinner}></div>
+            <p>Đang tải dữ liệu khuyến mãi...</p>
+          </div>
+        ) : error ? (
+          <div className={styles.errorContainer}>
+            <p>{error}</p>
+            <button onClick={fetchData} className={styles.retryButton}>Thử lại</button>
+          </div>
+        ) : (
+          <div className={styles.offerGrid}>
+            {promotions.length > 0 ? (
+              promotions.map((promotion, index) => (
+                <div key={promotion.maMK} className={styles.offerCard}>
+                  <div className={styles.offerImage}>
+                    <Image src={getValidImageSrc(promotion.hinhAnh)} alt={promotion.tenKhuyenMai} fill style={{ objectFit: 'cover' }} />
+                    <div className={styles.offerType}>{promotion.phanTramGiam}% Giảm</div>
+                  </div>
+                  <div className={styles.offerContent}>
+                    <h3>{promotion.tenKhuyenMai}</h3>
+                    <p>{promotion.moTa.length > 100 ? promotion.moTa.substring(0, 100) + '...' : promotion.moTa}</p>
+                    <div className={styles.offerRating}>
+                      <FaStar className={styles.starActive} />
+                      <FaStar className={styles.starActive} />
+                      <FaStar className={styles.starActive} />
+                      <FaStar className={styles.starActive} />
+                      <FaStar className={styles.starActive} />
+                    </div>
+                    <div className={styles.offerFooter}>
+                      <div className={styles.offerCode}>{promotion.maGiamGia}</div>
+                      <Link href={`/users/promotions?id=${promotion.maMK}`} className={styles.viewOfferBtn}>
+                        Xem chi tiết
+                      </Link>
+                    </div>
+                  </div>
                 </div>
-                <div className={styles.offerPrice}>
-                  <span className={styles.amount}>{offer.price.toLocaleString('en-US')}đ</span>
-                  <span className={styles.perNight}>{t('home.perNight')}</span>
-                </div>
+              ))
+            ) : (
+              <div className={styles.noOffers}>
+                <p>Hiện không có khuyến mãi nào.</p>
               </div>
-            </div>
-          ))}
-        </div>
+            )}
+          </div>
+        )}
       </section>
-          <section className={styles.mapSection}>
-            <h2>{t('home.location')}</h2>
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.757135614257!2d105.84125361476292!3d21.007025386010126!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ac428c3336e5%3A0x384d11d7f7f3b4a8!2zQ29wYWNhYmFuYSBNYXJrZXQgLSBUaOG7jyBMw6A!5e0!3m2!1svi!2s!4v1647901645957!5m2!1svi!2s"
-              width="100%"
-              height="450"
-              style={{ border: 0 }}
-              allowFullScreen
-              loading="lazy"
-            ></iframe>
-          </section>
+
+      {/* Map Section */}
+      <section className={styles.mapSection}>
+        <h2>{t('home.location')}</h2>
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.757135614257!2d105.84125361476292!3d21.007025386010126!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ac428c3336e5%3A0x384d11d7f7f3b4a8!2zQ29wYWNhYmFuYSBNYXJrZXQgLSBUaOG7jyBMw6A!5e0!3m2!1svi!2s!4v1647901645957!5m2!1svi!2s"
+          width="100%"
+          height="450"
+          style={{ border: 0 }}
+          allowFullScreen
+          loading="lazy"
+        ></iframe>
+      </section>
       {/* Footer */}
       <Footer />
     </div>
