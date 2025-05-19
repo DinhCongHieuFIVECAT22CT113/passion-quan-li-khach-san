@@ -7,6 +7,12 @@ using Microsoft.EntityFrameworkCore;
 using be_quanlikhachsanapi.ViewModel;
 using System.Linq;
 using System.Threading.Tasks;
+using Google.Apis.Gmail.v1.Data;
+using be_quanlikhachsanapi.ViewModel;
+using be_quanlikhachsanapi.Helpers;
+using System.Net.WebSockets;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Microsoft.AspNetCore.Authorization;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -14,7 +20,7 @@ public class AuthController : ControllerBase
 {
     private readonly QuanLyKhachSanContext _context;
     private readonly ITokenService _tokenService;
-    private readonly IPasswordHasher<KhachHang> _passwordHasher;
+    private readonly IPasswordHasher<KhachHang> _passwordHasherKh;
     private readonly IPasswordHasher<NhanVien> _passwordHasherNv;
     private readonly ISendEmailServices _sendEmail;
     private readonly IConfiguration _confMail;
@@ -22,14 +28,14 @@ public class AuthController : ControllerBase
     public AuthController(
         QuanLyKhachSanContext context,
         ITokenService tokenService,
-        IPasswordHasher<KhachHang> passwordHasher,
+        IPasswordHasher<KhachHang> passwordHasherKh,
         IPasswordHasher<NhanVien> passwordHasherNv,
         ISendEmailServices sendEmail,
         IConfiguration confMail)
     {
         _context = context;
         _tokenService = tokenService;
-        _passwordHasher = passwordHasher;
+        _passwordHasherKh = passwordHasherKh;
         _passwordHasherNv = passwordHasherNv;
         _sendEmail = sendEmail;
         _confMail = confMail;
@@ -79,7 +85,7 @@ public class AuthController : ControllerBase
             else
             {
                 // Nếu không thể parse số (MaKh không đúng định dạng), quay về mặc định
-                newMaKh = "KH001"; 
+                newMaKh = "KH001";
             }
         }
         // --- Auto Increment MaKh --- END ---
@@ -100,7 +106,7 @@ public class AuthController : ControllerBase
 
         // Hash mật khẩu
         #pragma warning disable CS8601
-        khachHang.PasswordHash = _passwordHasher.HashPassword(khachHang, registerDto.Password);
+        khachHang.PasswordHash = _passwordHasherKh.HashPassword(khachHang, registerDto.Password);
         #pragma warning restore CS8601
 
         _context.KhachHangs.Add(khachHang);
@@ -118,7 +124,7 @@ public class AuthController : ControllerBase
 
         // Gửi Email
         _sendEmail.SendEmail(email);
-        
+
         // Trả về thông tin người dùng và token
         return new UserDto
         {
@@ -139,7 +145,7 @@ public class AuthController : ControllerBase
 
         if (khachHang != null)
         {
-            var result = _passwordHasher.VerifyHashedPassword(
+            var result = _passwordHasherKh.VerifyHashedPassword(
                 khachHang, khachHang.PasswordHash, loginDto.Password);
 
             if (result == PasswordVerificationResult.Failed)
@@ -177,4 +183,70 @@ public class AuthController : ControllerBase
             Token = _tokenService.CreateToken(nhanVien)
         };
     }
+
+    [HttpPost("Đổi mật khẩu")]
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<UserDto>> ChangePassword([FromForm] ChangePassDto changePassDto)
+    {
+        var userName = changePassDto.UserName;
+
+        var khachHang = _context.KhachHangs.FirstOrDefault(kh => kh.UserName == userName);
+        var nhanVien = _context.NhanViens.FirstOrDefault(nv => nv.UserName == userName);
+
+        if (khachHang == null && nhanVien == null)
+        {
+            return new JsonResult("Không tìm thấy tài khoản với username đã cho.")
+            {
+                StatusCode = StatusCodes.Status404NotFound
+            };
+        }
+        bool isCustomer = khachHang != null;
+        var user = isCustomer ? (object)khachHang : nhanVien;
+        
+        var isOldPasswordValid = isCustomer
+            ? _passwordHasherKh.VerifyHashedPassword(khachHang, khachHang.PasswordHash, changePassDto.Password)
+            : _passwordHasherNv.VerifyHashedPassword(nhanVien, nhanVien.PasswordHash, changePassDto.Password);
+
+        if (isOldPasswordValid == PasswordVerificationResult.Failed)
+        {
+            return new JsonResult("Mật khẩu cũ không đúng.")
+            {
+                StatusCode = StatusCodes.Status400BadRequest
+            };
+        }
+        if (changePassDto.NewPassword != changePassDto.ConfirmPassword)
+        {
+            return new JsonResult("Mật khẩu xác nhận không khớp.")
+            {
+                StatusCode = StatusCodes.Status400BadRequest
+            };
+        }
+        if (isCustomer)
+        {
+            khachHang.PasswordHash = _passwordHasherKh.HashPassword(khachHang, changePassDto.NewPassword);
+            _context.KhachHangs.Update(khachHang);
+        }
+        else
+        {
+            nhanVien.PasswordHash = _passwordHasherNv.HashPassword(nhanVien, changePassDto.NewPassword);
+            _context.NhanViens.Update(nhanVien);
+        }
+        _context.SaveChanges();
+
+        var email = new EmailModel
+            {
+                ToEmail = isCustomer ? khachHang.Email : nhanVien.Email,
+                Subject = "Mật khẩu đăng nhập vừa được thay đổi",
+                Body = "Bạn vừa thay đổi mật khẩu thành công. Nếu bạn không thực hiện điều này, vui lòng liên hệ với chúng tôi ngay."
+            };
+
+            _sendEmail.SendEmail(email);
+
+            return new JsonResult("Đã thay đổi mật khẩu thành công.")
+            {
+                StatusCode = StatusCodes.Status200OK
+            };
+    }
 }
+
+    

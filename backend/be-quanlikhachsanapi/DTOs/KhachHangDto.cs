@@ -38,15 +38,4 @@ namespace be_quanlikhachsanapi.DTOs
         public string SoCccd { get; set; } = null!;
         public string? MaLoaiKh { get; set; }
     }
-    public class ChangePassDto
-    {
-        [Required]
-        public required string Password { get; set; }
-
-        [Required]
-        public required string NewPassword { get; set; }
-
-        [Required]
-        public required string ConfirmPassword { get; set; }
-    }
 }

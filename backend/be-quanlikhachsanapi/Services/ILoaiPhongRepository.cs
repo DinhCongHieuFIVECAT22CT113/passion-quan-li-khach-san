@@ -37,8 +37,7 @@ namespace be_quanlikhachsanapi.Services
                 GiuongDon = lp.GiuongDon,
                 KichThuocPhong = lp.KichThuocPhong,
                 SucChua = lp.SucChua,
-                Thumbnail = lp.Thumbnail,
-                HinhAnh = lp.HinhAnh
+                Thumbnail = lp.Thumbnail
             }).ToList();
         }
         public JsonResult GetLoaiPhongById(string MaLoaiPhong)
@@ -61,8 +60,7 @@ namespace be_quanlikhachsanapi.Services
                 GiuongDon = loaiPhong.GiuongDon,
                 KichThuocPhong = loaiPhong.KichThuocPhong,
                 SucChua = loaiPhong.SucChua,
-                Thumbnail = loaiPhong.Thumbnail,
-                HinhAnh = loaiPhong.HinhAnh
+                Thumbnail = loaiPhong.Thumbnail
             };
             return new JsonResult(_loaiPhong);
         }
@@ -98,7 +96,6 @@ namespace be_quanlikhachsanapi.Services
                 KichThuocPhong = createLoaiPhong.KichThuocPhong,
                 SucChua = createLoaiPhong.SucChua,
                 Thumbnail = createLoaiPhong.Thumbnail,
-                HinhAnh = createLoaiPhong.HinhAnh,
                 NgayTao = DateTime.Now,
                 NgaySua = DateTime.Now
             };
@@ -136,7 +133,6 @@ namespace be_quanlikhachsanapi.Services
                 loaiPhong.KichThuocPhong = updateLoaiPhong.KichThuocPhong;
                 loaiPhong.SucChua = updateLoaiPhong.SucChua;
                 loaiPhong.Thumbnail = updateLoaiPhong.Thumbnail;
-                loaiPhong.HinhAnh = updateLoaiPhong.HinhAnh;
                 loaiPhong.NgaySua = DateTime.Now;
 
                 _context.SaveChanges();

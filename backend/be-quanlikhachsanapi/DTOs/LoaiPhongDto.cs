@@ -27,8 +27,6 @@ namespace be_quanlikhachsanapi.DTOs
         public int SucChua { get; set; }
 
         public string? Thumbnail { get; set; }
-
-        public string? HinhAnh { get; set; }
     }
 
     public class CreateLoaiPhongDTO
@@ -65,7 +63,6 @@ namespace be_quanlikhachsanapi.DTOs
 
         public string? Thumbnail { get; set; }
 
-        public string? HinhAnh { get; set; }
         [Required(ErrorMessage = "Ngày tạo phòng là bắt buộc.")]
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
@@ -107,7 +104,6 @@ namespace be_quanlikhachsanapi.DTOs
 
         public string? Thumbnail { get; set; }
 
-        public string? HinhAnh { get; set; }
         [Required(ErrorMessage = "Ngày sửa phòng là bắt buộc.")]
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
