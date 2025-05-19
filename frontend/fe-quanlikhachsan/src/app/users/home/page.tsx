@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../../../app/components/profile/LanguageContext';
 import i18n from '../../../app/i18n';
 import Header from '../../components/layout/Header';
+import Footer from '../../components/layout/Footer';
 
 export default function Home() {
   const { t } = useTranslation();
@@ -32,35 +33,35 @@ export default function Home() {
       title: t('home.luxuriousRoom'),
       description: t('home.luxuriousRoomDesc'),
       icon: <FaHotel />,
-      image: '/images/room.jpg',
+      image: '/images/reviews/room.jpg',
       link: '/rooms',
     },
     {
       title: t('home.diverseCuisine'),
       description: t('home.diverseCuisineDesc'),
       icon: <FaUtensils />,
-      image: '/images/dining.jpg',
+      image: '/images/reviews/dining.jpg',
       link: '/dining',
     },
     {
       title: t('home.fiveStarService'),
       description: t('home.fiveStarServiceDesc'),
       icon: <FaUsers />,
-      image: '/images/conference.jpg',
+      image: '/images/reviews/conference.jpg',
       link: '/conference',
     },
     {
       title: t('home.specialOffers'),
       description: t('home.specialOffersDesc'),
       icon: <FaSwimmingPool />,
-      image: '/images/pool.jpg',
+      image: '/images/reviews/pool.jpg',
       link: '/pool',
     },
     {
       title: t('home.specialOffers'),
       description: t('home.specialOffersDesc'),
       icon: <FaRing />,
-      image: '/images/wedding.jpg',
+      image: '/images/reviews/wedding.jpg',
       link: '/wedding',
     },
   ];
@@ -72,7 +73,7 @@ export default function Home() {
       description: t('home.weekendGetawayDesc'),
       rating: 5,
       price: 4500000,
-      image: '/images/weekend.jpg',
+      image: '/images/reviews/weekend.jpg',
     },
     {
       type: t('home.specialOffer'),
@@ -80,7 +81,7 @@ export default function Home() {
       description: t('home.businessPackageDesc'),
       rating: 4.5,
       price: 6900000,
-      image: '/images/business.jpg',
+      image: '/images/reviews/business.jpg',
     },
     {
       type: t('home.holidayOffer'),
@@ -88,7 +89,7 @@ export default function Home() {
       description: t('home.familyHolidayDesc'),
       rating: 4.8,
       price: 9200000,
-      image: '/images/family.jpg',
+      image: '/images/reviews/family.jpg',
     },
   ];
 
@@ -113,7 +114,7 @@ export default function Home() {
         <div className={styles.servicesGrid}>
           <div className={styles.serviceCard}>
             <div className={styles.serviceImage}>
-              <Image src="/images/location.jpg" alt="Vị trí" fill style={{ objectFit: 'cover' }} />
+              <Image src="/images/reviews/location.jpg" alt="Vị trí" fill style={{ objectFit: 'cover' }} />
             </div>
             <div className={styles.serviceContent}>
               <h3>{t('home.location')}</h3>
@@ -123,7 +124,7 @@ export default function Home() {
 
           <div className={styles.serviceCard}>
             <div className={styles.serviceImage}>
-              <Image src="/images/room.jpg" alt="Phòng" fill style={{ objectFit: 'cover' }} />
+              <Image src="/images/reviews/room.jpg" alt="Phòng" fill style={{ objectFit: 'cover' }} />
             </div>
             <div className={styles.serviceContent}>
               <h3>{t('home.luxuriousRoom')}</h3>
@@ -133,7 +134,7 @@ export default function Home() {
 
           <div className={styles.serviceCard}>
             <div className={styles.serviceImage}>
-              <Image src="/images/service.jpg" alt="Dịch vụ" fill style={{ objectFit: 'cover' }} />
+              <Image src="/images/reviews/service.jpg" alt="Dịch vụ" fill style={{ objectFit: 'cover' }} />
             </div>
             <div className={styles.serviceContent}>
               <h3>{t('home.fiveStarService')}</h3>
@@ -143,7 +144,7 @@ export default function Home() {
 
           <div className={styles.serviceCard}>
             <div className={styles.serviceImage}>
-              <Image src="/images/dining.jpg" alt="Ẩm thực" fill style={{ objectFit: 'cover' }} />
+              <Image src="/images/reviews/dining.jpg" alt="Ẩm thực" fill style={{ objectFit: 'cover' }} />
             </div>
             <div className={styles.serviceContent}>
               <h3>{t('home.diverseCuisine')}</h3>
@@ -158,7 +159,7 @@ export default function Home() {
         <div className={styles.sectionHeader}>
           <h2>{t('home.specialOffers')}</h2>
           <p>{t('home.specialOffersDesc')}</p>
-          <Link href="/offers" className={styles.viewAll}>
+          <Link href="/users/promotions" className={styles.viewAll}>
             {t('home.viewAllOffers')}
           </Link>
         </div>
@@ -186,47 +187,19 @@ export default function Home() {
           ))}
         </div>
       </section>
-
+          <section className={styles.mapSection}>
+            <h2>{t('home.location')}</h2>
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.757135614257!2d105.84125361476292!3d21.007025386010126!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ac428c3336e5%3A0x384d11d7f7f3b4a8!2zQ29wYWNhYmFuYSBNYXJrZXQgLSBUaOG7jyBMw6A!5e0!3m2!1svi!2s!4v1647901645957!5m2!1svi!2s"
+              width="100%"
+              height="450"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+            ></iframe>
+          </section>
       {/* Footer */}
-      <footer className={styles.footer}>
-        <div className={styles.footerContent}>
-          <div className={styles.footerLeft}>
-            <h3>{t('about.subscribe')}</h3>
-            <div className={styles.subscribeForm}>
-              <input type="email" placeholder={t('about.subscribePlaceholder')} />
-              <button className={styles.subscribeButton}>{t('about.subscribeButton')}</button>
-            </div>
-          </div>
-
-          <div className={styles.footerCenter}>
-            <Image src="/images/logo.png" alt="Logo Khách sạn" width={150} height={60} />
-          </div>
-
-          <div className={styles.footerRight}>
-            <div className={styles.footerLinks}>
-              <div className={styles.linkGroup}>
-                <h4>{t('about.footerAbout')}</h4>
-                <Link href="/location">{t('about.location')}</Link>
-              </div>
-
-              <div className={styles.linkGroup}>
-                <h4>{t('about.support')}</h4>
-                <Link href="/faq">{t('about.faq')}</Link>
-                <Link href="/terms">{t('about.terms')}</Link>
-                <Link href="/privacy">{t('about.privacy')}</Link>
-              </div>
-
-              <div className={styles.linkGroup}>
-                <h4>{t('about.downloadApp')}</h4>
-                <Link href="/services">{t('about.services')}</Link>
-                <Link href="/careers">{t('about.careers')}</Link>
-                <Link href="/book">{t('about.howToBook')}</Link>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className={styles.copyright}>{t('about.copyright')}</div>
-      </footer>
+      <Footer />
     </div>
   );
 }

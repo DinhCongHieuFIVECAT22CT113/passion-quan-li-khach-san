@@ -9,6 +9,7 @@ import { getRooms, getRoomTypes } from '../../../lib/api';
 import { Room, RoomType } from '../../../types/auth';
 import { API_BASE_URL } from '../../../lib/config';
 import Header from '../../components/layout/Header';
+import Footer from '../../components/layout/Footer';
 
 // Hàm hỗ trợ để đảm bảo đường dẫn hình ảnh hợp lệ
 const getValidImageSrc = (imagePath: string | undefined): string => {
@@ -37,6 +38,11 @@ export default function RoomsPage() {
   const [capacity, setCapacity] = useState(2);
   const [showFilters, setShowFilters] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Thêm trạng thái tạm thời cho bộ lọc
+  const [tempSelectedFilter, setTempSelectedFilter] = useState('all');
+  const [tempPriceRange, setTempPriceRange] = useState([500000, 5000000]);
+  const [tempCapacity, setTempCapacity] = useState(2);
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -73,6 +79,14 @@ export default function RoomsPage() {
 
     fetchRooms();
   }, []);
+
+  // Hàm áp dụng bộ lọc
+  const applyFilters = () => {
+    setSelectedFilter(tempSelectedFilter);
+    setPriceRange(tempPriceRange);
+    setCapacity(tempCapacity);
+    setShowFilters(false); // Ẩn bộ lọc sau khi áp dụng
+  };
 
   // Lọc phòng theo bộ lọc đã chọn và từ khóa tìm kiếm
   const filteredRoomTypes = roomTypes.filter((roomType) => {
@@ -174,8 +188,8 @@ export default function RoomsPage() {
                 <span>Loại phòng</span>
               </div>
               <select 
-                value={selectedFilter} 
-                onChange={(e) => setSelectedFilter(e.target.value)}
+                value={tempSelectedFilter} 
+                onChange={(e) => setTempSelectedFilter(e.target.value)}
                 className={styles.filterSelect}
               >
                 <option value="all">Tất cả phòng</option>
@@ -190,7 +204,7 @@ export default function RoomsPage() {
             <div className={styles.filterCard}>
               <div className={styles.filterHeader}>
                 <FaDollarSign className={styles.filterIcon} />
-                <span>Giá tiền (VNĐ): {priceRange[0]?.toLocaleString() || 0} - {priceRange[1]?.toLocaleString() || 0}</span>
+                <span>Giá tiền (VNĐ): {tempPriceRange[0]?.toLocaleString() || 0} - {tempPriceRange[1]?.toLocaleString() || 0}</span>
               </div>
               <div className={styles.rangeSliderContainer}>
                 <input
@@ -198,8 +212,8 @@ export default function RoomsPage() {
                   min="500000"
                   max="5000000"
                   step="100000"
-                  value={priceRange[0]}
-                  onChange={(e) => setPriceRange([parseInt(e.target.value), priceRange[1]])}
+                  value={tempPriceRange[0]}
+                  onChange={(e) => setTempPriceRange([parseInt(e.target.value), tempPriceRange[1]])}
                   className={styles.rangeSlider}
                 />
                 <input
@@ -207,8 +221,8 @@ export default function RoomsPage() {
                   min="500000"
                   max="5000000"
                   step="100000"
-                  value={priceRange[1]}
-                  onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
+                  value={tempPriceRange[1]}
+                  onChange={(e) => setTempPriceRange([tempPriceRange[0], parseInt(e.target.value)])}
                   className={styles.rangeSlider}
                 />
                 <div className={styles.priceLabels}>
@@ -221,20 +235,30 @@ export default function RoomsPage() {
             <div className={styles.filterCard}>
               <div className={styles.filterHeader}>
                 <FaUsers className={styles.filterIcon} />
-                <span>Số người: {capacity}</span>
+                <span>Số người: {tempCapacity}</span>
               </div>
               <input
                 type="range"
                 min="1"
                 max="10"
-                value={capacity}
-                onChange={(e) => setCapacity(parseInt(e.target.value))}
+                value={tempCapacity}
+                onChange={(e) => setTempCapacity(parseInt(e.target.value))}
                 className={styles.capacitySlider}
               />
               <div className={styles.capacityLabels}>
                 <span>1</span>
                 <span>10</span>
               </div>
+            </div>
+
+            {/* Nút Áp dụng */}
+            <div className={styles.filterCard}>
+              <button
+                onClick={applyFilters}
+                className={styles.applyButton}
+              >
+                Áp dụng
+              </button>
             </div>
           </div>
         </div>
@@ -349,42 +373,7 @@ export default function RoomsPage() {
       </main>
       
       {/* Footer */}
-      <footer className={styles.footer}>
-        <div className={styles.footerContent}>
-          <div className={styles.footerLogo}>
-            <Image src="/images/logo.png" alt="Logo" width={150} height={50} />
-            <p>Trải nghiệm lưu trú đẳng cấp và sang trọng</p>
-          </div>
-          
-          <div className={styles.footerLinks}>
-            <div className={styles.linkGroup}>
-              <h4>Liên kết</h4>
-              <Link href="/users/home">Trang chủ</Link>
-              <Link href="/users/about">Giới thiệu</Link>
-              <Link href="/users/rooms">Phòng</Link>
-              <Link href="/users/explore">Khám phá</Link>
-            </div>
-            
-            <div className={styles.linkGroup}>
-              <h4>Chính sách</h4>
-              <Link href="/privacy">Bảo mật</Link>
-              <Link href="/terms">Điều khoản</Link>
-              <Link href="/faq">FAQ</Link>
-            </div>
-            
-            <div className={styles.linkGroup}>
-              <h4>Liên hệ</h4>
-              <p>Email: info@hotel.com</p>
-              <p>Phone: +84 123 456 789</p>
-              <p>Address: 123 Street, City</p>
-            </div>
-          </div>
-        </div>
-        
-        <div className={styles.copyright}>
-          <p>&copy; {new Date().getFullYear()} Luxury Hotel. All rights reserved.</p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

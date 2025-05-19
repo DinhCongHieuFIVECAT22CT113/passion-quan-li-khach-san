@@ -89,7 +89,7 @@
   height: 60vh;
   min-height: 400px;
   max-height: 600px;
-  background-image: url('/images/luxury-hotel-room.jpg');
+  background-image: url('/heros/room-hero.jpg');
   background-size: cover;
   background-position: center;
   display: flex;
