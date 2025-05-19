@@ -307,7 +307,7 @@ export default function PromotionManager() {
               <input name="tenKM" value={form.tenKM} onChange={handleChange} placeholder="Tên chương trình" required />
               <input name="phanTramGiam" type="number" value={form.phanTramGiam} onChange={handleChange} placeholder="Giảm (%)" required min={0} max={100} />
               <select name="loaiKhuyenMai" value={form.loaiKhuyenMai} onChange={handleChange} required>
-                <option value="">Chọn loại</option>
+                <option key="loai-default" value="">Chọn loại</option>
                 <option key="loai-phong" value="Phòng">Phòng</option>
                 <option key="loai-dichvu" value="Dịch vụ">Dịch vụ</option>
                 <option key="loai-hoadon" value="Tổng hóa đơn">Tổng hóa đơn</option>
@@ -334,7 +334,7 @@ export default function PromotionManager() {
               <input name="tenKM" value={form.tenKM} onChange={handleChange} placeholder="Tên chương trình" required />
               <input name="phanTramGiam" type="number" value={form.phanTramGiam} onChange={handleChange} placeholder="Giảm (%)" required min={0} max={100} />
               <select name="loaiKhuyenMai" value={form.loaiKhuyenMai} onChange={handleChange} required>
-                <option value="">Chọn loại</option>
+                <option key="edit-loai-default" value="">Chọn loại</option>
                 <option key="edit-loai-phong" value="Phòng">Phòng</option>
                 <option key="edit-loai-dichvu" value="Dịch vụ">Dịch vụ</option>
                 <option key="edit-loai-hoadon" value="Tổng hóa đơn">Tổng hóa đơn</option>
