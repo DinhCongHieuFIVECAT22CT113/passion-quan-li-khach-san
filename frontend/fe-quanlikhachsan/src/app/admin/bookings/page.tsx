@@ -233,7 +233,7 @@ export default function BookingManager() {
         }
       }
       
-      const response = await fetch(`${API_BASE_URL}/DatPhong/Cập nhật đặt phòng`, {
+      const response = await fetch(`${API_BASE_URL}/DatPhong/Cập nhật đặt phòng?maDatPhong=${form.maDatPhong}`, {
         method: 'PUT',
         headers: getFormDataHeaders(),
         body: formData,
@@ -279,6 +279,29 @@ export default function BookingManager() {
     (b.tenPhong || '').toLowerCase().includes(search.toLowerCase()) ||
     (b.maDatPhong || '').toLowerCase().includes(search.toLowerCase())
   );
+
+  const handleDelete = async (maDatPhong: string) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa đơn đặt phòng này?')) {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error("Bạn cần đăng nhập để thực hiện hành động này");
+        
+        const response = await fetch(`${API_BASE_URL}/DatPhong/Xóa đặt phòng?maDatPhong=${maDatPhong}`, {
+          method: 'DELETE',
+          headers: getAuthHeaders('DELETE'),
+          credentials: 'include'
+        });
+        
+        await handleResponse(response);
+        
+        // Cập nhật danh sách đặt phòng
+        setBookings(bookings.filter(booking => booking.maDatPhong !== maDatPhong));
+      } catch (err: any) {
+        alert(`Lỗi: ${err.message}`);
+        console.error("Error deleting booking:", err);
+      }
+    }
+  };
 
   return (
     <div className={styles.container}>

@@ -157,7 +157,23 @@ export const getRooms = async () => {
     headers: getAuthHeaders('GET'),
   });
 
-  return handleResponse(response);
+  const data = await handleResponse(response);
+
+  // Chuyển đổi từ định dạng backend sang định dạng frontend
+  if (Array.isArray(data)) {
+    return data.map(room => ({
+      maPhong: room.maPhong,
+      soPhong: room.soPhong,  // backend sử dụng SoPhong
+      maLoaiPhong: room.maLoaiPhong,
+      giaTien: room.giaTien || 0,  // Backend có thể không có trường này
+      trangThai: room.trangThai,
+      thumbnail: room.thumbnail,
+      hinhAnh: room.hinhAnh,
+      tang: room.tang
+    }));
+  }
+
+  return data;
 };
 
 // API Lấy danh sách loại phòng - endpoint từ Swagger
@@ -169,6 +185,102 @@ export const getRoomTypes = async () => {
     mode: 'cors',
     credentials: 'include',
     headers: getAuthHeaders('GET'),
+  });
+
+  return handleResponse(response);
+};
+
+// API Tạo phòng mới
+export const createRoom = async (roomData: any) => {
+  console.log(`Đang gọi API tạo phòng mới: ${API_BASE_URL}/Phong/Tạo phòng mới`);
+
+  // Chuyển đổi key từ camelCase sang PascalCase cho phù hợp với API
+  const formData = new FormData();
+  
+  // Xử lý key name để phù hợp với API backend
+  const keyMapping: Record<string, string> = {
+    maLoaiPhong: 'MaLoaiPhong',
+    soPhong: 'SoPhong',
+    trangThai: 'TrangThai',
+    ngayTao: 'NgayTao',
+    tang: 'Tang',
+    thumbnail: 'Thumbnail',
+    hinhAnh: 'HinhAnh'
+  };
+
+  // Loại bỏ các trường không cần thiết và đảm bảo tên trường đúng với backend
+  for (const key in roomData) {
+    if (key !== 'tenLoaiPhong' && key !== 'maPhong' && key !== 'giaTien') {
+      const backendKey = keyMapping[key] || key;
+      formData.append(backendKey, String(roomData[key] || ''));
+    }
+  }
+  
+  console.log("Dữ liệu gửi đi:", Object.fromEntries(formData.entries()));
+  
+  const response = await fetch(`${API_BASE_URL}/Phong/Tạo phòng mới`, {
+    method: 'POST',
+    mode: 'cors',
+    credentials: 'include',
+    body: formData,
+    headers: getFormDataHeaders(),
+  });
+
+  return handleResponse(response);
+};
+
+// API Cập nhật phòng
+export const updateRoom = async (maPhong: string, roomData: any) => {
+  console.log(`Đang gọi API cập nhật phòng: ${API_BASE_URL}/Phong/Cập nhật phòng?maPhong=${maPhong}`);
+  
+  // Chuyển đổi key từ camelCase sang PascalCase cho phù hợp với API
+  const formData = new FormData();
+  
+  // Xử lý key name để phù hợp với API backend
+  const keyMapping: Record<string, string> = {
+    maLoaiPhong: 'MaLoaiPhong',
+    soPhong: 'SoPhong',
+    trangThai: 'TrangThai',
+    ngaySua: 'NgaySua',
+    tang: 'Tang',
+    thumbnail: 'Thumbnail',
+    hinhAnh: 'HinhAnh'
+  };
+
+  // Loại bỏ các trường không cần thiết và đảm bảo tên trường đúng với backend
+  for (const key in roomData) {
+    if (key !== 'tenLoaiPhong' && key !== 'maPhong' && key !== 'giaTien') {
+      const backendKey = keyMapping[key] || key;
+      formData.append(backendKey, String(roomData[key] || ''));
+    }
+  }
+  
+  console.log("Dữ liệu cập nhật:", Object.fromEntries(formData.entries()));
+  
+  const response = await fetch(`${API_BASE_URL}/Phong/Cập nhật phòng?maPhong=${maPhong}`, {
+    method: 'PUT',
+    mode: 'cors',
+    credentials: 'include',
+    body: formData,
+    headers: getFormDataHeaders(),
+  });
+
+  return handleResponse(response);
+};
+
+// API Xóa phòng
+export const deleteRoom = async (maPhong: string) => {
+  console.log(`Đang gọi API xóa phòng: ${API_BASE_URL}/Phong/Xóa phòng?maPhong=${maPhong}`);
+  
+  const formData = new FormData();
+  formData.append('maPhong', maPhong);
+  
+  const response = await fetch(`${API_BASE_URL}/Phong/Xóa phòng?maPhong=${maPhong}`, {
+    method: 'DELETE',
+    mode: 'cors',
+    credentials: 'include',
+    body: formData,
+    headers: getFormDataHeaders(),
   });
 
   return handleResponse(response);
@@ -497,7 +609,7 @@ export const createStaff = async (staffData: any) => {
 
 // API để cập nhật nhân viên
 export const updateStaff = async (staffData: any) => {
-  console.log(`Đang gọi API cập nhật nhân viên: ${API_BASE_URL}/NhanVien/Cập nhật nhân viên`);
+  console.log(`Đang gọi API cập nhật nhân viên: ${API_BASE_URL}/NhanVien/Cập nhật nhân viên?maNv=${staffData.maNv}`);
   
   const formData = new FormData();
   for (const key in staffData) {
@@ -506,7 +618,7 @@ export const updateStaff = async (staffData: any) => {
     }
   }
   
-  const response = await fetch(`${API_BASE_URL}/NhanVien/Cập nhật nhân viên`, {
+  const response = await fetch(`${API_BASE_URL}/NhanVien/Cập nhật nhân viên?maNv=${staffData.maNv}`, {
     method: 'PUT',
     mode: 'cors',
     credentials: 'include',
@@ -519,9 +631,9 @@ export const updateStaff = async (staffData: any) => {
 
 // API để xóa nhân viên
 export const deleteStaff = async (maNV: string) => {
-  console.log(`Đang gọi API xóa nhân viên: ${API_BASE_URL}/NhanVien/Xóa nhân viên?id=${maNV}`);
+  console.log(`Đang gọi API xóa nhân viên: ${API_BASE_URL}/NhanVien/Xóa nhân viên?maNv=${maNV}`);
   
-  const response = await fetch(`${API_BASE_URL}/NhanVien/Xóa nhân viên?id=${maNV}`, {
+  const response = await fetch(`${API_BASE_URL}/NhanVien/Xóa nhân viên?maNv=${maNV}`, {
     method: 'DELETE',
     mode: 'cors',
     credentials: 'include',
@@ -533,9 +645,9 @@ export const deleteStaff = async (maNV: string) => {
 
 // API để lấy danh sách đánh giá
 export const getReviews = async () => {
-  console.log(`Đang gọi API lấy danh sách đánh giá: ${API_BASE_URL}/DanhGia/Lấy danh sách tất cả đánh giá`);
+  console.log(`Đang gọi API lấy danh sách đánh giá: ${API_BASE_URL}/Review/Lấy danh sách tất cả đánh giá`);
   
-  const response = await fetch(`${API_BASE_URL}/DanhGia/Lấy danh sách tất cả đánh giá`, {
+  const response = await fetch(`${API_BASE_URL}/Review/Lấy danh sách tất cả đánh giá`, {
     method: 'GET',
     mode: 'cors',
     credentials: 'include',
@@ -546,14 +658,454 @@ export const getReviews = async () => {
 };
 
 // API để duyệt đánh giá
-export const approveReview = async (maDG: string, isApproved: boolean) => {
-  console.log(`Đang gọi API duyệt đánh giá: ${API_BASE_URL}/DanhGia/Duyệt đánh giá`);
+export const approveReview = async (maReview: string, isApproved: boolean) => {
+  console.log(`Đang gọi API duyệt đánh giá: ${API_BASE_URL}/Review/Cập nhật đánh giá?MaReview=${maReview}`);
   
   const formData = new FormData();
-  formData.append('maDG', maDG);
-  formData.append('trangThai', isApproved ? 'Đã duyệt' : 'Chưa duyệt');
+  formData.append('MaReview', maReview);
+  formData.append('TrangThai', isApproved ? 'Đã duyệt' : 'Chưa duyệt');
   
-  const response = await fetch(`${API_BASE_URL}/DanhGia/Duyệt đánh giá`, {
+  const response = await fetch(`${API_BASE_URL}/Review/Cập nhật đánh giá?MaReview=${maReview}`, {
+    method: 'PUT',
+    mode: 'cors',
+    credentials: 'include',
+    body: formData,
+    headers: getFormDataHeaders(),
+  });
+
+  return handleResponse(response);
+};
+
+// API để lấy dữ liệu tổng quan cho dashboard
+export const getDashboardStats = async () => {
+  console.log(`Đang gọi API lấy thống kê dashboard: ${API_BASE_URL}/Dashboard/GetStats`);
+  
+  try {
+    // Lấy thống kê phòng
+    const roomsResponse = await fetch(`${API_BASE_URL}/Phong/Lấy danh sách tất cả phòng`, {
+      method: 'GET',
+      mode: 'cors',
+      credentials: 'include',
+      headers: getAuthHeaders('GET'),
+    });
+    
+    const roomsData = await handleResponse(roomsResponse);
+    
+    // Lấy thống kê đặt phòng
+    const bookingsResponse = await fetch(`${API_BASE_URL}/DatPhong/Lấy danh sách đặt phòng`, {
+      method: 'GET',
+      mode: 'cors',
+      credentials: 'include',
+      headers: getAuthHeaders('GET'),
+    });
+    
+    const bookingsData = await handleResponse(bookingsResponse);
+    
+    // Lấy thống kê hóa đơn và doanh thu
+    const invoicesResponse = await fetch(`${API_BASE_URL}/HoaDon/Lấy danh sách tất cả hóa đơn`, {
+      method: 'GET',
+      mode: 'cors',
+      credentials: 'include',
+      headers: getAuthHeaders('GET'),
+    });
+    
+    const invoicesData = await handleResponse(invoicesResponse);
+    
+    // Lấy thống kê nhân viên
+    const staffsResponse = await fetch(`${API_BASE_URL}/NhanVien/Lấy danh sách tất cả nhân viên`, {
+      method: 'GET',
+      mode: 'cors',
+      credentials: 'include',
+      headers: getAuthHeaders('GET'),
+    });
+    
+    const staffsData = await handleResponse(staffsResponse);
+    
+    // Xử lý và tính toán thống kê từ dữ liệu
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Thống kê phòng
+    const roomsStats = {
+      total: Array.isArray(roomsData) ? roomsData.length : 0,
+      available: Array.isArray(roomsData) ? roomsData.filter(room => room.trangThai === 'Trống').length : 0,
+      occupied: Array.isArray(roomsData) ? roomsData.filter(room => room.trangThai === 'Đã đặt' || room.trangThai === 'Đang ở').length : 0,
+      maintenance: Array.isArray(roomsData) ? roomsData.filter(room => room.trangThai === 'Đang dọn' || room.trangThai === 'Bảo trì').length : 0
+    };
+    
+    // Thống kê đặt phòng
+    const bookingsToday = Array.isArray(bookingsData) ? bookingsData.filter(booking => {
+      const bookingDate = new Date(booking.ngayDen);
+      bookingDate.setHours(0, 0, 0, 0);
+      return bookingDate.getTime() === today.getTime();
+    }).length : 0;
+    
+    const bookingsPending = Array.isArray(bookingsData) ? bookingsData.filter(booking => booking.trangThai === 'Đã đặt').length : 0;
+    const bookingsCompleted = Array.isArray(bookingsData) ? bookingsData.filter(booking => booking.trangThai === 'Đã trả phòng').length : 0;
+    const bookingsCancelled = Array.isArray(bookingsData) ? bookingsData.filter(booking => booking.trangThai === 'Đã hủy').length : 0;
+    
+    const bookingsStats = {
+      today: bookingsToday,
+      pending: bookingsPending,
+      completed: bookingsCompleted,
+      cancelled: bookingsCancelled
+    };
+    
+    // Thống kê hóa đơn và doanh thu
+    const invoicesToday = Array.isArray(invoicesData) ? invoicesData.filter(invoice => {
+      const invoiceDate = new Date(invoice.ngayLap);
+      invoiceDate.setHours(0, 0, 0, 0);
+      return invoiceDate.getTime() === today.getTime();
+    }) : [];
+    
+    // Tính tổng doanh thu ngày hôm nay
+    const revenueToday = invoicesToday.reduce((sum, invoice) => sum + (invoice.tongTien || 0), 0);
+    
+    // Tính doanh thu tuần
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - today.getDay());
+    
+    const invoicesThisWeek = Array.isArray(invoicesData) ? invoicesData.filter(invoice => {
+      const invoiceDate = new Date(invoice.ngayLap);
+      return invoiceDate >= weekStart && invoiceDate <= today;
+    }) : [];
+    
+    const revenueWeek = invoicesThisWeek.reduce((sum, invoice) => sum + (invoice.tongTien || 0), 0);
+    
+    // Tính doanh thu tháng
+    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+    
+    const invoicesThisMonth = Array.isArray(invoicesData) ? invoicesData.filter(invoice => {
+      const invoiceDate = new Date(invoice.ngayLap);
+      return invoiceDate >= monthStart && invoiceDate <= today;
+    }) : [];
+    
+    const revenueMonth = invoicesThisMonth.reduce((sum, invoice) => sum + (invoice.tongTien || 0), 0);
+    
+    // Tính doanh thu trung bình ngày trong tháng
+    const daysInMonth = today.getDate();
+    const revenueAvg = daysInMonth > 0 ? revenueMonth / daysInMonth : 0;
+    
+    const revenueStats = {
+      today: revenueToday,
+      week: revenueWeek,
+      month: revenueMonth,
+      average: revenueAvg
+    };
+    
+    // Thống kê nhân viên
+    const staffStats = {
+      total: Array.isArray(staffsData) ? staffsData.length : 0,
+      onDuty: Math.floor(Array.isArray(staffsData) ? staffsData.length / 3 : 0), // Giả định 1/3 nhân viên đang trực
+      managers: Array.isArray(staffsData) ? staffsData.filter(staff => staff.chucVu === 'Quản lý').length : 0,
+      employees: Array.isArray(staffsData) ? staffsData.filter(staff => staff.chucVu !== 'Quản lý' && staff.chucVu !== 'Kế toán').length : 0,
+      accountants: Array.isArray(staffsData) ? staffsData.filter(staff => staff.chucVu === 'Kế toán').length : 0
+    };
+    
+    return {
+      rooms: roomsStats,
+      bookings: bookingsStats,
+      revenue: revenueStats,
+      staff: staffStats,
+      recentBookings: Array.isArray(bookingsData) 
+        ? bookingsData
+          .sort((a, b) => new Date(b.ngayDen).getTime() - new Date(a.ngayDen).getTime())
+          .slice(0, 5)
+        : []
+    };
+    
+  } catch (error) {
+    console.error("Lỗi khi lấy thống kê dashboard:", error);
+    throw error;
+  }
+};
+
+// API để lấy và cập nhật trạng thái phòng cho nhân viên
+export const getEmployeeRooms = async () => {
+  console.log(`Đang gọi API lấy danh sách phòng cho nhân viên: ${API_BASE_URL}/Phong/Lấy danh sách tất cả phòng`);
+  
+  const response = await fetch(`${API_BASE_URL}/Phong/Lấy danh sách tất cả phòng`, {
+    method: 'GET',
+    mode: 'cors',
+    credentials: 'include',
+    headers: getAuthHeaders('GET'),
+  });
+
+  const data = await handleResponse(response);
+
+  // Chuyển đổi từ định dạng backend sang định dạng frontend
+  if (Array.isArray(data)) {
+    return data.map(room => ({
+      id: room.maPhong,
+      name: room.soPhong,
+      type: room.maLoaiPhong, // Cần bổ sung thêm tên loại phòng
+      price: room.giaTien || 0,
+      status: room.trangThai,
+      tang: room.tang || 1
+    }));
+  }
+
+  return [];
+};
+
+// API cập nhật trạng thái phòng cho nhân viên
+export const updateRoomStatus = async (maPhong: string, trangThai: string) => {
+  console.log(`Đang gọi API cập nhật trạng thái phòng: ${API_BASE_URL}/Phong/Cập nhật trạng thái phòng?maPhong=${maPhong}`);
+  
+  const formData = new FormData();
+  formData.append('MaPhong', maPhong);
+  formData.append('TrangThai', trangThai);
+  
+  const response = await fetch(`${API_BASE_URL}/Phong/Cập nhật trạng thái phòng?maPhong=${maPhong}&trangThai=${trangThai}`, {
+    method: 'PUT',
+    mode: 'cors',
+    credentials: 'include',
+    body: formData,
+    headers: getFormDataHeaders(),
+  });
+
+  return handleResponse(response);
+};
+
+// API lấy danh sách đặt phòng cho nhân viên
+export const getEmployeeBookings = async () => {
+  console.log(`Đang gọi API lấy danh sách đặt phòng cho nhân viên: ${API_BASE_URL}/DatPhong/Lấy danh sách đặt phòng`);
+  
+  const response = await fetch(`${API_BASE_URL}/DatPhong/Lấy danh sách đặt phòng`, {
+    method: 'GET',
+    mode: 'cors',
+    credentials: 'include',
+    headers: getAuthHeaders('GET'),
+  });
+
+  const bookingsData = await handleResponse(response);
+  
+  // Lấy thêm thông tin khách hàng
+  const customersResponse = await fetch(`${API_BASE_URL}/KhachHang/Lấy danh sách tất cả khách hàng`, {
+    method: 'GET',
+    mode: 'cors',
+    credentials: 'include',
+    headers: getAuthHeaders('GET'),
+  });
+  
+  const customersData = await handleResponse(customersResponse);
+  const customers = Array.isArray(customersData) ? customersData : [];
+  
+  // Lấy thêm thông tin phòng
+  const roomsResponse = await fetch(`${API_BASE_URL}/Phong/Lấy danh sách tất cả phòng`, {
+    method: 'GET',
+    mode: 'cors',
+    credentials: 'include',
+    headers: getAuthHeaders('GET'),
+  });
+  
+  const roomsData = await handleResponse(roomsResponse);
+  const rooms = Array.isArray(roomsData) ? roomsData : [];
+
+  // Chuyển đổi từ định dạng backend sang định dạng frontend
+  if (Array.isArray(bookingsData)) {
+    return bookingsData.map(booking => {
+      const customer = customers.find(c => c.maKh === booking.maKh) || {};
+      const room = rooms.find(r => r.maPhong === booking.maPhong) || {};
+      
+      return {
+        id: booking.maDatPhong,
+        customerId: booking.maKh,
+        customerName: customer.hoKh && customer.tenKh ? `${customer.hoKh} ${customer.tenKh}` : 'Không xác định',
+        roomId: booking.maPhong,
+        roomName: room.soPhong || 'Không xác định',
+        checkInDate: booking.ngayDen,
+        checkOutDate: booking.ngayDi,
+        status: booking.trangThai,
+        note: booking.ghiChu || '',
+        totalPrice: booking.tongTien || 0,
+        phoneNumber: customer.soDienThoai || '',
+        email: customer.email || ''
+      };
+    });
+  }
+
+  return [];
+};
+
+// API cập nhật trạng thái đặt phòng cho nhân viên
+export const updateBookingStatus = async (maDatPhong: string, trangThai: string) => {
+  console.log(`Đang gọi API cập nhật trạng thái đặt phòng: ${API_BASE_URL}/DatPhong/Cập nhật đặt phòng?maDatPhong=${maDatPhong}`);
+  
+  // Đầu tiên lấy thông tin đặt phòng hiện tại
+  const getResponse = await fetch(`${API_BASE_URL}/DatPhong/Tìm đặt phòng theo ID?maDatPhong=${maDatPhong}`, {
+    method: 'GET',
+    mode: 'cors',
+    credentials: 'include',
+    headers: getAuthHeaders('GET'),
+  });
+  
+  const bookingData = await handleResponse(getResponse);
+  
+  if (!bookingData) {
+    throw new Error('Không tìm thấy thông tin đặt phòng');
+  }
+  
+  // Cập nhật trạng thái
+  const formData = new FormData();
+  
+  // Sử dụng forEach để thêm tất cả thuộc tính từ bookingData vào formData
+  Object.entries(bookingData).forEach(([key, value]) => {
+    if (value !== null && value !== undefined) {
+      formData.append(key, String(value));
+    }
+  });
+  
+  // Ghi đè trạng thái mới
+  formData.set('TrangThai', trangThai);
+  
+  const response = await fetch(`${API_BASE_URL}/DatPhong/Cập nhật đặt phòng?maDatPhong=${maDatPhong}`, {
+    method: 'PUT',
+    mode: 'cors',
+    credentials: 'include',
+    body: formData,
+    headers: getFormDataHeaders(),
+  });
+
+  return handleResponse(response);
+};
+
+// API tạo đặt phòng mới cho nhân viên
+export const createEmployeeBooking = async (bookingData: any) => {
+  console.log(`Đang gọi API tạo đặt phòng mới: ${API_BASE_URL}/DatPhong/Tạo đặt phòng mới`);
+  
+  const formData = new FormData();
+  
+  // Chuyển đổi key từ camelCase sang PascalCase cho phù hợp với API
+  const keyMapping: Record<string, string> = {
+    maKh: 'MaKh',
+    maPhong: 'MaPhong',
+    ngayDen: 'NgayDen',
+    ngayDi: 'NgayDi',
+    trangThai: 'TrangThai',
+    ghiChu: 'GhiChu',
+  };
+
+  for (const key in bookingData) {
+    const backendKey = keyMapping[key] || key;
+    formData.append(backendKey, String(bookingData[key] || ''));
+  }
+  
+  const response = await fetch(`${API_BASE_URL}/DatPhong/Tạo đặt phòng mới`, {
+    method: 'POST',
+    mode: 'cors',
+    credentials: 'include',
+    body: formData,
+    headers: getFormDataHeaders(),
+  });
+
+  return handleResponse(response);
+};
+
+// API lấy danh sách hóa đơn cho nhân viên
+export const getEmployeeInvoices = async () => {
+  console.log(`Đang gọi API lấy danh sách hóa đơn cho nhân viên: ${API_BASE_URL}/HoaDon/Lấy danh sách tất cả hóa đơn`);
+  
+  const response = await fetch(`${API_BASE_URL}/HoaDon/Lấy danh sách tất cả hóa đơn`, {
+    method: 'GET',
+    mode: 'cors',
+    credentials: 'include',
+    headers: getAuthHeaders('GET'),
+  });
+
+  const invoicesData = await handleResponse(response);
+  
+  // Lấy thông tin đặt phòng
+  const bookingsResponse = await fetch(`${API_BASE_URL}/DatPhong/Lấy danh sách đặt phòng`, {
+    method: 'GET',
+    mode: 'cors',
+    credentials: 'include',
+    headers: getAuthHeaders('GET'),
+  });
+  
+  const bookingsData = await handleResponse(bookingsResponse);
+  const bookings = Array.isArray(bookingsData) ? bookingsData : [];
+  
+  // Lấy thông tin khách hàng
+  const customersResponse = await fetch(`${API_BASE_URL}/KhachHang/Lấy danh sách tất cả khách hàng`, {
+    method: 'GET',
+    mode: 'cors',
+    credentials: 'include',
+    headers: getAuthHeaders('GET'),
+  });
+  
+  const customersData = await handleResponse(customersResponse);
+  const customers = Array.isArray(customersData) ? customersData : [];
+
+  // Chuyển đổi từ định dạng backend sang định dạng frontend
+  if (Array.isArray(invoicesData)) {
+    return invoicesData.map(invoice => {
+      const booking = bookings.find(b => b.maDatPhong === invoice.maDatPhong) || {};
+      const customer = customers.find(c => c.maKh === booking.maKh) || {};
+      
+      return {
+        id: invoice.maHoaDon,
+        bookingId: invoice.maDatPhong,
+        customerId: booking.maKh || '',
+        customerName: customer.hoKh && customer.tenKh ? `${customer.hoKh} ${customer.tenKh}` : 'Không xác định',
+        amount: invoice.tongTien || 0,
+        date: invoice.ngayLap || new Date().toISOString(),
+        paymentMethod: invoice.maPttt || '',
+        status: invoice.trangThai || 'Chưa thanh toán',
+        note: invoice.ghiChu || ''
+      };
+    });
+  }
+
+  return [];
+};
+
+// API tạo hóa đơn mới cho nhân viên
+export const createEmployeeInvoice = async (invoiceData: any) => {
+  console.log(`Đang gọi API tạo hóa đơn mới: ${API_BASE_URL}/HoaDon/Tạo hóa đơn mới`);
+  
+  const formData = new FormData();
+  
+  // Chuyển đổi key từ camelCase sang PascalCase cho phù hợp với API
+  const keyMapping: Record<string, string> = {
+    maDatPhong: 'MaDatPhong',
+    tongTien: 'TongTien',
+    maPttt: 'MaPttt',
+    trangThai: 'TrangThai',
+    ghiChu: 'GhiChu',
+    ngayLap: 'NgayLap'
+  };
+
+  for (const key in invoiceData) {
+    const backendKey = keyMapping[key] || key;
+    formData.append(backendKey, String(invoiceData[key] || ''));
+  }
+  
+  // Nếu không có ngày lập, thêm ngày hiện tại
+  if (!invoiceData.ngayLap) {
+    formData.append('NgayLap', new Date().toISOString());
+  }
+  
+  const response = await fetch(`${API_BASE_URL}/HoaDon/Tạo hóa đơn mới`, {
+    method: 'POST',
+    mode: 'cors',
+    credentials: 'include',
+    body: formData,
+    headers: getFormDataHeaders(),
+  });
+
+  return handleResponse(response);
+};
+
+// API cập nhật trạng thái hóa đơn cho nhân viên
+export const updateInvoiceStatus = async (maHoaDon: string, trangThai: string) => {
+  console.log(`Đang gọi API cập nhật trạng thái hóa đơn: ${API_BASE_URL}/HoaDon/Cập nhật trạng thái hóa đơn?maHoaDon=${maHoaDon}`);
+  
+  const formData = new FormData();
+  formData.append('MaHoaDon', maHoaDon);
+  formData.append('TrangThai', trangThai);
+  
+  const response = await fetch(`${API_BASE_URL}/HoaDon/Cập nhật trạng thái hóa đơn?maHoaDon=${maHoaDon}&trangThai=${trangThai}`, {
     method: 'PUT',
     mode: 'cors',
     credentials: 'include',

@@ -162,7 +162,7 @@ export default function CustomerManager() {
         formData.append(key, String(form[key as keyof Customer] || ''));
       }
       
-      const response = await fetch(`${API_BASE_URL}/KhachHang/Cập nhật khách hàng`, {
+      const response = await fetch(`${API_BASE_URL}/KhachHang/Cập nhật khách hàng?maKh=${form.maKh}`, {
         method: 'PUT',
         headers: getFormDataHeaders(),
         body: formData,
@@ -192,7 +192,7 @@ export default function CustomerManager() {
       const token = localStorage.getItem('token');
       if (!token) throw new Error("Bạn cần đăng nhập để thực hiện hành động này");
       
-      const response = await fetch(`${API_BASE_URL}/KhachHang/Xóa khách hàng?id=${maKh}`, {
+      const response = await fetch(`${API_BASE_URL}/KhachHang/Xóa khách hàng?maKh=${maKh}`, {
         method: 'DELETE',
         headers: getAuthHeaders('DELETE'),
         credentials: 'include'
