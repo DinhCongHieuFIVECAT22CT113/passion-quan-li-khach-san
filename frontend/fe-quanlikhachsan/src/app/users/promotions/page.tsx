@@ -96,16 +96,40 @@ export default function PromotionsPage() {
   };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN');
+    if (!dateString) return '';
+    
+    try {
+      const date = new Date(dateString);
+      // Kiểm tra nếu ngày không hợp lệ
+      if (isNaN(date.getTime())) {
+        console.error('Ngày không hợp lệ:', dateString);
+        return '';
+      }
+      return date.toLocaleDateString('vi-VN');
+    } catch (error) {
+      console.error('Lỗi định dạng ngày tháng:', error, dateString);
+      return '';
+    }
   };
 
   const isPromotionActive = (promotion: Promotion) => {
-    const now = new Date();
-    const startDate = new Date(promotion.ngayBatDau);
-    const endDate = new Date(promotion.ngayKetThuc);
-    
-    return now >= startDate && now <= endDate;
+    try {
+      if (!promotion.ngayBatDau || !promotion.ngayKetThuc) return false;
+      
+      const now = new Date();
+      const startDate = new Date(promotion.ngayBatDau);
+      const endDate = new Date(promotion.ngayKetThuc);
+      
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        console.error('Ngày không hợp lệ trong khuyến mãi:', promotion);
+        return false;
+      }
+      
+      return now >= startDate && now <= endDate;
+    } catch (error) {
+      console.error('Lỗi kiểm tra khuyến mãi còn hiệu lực:', error);
+      return false;
+    }
   };
 
   const getValidImageSrc = (imagePath: string | undefined): string => {
@@ -132,6 +156,12 @@ export default function PromotionsPage() {
       return true; // 'all'
     }
   });
+
+  // Hàm kiểm tra chuỗi an toàn trước khi dùng các phương thức length, substring
+  const safeString = (value: any): string => {
+    if (value === null || value === undefined) return '';
+    return String(value);
+  };
 
   if (loading) {
     return (
@@ -194,7 +224,7 @@ export default function PromotionsPage() {
                 </div>
               </div>
               <div className={styles.promotionDetailInfo}>
-                <h2>{selectedPromotion.tenKhuyenMai}</h2>
+                <h2>{selectedPromotion.tenKhuyenMai || 'Khuyến mãi đặc biệt'}</h2>
                 
                 <div className={styles.promotionMeta}>
                   <div className={styles.metaItem}>
@@ -203,7 +233,7 @@ export default function PromotionsPage() {
                   </div>
                   <div className={styles.metaItem}>
                     <FaTag className={styles.metaIcon} />
-                    <span>Giảm: {selectedPromotion.phanTramGiam}%</span>
+                    <span>Giảm: {selectedPromotion.phanTramGiam || 0}%</span>
                   </div>
                   <div className={styles.metaItem}>
                     <FaInfoCircle className={styles.metaIcon} />
@@ -211,13 +241,13 @@ export default function PromotionsPage() {
                   </div>
                 </div>
                 
-                <p className={styles.promotionDescription}>{selectedPromotion.moTa}</p>
+                <p className={styles.promotionDescription}>{safeString(selectedPromotion.moTa)}</p>
                 
                 <div className={styles.promotionCode}>
                   <div className={styles.codeBox}>
-                    <span>{selectedPromotion.maGiamGia}</span>
+                    <span>{selectedPromotion.maGiamGia || 'N/A'}</span>
                     <button 
-                      onClick={() => copyToClipboard(selectedPromotion.maGiamGia)} 
+                      onClick={() => copyToClipboard(selectedPromotion.maGiamGia || '')} 
                       className={styles.copyButton}
                       disabled={copiedCode === selectedPromotion.maGiamGia}
                     >
@@ -299,22 +329,22 @@ export default function PromotionsPage() {
             
             <div className={styles.promotionsGrid}>
               {filteredPromotions.length > 0 ? (
-                filteredPromotions.map((promotion) => (
+                filteredPromotions.map((promotion, index) => (
                   <div 
-                    key={promotion.maMK} //  Add key here!  This is crucial.
+                    key={promotion.maMK || index}
                     className={styles.promotionCard}
                     onClick={() => handlePromotionClick(promotion)}
                   >
                     <div className={styles.promotionImageContainer}>
                       <Image
                         src={getValidImageSrc(promotion.hinhAnh)}
-                        alt={promotion.tenKhuyenMai}
+                        alt={promotion.tenKhuyenMai || 'Khuyến mãi'}
                         width={400}
                         height={250}
                         className={styles.promotionImage}
                       />
                       <div className={styles.promotionDiscount}>
-                        <span>{promotion.phanTramGiam}%</span>
+                        <span>{promotion.phanTramGiam || 0}%</span>
                       </div>
                       <div className={`${styles.promotionStatus} ${isPromotionActive(promotion) ? styles.active : styles.expired}`}>
                         {isPromotionActive(promotion) ? 'Đang áp dụng' : 'Hết hạn'}
@@ -326,19 +356,19 @@ export default function PromotionsPage() {
                       )}
                     </div>
                     <div className={styles.promotionContent}>
-                      <h3>{promotion.tenKhuyenMai}</h3>
+                      <h3>{promotion.tenKhuyenMai || 'Khuyến mãi đặc biệt'}</h3>
                       <div className={styles.promotionPeriod}>
                         <FaClock className={styles.periodIcon} />
                         <span>{formatDate(promotion.ngayBatDau)} - {formatDate(promotion.ngayKetThuc)}</span>
                       </div>
                       <p className={styles.promotionShortDesc}>
-                        {promotion.moTa.length > 100 
-                          ? promotion.moTa.substring(0, 100) + '...' 
-                          : promotion.moTa}
+                        {safeString(promotion.moTa).length > 100 
+                          ? safeString(promotion.moTa).substring(0, 100) + '...' 
+                          : safeString(promotion.moTa)}
                       </p>
                       <div className={styles.promotionCardFooter}>
                         <div className={styles.promotionCode}>
-                          <span>{promotion.maGiamGia}</span>
+                          <span>{promotion.maGiamGia || 'N/A'}</span>
                         </div>
                         <button className={styles.viewDetailBtn}>
                           Xem chi tiết

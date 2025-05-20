@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { getEmployeeRooms, updateRoomStatus } from '../../../lib/api';
+import { formatCurrency } from '../../../lib/utils';
 
 interface Room {
   id: string;
@@ -41,6 +42,7 @@ export default function RoomManager() {
       try {
         setLoading(true);
         const data = await getEmployeeRooms();
+        console.log("Dữ liệu phòng nhận được:", data);
         setRooms(data);
         setError(null);
       } catch (err: any) {
@@ -102,7 +104,7 @@ export default function RoomManager() {
                 <td style={{padding:'12px 10px'}}>{room.id}</td>
                 <td style={{padding:'12px 10px'}}>{room.name}</td>
                 <td style={{padding:'12px 10px'}}>{room.type}</td>
-                <td>{room.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}</td>
+                <td style={{padding:'12px 10px'}}>{formatCurrency(room.price)}</td>
                 <td style={{padding:'12px 10px'}}>{room.tang}</td>
                 <td style={{padding:'12px 10px'}}>
                   <span style={{

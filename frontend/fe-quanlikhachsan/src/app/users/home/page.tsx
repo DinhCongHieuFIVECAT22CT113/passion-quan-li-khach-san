@@ -12,6 +12,7 @@ import i18n from '../../../app/i18n';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import { getRoomTypes, getPromotions } from '../../../lib/api';
+import { formatCurrency, formatDate, safeString } from '../../../lib/utils';
 
 // Định nghĩa interface cho RoomType
 interface RoomType {
@@ -68,20 +69,34 @@ export default function Home() {
     try {
       // Lấy danh sách loại phòng nổi bật
       const roomTypesData = await getRoomTypes();
+      console.log('Dữ liệu roomTypes:', roomTypesData);
       // Chỉ lấy 3 phòng đầu tiên để hiển thị
       setFeaturedRooms(roomTypesData.slice(0, 3));
       
       // Lấy danh sách khuyến mãi
       const promotionsData = await getPromotions();
-      // Lọc chỉ lấy những khuyến mãi còn hiệu lực
-      const activePromotions = promotionsData.filter((promo: Promotion) => {
-        const now = new Date();
-        const startDate = new Date(promo.ngayBatDau);
-        const endDate = new Date(promo.ngayKetThuc);
-        return now >= startDate && now <= endDate;
-      });
-      // Chỉ lấy 3 khuyến mãi đầu tiên để hiển thị
-      setPromotions(activePromotions.slice(0, 3));
+      console.log('Dữ liệu promotions:', promotionsData);
+      
+      // Đảm bảo dữ liệu là mảng hợp lệ
+      if (Array.isArray(promotionsData)) {
+        // Lọc chỉ lấy những khuyến mãi còn hiệu lực
+        const activePromotions = promotionsData.filter((promo: Promotion) => {
+          try {
+            const now = new Date();
+            const startDate = new Date(promo.ngayBatDau);
+            const endDate = new Date(promo.ngayKetThuc);
+            return now >= startDate && now <= endDate;
+          } catch (err) {
+            console.error('Lỗi xử lý ngày tháng:', err);
+            return false;
+          }
+        });
+        // Chỉ lấy 3 khuyến mãi đầu tiên để hiển thị
+        setPromotions(activePromotions.slice(0, 3));
+      } else {
+        console.error('Dữ liệu promotions không phải dạng mảng:', promotionsData);
+        setError('Dữ liệu khuyến mãi không hợp lệ.');
+      }
     } catch (err) {
       console.error('Lỗi khi lấy dữ liệu:', err);
       setError('Không thể tải dữ liệu từ server.');
@@ -105,7 +120,7 @@ export default function Home() {
     return '/images/room-placeholder.jpg';
   };
 
-  if (!isReady) return null; 
+  if (!isReady) return null;
 
   const services = [
     {
@@ -230,14 +245,18 @@ export default function Home() {
           <div className={styles.offerGrid}>
             {promotions.length > 0 ? (
               promotions.map((promotion, index) => (
-                <div key={promotion.maMK} className={styles.offerCard}>
+                <div key={promotion.maMK || index} className={styles.offerCard}>
                   <div className={styles.offerImage}>
-                    <Image src={getValidImageSrc(promotion.hinhAnh)} alt={promotion.tenKhuyenMai} fill style={{ objectFit: 'cover' }} />
-                    <div className={styles.offerType}>{promotion.phanTramGiam}% Giảm</div>
+                    <Image src={getValidImageSrc(promotion.hinhAnh)} alt={promotion.tenKhuyenMai || 'Khuyến mãi'} fill style={{ objectFit: 'cover' }} />
+                    <div className={styles.offerType}>{promotion.phanTramGiam || 0}% Giảm</div>
                   </div>
                   <div className={styles.offerContent}>
-                    <h3>{promotion.tenKhuyenMai}</h3>
-                    <p>{promotion.moTa.length > 100 ? promotion.moTa.substring(0, 100) + '...' : promotion.moTa}</p>
+                    <h3>{promotion.tenKhuyenMai || 'Khuyến mãi đặc biệt'}</h3>
+                    <p>
+                      {safeString(promotion.moTa).length > 100 
+                        ? safeString(promotion.moTa).substring(0, 100) + '...' 
+                        : safeString(promotion.moTa)}
+                    </p>
                     <div className={styles.offerRating}>
                       <FaStar className={styles.starActive} />
                       <FaStar className={styles.starActive} />
@@ -246,8 +265,8 @@ export default function Home() {
                       <FaStar className={styles.starActive} />
                     </div>
                     <div className={styles.offerFooter}>
-                      <div className={styles.offerCode}>{promotion.maGiamGia}</div>
-                      <Link href={`/users/promotions?id=${promotion.maMK}`} className={styles.viewOfferBtn}>
+                      <div className={styles.offerCode}>{promotion.maGiamGia || 'N/A'}</div>
+                      <Link href={`/users/promotions?id=${promotion.maMK || ''}`} className={styles.viewOfferBtn}>
                         Xem chi tiết
                       </Link>
                     </div>

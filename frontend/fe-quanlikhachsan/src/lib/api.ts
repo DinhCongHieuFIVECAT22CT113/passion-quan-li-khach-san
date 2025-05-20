@@ -180,14 +180,31 @@ export const getRooms = async () => {
 export const getRoomTypes = async () => {
   console.log(`Đang gọi API lấy danh sách loại phòng: ${API_BASE_URL}/LoaiPhong/Lấy danh sách tất cả loại phòng`);
   
-  const response = await fetch(`${API_BASE_URL}/LoaiPhong/Lấy danh sách tất cả loại phòng`, {
-    method: 'GET',
-    mode: 'cors',
-    credentials: 'include',
-    headers: getAuthHeaders('GET'),
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/LoaiPhong/Lấy danh sách tất cả loại phòng`, {
+      method: 'GET',
+      mode: 'cors',
+      credentials: 'include',
+      headers: getAuthHeaders('GET'),
+    });
 
-  return handleResponse(response);
+    const data = await handleResponse(response);
+    console.log('Dữ liệu nhận về từ API getRoomTypes:', data);
+    
+    // Kiểm tra và xử lý dữ liệu
+    if (Array.isArray(data)) {
+      return data.map(roomType => ({
+        ...roomType,
+        donGia: typeof roomType.donGia === 'string' ? parseFloat(roomType.donGia) : (roomType.donGia || 0)
+      }));
+    }
+    
+    console.error('Dữ liệu roomTypes không phải mảng:', data);
+    return [];
+  } catch (error) {
+    console.error('Lỗi khi gọi API getRoomTypes:', error);
+    return [];
+  }
 };
 
 // API Tạo phòng mới
@@ -393,28 +410,62 @@ export const cancelBooking = async (bookingId: string) => {
 export const getServices = async () => {
   console.log(`Đang gọi API lấy dịch vụ: ${API_BASE_URL}/DichVu/Lấy danh sách tất cả dịch vụ`);
   
-  const response = await fetch(`${API_BASE_URL}/DichVu/Lấy danh sách tất cả dịch vụ`, {
-    method: 'GET',
-    mode: 'cors',
-    credentials: 'include',
-    headers: getAuthHeaders('GET'),
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/DichVu/Lấy danh sách tất cả dịch vụ`, {
+      method: 'GET',
+      mode: 'cors',
+      credentials: 'include',
+      headers: getAuthHeaders('GET'),
+    });
 
-  return handleResponse(response);
+    const data = await handleResponse(response);
+    console.log('Dữ liệu nhận về từ API getServices:', data);
+    
+    // Kiểm tra và xử lý dữ liệu
+    if (Array.isArray(data)) {
+      return data.map(service => ({
+        ...service,
+        donGia: typeof service.donGia === 'string' ? parseFloat(service.donGia) : (service.donGia || 0)
+      }));
+    }
+    
+    console.error('Dữ liệu services không phải mảng:', data);
+    return [];
+  } catch (error) {
+    console.error('Lỗi khi gọi API getServices:', error);
+    return [];
+  }
 };
 
 // API Lấy khuyến mãi - endpoint từ Swagger
 export const getPromotions = async () => {
   console.log(`Đang gọi API lấy khuyến mãi: ${API_BASE_URL}/KhuyenMai/Lấy danh sách tất cả khuyến mãi`);
   
-  const response = await fetch(`${API_BASE_URL}/KhuyenMai/Lấy danh sách tất cả khuyến mãi`, {
-    method: 'GET',
-    mode: 'cors',
-    credentials: 'include',
-    headers: getAuthHeaders('GET'),
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/KhuyenMai/Lấy danh sách tất cả khuyến mãi`, {
+      method: 'GET',
+      mode: 'cors',
+      credentials: 'include',
+      headers: getAuthHeaders('GET'),
+    });
 
-  return handleResponse(response);
+    const data = await handleResponse(response);
+    console.log('Dữ liệu nhận về từ API getPromotions:', data);
+    
+    // Kiểm tra và xử lý dữ liệu
+    if (Array.isArray(data)) {
+      return data.map(promotion => ({
+        ...promotion,
+        phanTramGiam: typeof promotion.phanTramGiam === 'string' ? parseFloat(promotion.phanTramGiam) : (promotion.phanTramGiam || 0)
+      }));
+    }
+    
+    console.error('Dữ liệu promotions không phải mảng:', data);
+    return [];
+  } catch (error) {
+    console.error('Lỗi khi gọi API getPromotions:', error);
+    return [];
+  }
 };
 
 // Helper function để tạo request với token và xử lý refresh token khi cần
@@ -824,28 +875,39 @@ export const getDashboardStats = async () => {
 export const getEmployeeRooms = async () => {
   console.log(`Đang gọi API lấy danh sách phòng cho nhân viên: ${API_BASE_URL}/Phong/Lấy danh sách tất cả phòng`);
   
-  const response = await fetch(`${API_BASE_URL}/Phong/Lấy danh sách tất cả phòng`, {
-    method: 'GET',
-    mode: 'cors',
-    credentials: 'include',
-    headers: getAuthHeaders('GET'),
-  });
+  try {
+    const response = await fetch(`${API_BASE_URL}/Phong/Lấy danh sách tất cả phòng`, {
+      method: 'GET',
+      mode: 'cors',
+      credentials: 'include',
+      headers: getAuthHeaders('GET'),
+    });
 
-  const data = await handleResponse(response);
+    const data = await handleResponse(response);
+    console.log('Dữ liệu phòng từ API:', data);
 
-  // Chuyển đổi từ định dạng backend sang định dạng frontend
-  if (Array.isArray(data)) {
-    return data.map(room => ({
-      id: room.maPhong,
-      name: room.soPhong,
-      type: room.maLoaiPhong, // Cần bổ sung thêm tên loại phòng
-      price: room.giaTien || 0,
-      status: room.trangThai,
-      tang: room.tang || 1
-    }));
+    // Chuyển đổi từ định dạng backend sang định dạng frontend
+    if (Array.isArray(data)) {
+      return data.map(room => {
+        // Ưu tiên sử dụng giaMoiDem, nếu không có thì dùng giaMoiGio, nếu không có cả hai thì dùng giaTien hoặc 0
+        const roomPrice = room.giaMoiDem || room.giaMoiGio || room.giaTien || 0;
+        
+        return {
+          id: room.maPhong,
+          name: room.soPhong,
+          type: room.maLoaiPhong, // Cần bổ sung thêm tên loại phòng
+          price: roomPrice,
+          status: room.trangThai,
+          tang: room.tang || 1
+        };
+      });
+    }
+
+    return [];
+  } catch (err) {
+    console.error('Lỗi khi lấy danh sách phòng cho nhân viên:', err);
+    return [];
   }
-
-  return [];
 };
 
 // API cập nhật trạng thái phòng cho nhân viên

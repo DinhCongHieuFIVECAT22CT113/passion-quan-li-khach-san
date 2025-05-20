@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FaUser, FaSpa, FaUtensils, FaSwimmer, FaDumbbell, FaCar, FaWifi, FaCoffee, FaShoppingBag, FaClock, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaUser, FaSpa, FaUtensils, FaSwimmer, FaDumbbell, FaCar, FaWifi, FaCoffee, FaShoppingBag, FaClock, FaMapMarkerAlt, FaStar } from 'react-icons/fa';
 import styles from './styles.module.css';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../../components/profile/LanguageContext';
@@ -11,6 +11,7 @@ import i18n from '../../i18n';
 import { API_BASE_URL } from '../../../lib/config';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
+import { getServices } from '../../../lib/api';
 
 interface Service {
   maDichVu: string;
@@ -24,10 +25,11 @@ interface Service {
 export default function ServicesPage() {
   const { t } = useTranslation();
   const { selectedLanguage } = useLanguage();
+  const [isClient, setIsClient] = useState(false);
   const [services, setServices] = useState<Service[]>([]);
-  const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [bookingDetails, setBookingDetails] = useState({
     date: '',
@@ -37,27 +39,50 @@ export default function ServicesPage() {
   });
 
   useEffect(() => {
+    setIsClient(true);
     i18n.changeLanguage(selectedLanguage);
     fetchServices();
   }, [selectedLanguage]);
 
   const fetchServices = async () => {
-    setLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/DichVu/Lấy danh sách tất cả dịch vụ`);
-      if (!response.ok) {
-        throw new Error(`Lỗi: ${response.status}`);
+      setLoading(true);
+      const data = await getServices();
+      console.log('Dữ liệu services:', data);
+      
+      // Đảm bảo dữ liệu là mảng hợp lệ
+      if (Array.isArray(data)) {
+        setServices(data);
+      } else {
+        console.error('Dữ liệu services không phải dạng mảng:', data);
+        setError('Không thể lấy danh sách dịch vụ');
       }
-      const data = await response.json();
-      setServices(data);
-    } catch (err) {
-      console.error('Lỗi khi lấy danh sách dịch vụ:', err);
-      setError('Không thể tải danh sách dịch vụ. Vui lòng thử lại sau.');
+    } catch (error) {
+      console.error('Error fetching services:', error);
+      setError('Không thể lấy danh sách dịch vụ');
     } finally {
       setLoading(false);
     }
   };
 
+  // Hàm định dạng tiền tệ an toàn
+  const formatCurrency = (value: any): string => {
+    // Chuyển đổi sang number nếu là string
+    const numValue = typeof value === 'string' ? parseFloat(value) : value;
+    
+    // Kiểm tra giá trị hợp lệ
+    if (isNaN(numValue) || numValue === null || numValue === undefined) {
+      return '0 đ';
+    }
+    
+    try {
+      return numValue.toLocaleString('vi-VN') + ' đ';
+    } catch (error) {
+      console.error('Lỗi định dạng tiền tệ:', error);
+      return '0 đ';
+    }
+  };
+  
   const handleServiceClick = (service: Service) => {
     setSelectedService(service);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -134,6 +159,12 @@ export default function ServicesPage() {
     return '/images/service-placeholder.jpg';
   };
 
+  // Hàm kiểm tra chuỗi an toàn trước khi dùng các phương thức length, substring
+  const safeString = (value: any): string => {
+    if (value === null || value === undefined) return '';
+    return String(value);
+  };
+
   if (loading) {
     return (
       <div className={styles.loadingContainer}>
@@ -184,18 +215,18 @@ export default function ServicesPage() {
               <div className={styles.serviceDetailImage}>
                 <Image 
                   src={getValidImageSrc(selectedService.hinhAnh)} 
-                  alt={selectedService.tenDichVu}
+                  alt={selectedService.tenDichVu || 'Dịch vụ'}
                   width={600}
                   height={400}
                   className={styles.detailImage}
                 />
               </div>
               <div className={styles.serviceDetailInfo}>
-                <h2>{selectedService.tenDichVu}</h2>
+                <h2>{selectedService.tenDichVu || 'Dịch vụ'}</h2>
                 <div className={styles.servicePrice}>
-                  {selectedService.donGia.toLocaleString()}đ
+                  {formatCurrency(selectedService.donGia)}
                 </div>
-                <p className={styles.serviceDescription}>{selectedService.moTa}</p>
+                <p className={styles.serviceDescription}>{safeString(selectedService.moTa)}</p>
                 <button 
                   onClick={() => setShowModal(true)} 
                   className={styles.bookServiceButton}
@@ -250,45 +281,47 @@ export default function ServicesPage() {
             
             <div className={styles.servicesGrid}>
               {services.length > 0 ? (
-                services.map((service) => (
+                services.map((service, index) => (
                   <div 
-                    key={service.maDichVu} 
+                    key={service.maDichVu || index} 
                     className={styles.serviceCard}
                     onClick={() => handleServiceClick(service)}
                   >
                     <div className={styles.serviceImageContainer}>
-                      <Image
-                        src={getValidImageSrc(service.hinhAnh)}
-                        alt={service.tenDichVu}
+                      <Image 
+                        src={getValidImageSrc(service.hinhAnh)} 
+                        alt={service.tenDichVu || 'Dịch vụ'}
                         width={400}
-                        height={300}
+                        height={250}
                         className={styles.serviceImage}
                       />
                       <div className={styles.serviceIcon}>
-                        {getServiceIcon(service.tenDichVu)}
+                        {getServiceIcon(service.tenDichVu || '')}
                       </div>
                     </div>
                     <div className={styles.serviceContent}>
-                      <h3>{service.tenDichVu}</h3>
-                      <p className={styles.serviceShortDesc}>
-                        {service.moTa.length > 100 
-                          ? service.moTa.substring(0, 100) + '...' 
-                          : service.moTa}
+                      <h3>{service.tenDichVu || 'Dịch vụ'}</h3>
+                      <div className={styles.serviceRating}>
+                        <FaStar className={styles.starIcon} />
+                        <FaStar className={styles.starIcon} />
+                        <FaStar className={styles.starIcon} />
+                        <FaStar className={styles.starIcon} />
+                        <FaStar className={styles.starIcon} />
+                      </div>
+                      <p>{safeString(service.moTa).length > 100 
+                          ? safeString(service.moTa).substring(0, 100) + '...' 
+                          : safeString(service.moTa)}
                       </p>
                       <div className={styles.serviceFooter}>
-                        <span className={styles.servicePrice}>
-                          {service.donGia.toLocaleString()}đ
-                        </span>
-                        <button className={styles.viewDetailBtn}>
-                          Xem chi tiết
-                        </button>
+                        <div className={styles.servicePrice}>{formatCurrency(service.donGia)}</div>
+                        <button className={styles.viewDetailsBtn}>Xem chi tiết</button>
                       </div>
                     </div>
                   </div>
                 ))
               ) : (
                 <div className={styles.noServices}>
-                  <p>Không có dịch vụ nào được tìm thấy.</p>
+                  <p>Hiện không có dịch vụ nào.</p>
                 </div>
               )}
             </div>
@@ -299,82 +332,71 @@ export default function ServicesPage() {
       {/* Modal đặt dịch vụ */}
       {showModal && selectedService && (
         <div className={styles.modalOverlay}>
-          <div className={styles.modalContent}>
-            <button 
-              onClick={() => setShowModal(false)} 
-              className={styles.closeModalBtn}
-            >
-              &times;
-            </button>
-            <h2>Đặt dịch vụ: {selectedService.tenDichVu}</h2>
-            
-            <form onSubmit={handleBookingSubmit} className={styles.bookingForm}>
-              <div className={styles.formGroup}>
-                <label htmlFor="date">Ngày sử dụng:</label>
-                <input
-                  type="date"
-                  id="date"
-                  required
-                  min={new Date().toISOString().split('T')[0]}
-                  value={bookingDetails.date}
-                  onChange={(e) => setBookingDetails({...bookingDetails, date: e.target.value})}
-                />
-              </div>
-              
-              <div className={styles.formGroup}>
-                <label htmlFor="time">Giờ sử dụng:</label>
-                <input
-                  type="time"
-                  id="time"
-                  required
-                  value={bookingDetails.time}
-                  onChange={(e) => setBookingDetails({...bookingDetails, time: e.target.value})}
-                />
-              </div>
-              
-              <div className={styles.formGroup}>
-                <label htmlFor="guests">Số người:</label>
-                <input
-                  type="number"
-                  id="guests"
-                  min="1"
-                  max="10"
-                  required
-                  value={bookingDetails.guests}
-                  onChange={(e) => setBookingDetails({...bookingDetails, guests: parseInt(e.target.value)})}
-                />
-              </div>
-              
-              <div className={styles.formGroup}>
-                <label htmlFor="notes">Ghi chú:</label>
-                <textarea
-                  id="notes"
-                  rows={4}
-                  value={bookingDetails.notes}
-                  onChange={(e) => setBookingDetails({...bookingDetails, notes: e.target.value})}
-                ></textarea>
-              </div>
-              
-              <div className={styles.bookingSummary}>
-                <h3>Tóm tắt đặt dịch vụ</h3>
-                <div className={styles.summaryItem}>
-                  <span>Dịch vụ:</span>
-                  <span>{selectedService.tenDichVu}</span>
+          <div className={styles.modal}>
+            <div className={styles.modalHeader}>
+              <h3>Đặt dịch vụ: {selectedService.tenDichVu}</h3>
+              <button className={styles.closeModal} onClick={() => setShowModal(false)}>&times;</button>
+            </div>
+            <div className={styles.modalBody}>
+              <form onSubmit={handleBookingSubmit}>
+                <div className={styles.formGroup}>
+                  <label htmlFor="date">Ngày sử dụng:</label>
+                  <input 
+                    type="date" 
+                    id="date" 
+                    value={bookingDetails.date} 
+                    onChange={(e) => setBookingDetails({...bookingDetails, date: e.target.value})}
+                    required
+                  />
                 </div>
-                <div className={styles.summaryItem}>
-                  <span>Giá:</span>
-                  <span>{selectedService.donGia.toLocaleString()}đ</span>
+                <div className={styles.formGroup}>
+                  <label htmlFor="time">Giờ sử dụng:</label>
+                  <input 
+                    type="time" 
+                    id="time" 
+                    value={bookingDetails.time} 
+                    onChange={(e) => setBookingDetails({...bookingDetails, time: e.target.value})}
+                    min="08:00" 
+                    max="22:00"
+                    required
+                  />
                 </div>
-                <div className={styles.summaryItem}>
-                  <span>Tổng cộng:</span>
-                  <span>{(selectedService.donGia * bookingDetails.guests).toLocaleString()}đ</span>
+                <div className={styles.formGroup}>
+                  <label htmlFor="guests">Số người:</label>
+                  <input 
+                    type="number" 
+                    id="guests" 
+                    value={bookingDetails.guests} 
+                    onChange={(e) => setBookingDetails({...bookingDetails, guests: Number(e.target.value)})}
+                    min="1"
+                    required
+                  />
                 </div>
-              </div>
-              
-              <button type="submit" className={styles.submitBookingBtn}>
-                Xác nhận đặt dịch vụ
-              </button>
-            </form>
+                <div className={styles.formGroup}>
+                  <label htmlFor="notes">Ghi chú:</label>
+                  <textarea 
+                    id="notes" 
+                    value={bookingDetails.notes} 
+                    onChange={(e) => setBookingDetails({...bookingDetails, notes: e.target.value})}
+                    rows={4}
+                  />
+                </div>
+                <div className={styles.bookingSummary}>
+                  <h4>Thông tin đặt dịch vụ</h4>
+                  <div className={styles.summaryItem}>
+                    <span>Dịch vụ:</span>
+                    <span>{selectedService.tenDichVu}</span>
+                  </div>
+                  <div className={styles.summaryItem}>
+                    <span>Giá:</span>
+                    <span>{formatCurrency(selectedService.donGia)}</span>
+                  </div>
+                </div>
+                <button type="submit" className={styles.submitBooking}>
+                  Xác nhận đặt dịch vụ
+                </button>
+              </form>
+            </div>
           </div>
         </div>
       )}
