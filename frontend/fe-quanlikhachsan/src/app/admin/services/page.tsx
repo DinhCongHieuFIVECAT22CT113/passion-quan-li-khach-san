@@ -34,9 +34,10 @@ export default function ServiceManager() {
           giaTien: service.giaTien || 0
         }));
         setServices(servicesWithSafePrice);
-      } catch (err: any) {
-        setError(err.message || "Có lỗi xảy ra khi tải dữ liệu");
-        console.error("Error fetching services:", err);
+      } catch (err) {
+        const error = err as Error;
+        setError(error.message || "Có lỗi xảy ra khi tải dữ liệu");
+        console.error("Error fetching services:", error);
       } finally {
         setIsLoading(false);
       }
@@ -95,9 +96,10 @@ export default function ServiceManager() {
         
         // Cập nhật danh sách dịch vụ sau khi xóa
         setServices(services.filter(service => service.maDichVu !== maDichVu));
-      } catch (err: any) {
-        alert(`Lỗi: ${err.message}`);
-        console.error("Error deleting service:", err);
+      } catch (err) {
+        const error = err as Error;
+        alert(`Lỗi: ${error.message}`);
+        console.error("Error deleting service:", error);
       }
     }
   };
@@ -159,9 +161,10 @@ export default function ServiceManager() {
       
       setServices(servicesWithSafePrice);
       closeModal();
-    } catch (err: any) {
-      alert(`Lỗi: ${err.message}`);
-      console.error("Error saving service:", err);
+    } catch (err) {
+      const error = err as Error;
+      alert(`Lỗi: ${error.message}`);
+      console.error("Error saving service:", error);
     }
   };
 

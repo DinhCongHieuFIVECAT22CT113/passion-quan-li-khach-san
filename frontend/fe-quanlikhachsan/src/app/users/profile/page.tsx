@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, ChangeEvent, FC } from 'react';
+import React, { useState, useEffect, FC } from 'react';
 import AuthCheck from '../../../app/components/auth/AuthCheck';
 import Image from 'next/image';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import styles from './styles.module.css';
 import PersonalInfoForm from '../../../app/components/profile/PersonalInfoForm';
@@ -16,18 +15,12 @@ import { useTranslation } from 'react-i18next';
 import i18n from '../../../app/i18n';
 import Header from '../../components/layout/Header';
 
-interface Language {
-  id: string;
-  code: string;
-  name: string;
-  status: string;
-}
-
 const ProfilePage: FC = () => {
   const router = useRouter();
-  const { t, i18n: i18nInstance } = useTranslation();
+  const { t } = useTranslation();
   const { languages, selectedLanguage, setSelectedLanguage } = useLanguage();
   const [isClient, setIsClient] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   // Avatar
   const [avatarSrc, setAvatarSrc] = useState<string | null>(null);
@@ -36,10 +29,13 @@ const ProfilePage: FC = () => {
 
   // User Info
   const [userInfo, setUserInfo] = useState({
-    name: 'Nguyễn Văn A',
-    email: 'nguyenvana@example.com',
-    phone: '0123 456 789',
-    address: '123 Đường Láng, Hà Nội',
+    name: '',
+    email: '',
+    phone: '',
+    address: '',
+    hokh: '',
+    tenkh: '',
+    idNumber: '',
   });
 
   // Transaction History
@@ -69,7 +65,7 @@ const ProfilePage: FC = () => {
     const savedLanguage = localStorage.getItem('selectedLanguage') || 'vi';
     setSelectedLanguage(savedLanguage);
     i18n.changeLanguage(savedLanguage);
-  }, []);
+  }, [setSelectedLanguage]);
 
   // Handle Language Change
   const handleLanguageChange = (code: string) => {
@@ -97,12 +93,15 @@ const ProfilePage: FC = () => {
         if (profileResponse.ok) {
           const { data } = await profileResponse.json();
           setUserInfo({
-            name: `${data.hokh} ${data.tenkh}`,
-            email: data.email || 'nguyenvana@example.com',
-            phone: data.soDienThoai || '0123 456 789',
-            address: data.address || '123 Đường Láng, Hà Nội',
+            name: data.hokh && data.tenkh ? `${data.hokh} ${data.tenkh}` : '',
+            email: data.email || '',
+            phone: data.soDienThoai || '',
+            address: data.address || '',
+            hokh: data.hokh || '',
+            tenkh: data.tenkh || '',
+            idNumber: data.soCccd || '',
           });
-          setAvatarSrc(data.avatarSrc);
+          setAvatarSrc(data.avatarSrc || null);
         } else {
           const errorData = await profileResponse.json();
           console.error('Error fetching profile:', errorData.message);
@@ -116,10 +115,11 @@ const ProfilePage: FC = () => {
 
         if (transactionsResponse.ok) {
           const { data } = await transactionsResponse.json();
-          setTransactionHistory(data);
+          setTransactionHistory(data || []);
         } else {
           const errorData = await transactionsResponse.json();
           console.error('Error fetching transactions:', errorData.message);
+          setTransactionHistory([]);
         }
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -135,6 +135,11 @@ const ProfilePage: FC = () => {
     localStorage.removeItem('token');
     sessionStorage.clear();
     router.push('/login');
+  };
+
+  // Toggle edit mode
+  const toggleEditMode = () => {
+    setIsEditing(!isEditing);
   };
 
   // Handle Change Password
@@ -188,6 +193,44 @@ const ProfilePage: FC = () => {
     }
   };
 
+  // Handle Save Profile
+  const handleSaveProfile = async (data: { hokh: string; tenkh: string; email: string; soDienThoai: string; soCccd: string }) => {
+    try {
+      const response = await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'updateProfile',
+          hokh: data.hokh,
+          tenkh: data.tenkh,
+          email: data.email,
+          soDienThoai: data.soDienThoai,
+          soCccd: data.soCccd,
+        }),
+      });
+
+      if (response.ok) {
+        setUserInfo((prev) => ({
+          ...prev,
+          name: `${data.hokh} ${data.tenkh}`,
+          hokh: data.hokh,
+          tenkh: data.tenkh,
+          email: data.email,
+          phone: data.soDienThoai,
+          idNumber: data.soCccd
+        }));
+        setIsEditing(false);
+      } else {
+        const errorData = await response.json();
+        console.error('Error updating profile:', errorData.message);
+        window.alert(errorData.message || t('profile.updateProfileFailed'));
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      window.alert(t('profile.updateProfileError'));
+    }
+  };
+
   // Tránh render nội dung phụ thuộc vào ngôn ngữ trước khi client mount
   if (!isClient) {
     return (
@@ -211,16 +254,6 @@ const ProfilePage: FC = () => {
     );
   }
 
-  if (!userInfo) {
-    return (
-      <AuthCheck>
-        <div className={styles.loadingContainer}>
-          <p>{t('profile.noUserData')}</p>
-        </div>
-      </AuthCheck>
-    );
-  }
-
   return (
     <AuthCheck>
       <div className={styles.container}>
@@ -231,19 +264,21 @@ const ProfilePage: FC = () => {
           <div className={styles.profileCard}>
             <div className={styles.profileHeader}>
               <h1>{t('profile.title')}</h1>
-              <button onClick={() => setShowAvatarModal(true)} className={styles.editButton}>
-                {t('profile.changeAvatar')}
-              </button>
-              <button onClick={handleLogout} className={styles.logoutBtn}>
-                {t('profile.logout')}
-              </button>
+              <div className={styles.headerButtons}>
+                <button onClick={() => setShowAvatarModal(true)} className={styles.editButton}>
+                  {t('profile.changeAvatar')}
+                </button>
+                <button onClick={handleLogout} className={styles.logoutBtn}>
+                  {t('profile.logout')}
+                </button>
+              </div>
             </div>
 
             <div className={styles.profileContent}>
               <div className={styles.avatarSection}>
                 <div className={styles.avatarWrapper}>
                   <Image
-                    src={avatarSrc || '/default-avatar.png'}
+                    src={avatarSrc || '/images/default-avatar.png'}
                     alt="Ảnh đại diện"
                     className={styles.avatar}
                     width={150}
@@ -277,16 +312,59 @@ const ProfilePage: FC = () => {
                     )}
                   </div>
                 </div>
-                <PersonalInfoForm
-                  onSave={(data) =>
-                    setUserInfo((prev) => ({
-                      ...prev,
-                      name: `${data.hokh} ${data.tenkh}`,
-                    }))
-                  }
-                  onChangePassword={() => setShowChangePasswordModal(true)}
-                  onPaymentOptions={() => setShowPaymentOptionsModal(true)}
-                />
+                
+                {!isEditing ? (
+                  <div className={styles.userInfoDisplay}>
+                    <h3>{t('profile.personalInfo')}</h3>
+                    <div className={styles.infoGrid}>
+                      <div className={styles.infoItem}>
+                        <span className={styles.infoLabel}>{t('profile.fullName')}:</span>
+                        <span className={styles.infoValue}>{userInfo.name || t('profile.noData')}</span>
+                      </div>
+                      <div className={styles.infoItem}>
+                        <span className={styles.infoLabel}>{t('profile.email')}:</span>
+                        <span className={styles.infoValue}>{userInfo.email || t('profile.noData')}</span>
+                      </div>
+                      <div className={styles.infoItem}>
+                        <span className={styles.infoLabel}>{t('profile.phoneNumber')}:</span>
+                        <span className={styles.infoValue}>{userInfo.phone || t('profile.noData')}</span>
+                      </div>
+                      <div className={styles.infoItem}>
+                        <span className={styles.infoLabel}>{t('profile.idNumber')}:</span>
+                        <span className={styles.infoValue}>{userInfo.idNumber || t('profile.noData')}</span>
+                      </div>
+                      <div className={styles.infoItem}>
+                        <span className={styles.infoLabel}>{t('profile.address')}:</span>
+                        <span className={styles.infoValue}>{userInfo.address || t('profile.noData')}</span>
+                      </div>
+                    </div>
+                    <div className={styles.actionButtons}>
+                      <button onClick={toggleEditMode} className={styles.editProfileBtn}>
+                        {t('profile.editProfile')}
+                      </button>
+                      <button onClick={() => setShowChangePasswordModal(true)} className={styles.actionBtn}>
+                        {t('profile.editPassword')}
+                      </button>
+                      <button onClick={() => setShowPaymentOptionsModal(true)} className={styles.actionBtn}>
+                        {t('profile.paymentOptions')}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <PersonalInfoForm
+                    initialValues={{
+                      hokh: userInfo.hokh,
+                      tenkh: userInfo.tenkh,
+                      email: userInfo.email,
+                      soDienThoai: userInfo.phone,
+                      soCccd: userInfo.idNumber
+                    }}
+                    onCancel={toggleEditMode}
+                    onSave={handleSaveProfile}
+                    onChangePassword={() => setShowChangePasswordModal(true)}
+                    onPaymentOptions={() => setShowPaymentOptionsModal(true)}
+                  />
+                )}
               </div>
             </div>
 

@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FaStar, FaWifi, FaTv, FaSnowflake, FaBath, FaUser, FaSearch, FaFilter, FaBed, FaDollarSign, FaUsers, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { FaStar, FaWifi, FaTv, FaSnowflake, FaBath, FaSearch, FaFilter, FaBed, FaDollarSign, FaUsers, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import styles from './styles.module.css';
-import { getRooms, getRoomTypes } from '../../../lib/api';
-import { Room, RoomType } from '../../../types/auth';
+import { getRoomTypes } from '../../../lib/api';
+import { RoomType } from '../../../types/auth';
 import { API_BASE_URL } from '../../../lib/config';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
@@ -100,13 +100,13 @@ export default function RoomsPage() {
       return false;
     }
     
-    // Lọc theo giá - kiểm tra trường donGia có tồn tại không
-    if (roomType.donGia !== undefined && (roomType.donGia < priceRange[0] || roomType.donGia > priceRange[1])) {
+    // Lọc theo giá - kiểm tra trường giaMoiDem có tồn tại không
+    if (roomType.giaMoiDem !== undefined && (roomType.giaMoiDem < priceRange[0] || roomType.giaMoiDem > priceRange[1])) {
       return false;
     }
     
-    // Lọc theo số người - kiểm tra trường soNguoi có tồn tại không
-    if (roomType.soNguoi !== undefined && roomType.soNguoi < capacity) {
+    // Lọc theo số người - kiểm tra trường sucChua có tồn tại không
+    if (roomType.sucChua !== undefined && roomType.sucChua < capacity) {
       return false;
     }
     
@@ -115,9 +115,9 @@ export default function RoomsPage() {
 
   // Sắp xếp phòng theo giá từ thấp đến cao
   const sortedRoomTypes = [...filteredRoomTypes].sort((a, b) => {
-    if (a.donGia === undefined) return 1;
-    if (b.donGia === undefined) return -1;
-    return a.donGia - b.donGia;
+    if (a.giaMoiDem === undefined) return 1;
+    if (b.giaMoiDem === undefined) return -1;
+    return a.giaMoiDem - b.giaMoiDem;
   });
 
   if (loading) {
@@ -299,7 +299,7 @@ export default function RoomsPage() {
               <div key={roomType.maLoaiPhong} className={styles.roomCard}>
                 <div className={styles.roomImageContainer}>
                   <Image
-                    src={getValidImageSrc(roomType.hinhAnh)}
+                    src={getValidImageSrc(roomType.thumbnail)}
                     alt={roomType.tenLoaiPhong}
                     width={500}
                     height={300}
@@ -316,7 +316,7 @@ export default function RoomsPage() {
                   <h3 className={styles.roomTitle}>{roomType.tenLoaiPhong}</h3>
                   
                   <p className={styles.roomDescription}>
-                    {roomType.moTa || `Phòng ${roomType.tenLoaiPhong} sang trọng với diện tích ${roomType.dienTich || 0}m², trang bị đầy đủ tiện nghi hiện đại.`}
+                    {roomType.moTa || `Phòng ${roomType.tenLoaiPhong} sang trọng với diện tích ${roomType.kichThuocPhong || 0}m², trang bị đầy đủ tiện nghi hiện đại.`}
                   </p>
                   
                   <div className={styles.amenitiesRow}>
@@ -341,21 +341,21 @@ export default function RoomsPage() {
                   <div className={styles.roomSpecifications}>
                     <div className={styles.specItem}>
                       <span className={styles.specLabel}>Diện tích</span>
-                      <span className={styles.specValue}>{roomType.dienTich || 0}m²</span>
+                      <span className={styles.specValue}>{roomType.kichThuocPhong || 0}m²</span>
                     </div>
                     <div className={styles.specItem}>
                       <span className={styles.specLabel}>Giường</span>
-                      <span className={styles.specValue}>{roomType.soGiuong || 0}</span>
+                      <span className={styles.specValue}>{roomType.soGiuongNgu || 0}</span>
                     </div>
                     <div className={styles.specItem}>
                       <span className={styles.specLabel}>Khách</span>
-                      <span className={styles.specValue}>{roomType.soNguoi || 0}</span>
+                      <span className={styles.specValue}>{roomType.sucChua || 0}</span>
                     </div>
                   </div>
                   
                   <div className={styles.roomCardFooter}>
                     <div className={styles.priceInfo}>
-                      <span className={styles.priceAmount}>{(roomType.donGia !== undefined) ? roomType.donGia.toLocaleString() : 0}đ</span>
+                      <span className={styles.priceAmount}>{(roomType.giaMoiDem !== undefined) ? roomType.giaMoiDem.toLocaleString() : 0}đ</span>
                       <span className={styles.priceUnit}>/đêm</span>
                     </div>
                     <Link 

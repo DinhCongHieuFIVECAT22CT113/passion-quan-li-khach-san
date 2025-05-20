@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 
 // Mock transaction data (replace with real database in production)
-const mockTransactions: any[] = [];
+const mockTransactions: unknown[] = [];
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     // In a real app, fetch the user's transactions from the database
     // using an authenticated user ID (e.g., from a JWT token)

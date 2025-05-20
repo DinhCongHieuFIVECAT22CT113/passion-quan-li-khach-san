@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { getUserInfo, APP_CONFIG } from '../../lib/config';
+import { getUserInfo } from '../../lib/config';
 import { useLogout } from '../../lib/hooks';
 
 // Danh sách tất cả các mục menu có thể có

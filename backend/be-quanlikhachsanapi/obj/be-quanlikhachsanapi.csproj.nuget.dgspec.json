@@ -1,32 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Admin\\Desktop\\QuanLyKhachSan\\FE\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj": {}
+    "D:\\PTUDW quản lý khách sạn\\code dev\\DEV FE-BE\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Admin\\Desktop\\QuanLyKhachSan\\FE\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj": {
+    "D:\\PTUDW quản lý khách sạn\\code dev\\DEV FE-BE\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Admin\\Desktop\\QuanLyKhachSan\\FE\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj",
+        "projectUniqueName": "D:\\PTUDW quản lý khách sạn\\code dev\\DEV FE-BE\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj",
         "projectName": "be-quanlikhachsanapi",
-        "projectPath": "C:\\Users\\Admin\\Desktop\\QuanLyKhachSan\\FE\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj",
-        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Admin\\Desktop\\QuanLyKhachSan\\FE\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\obj\\",
+        "projectPath": "D:\\PTUDW quản lý khách sạn\\code dev\\DEV FE-BE\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj",
+        "packagesPath": "C:\\Users\\anhso\\.nuget\\packages\\",
+        "outputPath": "D:\\PTUDW quản lý khách sạn\\code dev\\DEV FE-BE\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "H:\\Microsoft\\Visual Studio 2022\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\anhso\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -126,7 +119,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.400/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.408/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

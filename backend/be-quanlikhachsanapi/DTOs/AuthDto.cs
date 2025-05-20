@@ -40,7 +40,18 @@ namespace be_quanlikhachsanapi.DTOs
         [Required(ErrorMessage = "Mật khẩu là bắt buộc")]
         public string Password { get; set; } = default!;
     }
+    public class ChangePassDto
+    {   
+        public string UserName { get; set; } = default!;
+        [Required]
+        public required string Password { get; set; }
 
+        [Required]
+        public required string NewPassword { get; set; }
+
+        [Required]
+        public required string ConfirmPassword { get; set; }
+    }
     public class UserDto
     {
         public string MaNguoiDung { get; set; } = default!;

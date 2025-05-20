@@ -1,48 +1,87 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { getUserInfo } from '../../../lib/config';
+import { getDashboardStats } from '../../../lib/api';
+
+interface RoomStats { total: number; available: number; occupied: number; maintenance: number }
+interface BookingStats { today: number; pending: number; completed: number; cancelled: number }
+interface RevenueStats { today: number; week: number; month: number; average: number }
+interface StaffStats { total: number; onDuty: number; managers: number; employees: number; accountants: number }
+interface RecentBooking {
+  maDatPhong: string;
+  customerName?: string;
+  maKh: string;
+  roomName?: string;
+  maPhong: string;
+  ngayDen: string;
+  ngayDi: string;
+  trangThai: string;
+}
+interface DashboardData {
+  rooms: RoomStats;
+  bookings: BookingStats;
+  revenue: RevenueStats;
+  staff: StaffStats;
+  recentBookings: RecentBooking[];
+}
+
+const initialStats: DashboardData = {
+  rooms: { total: 0, available: 0, occupied: 0, maintenance: 0 },
+  bookings: { today: 0, pending: 0, completed: 0, cancelled: 0 },
+  revenue: { today: 0, week: 0, month: 0, average: 0 },
+  staff: { total: 0, onDuty: 0, managers: 0, employees: 0, accountants: 0 },
+  recentBookings: []
+};
 
 export default function ManagerDashboardPage() {
-  const [userInfo, setUserInfo] = useState<any>(null);
+  const [userInfo, setUserInfo] = useState<{ userName?: string } | null>(null);
+  const [stats, setStats] = useState<DashboardData>(initialStats);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   useEffect(() => {
     const info = getUserInfo();
-    setUserInfo(info);
+    setUserInfo(info as { userName?: string } | null); // Type assertion
+    
+    const fetchStats = async () => {
+      try {
+        setLoading(true);
+        const data = await getDashboardStats();
+        setStats(data as DashboardData); 
+        setError(null);
+      } catch (err) {
+        const error = err as Error;
+        console.error("Lỗi khi lấy dữ liệu dashboard:", error);
+        setError(error.message || "Không thể lấy dữ liệu thống kê");
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchStats();
   }, []);
   
-  // Giả lập dữ liệu thống kê
-  const stats = {
-    rooms: {
-      total: 120,
-      available: 43,
-      occupied: 77,
-      maintenance: 0
-    },
-    bookings: {
-      today: 15,
-      pending: 8,
-      completed: 120,
-      cancelled: 5
-    },
-    revenue: {
-      today: 25000000,
-      week: 150000000,
-      month: 580000000,
-      average: 19000000
-    },
-    staff: {
-      total: 45,
-      onDuty: 12,
-      managers: 3,
-      employees: 32,
-      accountants: 10
-    }
-  };
-  
-  // Format tiền theo định dạng VND
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
   };
+  
+  const formatDate = (dateString: string) => {
+    if (!dateString) return 'N/A';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('vi-VN');
+    } catch (e) { // eslint-disable-line @typescript-eslint/no-unused-vars
+      return dateString; // Trả về chuỗi gốc nếu không parse được
+    }
+  };
+  
+  if (loading) {
+    return <div style={{padding:'24px', textAlign:'center'}}>Đang tải dữ liệu...</div>;
+  }
+  
+  if (error) {
+    return <div style={{padding:'24px', color:'red', textAlign:'center'}}>Lỗi: {error}</div>;
+  }
   
   return (
     <div style={{ padding: '24px' }}>
@@ -94,35 +133,35 @@ export default function ManagerDashboardPage() {
               </tr>
             </thead>
             <tbody>
-              {[
-                { id: 'DP001', customer: 'Nguyễn Văn A', room: '101', checkin: '12/05/2025', checkout: '15/05/2025', status: 'Đã xác nhận' },
-                { id: 'DP002', customer: 'Trần Thị B', room: '205', checkin: '13/05/2025', checkout: '16/05/2025', status: 'Đang xử lý' },
-                { id: 'DP003', customer: 'Lê Văn C', room: '310', checkin: '14/05/2025', checkout: '17/05/2025', status: 'Đã thanh toán' },
-                { id: 'DP004', customer: 'Phạm Thị D', room: '402', checkin: '15/05/2025', checkout: '18/05/2025', status: 'Chờ xác nhận' },
-                { id: 'DP005', customer: 'Hoàng Văn E', room: '115', checkin: '16/05/2025', checkout: '19/05/2025', status: 'Đã xác nhận' },
-              ].map((booking, index) => (
-                <tr key={index} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                  <td style={{ padding: '12px 8px' }}>{booking.id}</td>
-                  <td style={{ padding: '12px 8px' }}>{booking.customer}</td>
-                  <td style={{ padding: '12px 8px' }}>{booking.room}</td>
-                  <td style={{ padding: '12px 8px' }}>{booking.checkin}</td>
-                  <td style={{ padding: '12px 8px' }}>{booking.checkout}</td>
-                  <td style={{ padding: '12px 8px' }}>
-                    <span style={{ 
-                      padding: '4px 8px', 
-                      borderRadius: '4px', 
-                      fontSize: '0.8rem',
-                      backgroundColor: 
-                        booking.status === 'Đã xác nhận' ? '#9ae6b4' : 
-                        booking.status === 'Đang xử lý' ? '#fbd38d' : 
-                        booking.status === 'Đã thanh toán' ? '#90cdf4' : 
-                        '#e9d8fd'
-                    }}>
-                      {booking.status}
-                    </span>
-                  </td>
+              {stats.recentBookings && stats.recentBookings.length > 0 ? (
+                stats.recentBookings.map((booking, index) => (
+                  <tr key={index} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                    <td style={{ padding: '12px 8px' }}>{booking.maDatPhong}</td>
+                    <td style={{ padding: '12px 8px' }}>{booking.customerName || booking.maKh}</td>
+                    <td style={{ padding: '12px 8px' }}>{booking.roomName || booking.maPhong}</td>
+                    <td style={{ padding: '12px 8px' }}>{formatDate(booking.ngayDen)}</td>
+                    <td style={{ padding: '12px 8px' }}>{formatDate(booking.ngayDi)}</td>
+                    <td style={{ padding: '12px 8px' }}>
+                      <span style={{
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        fontSize: '0.8rem',
+                        backgroundColor:
+                          booking.trangThai === 'Đã xác nhận' ? '#9ae6b4' :
+                          booking.trangThai === 'Đang xử lý' || booking.trangThai === 'Đã đặt' ? '#fbd38d' :
+                          booking.trangThai === 'Đã thanh toán' || booking.trangThai === 'Đã trả phòng' ? '#90cdf4' :
+                          '#e9d8fd'
+                      }}>
+                        {booking.trangThai}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: 'center', padding: '20px', fontStyle: 'italic', color: '#666' }}>Không có đặt phòng gần đây.</td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
@@ -171,4 +210,4 @@ export default function ManagerDashboardPage() {
       </div>
     </div>
   );
-} 
+}

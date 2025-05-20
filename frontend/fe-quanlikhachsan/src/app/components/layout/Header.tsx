@@ -14,11 +14,9 @@ export default function Header() {
   const pathname = usePathname();
   const { t } = useTranslation();
   const { selectedLanguage } = useLanguage();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    setIsLoggedIn(!!localStorage.getItem('token'));
     i18n.changeLanguage(selectedLanguage).then(() => {
       setIsReady(true);
     });

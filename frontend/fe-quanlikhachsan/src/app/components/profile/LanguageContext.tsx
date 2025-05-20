@@ -18,7 +18,7 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [languages, setLanguages] = useState<Language[]>([
+  const [languages, /*setLanguages*/] = useState<Language[]>([
   { id: 1, name: 'Tiếng Việt', code: 'vi', status: 'Đang sử dụng' },
   { id: 2, name: '한국어', code: 'ko', status: 'Đang sử dụng' }, // Tiếng Hàn
   { id: 3, name: '日本語', code: 'ja', status: 'Đang sử dụng' }, // Nhật

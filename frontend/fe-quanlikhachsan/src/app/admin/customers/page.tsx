@@ -70,9 +70,10 @@ export default function CustomerManager() {
           ghiChu: customer.ghiChu || ''
         }));
         setCustomers(safeData);
-      } catch (err: any) {
-        setError(err.message || "Có lỗi xảy ra khi tải dữ liệu");
-        console.error("Error fetching customers:", err);
+      } catch (err) {
+        const error = err as Error;
+        setError(error.message || "Có lỗi xảy ra khi tải dữ liệu");
+        console.error("Error fetching customers:", error);
       } finally {
         setIsLoading(false);
       }
@@ -144,9 +145,10 @@ export default function CustomerManager() {
       const data = await handleResponse(customersResponse);
       setCustomers(Array.isArray(data) ? data : []);
       setShowAddModal(false);
-    } catch (err: any) {
-      alert(`Lỗi: ${err.message}`);
-      console.error("Error adding customer:", err);
+    } catch (err) {
+      const error = err as Error;
+      alert(`Lỗi: ${error.message}`);
+      console.error("Error adding customer:", error);
     }
   };
 
@@ -162,7 +164,7 @@ export default function CustomerManager() {
         formData.append(key, String(form[key as keyof Customer] || ''));
       }
       
-      const response = await fetch(`${API_BASE_URL}/KhachHang/Cập nhật khách hàng`, {
+      const response = await fetch(`${API_BASE_URL}/KhachHang/Cập nhật khách hàng?maKh=${form.maKh}`, {
         method: 'PUT',
         headers: getFormDataHeaders(),
         body: formData,
@@ -181,9 +183,10 @@ export default function CustomerManager() {
       const data = await handleResponse(customersResponse);
       setCustomers(Array.isArray(data) ? data : []);
       setEditCustomer(null);
-    } catch (err: any) {
-      alert(`Lỗi: ${err.message}`);
-      console.error("Error updating customer:", err);
+    } catch (err) {
+      const error = err as Error;
+      alert(`Lỗi: ${error.message}`);
+      console.error("Error updating customer:", error);
     }
   };
 
@@ -192,7 +195,7 @@ export default function CustomerManager() {
       const token = localStorage.getItem('token');
       if (!token) throw new Error("Bạn cần đăng nhập để thực hiện hành động này");
       
-      const response = await fetch(`${API_BASE_URL}/KhachHang/Xóa khách hàng?id=${maKh}`, {
+      const response = await fetch(`${API_BASE_URL}/KhachHang/Xóa khách hàng?maKh=${maKh}`, {
         method: 'DELETE',
         headers: getAuthHeaders('DELETE'),
         credentials: 'include'
@@ -203,9 +206,10 @@ export default function CustomerManager() {
       // Cập nhật state
       setCustomers(customers.filter(c => c.maKh !== maKh));
       setShowDeleteConfirm(null);
-    } catch (err: any) {
-      alert(`Lỗi: ${err.message}`);
-      console.error("Error deleting customer:", err);
+    } catch (err) {
+      const error = err as Error;
+      alert(`Lỗi: ${error.message}`);
+      console.error("Error deleting customer:", error);
     }
   };
 

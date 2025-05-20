@@ -7,6 +7,7 @@ namespace be_quanlikhachsanapi.DTOs
         public string MaKm { get; set; } = default!;
 
         public string TenKhuyenMai { get; set; } = default!;
+        public string? Thumbnail { get; set; }
         public string MoTa { get; set; } = default!;
         public string MaGiamGia { get; set; } = default!;
         public int PhanTramGiam { get; set; }
@@ -23,6 +24,9 @@ namespace be_quanlikhachsanapi.DTOs
         [Required]
         [MaxLength(100)]
         public string TenKhuyenMai { get; set; } = default!;
+        [Required(ErrorMessage = "Hình ảnh là bắt buộc.")]
+        [MaxLength(500)]
+        public string? Thumbnail { get; set; }
         [Required]
         [MaxLength(500)]
         public string MoTa { get; set; } = default!;
@@ -53,6 +57,9 @@ namespace be_quanlikhachsanapi.DTOs
         [Required]
         [MaxLength(100)]
         public string TenKhuyenMai { get; set; } = default!;
+        [Required(ErrorMessage = "Hình ảnh là bắt buộc.")]
+        [MaxLength(500)]
+        public string? Thumbnail { get; set; }
         [Required]
         [MaxLength(500)]
         public string MoTa { get; set; } = default!;

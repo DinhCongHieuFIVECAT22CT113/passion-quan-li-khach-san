@@ -29,8 +29,6 @@ public partial class LoaiPhong
 
     public string? Thumbnail { get; set; }
 
-    public string? HinhAnh { get; set; }
-
     public DateTime? NgayTao { get; set; }
 
     public DateTime? NgaySua { get; set; }

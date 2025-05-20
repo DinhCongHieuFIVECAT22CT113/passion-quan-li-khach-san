@@ -28,6 +28,7 @@ namespace be_quanlikhachsanapi.Services
             {
                 MaDichVu = dv.MaDichVu,
                 TenDichVu = dv.TenDichVu,
+                Thumbnail = dv.Thumbnail,
                 MoTa = dv.MoTa,
                 DonGia = dv.DonGia
             }).ToList();
@@ -43,6 +44,7 @@ namespace be_quanlikhachsanapi.Services
             {
                 MaDichVu = dichVu.MaDichVu,
                 TenDichVu = dichVu.TenDichVu,
+                Thumbnail = dichVu.Thumbnail,
                 MoTa = dichVu.MoTa,
                 DonGia = dichVu.DonGia
             };
@@ -70,6 +72,7 @@ namespace be_quanlikhachsanapi.Services
             {
                 MaDichVu = newMaDichVu,
                 TenDichVu = createDichVu.TenDichVu,
+                Thumbnail = createDichVu.Thumbnail,
                 MoTa = createDichVu.MoTa,
                 DonGia = createDichVu.DonGia,
                 NgayTao = DateTime.Now,
@@ -99,6 +102,7 @@ namespace be_quanlikhachsanapi.Services
             else
             {        
                 dichVu.TenDichVu = updateDichVu.TenDichVu;
+                dichVu.Thumbnail = updateDichVu.Thumbnail;
                 dichVu.MoTa = updateDichVu.MoTa;
                 dichVu.DonGia = updateDichVu.DonGia;
                 dichVu.NgaySua = DateTime.Now;

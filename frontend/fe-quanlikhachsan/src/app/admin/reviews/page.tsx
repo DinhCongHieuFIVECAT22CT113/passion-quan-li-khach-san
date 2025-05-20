@@ -48,9 +48,10 @@ export default function ReviewManager() {
         });
         
         setReviews(reviewsWithNames);
-      } catch (err: any) {
-        setError(err.message || "Có lỗi xảy ra khi tải dữ liệu đánh giá");
-        console.error("Error fetching reviews:", err);
+      } catch (err) {
+        const error = err as Error;
+        setError(error.message || "Có lỗi xảy ra khi tải dữ liệu đánh giá");
+        console.error("Error fetching reviews:", error);
       } finally {
         setIsLoading(false);
       }
@@ -65,9 +66,10 @@ export default function ReviewManager() {
       setReviews(reviews.map(review => 
         review.maDG === maDG ? { ...review, trangThai: 'Đã duyệt' } : review
       ));
-    } catch (err: any) {
-      alert(`Lỗi khi duyệt đánh giá: ${err.message}`);
-      console.error("Error approving review:", err);
+    } catch (err) {
+      const error = err as Error;
+      alert(`Lỗi khi duyệt đánh giá: ${error.message}`);
+      console.error("Error approving review:", error);
     }
   };
 
@@ -87,9 +89,10 @@ export default function ReviewManager() {
       setReviews(reviews.map(r => 
         r.maDG === review.maDG ? updatedReview : r
       ));
-    } catch (err: any) {
-      alert(`Lỗi khi thay đổi trạng thái hiển thị: ${err.message}`);
-      console.error("Error toggling review visibility:", err);
+    } catch (err) {
+      const error = err as Error;
+      alert(`Lỗi khi thay đổi trạng thái hiển thị: ${error.message}`);
+      console.error("Error toggling review visibility:", error);
     }
   };
 
@@ -107,9 +110,10 @@ export default function ReviewManager() {
         
         // Cập nhật state
         setReviews(reviews.filter(review => review.maDG !== maDG));
-      } catch (err: any) {
-        alert(`Lỗi khi xóa đánh giá: ${err.message}`);
-        console.error("Error deleting review:", err);
+      } catch (err) {
+        const error = err as Error;
+        alert(`Lỗi khi xóa đánh giá: ${error.message}`);
+        console.error("Error deleting review:", error);
       }
     }
   };
@@ -151,9 +155,10 @@ export default function ReviewManager() {
         trangThai: 'Chưa duyệt',
         anHien: false
       });
-    } catch (err: any) {
-      alert(`Lỗi: ${err.message}`);
-      console.error("Error updating review:", err);
+    } catch (err) {
+      const error = err as Error;
+      alert(`Lỗi: ${error.message}`);
+      console.error("Error updating review:", error);
     }
   };
 

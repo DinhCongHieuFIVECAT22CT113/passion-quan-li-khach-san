@@ -102,9 +102,10 @@ export default function BookingManager() {
         });
         
         setBookings(bookingsWithDetails);
-      } catch (err: any) {
-        setError(err.message || "Có lỗi xảy ra khi tải dữ liệu");
-        console.error("Error fetching data:", err);
+      } catch (err) {
+        const error = err as Error;
+        setError(error.message || "Có lỗi xảy ra khi tải dữ liệu");
+        console.error("Error fetching data:", error);
       } finally {
         setIsLoading(false);
       }
@@ -279,9 +280,10 @@ export default function BookingManager() {
       
       setBookings(bookingsWithDetails);
       setShowAddModal(false);
-    } catch (err: any) {
-      alert(`Lỗi: ${err.message}`);
-      console.error("Error adding booking:", err);
+    } catch (err) {
+      const error = err as Error;
+      alert(`Lỗi: ${error.message}`);
+      console.error("Error adding booking:", error);
     }
   };
 
@@ -300,7 +302,7 @@ export default function BookingManager() {
         }
       }
       
-      const response = await fetch(`${API_BASE_URL}/DatPhong/Cập nhật đặt phòng`, {
+      const response = await fetch(`${API_BASE_URL}/DatPhong/Cập nhật đặt phòng?maDatPhong=${form.maDatPhong}`, {
         method: 'PUT',
         headers: getFormDataHeaders(),
         body: formData,
@@ -334,9 +336,10 @@ export default function BookingManager() {
       
       setBookings(bookingsWithDetails);
       setEditBooking(null);
-    } catch (err: any) {
-      alert(`Lỗi: ${err.message}`);
-      console.error("Error updating booking:", err);
+    } catch (err) {
+      const error = err as Error;
+      alert(`Lỗi: ${error.message}`);
+      console.error("Error updating booking:", error);
     }
   };
 

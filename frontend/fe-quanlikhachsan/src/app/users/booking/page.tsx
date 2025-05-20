@@ -2,8 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
-import { FaUser } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import styles from './styles.module.css';
 import { useTranslation } from 'react-i18next';

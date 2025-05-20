@@ -1,15 +1,29 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from './profile.module.css';
 import { useTranslation } from 'react-i18next';
 
 interface PersonalInfoFormProps {
-  onSave?: (data: { hokh: string; tenkh: string }) => void;
+  onSave?: (data: { hokh: string; tenkh: string; email: string; soDienThoai: string; soCccd: string }) => void;
+  onCancel?: () => void;
   onChangePassword?: () => void;
   onPaymentOptions?: () => void;
+  initialValues?: {
+    hokh: string;
+    tenkh: string;
+    email: string;
+    soDienThoai: string;
+    soCccd: string;
+  };
 }
 
-const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ onSave, onChangePassword, onPaymentOptions }) => {
+const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ 
+  onSave, 
+  onCancel, 
+  onChangePassword, 
+  onPaymentOptions, 
+  initialValues 
+}) => {
   const { t } = useTranslation();
   const [hokh, setHokh] = useState('');
   const [tenkh, setTenkh] = useState('');
@@ -26,6 +40,17 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ onSave, onChangePas
   });
 
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+
+  // Khởi tạo giá trị từ initialValues nếu có
+  useEffect(() => {
+    if (initialValues) {
+      setHokh(initialValues.hokh);
+      setTenkh(initialValues.tenkh);
+      setEmail(initialValues.email);
+      setSoDienThoai(initialValues.soDienThoai);
+      setSoCccd(initialValues.soCccd);
+    }
+  }, [initialValues]);
 
   const validateFields = () => {
     const newErrors = {
@@ -64,7 +89,7 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ onSave, onChangePas
     setShowSaveSuccess(true);
 
     if (onSave) {
-      onSave({ hokh, tenkh });
+      onSave({ hokh, tenkh, email, soDienThoai, soCccd });
     }
   };
 
@@ -151,6 +176,11 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({ onSave, onChangePas
         <button className={styles.saveInfoBtn} onClick={handleSaveInfo}>
           {t('profile.saveChanges')}
         </button>
+        {onCancel && (
+          <button className={styles.cancelBtn} onClick={onCancel}>
+            {t('profile.cancel')}
+          </button>
+        )}
         <button className={styles.actionBtn} onClick={onPaymentOptions}>
           {t('profile.paymentOptions')}
         </button>
