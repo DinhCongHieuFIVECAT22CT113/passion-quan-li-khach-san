@@ -13,12 +13,6 @@ public partial class ChiTietDatPhong
 
     public string? MaPhong { get; set; }
 
-    public int? SoDem { get; set; }
-
-    public decimal? GiaTien { get; set; }
-
-    public decimal? ThanhTien { get; set; }
-
     public string? TrangThai { get; set; }
 
     public virtual DatPhong MaDatPhongNavigation { get; set; } = null!;

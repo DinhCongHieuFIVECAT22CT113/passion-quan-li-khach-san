@@ -17,8 +17,6 @@ public partial class SuDungDichVu
 
     public DateTime? NgaySuDung { get; set; }
 
-    public byte[]? ThoiGianSuDung { get; set; }
-
     public string? TrangThai { get; set; }
 
     public virtual DatPhong? MaDatPhongNavigation { get; set; }

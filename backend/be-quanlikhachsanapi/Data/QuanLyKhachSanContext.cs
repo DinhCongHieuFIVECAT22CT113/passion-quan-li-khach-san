@@ -51,6 +51,9 @@ public partial class QuanLyKhachSanContext : DbContext
 
     public virtual DbSet<SuDungDichVu> SuDungDichVus { get; set; }
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Server=CONG-HIEU\\CONGHIEU;Database=QuanLyKhachSan;Trusted_Connection=True;TrustServerCertificate=True");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -113,6 +116,8 @@ public partial class QuanLyKhachSanContext : DbContext
             entity.Property(e => e.MaCaLam)
                 .HasMaxLength(10)
                 .IsUnicode(false);
+            entity.Property(e => e.GioBatDau).HasPrecision(0);
+            entity.Property(e => e.GioKetThuc).HasPrecision(0);
             entity.Property(e => e.TenCaLam).HasMaxLength(150);
         });
 
@@ -125,7 +130,6 @@ public partial class QuanLyKhachSanContext : DbContext
             entity.Property(e => e.MaChiTietDatPhong)
                 .HasMaxLength(10)
                 .IsUnicode(false);
-            entity.Property(e => e.GiaTien).HasColumnType("money");
             entity.Property(e => e.MaDatPhong)
                 .HasMaxLength(10)
                 .IsUnicode(false);
@@ -135,7 +139,6 @@ public partial class QuanLyKhachSanContext : DbContext
             entity.Property(e => e.MaPhong)
                 .HasMaxLength(10)
                 .IsUnicode(false);
-            entity.Property(e => e.ThanhTien).HasColumnType("money");
             entity.Property(e => e.TrangThai).HasMaxLength(50);
 
             entity.HasOne(d => d.MaDatPhongNavigation).WithMany(p => p.ChiTietDatPhongs)
@@ -162,7 +165,6 @@ public partial class QuanLyKhachSanContext : DbContext
             entity.Property(e => e.MaDatPhong)
                 .HasMaxLength(10)
                 .IsUnicode(false);
-            entity.Property(e => e.GiaGoc).HasColumnType("money");
             entity.Property(e => e.MaKh)
                 .HasMaxLength(10)
                 .IsUnicode(false)
@@ -172,7 +174,6 @@ public partial class QuanLyKhachSanContext : DbContext
             entity.Property(e => e.ThoiGianDen)
                 .HasMaxLength(255)
                 .IsUnicode(false);
-            entity.Property(e => e.TongTien).HasColumnType("money");
             entity.Property(e => e.TrangThai)
                 .HasMaxLength(50)
                 .HasDefaultValue("Chờ xác nhận");
@@ -217,9 +218,6 @@ public partial class QuanLyKhachSanContext : DbContext
                 .HasMaxLength(10)
                 .IsUnicode(false)
                 .HasColumnName("MaKM");
-            entity.Property(e => e.SoTienConThieu).HasColumnType("money");
-            entity.Property(e => e.SoTienDaThanhToan).HasColumnType("money");
-            entity.Property(e => e.SoTienThanhToanDu).HasColumnType("money");
             entity.Property(e => e.TongTien).HasColumnType("money");
             entity.Property(e => e.TrangThai)
                 .HasMaxLength(50)
@@ -333,7 +331,6 @@ public partial class QuanLyKhachSanContext : DbContext
                 .IsUnicode(false);
             entity.Property(e => e.GiaMoiDem).HasColumnType("money");
             entity.Property(e => e.GiaMoiGio).HasColumnType("money");
-            entity.Property(e => e.MoTa).HasColumnType("text");
             entity.Property(e => e.TenLoaiPhong).HasMaxLength(150);
         });
 
@@ -442,7 +439,6 @@ public partial class QuanLyKhachSanContext : DbContext
             entity.Property(e => e.PhuongThucThanhToan1)
                 .HasMaxLength(150)
                 .HasColumnName("PhuongThucThanhToan");
-            entity.Property(e => e.SoTienCanThanhToan).HasColumnType("decimal(18, 2)");
             entity.Property(e => e.TrangThai).HasMaxLength(50);
 
             entity.HasOne(d => d.MaHoaDonNavigation).WithMany(p => p.PhuongThucThanhToans)
@@ -497,9 +493,6 @@ public partial class QuanLyKhachSanContext : DbContext
             entity.Property(e => e.MaDichVu)
                 .HasMaxLength(10)
                 .IsUnicode(false);
-            entity.Property(e => e.ThoiGianSuDung)
-                .IsRowVersion()
-                .IsConcurrencyToken();
             entity.Property(e => e.TongTien).HasColumnType("money");
             entity.Property(e => e.TrangThai).HasMaxLength(50);
 
