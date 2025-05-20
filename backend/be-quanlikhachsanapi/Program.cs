@@ -117,6 +117,7 @@ builder.Services.AddScoped<IPhuongThucThanhToanRepository, PhuongThucThanhToanRe
 builder.Services.AddScoped<IKhachHangRepository, KhachHangRepository>();
 builder.Services.AddScoped<INhanVienRepository, NhanVienRepository>();
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+builder.Services.AddScoped<ILoaiKhachHangRepository, LoaiKhachHangRepository>();
 // Thêm vào phần đăng ký services
 builder.Services.AddScoped<IDatPhongRepository, DatPhongRepository>();
 builder.Services.AddScoped<IChiTietDatPhongRepository, ChiTietDatPhongRepository>();

@@ -34,6 +34,5 @@ namespace be_quanlikhachsanapi.DTOs
         public string Sdt { get; set; } = null!;
         public string? DiaChi { get; set; }
         public string SoCccd { get; set; } = null!;
-        public string? MaLoaiKh { get; set; }
     }
 }

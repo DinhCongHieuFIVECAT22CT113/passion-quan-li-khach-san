@@ -75,18 +75,16 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(khachHang);
         }
-
-        //     [HttpPost("Khôi phục mật khẩu")]
-        //     [Consumes("multipart/form-data")]
-        //     public IActionResult ResetPassword(string userName)
-        //     {
-        //         var khachHang = _khachHangRepo.ResetPassword(userName);
-        //         if (khachHang == null)
-        //         {
-        //             return NotFound("Không tìm thấy khách hàng với ID đã cho.");
-        //         }
-        //         return Ok(khachHang);
-        //     }
-        // }
+        [HttpPut("Cập nhật loại khách hàng")]
+        [Consumes("multipart/form-data")]
+        public IActionResult UpdateLoaiKhachHang(string maKh, string maLoaiKh)
+        {
+            var khachHang = _khachHangRepo.UpdateLoaiKhachHang(maKh, maLoaiKh);
+            if (khachHang == null)
+            {
+                return NotFound("Không tìm thấy khách hàng với ID đã cho.");
+            }
+            return Ok(khachHang);
+        } 
     }
 }

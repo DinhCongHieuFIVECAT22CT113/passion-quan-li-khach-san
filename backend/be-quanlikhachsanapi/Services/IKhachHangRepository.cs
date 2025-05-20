@@ -17,8 +17,8 @@ namespace be_quanlikhachsanapi.Services
         JsonResult GetKhachHangById(string MaKh);
         JsonResult CreateKhachHang(CreateKhachHangDto createKhachHang);
         JsonResult UpdateKhachHang(string MaKh, UpdateKhachHangDto updateKhachHang);
+        JsonResult UpdateLoaiKhachHang(string MaKh, string MaLoaiKh);
         JsonResult DeleteKhachHang(string MaKh);
-        //JsonResult ResetPassword(string UserName);
     }
     public class KhachHangRepository : IKhachHangRepository
     {
@@ -26,7 +26,7 @@ namespace be_quanlikhachsanapi.Services
         private readonly IPasswordHasher<KhachHang> _passwordHasher;
         private readonly ISendEmailServices _sendEmail;
         private readonly IConfiguration _confMail;
-        
+
         public KhachHangRepository(QuanLyKhachSanContext context, IPasswordHasher<KhachHang> passwordHasher, ISendEmailServices sendEmail, IConfiguration confMail)
         {
             _context = context;
@@ -128,9 +128,9 @@ namespace be_quanlikhachsanapi.Services
                 NgaySua = DateTime.Now
             };
 
-            #pragma warning disable CS8601
+#pragma warning disable CS8601
             khachHang.PasswordHash = _passwordHasher.HashPassword(khachHang, password);
-            #pragma warning restore CS8601
+#pragma warning restore CS8601
 
             _context.KhachHangs.Add(khachHang);
             _context.SaveChanges();
@@ -165,7 +165,6 @@ namespace be_quanlikhachsanapi.Services
             khachHang.Sdt = updateKhachHang.Sdt;
             khachHang.DiaChi = updateKhachHang.DiaChi;
             khachHang.SoCccd = updateKhachHang.SoCccd;
-            khachHang.MaLoaiKh = updateKhachHang.MaLoaiKh;
             khachHang.NgaySua = DateTime.Now;
 
             _context.SaveChanges();
@@ -195,38 +194,26 @@ namespace be_quanlikhachsanapi.Services
                 StatusCode = StatusCodes.Status200OK
             };
         }
+        
+        public JsonResult UpdateLoaiKhachHang(string MaKh, string MaLoaiKh)
+        {
+            var khachHang = _context.KhachHangs.FirstOrDefault(kh => kh.MaKh == MaKh);
+            if (khachHang == null)
+            {
+                return new JsonResult("Không tìm thấy khách hàng với mã đã cho.")
+                {
+                    StatusCode = StatusCodes.Status404NotFound
+                };
+            }
 
-        // public JsonResult ResetPassword(string userName)
-        // {
-        //     var khachHang = _context.KhachHangs.FirstOrDefault(kh => kh.UserName == userName);
-        //     if (khachHang == null)
-        //     {
-        //         return new JsonResult("Không tìm thấy khách hàng với username đã cho.")
-        //         {
-        //             StatusCode = StatusCodes.Status404NotFound
-        //         };
-        //     }
+            khachHang.MaLoaiKh = MaLoaiKh;
+            khachHang.NgaySua = DateTime.Now;
+            _context.SaveChanges();
 
-        //     // Sinh mật khẩu ngẫu nhiên
-        //     string password = Guid.NewGuid().ToString("N").Substring(0, 6); // Generate a random password
-
-        //     // Cập nhật mật khẩu mới
-        //     khachHang.PasswordHash = _passwordHasher.HashPassword(khachHang, password);
-        //     _context.SaveChanges();
-
-        //     // Gửi email xác nhận
-        //     var email = new EmailModel
-        //     {
-        //         ToEmail = khachHang.Email,
-        //         Subject = "Mật khẩu đăng nhập đã được khôi phục",
-        //         Body = $"Mật khẩu mới của bạn là: {password}"
-        //     };
-        //     _sendEmail.SendEmail(email);
-
-        //     return new JsonResult("Đã khôi phục mật khẩu thành công.")
-        //     {
-        //         StatusCode = StatusCodes.Status200OK
-        //     };
-        // }
+            return new JsonResult("Đã cập nhật loại khách hàng thành công")
+            {
+                StatusCode = StatusCodes.Status200OK
+            };
+        }
     }
 }
