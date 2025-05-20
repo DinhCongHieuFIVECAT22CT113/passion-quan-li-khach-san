@@ -151,10 +151,10 @@ namespace be_quanlikhachsanapi.Controllers
         /// <summary>
         /// Tính tổng doanh thu theo tháng và năm
         /// </summary>
-        [HttpGet("doanhthu?thang={thang}&nam={nam}")]
+        [HttpGet("doanhthu")]
         [Consumes("multipart/form-data")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> TinhTongDoanhThu(int thang, int nam)
+        public async Task<IActionResult> TinhTongDoanhThu([FromQuery] int thang, [FromQuery] int nam)
         {
             var tongDoanhThu = await _hoaDonRepo.TinhTongDoanhThuAsync(thang, nam);
             return Ok(new { Thang = thang, Nam = nam, TongDoanhThu = tongDoanhThu });
