@@ -45,32 +45,65 @@ const SignupForm: React.FC = () => {
     const newErrors: Record<string, string> = {};
 
     // Kiểm tra các trường bắt buộc
-    if (!formData.userName.trim()) newErrors.userName = 'Tên tài khoản không được để trống';
-    if (!formData.password.trim()) newErrors.password = 'Mật khẩu không được để trống';
-    if (!formData.confirmPassword.trim()) newErrors.confirmPassword = 'Xác nhận mật khẩu không được để trống';
-    if (!formData.hoKh.trim()) newErrors.hoKh = 'Họ không được để trống';
-    if (!formData.tenKh.trim()) newErrors.tenKh = 'Tên không được để trống';
-    if (!formData.email.trim()) newErrors.email = 'Email không được để trống';
-    if (!formData.soCccd.trim()) newErrors.soCccd = 'Số CCCD/CMND không được để trống';
-    if (!formData.soDienThoai.trim()) newErrors.soDienThoai = 'Số điện thoại không được để trống';
+    if (!formData.userName.trim()) {
+      newErrors.userName = 'Tên tài khoản không được để trống';
+    } else if (formData.userName.length < 6) {
+      newErrors.userName = 'Tên tài khoản phải có ít nhất 6 ký tự';
+    } else if (!/^[a-zA-Z][a-zA-Z0-9_]*$/.test(formData.userName)) {
+      newErrors.userName = 'Tên tài khoản phải bắt đầu bằng chữ cái và chỉ chứa chữ cái, số hoặc dấu gạch dưới';
+    }
 
-    // Kiểm tra mật khẩu khớp nhau
-    if (formData.password !== formData.confirmPassword) {
+    // Kiểm tra mật khẩu
+    if (!formData.password.trim()) {
+      newErrors.password = 'Mật khẩu không được để trống';
+    } else if (formData.password.length < 8) {
+      newErrors.password = 'Mật khẩu phải có ít nhất 8 ký tự';
+    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/.test(formData.password)) {
+      newErrors.password = 'Mật khẩu phải chứa ít nhất 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt';
+    }
+
+    if (!formData.confirmPassword.trim()) {
+      newErrors.confirmPassword = 'Xác nhận mật khẩu không được để trống';
+    } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Mật khẩu xác nhận không khớp';
     }
 
-    // Kiểm tra định dạng email
-    if (formData.email && !/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email)) {
+    // Kiểm tra họ
+    if (!formData.hoKh.trim()) {
+      newErrors.hoKh = 'Họ không được để trống';
+    } else if (formData.hoKh.length < 2) {
+      newErrors.hoKh = 'Họ phải có ít nhất 2 ký tự';
+    } else if (!/^[a-zA-ZÀ-ỹ\s]+$/.test(formData.hoKh)) {
+      newErrors.hoKh = 'Họ chỉ được chứa chữ cái và khoảng trắng';
+    }
+
+    // Kiểm tra tên
+    if (!formData.tenKh.trim()) {
+      newErrors.tenKh = 'Tên không được để trống';
+    } else if (formData.tenKh.length < 2) {
+      newErrors.tenKh = 'Tên phải có ít nhất 2 ký tự';
+    } else if (!/^[a-zA-ZÀ-ỹ\s]+$/.test(formData.tenKh)) {
+      newErrors.tenKh = 'Tên chỉ được chứa chữ cái và khoảng trắng';
+    }
+
+    // Kiểm tra email
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email không được để trống';
+    } else if (!/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email)) {
       newErrors.email = 'Email không hợp lệ';
     }
 
-    // Kiểm tra định dạng số CCCD
-    if (formData.soCccd && !/^\d{12}$/.test(formData.soCccd)) {
-      newErrors.soCccd = 'Số CCCD phải có 12 chữ số';
+    // Kiểm tra CCCD
+    if (!formData.soCccd.trim()) {
+      newErrors.soCccd = 'Số CCCD/CMND không được để trống';
+    } else if (!/^\d{12}$/.test(formData.soCccd)) {
+      newErrors.soCccd = 'Số CCCD phải có đúng 12 chữ số';
     }
 
-    // Kiểm tra định dạng số điện thoại
-    if (formData.soDienThoai && !/^0\d{9}$/.test(formData.soDienThoai)) {
+    // Kiểm tra số điện thoại
+    if (!formData.soDienThoai.trim()) {
+      newErrors.soDienThoai = 'Số điện thoại không được để trống';
+    } else if (!/^0\d{9}$/.test(formData.soDienThoai)) {
       newErrors.soDienThoai = 'Số điện thoại không hợp lệ (phải bắt đầu bằng số 0 và có 10 chữ số)';
     }
 

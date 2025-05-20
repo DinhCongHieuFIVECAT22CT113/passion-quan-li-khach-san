@@ -1,4 +1,4 @@
-'use client';
+  'use client';
 import React, { useState, useEffect } from "react";
 import styles from "./BookingManager.module.css";
 import { API_BASE_URL } from '../../../lib/config';
@@ -159,13 +159,80 @@ export default function BookingManager() {
   };
 
   // Xử lý thay đổi input
+  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+
+  const validateForm = (data: Booking): Record<string, string> => {
+    const errors: Record<string, string> = {};
+
+    // Kiểm tra khách hàng
+    if (!data.maKh) {
+      errors.maKh = 'Vui lòng chọn khách hàng';
+    }
+
+    // Kiểm tra phòng
+    if (!data.maPhong) {
+      errors.maPhong = 'Vui lòng chọn phòng';
+    }
+
+    // Kiểm tra ngày nhận phòng
+    if (!data.ngayDen) {
+      errors.ngayDen = 'Vui lòng chọn ngày nhận phòng';
+    } else {
+      const ngayDen = new Date(data.ngayDen);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (ngayDen < today) {
+        errors.ngayDen = 'Ngày nhận phòng không thể là ngày trong quá khứ';
+      }
+    }
+
+    // Kiểm tra ngày trả phòng
+    if (!data.ngayDi) {
+      errors.ngayDi = 'Vui lòng chọn ngày trả phòng';
+    } else if (data.ngayDen) {
+      const ngayDen = new Date(data.ngayDen);
+      const ngayDi = new Date(data.ngayDi);
+      if (ngayDi <= ngayDen) {
+        errors.ngayDi = 'Ngày trả phòng phải sau ngày nhận phòng';
+      }
+    }
+
+    // Kiểm tra trạng thái
+    if (!data.trangThai) {
+      errors.trangThai = 'Vui lòng chọn trạng thái';
+    }
+
+    // Kiểm tra ghi chú
+    if (data.ghiChu && data.ghiChu.length > 500) {
+      errors.ghiChu = 'Ghi chú không được vượt quá 500 ký tự';
+    }
+
+    return errors;
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    const newForm = { ...form, [name]: value };
+    setForm(newForm);
+
+    // Kiểm tra realtime cho trường đang thay đổi
+    const errors = validateForm(newForm);
+    setFormErrors(prev => ({
+      ...prev,
+      [name]: errors[name] || ''
+    }));
   };
 
   // Xử lý submit Thêm mới
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Kiểm tra toàn bộ form trước khi submit
+    const errors = validateForm(form);
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
     
     try {
       const token = localStorage.getItem('token');
@@ -345,7 +412,13 @@ export default function BookingManager() {
             <form onSubmit={handleAdd} autoComplete="off">
               <div>
                 <label>Khách hàng:</label>
-                <select name="maKh" value={form.maKh} onChange={handleChange} required>
+                <select 
+                  name="maKh" 
+                  value={form.maKh} 
+                  onChange={handleChange} 
+                  required
+                  className={formErrors.maKh ? styles.errorInput : ''}
+                >
                   <option value="">Chọn khách hàng</option>
                   {customers.map(customer => (
                     <option key={customer.maKh} value={customer.maKh}>
@@ -356,7 +429,13 @@ export default function BookingManager() {
               </div>
               <div>
                 <label>Phòng:</label>
-                <select name="maPhong" value={form.maPhong} onChange={handleChange} required>
+                <select 
+                  name="maPhong" 
+                  value={form.maPhong} 
+                  onChange={handleChange} 
+                  required
+                  className={formErrors.maPhong ? styles.errorInput : ''}
+                >
                   <option value="">Chọn phòng</option>
                   {rooms.map(room => (
                     <option key={room.maPhong} value={room.maPhong}>
@@ -367,15 +446,39 @@ export default function BookingManager() {
               </div>
               <div>
                 <label>Ngày nhận phòng:</label>
-                <input name="ngayDen" type="date" value={form.ngayDen} onChange={handleChange} required />
+                <input 
+                  name="ngayDen" 
+                  type="date" 
+                  value={form.ngayDen} 
+                  onChange={handleChange} 
+                  required
+                  className={formErrors.ngayDen ? styles.errorInput : ''}
+                  min={new Date().toISOString().split('T')[0]}
+                />
+                {formErrors.ngayDen && <p className={styles.errorText}>{formErrors.ngayDen}</p>}
               </div>
               <div>
                 <label>Ngày trả phòng:</label>
-                <input name="ngayDi" type="date" value={form.ngayDi} onChange={handleChange} required />
+                <input 
+                  name="ngayDi" 
+                  type="date" 
+                  value={form.ngayDi} 
+                  onChange={handleChange} 
+                  required
+                  className={formErrors.ngayDi ? styles.errorInput : ''}
+                  min={form.ngayDen || new Date().toISOString().split('T')[0]}
+                />
+                {formErrors.ngayDi && <p className={styles.errorText}>{formErrors.ngayDi}</p>}
               </div>
               <div>
                 <label>Trạng thái:</label>
-                <select name="trangThai" value={form.trangThai} onChange={handleChange} required>
+                <select 
+                  name="trangThai" 
+                  value={form.trangThai} 
+                  onChange={handleChange} 
+                  required
+                  className={formErrors.trangThai ? styles.errorInput : ''}
+                >
                 <option value="">Chọn trạng thái</option>
                 <option value="Đã đặt">Đã đặt</option>
                 <option value="Đã nhận phòng">Đã nhận phòng</option>
@@ -386,7 +489,16 @@ export default function BookingManager() {
               </div>
               <div>
                 <label>Ghi chú:</label>
-                <textarea name="ghiChu" value={form.ghiChu || ''} onChange={handleChange} rows={3} />
+                <textarea 
+                  name="ghiChu" 
+                  value={form.ghiChu || ''} 
+                  onChange={handleChange} 
+                  rows={3}
+                  maxLength={500}
+                  className={formErrors.ghiChu ? styles.errorInput : ''}
+                  placeholder="Nhập ghi chú (tối đa 500 ký tự)"
+                />
+                {formErrors.ghiChu && <p className={styles.errorText}>{formErrors.ghiChu}</p>}
               </div>
               <div className={styles.buttonGroup}>
                 <button type="submit" className={styles.editBtn}>Lưu</button>
@@ -409,7 +521,13 @@ export default function BookingManager() {
               </div>
               <div>
                 <label>Khách hàng:</label>
-                <select name="maKh" value={form.maKh} onChange={handleChange} required>
+                <select 
+                  name="maKh" 
+                  value={form.maKh} 
+                  onChange={handleChange} 
+                  required
+                  className={formErrors.maKh ? styles.errorInput : ''}
+                >
                   <option value="">Chọn khách hàng</option>
                   {customers.map(customer => (
                     <option key={customer.maKh} value={customer.maKh}>
@@ -420,7 +538,13 @@ export default function BookingManager() {
               </div>
               <div>
                 <label>Phòng:</label>
-                <select name="maPhong" value={form.maPhong} onChange={handleChange} required>
+                <select 
+                  name="maPhong" 
+                  value={form.maPhong} 
+                  onChange={handleChange} 
+                  required
+                  className={formErrors.maPhong ? styles.errorInput : ''}
+                >
                   <option value="">Chọn phòng</option>
                   {rooms.map(room => (
                     <option key={room.maPhong} value={room.maPhong}>
@@ -431,15 +555,39 @@ export default function BookingManager() {
               </div>
               <div>
                 <label>Ngày nhận phòng:</label>
-                <input name="ngayDen" type="date" value={form.ngayDen} onChange={handleChange} required />
+                <input 
+                  name="ngayDen" 
+                  type="date" 
+                  value={form.ngayDen} 
+                  onChange={handleChange} 
+                  required
+                  className={formErrors.ngayDen ? styles.errorInput : ''}
+                  min={new Date().toISOString().split('T')[0]}
+                />
+                {formErrors.ngayDen && <p className={styles.errorText}>{formErrors.ngayDen}</p>}
               </div>
               <div>
                 <label>Ngày trả phòng:</label>
-                <input name="ngayDi" type="date" value={form.ngayDi} onChange={handleChange} required />
+                <input 
+                  name="ngayDi" 
+                  type="date" 
+                  value={form.ngayDi} 
+                  onChange={handleChange} 
+                  required
+                  className={formErrors.ngayDi ? styles.errorInput : ''}
+                  min={form.ngayDen || new Date().toISOString().split('T')[0]}
+                />
+                {formErrors.ngayDi && <p className={styles.errorText}>{formErrors.ngayDi}</p>}
               </div>
               <div>
                 <label>Trạng thái:</label>
-                <select name="trangThai" value={form.trangThai} onChange={handleChange} required>
+                <select 
+                  name="trangThai" 
+                  value={form.trangThai} 
+                  onChange={handleChange} 
+                  required
+                  className={formErrors.trangThai ? styles.errorInput : ''}
+                >
                 <option value="">Chọn trạng thái</option>
                 <option value="Đã đặt">Đã đặt</option>
                 <option value="Đã nhận phòng">Đã nhận phòng</option>
@@ -450,7 +598,16 @@ export default function BookingManager() {
               </div>
               <div>
                 <label>Ghi chú:</label>
-                <textarea name="ghiChu" value={form.ghiChu || ''} onChange={handleChange} rows={3} />
+                <textarea 
+                  name="ghiChu" 
+                  value={form.ghiChu || ''} 
+                  onChange={handleChange} 
+                  rows={3}
+                  maxLength={500}
+                  className={formErrors.ghiChu ? styles.errorInput : ''}
+                  placeholder="Nhập ghi chú (tối đa 500 ký tự)"
+                />
+                {formErrors.ghiChu && <p className={styles.errorText}>{formErrors.ghiChu}</p>}
               </div>
               <div className={styles.buttonGroup}>
                 <button type="submit" className={styles.editBtn}>Lưu</button>
