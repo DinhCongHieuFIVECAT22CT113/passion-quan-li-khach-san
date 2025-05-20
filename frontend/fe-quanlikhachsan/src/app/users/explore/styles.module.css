@@ -244,3 +244,126 @@
     grid-template-columns: 1fr;
   }
 } 
+
+/* Services Section */
+.servicesSection {
+  padding: 5rem 5%;
+  background-color: #f9f9f9;
+}
+
+.servicesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.serviceCard {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.serviceCard:hover {
+  transform: translateY(-5px);
+}
+
+.serviceImage {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+}
+
+.serviceContent {
+  padding: 1.5rem;
+}
+
+.serviceContent h3 {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.serviceContent p {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.servicePrice {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #8B7355;
+  margin-bottom: 1.5rem;
+}
+
+.exploreButton {
+  display: inline-block;
+  background: #8B7355;
+  color: white;
+  text-decoration: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.exploreButton:hover {
+  background: #6F5B3E;
+  transform: translateY(-2px);
+}
+
+/* Loading and Error States */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #f3f3f3;
+  border-top: 5px solid #8B7355;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.errorContainer {
+  text-align: center;
+  padding: 2rem;
+  background: #fff3f3;
+  border-radius: 8px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.errorContainer p {
+  color: #d32f2f;
+  margin-bottom: 1rem;
+}
+
+.retryButton {
+  background: #8B7355;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.retryButton:hover {
+  background: #6F5B3E;
+}

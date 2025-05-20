@@ -22,7 +22,7 @@ interface Promotion {
   phanTramGiam: number;
   dieuKien?: string;
   maGiamGia: string;
-  hinhAnh?: string;
+  thumbnail?: string;
   trangThai?: string;
 }
 
@@ -185,7 +185,7 @@ export default function Home() {
               promotions.map((promotion, index) => (
                 <div key={promotion.maMK || index} className={styles.offerCard}>
                   <div className={styles.offerImage}>
-                    <Image src={getValidImageSrc(promotion.hinhAnh)} alt={promotion.tenKhuyenMai || 'Khuyến mãi'} fill style={{ objectFit: 'cover' }} />
+                    <Image src={getValidImageSrc(promotion.thumbnail)} alt={promotion.tenKhuyenMai || 'Khuyến mãi'} fill style={{ objectFit: 'cover' }} />
                     <div className={styles.offerType}>{promotion.phanTramGiam || 0}% Giảm</div>
                   </div>
                   <div className={styles.offerContent}>

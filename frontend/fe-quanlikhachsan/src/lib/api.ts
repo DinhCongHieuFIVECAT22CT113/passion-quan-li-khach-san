@@ -239,18 +239,18 @@ export const getRooms = async () => {
   const data = await handleResponse(response);
 
   // Chuyển đổi từ định dạng backend sang định dạng frontend
-  if (Array.isArray(data)) {
-    return data.map(room => ({
-      maPhong: room.maPhong,
-      soPhong: room.soPhong,  // backend sử dụng SoPhong
-      maLoaiPhong: room.maLoaiPhong,
-      giaTien: room.giaTien || 0,  // Backend có thể không có trường này
-      trangThai: room.trangThai,
-      thumbnail: room.thumbnail,
-      hinhAnh: room.hinhAnh,
-      tang: room.tang
-    }));
-  }
+if (Array.isArray(data)) {
+  return data.map(roomType => ({
+    maLoaiPhong: roomType.maLoaiPhong,
+    tenLoaiPhong: roomType.tenLoaiPhong,
+    moTa: roomType.moTa,
+    giaMoiDem: roomType.giaMoiDem || 0, 
+    soGiuongNgu: roomType.soGiuongNgu || 0,
+    kichThuocPhong: roomType.kichThuocPhong || 0,
+    sucChua: roomType.sucChua || 0,
+    thumbnail: roomType.thumbnail || ''
+  }));
+}
 
   return data;
 };

@@ -266,7 +266,7 @@
   color: #007bff;
 }
 
-.viewDetailBtn {
+.viewDetailsBtn {
   background-color: transparent;
   border: 1px solid #007bff;
   color: #007bff;
@@ -276,7 +276,7 @@
   transition: all 0.3s ease;
 }
 
-.viewDetailBtn:hover {
+.viewDetailsBtn:hover {
   background-color: #007bff;
   color: white;
 }
