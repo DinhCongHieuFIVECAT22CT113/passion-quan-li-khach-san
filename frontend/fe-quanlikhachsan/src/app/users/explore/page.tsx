@@ -20,7 +20,7 @@ interface RoomType {
   donGia?: number;
   soNguoi?: number;
   dienTich?: number;
-  hinhAnh?: string;
+  thumbnail?: string;
   trangThai?: string;
 }
 
@@ -30,7 +30,7 @@ interface Service {
   tenDichVu: string;
   moTa: string;
   donGia: number;
-  hinhAnh?: string;
+  thumbnail?: string;
   trangThai?: string;
 }
 
@@ -74,7 +74,7 @@ export default function ExplorePage() {
 
   // Hàm lấy đường dẫn hình ảnh hợp lệ
   const getValidImageSrc = (imagePath?: string): string => {
-    if (!imagePath) return '/images/reviews/room.jpg';
+    if (!imagePath) return '/images/reviews/location.jpg';
     
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
       return imagePath;
@@ -84,7 +84,7 @@ export default function ExplorePage() {
       return imagePath;
     }
     
-    return '/images/reviews/room.jpg';
+    return '/images/reviews/location.jpg';
   };
 
   if (!isClient) {
@@ -115,7 +115,7 @@ export default function ExplorePage() {
     id: roomType.maLoaiPhong,
     title: roomType.tenLoaiPhong,
     description: roomType.moTa || t('explore.luxuriousRoomDesc'),
-    image: getValidImageSrc(roomType.hinhAnh),
+    image: getValidImageSrc(roomType.thumbnail),
   }));
 
   return (
@@ -191,7 +191,7 @@ export default function ExplorePage() {
               <div key={service.maDichVu} className={styles.serviceCard}>
                 <div className={styles.serviceImage}>
                   <Image
-                    src={getValidImageSrc(service.hinhAnh)}
+                    src={getValidImageSrc(service.thumbnail)}
                     alt={service.tenDichVu}
                     fill
                     style={{ objectFit: 'cover' }}

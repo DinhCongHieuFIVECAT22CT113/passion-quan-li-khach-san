@@ -69,6 +69,7 @@ export interface Room {
   maLoaiPhong: string;
   trangThai: string;
   moTa?: string;
+  thumbnail?: string;
   hinhAnh?: string;
 }
 
@@ -76,10 +77,10 @@ export interface Room {
 export interface RoomType {
   maLoaiPhong: string;
   tenLoaiPhong: string;
-  donGia: number;
-  soGiuong: number;
-  soNguoi: number;
-  dienTich: number;
+  giaMoiDem: number;
+  soGiuongNgu: number;
+  sucChua: number;
+  kichThuocPhong: number;
   moTa?: string;
-  hinhAnh?: string;
+  thumbnail?: string;
 } 

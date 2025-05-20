@@ -20,7 +20,7 @@ interface Promotion {
   phanTramGiam: number;
   dieuKien: string;
   maGiamGia: string;
-  hinhAnh: string;
+  thumbnail: string;
   trangThai: string;
 }
 
@@ -210,7 +210,7 @@ export default function PromotionsPage() {
             <div className={styles.promotionDetailHeader}>
               <div className={styles.promotionDetailImage}>
                 <Image 
-                  src={getValidImageSrc(selectedPromotion.hinhAnh)} 
+                  src={getValidImageSrc(selectedPromotion.thumbnail)} 
                   alt={selectedPromotion.tenKhuyenMai}
                   width={600}
                   height={400}
@@ -335,7 +335,7 @@ export default function PromotionsPage() {
                   >
                     <div className={styles.promotionImageContainer}>
                       <Image
-                        src={getValidImageSrc(promotion.hinhAnh)}
+                        src={getValidImageSrc(promotion.thumbnail)}
                         alt={promotion.tenKhuyenMai || 'Khuyến mãi'}
                         width={400}
                         height={250}

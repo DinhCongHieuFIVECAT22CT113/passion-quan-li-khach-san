@@ -16,7 +16,7 @@ interface Service {
   tenDichVu: string;
   moTa: string;
   donGia: number;
-  hinhAnh: string;
+  thumbnail: string;
   trangThai: string;
 }
 
@@ -209,7 +209,7 @@ export default function ServicesPage() {
             <div className={styles.serviceDetailHeader}>
               <div className={styles.serviceDetailImage}>
                 <Image 
-                  src={getValidImageSrc(selectedService.hinhAnh)} 
+                  src={getValidImageSrc(selectedService.thumbnail)} 
                   alt={selectedService.tenDichVu || 'Dịch vụ'}
                   width={600}
                   height={400}
@@ -284,7 +284,7 @@ export default function ServicesPage() {
                   >
                     <div className={styles.serviceImageContainer}>
                       <Image 
-                        src={getValidImageSrc(service.hinhAnh)} 
+                        src={getValidImageSrc(service.thumbnail)} 
                         alt={service.tenDichVu || 'Dịch vụ'}
                         width={400}
                         height={250}
