@@ -14,9 +14,10 @@ namespace be_quanlikhachsanapi.Controllers
         public DatPhongController(IDatPhongRepository datPhongRepo)
         {
             _datPhongRepo = datPhongRepo;
-        }
+        }   
 
-        [HttpGet("Lấy danh sách đặt phòng")]
+        // Lấy tất cả danh sách đặt phòng
+        [HttpGet]
         [Consumes("multipart/form-data")]
         public IActionResult GetAll()
         {
@@ -27,8 +28,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(datPhongs);
         }
-
-        [HttpGet("Tìm đặt phòng theo ID")]
+        // Tìm đặt phòng theo ID
+        [HttpGet("{maDatPhong}")]
         [Consumes("multipart/form-data")]
         public IActionResult GetByID(string maDatPhong)
         {
@@ -39,8 +40,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(datPhong);
         }
-
-        [HttpPost("Tạo đặt phòng mới")]
+        // Tạo đặt phòng mới
+        [HttpPost]
         [Consumes("multipart/form-data")]
         public IActionResult CreateDatPhong([FromForm] CreateDatPhongDTO createDatPhong)
         {
@@ -51,8 +52,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(datPhong);
         }
-
-        [HttpPut("Cập nhật đặt phòng")]
+        // Cập nhật đặt phòng
+        [HttpPut("{maDatPhong}")]
         [Consumes("multipart/form-data")]
         public IActionResult UpdateDatPhong(string maDatPhong, [FromForm] UpdateDatPhongDTO updateDatPhong)
         {
@@ -63,12 +64,24 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(datPhong);
         }
-
-        [HttpDelete("Xóa đặt phòng")]
+        // Xóa đặt phòng
+        [HttpDelete("{maDatPhong}")]
         [Consumes("multipart/form-data")]
         public IActionResult DeleteDatPhong(string maDatPhong)
         {
             var result = _datPhongRepo.DeleteDatPhong(maDatPhong);
+            if (result == null)
+            {
+                return NotFound("Không tìm thấy thông tin đặt phòng với ID đã cho.");
+            }
+            return Ok(result);
+        }
+        // Cập nhật trạng thái đặt phòng
+        [HttpPut("{maDatPhong}/trangthai")]
+        [Consumes("multipart/form-data")]
+        public IActionResult UpdateTrangThai(string maDatPhong, string trangThai)
+        {
+            var result = _datPhongRepo.UpdateTrangThai(maDatPhong, trangThai);
             if (result == null)
             {
                 return NotFound("Không tìm thấy thông tin đặt phòng với ID đã cho.");

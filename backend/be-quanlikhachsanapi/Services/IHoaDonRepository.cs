@@ -38,9 +38,6 @@ namespace be_quanlikhachsanapi.Services
                     GiamGiaLoaiKM = h.GiamGiaLoaiKm,
                     GiamGiaLoaiKH = h.GiamGiaLoaiKh,
                     TongTien = h.TongTien,
-                    SoTienDaThanhToan = h.SoTienDaThanhToan,
-                    SoTienConThieu = h.SoTienConThieu,
-                    SoTienThanhToanDu = h.SoTienThanhToanDu,
                     TrangThai = h.TrangThai,
                     NgayTao = h.NgayTao,
                     NgaySua = h.NgaySua
@@ -66,9 +63,6 @@ namespace be_quanlikhachsanapi.Services
                 GiamGiaLoaiKM = hoaDon.GiamGiaLoaiKm,
                 GiamGiaLoaiKH = hoaDon.GiamGiaLoaiKh,
                 TongTien = hoaDon.TongTien,
-                SoTienDaThanhToan = hoaDon.SoTienDaThanhToan,
-                SoTienConThieu = hoaDon.SoTienConThieu,
-                SoTienThanhToanDu = hoaDon.SoTienThanhToanDu,
                 TrangThai = hoaDon.TrangThai,
                 NgayTao = hoaDon.NgayTao,
                 NgaySua = hoaDon.NgaySua
@@ -93,9 +87,6 @@ namespace be_quanlikhachsanapi.Services
                 GiamGiaLoaiKM = hoaDon.GiamGiaLoaiKm,
                 GiamGiaLoaiKH = hoaDon.GiamGiaLoaiKh,
                 TongTien = hoaDon.TongTien,
-                SoTienDaThanhToan = hoaDon.SoTienDaThanhToan,
-                SoTienConThieu = hoaDon.SoTienConThieu,
-                SoTienThanhToanDu = hoaDon.SoTienThanhToanDu,
                 TrangThai = hoaDon.TrangThai,
                 NgayTao = hoaDon.NgayTao,
                 NgaySua = hoaDon.NgaySua
@@ -128,10 +119,7 @@ namespace be_quanlikhachsanapi.Services
                 GiamGiaLoaiKm = createDto.GiamGiaLoaiKM,
                 GiamGiaLoaiKh = createDto.GiamGiaLoaiKH,
                 TongTien = createDto.TongTien,
-                SoTienDaThanhToan = createDto.SoTienDaThanhToan,
-                SoTienConThieu = createDto.SoTienConThieu,
-                SoTienThanhToanDu = createDto.SoTienThanhToanDu,
-                TrangThai = createDto.TrangThai,
+                TrangThai = "Chưa thanh toán",
                 NgayTao = DateTime.Now
             };
 
@@ -164,18 +152,6 @@ namespace be_quanlikhachsanapi.Services
 
             if (updateDto.TongTien.HasValue)
                 hoaDon.TongTien = updateDto.TongTien.Value;
-
-            if (updateDto.SoTienDaThanhToan.HasValue)
-                hoaDon.SoTienDaThanhToan = updateDto.SoTienDaThanhToan.Value;
-
-            if (updateDto.SoTienConThieu.HasValue)
-                hoaDon.SoTienConThieu = updateDto.SoTienConThieu.Value;
-
-            if (updateDto.SoTienThanhToanDu.HasValue)
-                hoaDon.SoTienThanhToanDu = updateDto.SoTienThanhToanDu.Value;
-
-            if (!string.IsNullOrEmpty(updateDto.TrangThai))
-                hoaDon.TrangThai = updateDto.TrangThai;
 
             hoaDon.NgaySua = DateTime.Now;
 
@@ -226,7 +202,7 @@ namespace be_quanlikhachsanapi.Services
             string newId;
             if (lastHoaDon == null)
             {
-                newId = "HD0001";
+                newId = "HD001";
             }
             else
             {
@@ -238,16 +214,16 @@ namespace be_quanlikhachsanapi.Services
                     if (int.TryParse(numberPart, out int lastNumber))
                     {
                         int newNumber = lastNumber + 1;
-                        newId = $"HD{newNumber:D4}";
+                        newId = $"HD{newNumber:D3}";
                     }
                     else
                     {
-                        newId = "HD0001";
+                        newId = "HD001";
                     }
                 }
                 else
                 {
-                    newId = "HD0001";
+                    newId = "HD001";
                 }
             }
 

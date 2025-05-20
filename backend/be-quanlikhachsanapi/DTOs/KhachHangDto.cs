@@ -14,8 +14,6 @@ namespace be_quanlikhachsanapi.DTOs
         public string SoCccd { get; set; } = null!;
         public string? MaLoaiKh { get; set; }
         public string? MaRole { get; set; }
-        public DateTime? NgayTao { get; set; }
-        public DateTime? NgaySua { get; set; }
     }
 
     public class CreateKhachHangDto
@@ -27,7 +25,7 @@ namespace be_quanlikhachsanapi.DTOs
         public string Sdt { get; set; } = null!;
         public string? DiaChi { get; set; }
         public string SoCccd { get; set; } = null!;
-        public DateTime? NgayTao { get; set; }
+
     }
 
     public class UpdateKhachHangDto
@@ -36,6 +34,5 @@ namespace be_quanlikhachsanapi.DTOs
         public string Sdt { get; set; } = null!;
         public string? DiaChi { get; set; }
         public string SoCccd { get; set; } = null!;
-        public string? MaLoaiKh { get; set; }
     }
 }

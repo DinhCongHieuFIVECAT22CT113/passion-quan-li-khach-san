@@ -11,6 +11,8 @@ namespace be_quanlikhachsanapi.DTOs
         public string? MoTa { get; set; }
 
         public decimal DonGia { get; set; }
+        public DateTime? NgayTao { get; set; }
+        public DateTime? NgaySua { get; set; }
 
     }
     public class CreateDichVuDTO
@@ -25,14 +27,7 @@ namespace be_quanlikhachsanapi.DTOs
         public string? MoTa { get; set; }
 
         public decimal DonGia { get; set; }
-        [Required(ErrorMessage = "Ngày tạo dịch vụ là bắt buộc.")]
-        [DataType(DataType.Date)]
-        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
-        public DateTime? NgayTao { get; set; }
-        [Required(ErrorMessage = "Ngày sửa dịch vụ là bắt buộc.")]
-        [DataType(DataType.Date)]
-        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
-        public DateTime? NgaySua { get; set; }
+
     }
     public class UpdateDichVuDTO
     {
@@ -46,9 +41,6 @@ namespace be_quanlikhachsanapi.DTOs
         public string? MoTa { get; set; }
 
         public decimal DonGia { get; set; }
-        [Required(ErrorMessage = "Ngày sửa phòng là bắt buộc.")]
-        [DataType(DataType.Date)]
-        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
-        public DateTime? NgaySua { get; set; }
+
     }
 }

@@ -15,8 +15,8 @@ namespace be_quanlikhachsanapi.Controllers
         {
             _nhanVienRepo = nhanVienRepo;
         }
-
-        [HttpGet("Lấy danh sách tất cả nhân viên")]
+        // Lấy danh sách tất cả nhân viên
+        [HttpGet]
         [Consumes("multipart/form-data")]
         public IActionResult GetAll()
         {
@@ -27,8 +27,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(nhanViens);
         }
-
-        [HttpGet("Tìm nhân viên theo ID")]
+        // Lấy nhân viên theo ID
+        [HttpGet("{maNv}")]
         [Consumes("multipart/form-data")]
         public IActionResult GetByID(string maNv)
         {
@@ -39,7 +39,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(nhanVien);
         }
-        [HttpPost("Tạo nhân viên mới")]
+        // Tạo nhân viên mới
+        [HttpPost]
         [Consumes("multipart/form-data")]
         public IActionResult CreateNhanVien([FromForm] CreateNhanVienDTO createNhanVien)
         {
@@ -50,7 +51,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(nhanVien);
         }
-        [HttpPut("Cập nhật nhân viên")]
+        // Cập nhật nhân viên
+        [HttpPut("{maNv}")]
         [Consumes("multipart/form-data")]
         public IActionResult UpdateNhanVien(string maNv, [FromForm] UpdateNhanVienDTO updateNhanVien)
         {
@@ -61,7 +63,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(nhanVien);
         }
-        [HttpDelete("Xóa nhân viên")]
+        // Xóa nhân viên
+        [HttpDelete("{maNv}")]
         [Consumes("multipart/form-data")]
         public IActionResult DeleteNhanVien(string maNv)
         {

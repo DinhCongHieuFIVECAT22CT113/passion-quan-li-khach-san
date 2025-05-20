@@ -36,7 +36,6 @@ namespace be_quanlikhachsanapi.Services
                     {
                         MaPhuongThucThanhToan = p.MaPhuongThucThanhToan,
                         MaHoaDon = p.MaHoaDon,
-                        SoTienCanThanhToan = p.SoTienCanThanhToan,
                         PhuongThucThanhToan = p.PhuongThucThanhToan1,
                         TrangThai = p.TrangThai,
                         NgayThanhToan = p.NgayThanhToan,
@@ -65,7 +64,6 @@ namespace be_quanlikhachsanapi.Services
             {
                 MaPhuongThucThanhToan = phuongThuc.MaPhuongThucThanhToan,
                 MaHoaDon = phuongThuc.MaHoaDon,
-                SoTienCanThanhToan = phuongThuc.SoTienCanThanhToan,
                 PhuongThucThanhToan = phuongThuc.PhuongThucThanhToan1,
                 TrangThai = phuongThuc.TrangThai,
                 NgayThanhToan = phuongThuc.NgayThanhToan,
@@ -82,7 +80,6 @@ namespace be_quanlikhachsanapi.Services
                 {
                     MaPhuongThucThanhToan = p.MaPhuongThucThanhToan,
                     MaHoaDon = p.MaHoaDon,
-                    SoTienCanThanhToan = p.SoTienCanThanhToan,
                     PhuongThucThanhToan = p.PhuongThucThanhToan1,
                     TrangThai = p.TrangThai,
                     NgayThanhToan = p.NgayThanhToan,
@@ -106,9 +103,8 @@ namespace be_quanlikhachsanapi.Services
             {
                 MaPhuongThucThanhToan = maPhuongThuc,
                 MaHoaDon = createDto.MaHoaDon,
-                SoTienCanThanhToan = createDto.SoTienCanThanhToan,
                 PhuongThucThanhToan1 = createDto.PhuongThucThanhToan,
-                TrangThai = createDto.TrangThai,
+                TrangThai = "Chờ xử lý",
                 NgayThanhToan = createDto.NgayThanhToan,
                 NgayTao = DateTime.Now
             };
@@ -125,14 +121,8 @@ namespace be_quanlikhachsanapi.Services
             if (phuongThuc == null)
                 return false;
 
-            if (updateDto.SoTienCanThanhToan.HasValue)
-                phuongThuc.SoTienCanThanhToan = updateDto.SoTienCanThanhToan.Value;
-
             if (!string.IsNullOrEmpty(updateDto.PhuongThucThanhToan))
                 phuongThuc.PhuongThucThanhToan1 = updateDto.PhuongThucThanhToan;
-
-            if (!string.IsNullOrEmpty(updateDto.TrangThai))
-                phuongThuc.TrangThai = updateDto.TrangThai;
 
             if (updateDto.NgayThanhToan.HasValue)
                 phuongThuc.NgayThanhToan = updateDto.NgayThanhToan;
@@ -176,7 +166,7 @@ namespace be_quanlikhachsanapi.Services
             string newId;
             if (lastPhuongThuc == null)
             {
-                newId = "PT0001";
+                newId = "PT01";
             }
             else
             {
@@ -188,16 +178,16 @@ namespace be_quanlikhachsanapi.Services
                     if (int.TryParse(numberPart, out int lastNumber))
                     {
                         int newNumber = lastNumber + 1;
-                        newId = $"PT{newNumber:D4}";
+                        newId = $"PT{newNumber:D2}";
                     }
                     else
                     {
-                        newId = "PT0001";
+                        newId = "PT01";
                     }
                 }
                 else
                 {
-                    newId = "PT0001";
+                    newId = "PT01";
                 }
             }
 

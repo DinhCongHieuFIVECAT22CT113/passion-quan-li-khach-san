@@ -16,7 +16,8 @@ namespace be_quanlikhachsanapi.Controllers
             _dichVuRepo = dichVuRepo;
         }
 
-        [HttpGet("Lấy danh sách tất cả dịch vụ")]
+        // Lấy danh sách tất cả dịch vụ
+        [HttpGet]
         [Consumes("multipart/form-data")]
         public IActionResult GetAll()
         {
@@ -27,8 +28,9 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(dichVus);
         }
-        [HttpGet("Tìm dịch vụ theo ID")]
-        [Consumes("multipart/form-data")]   
+        // Lấy dịch vụ theo ID
+        [HttpGet("{maDichVu}")]
+        [Consumes("multipart/form-data")]
         public IActionResult GetByID(string maDichVu)
         {
             var dichVu = _dichVuRepo.GetDichVuById(maDichVu);
@@ -38,7 +40,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(dichVu);
         }
-        [HttpPost("Tạo dịch vụ mới")]
+        // Tạo dịch vụ mới
+        [HttpPost]
         [Consumes("multipart/form-data")]
         public IActionResult CreateDichVu([FromForm] CreateDichVuDTO createDichVu)
         {
@@ -49,7 +52,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(dichVu);
         }
-        [HttpPut("Cập nhật dịch vụ")]
+        // Cập nhật dịch vụ
+        [HttpPut("{maDichVu}")]
         [Consumes("multipart/form-data")]
         public IActionResult UpdateDichVu(string maDichVu, [FromForm] UpdateDichVuDTO updateDichVu)
         {
@@ -60,7 +64,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(dichVu);
         }
-        [HttpDelete("Xóa dịch vụ")]
+        // Xóa dịch vụ
+        [HttpDelete("{maDichVu}")]
         [Consumes("multipart/form-data")]
         public IActionResult DeleteDichVu(string maDichVu)
         {

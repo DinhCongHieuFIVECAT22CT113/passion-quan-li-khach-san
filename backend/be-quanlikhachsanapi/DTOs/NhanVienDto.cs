@@ -15,8 +15,7 @@ namespace be_quanlikhachsanapi.DTOs
         public decimal LuongCoBan { get; set; }
         public DateTime NgayVaoLam { get; set; }
         public string MaRole { get; set; } = null!;
-        public DateTime? NgayTao { get; set; }
-        public DateTime? NgaySua { get; set; }
+
     }
 
     public class CreateNhanVienDTO
@@ -31,7 +30,7 @@ namespace be_quanlikhachsanapi.DTOs
         public decimal LuongCoBan { get; set; }
         public string MaRole { get; set; } = null!;
         public DateTime NgayVaoLam { get; set; }
-        public DateTime? NgayTao { get; set; }
+
     }
 
     public class UpdateNhanVienDTO

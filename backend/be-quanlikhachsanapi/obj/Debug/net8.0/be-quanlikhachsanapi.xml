@@ -139,6 +139,11 @@
             Xóa thông tin sử dụng dịch vụ
             </summary>
         </member>
+        <member name="M:be_quanlikhachsanapi.Controllers.SuDungDichVuController.UpdateTrangThai(System.String,System.String)">
+            <summary>
+            Update trạng thái sử dụng dịch vụ
+            </summary>
+        </member>
         <member name="T:be_quanlikhachsanapi.Migrations.InitialCreate">
             <inheritdoc />
         </member>

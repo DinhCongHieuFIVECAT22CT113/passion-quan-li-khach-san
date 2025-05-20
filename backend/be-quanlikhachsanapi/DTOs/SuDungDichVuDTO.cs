@@ -31,8 +31,6 @@ namespace be_quanlikhachsanapi.DTOs
         public int SoLuong { get; set; }
 
         public DateTime? NgaySuDung { get; set; }
-
-        public string? TrangThai { get; set; } = "Đã sử dụng";
     }
 
     public class UpdateSuDungDichVuDTO
@@ -44,6 +42,5 @@ namespace be_quanlikhachsanapi.DTOs
         public int? SoLuong { get; set; }
 
         public DateTime? NgaySuDung { get; set; }
-        public string? TrangThai { get; set; }
     }
 }

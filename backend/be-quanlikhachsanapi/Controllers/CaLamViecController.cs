@@ -16,7 +16,8 @@ namespace be_quanlikhachsanapi.Controllers
             _caLamViecRepo = caLamViecRepo;
         }
 
-        [HttpGet("Lấy danh sách tất cả ca làm việc")]
+        // Lấy danh sách tất cả ca làm việc
+        [HttpGet()]
         [Consumes("multipart/form-data")]
         public IActionResult GetAll()
         {
@@ -27,7 +28,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(caLamViecs);
         }
-        [HttpGet("Tìm ca làm việc theo ID")]
+        // Tìm ca làm việc theo ID
+        [HttpGet("{maCaLam}")]
         [Consumes("multipart/form-data")]
         public IActionResult GetByID(string maCaLam)
         {
@@ -38,7 +40,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(caLamViec);
         }
-        [HttpPost("Tạo ca làm việc mới")]
+        //Tao ca làm việc mới
+        [HttpPost]
         [Consumes("multipart/form-data")]
         public IActionResult CreateCaLamViec([FromForm] CreateCaLamViecDTO createCaLamViec)
         {
@@ -49,7 +52,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(caLamViec);
         }
-        [HttpPut("Cập nhật ca làm việc")]
+        // Cập nhật ca làm việc
+        [HttpPut("{maCaLam}")]
         [Consumes("multipart/form-data")]
         public IActionResult UpdateCaLamViec(string maCaLam, [FromForm] UpdateCaLamViecDTO updateCaLamViec)
         {
@@ -60,7 +64,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(caLamViec);
         }
-        [HttpDelete("Xóa ca làm việc")]
+        // Xóa ca làm việc
+        [HttpDelete("{maCaLam}")]
         [Consumes("multipart/form-data")]
         public IActionResult DeleteCaLamViec(string maCaLam)
         {
