@@ -105,9 +105,9 @@ public class AuthController : ControllerBase
         };
 
         // Hash mật khẩu
-        #pragma warning disable CS8601
+#pragma warning disable CS8601
         khachHang.PasswordHash = _passwordHasherKh.HashPassword(khachHang, registerDto.Password);
-        #pragma warning restore CS8601
+#pragma warning restore CS8601
 
         _context.KhachHangs.Add(khachHang);
         await _context.SaveChangesAsync();
@@ -202,7 +202,7 @@ public class AuthController : ControllerBase
         }
         bool isCustomer = khachHang != null;
         var user = isCustomer ? (object)khachHang : nhanVien;
-        
+
         var isOldPasswordValid = isCustomer
             ? _passwordHasherKh.VerifyHashedPassword(khachHang, khachHang.PasswordHash, changePassDto.Password)
             : _passwordHasherNv.VerifyHashedPassword(nhanVien, nhanVien.PasswordHash, changePassDto.Password);
@@ -234,18 +234,66 @@ public class AuthController : ControllerBase
         _context.SaveChanges();
 
         var email = new EmailModel
-            {
-                ToEmail = isCustomer ? khachHang.Email : nhanVien.Email,
-                Subject = "Mật khẩu đăng nhập vừa được thay đổi",
-                Body = "Bạn vừa thay đổi mật khẩu thành công. Nếu bạn không thực hiện điều này, vui lòng liên hệ với chúng tôi ngay."
-            };
+        {
+            ToEmail = isCustomer ? khachHang.Email : nhanVien.Email,
+            Subject = "Mật khẩu đăng nhập vừa được thay đổi",
+            Body = "Bạn vừa thay đổi mật khẩu thành công. Nếu bạn không thực hiện điều này, vui lòng liên hệ với chúng tôi ngay."
+        };
 
-            _sendEmail.SendEmail(email);
+        _sendEmail.SendEmail(email);
 
-            return new JsonResult("Đã thay đổi mật khẩu thành công.")
+        return new JsonResult("Đã thay đổi mật khẩu thành công.")
+        {
+            StatusCode = StatusCodes.Status200OK
+        };
+    }
+
+    [HttpPost("Khôi phục mật khẩu")]
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<UserDto>> ResetPassword([FromForm] ResetPassDto resetPassDto)
+    {
+        var userName = resetPassDto.UserName;
+
+        var khachHang = _context.KhachHangs.FirstOrDefault(kh => kh.UserName == userName);
+        var nhanVien = _context.NhanViens.FirstOrDefault(nv => nv.UserName == userName);
+
+        if (khachHang == null && nhanVien == null)
+        {
+            return new JsonResult("Không tìm thấy tài khoản với username đã cho.")
             {
-                StatusCode = StatusCodes.Status200OK
+                StatusCode = StatusCodes.Status404NotFound
             };
+        }
+
+        // Sinh mật khẩu ngẫu nhiên
+        string password = Guid.NewGuid().ToString("N").Substring(0, 6); // Generate a random password
+
+        if (khachHang != null)
+        {
+            khachHang.PasswordHash = _passwordHasherKh.HashPassword(khachHang, password);
+            _context.KhachHangs.Update(khachHang);
+        }
+        else
+        {
+            nhanVien.PasswordHash = _passwordHasherNv.HashPassword(nhanVien, password);
+            _context.NhanViens.Update(nhanVien);
+        }
+        _context.SaveChanges();
+
+        var email = new EmailModel
+        {
+            ToEmail = khachHang?.Email ?? nhanVien.Email,
+            Subject = "Mật khẩu đăng nhập đã được khôi phục",
+            Body = $"Mật khẩu mới của bạn là: {password}"
+        };
+
+        // Gửi email xác nhận
+        _sendEmail.SendEmail(email);
+
+        return new JsonResult("Đã khôi phục mật khẩu thành công.")
+        {
+            StatusCode = StatusCodes.Status200OK
+        };
     }
 }
 

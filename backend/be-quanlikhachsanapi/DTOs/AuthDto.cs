@@ -52,6 +52,11 @@ namespace be_quanlikhachsanapi.DTOs
         [Required]
         public required string ConfirmPassword { get; set; }
     }
+    public class ResetPassDto
+    {
+        public string UserName { get; set; } = default!;
+    }
+
     public class UserDto
     {
         public string MaNguoiDung { get; set; } = default!;

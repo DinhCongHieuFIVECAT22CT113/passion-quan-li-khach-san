@@ -18,7 +18,7 @@ namespace be_quanlikhachsanapi.Services
         JsonResult CreateKhachHang(CreateKhachHangDto createKhachHang);
         JsonResult UpdateKhachHang(string MaKh, UpdateKhachHangDto updateKhachHang);
         JsonResult DeleteKhachHang(string MaKh);
-        JsonResult ResetPassword(string UserName);
+        //JsonResult ResetPassword(string UserName);
     }
     public class KhachHangRepository : IKhachHangRepository
     {
@@ -196,37 +196,37 @@ namespace be_quanlikhachsanapi.Services
             };
         }
 
-        public JsonResult ResetPassword(string userName)
-        {
-            var khachHang = _context.KhachHangs.FirstOrDefault(kh => kh.UserName == userName);
-            if (khachHang == null)
-            {
-                return new JsonResult("Không tìm thấy khách hàng với username đã cho.")
-                {
-                    StatusCode = StatusCodes.Status404NotFound
-                };
-            }
+        // public JsonResult ResetPassword(string userName)
+        // {
+        //     var khachHang = _context.KhachHangs.FirstOrDefault(kh => kh.UserName == userName);
+        //     if (khachHang == null)
+        //     {
+        //         return new JsonResult("Không tìm thấy khách hàng với username đã cho.")
+        //         {
+        //             StatusCode = StatusCodes.Status404NotFound
+        //         };
+        //     }
 
-            // Sinh mật khẩu ngẫu nhiên
-            string password = Guid.NewGuid().ToString("N").Substring(0, 6); // Generate a random password
+        //     // Sinh mật khẩu ngẫu nhiên
+        //     string password = Guid.NewGuid().ToString("N").Substring(0, 6); // Generate a random password
 
-            // Cập nhật mật khẩu mới
-            khachHang.PasswordHash = _passwordHasher.HashPassword(khachHang, password);
-            _context.SaveChanges();
+        //     // Cập nhật mật khẩu mới
+        //     khachHang.PasswordHash = _passwordHasher.HashPassword(khachHang, password);
+        //     _context.SaveChanges();
 
-            // Gửi email xác nhận
-            var email = new EmailModel
-            {
-                ToEmail = khachHang.Email,
-                Subject = "Mật khẩu đăng nhập đã được khôi phục",
-                Body = $"Mật khẩu mới của bạn là: {password}"
-            };
-            _sendEmail.SendEmail(email);
+        //     // Gửi email xác nhận
+        //     var email = new EmailModel
+        //     {
+        //         ToEmail = khachHang.Email,
+        //         Subject = "Mật khẩu đăng nhập đã được khôi phục",
+        //         Body = $"Mật khẩu mới của bạn là: {password}"
+        //     };
+        //     _sendEmail.SendEmail(email);
 
-            return new JsonResult("Đã khôi phục mật khẩu thành công.")
-            {
-                StatusCode = StatusCodes.Status200OK
-            };
-        }
+        //     return new JsonResult("Đã khôi phục mật khẩu thành công.")
+        //     {
+        //         StatusCode = StatusCodes.Status200OK
+        //     };
+        // }
     }
 }
