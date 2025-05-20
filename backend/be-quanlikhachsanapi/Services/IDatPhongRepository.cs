@@ -11,6 +11,7 @@ namespace be_quanlikhachsanapi.Services
         JsonResult GetDatPhongById(string MaDatPhong);
         JsonResult CreateDatPhong(CreateDatPhongDTO createDatPhong);
         JsonResult UpdateDatPhong(string MaDatPhong, UpdateDatPhongDTO updateDatPhong);
+        JsonResult UpdateTrangThai(string MaDatPhong, string TrangThai);
         JsonResult DeleteDatPhong(string MaDatPhong);
     }
 
@@ -29,7 +30,7 @@ namespace be_quanlikhachsanapi.Services
             return datPhongs.Select(dp => new DatPhongDTO
             {
                 MaDatPhong = dp.MaDatPhong,
-                MaKH = dp.MaKh, // Sửa MaKH thành MaKh (chữ h viết thường)
+                MaKH = dp.MaKh,
                 TreEm = dp.TreEm,
                 NguoiLon = dp.NguoiLon,
                 GhiChu = dp.GhiChu,
@@ -38,10 +39,6 @@ namespace be_quanlikhachsanapi.Services
                 NgayNhanPhong = dp.NgayNhanPhong,
                 NgayTraPhong = dp.NgayTraPhong,
                 TrangThai = dp.TrangThai,
-                NgayTao = dp.NgayTao,
-                NgaySua = dp.NgaySua,
-                GiaGoc = dp.GiaGoc,
-                TongTien = dp.TongTien
             }).ToList();
         }
 
@@ -65,10 +62,6 @@ namespace be_quanlikhachsanapi.Services
                 NgayNhanPhong = datPhong.NgayNhanPhong,
                 NgayTraPhong = datPhong.NgayTraPhong,
                 TrangThai = datPhong.TrangThai,
-                NgayTao = datPhong.NgayTao,
-                NgaySua = datPhong.NgaySua,
-                GiaGoc = datPhong.GiaGoc,
-                TongTien = datPhong.TongTien
             };
             return new JsonResult(_datPhong);
         }
@@ -94,7 +87,7 @@ namespace be_quanlikhachsanapi.Services
             var datPhong = new DatPhong
             {
                 MaDatPhong = newMaDatPhong,
-                MaKh = createDatPhong.MaKH, // Sửa MaKH thành MaKh
+                MaKh = createDatPhong.MaKH,
                 TreEm = createDatPhong.TreEm,
                 NguoiLon = createDatPhong.NguoiLon,
                 GhiChu = createDatPhong.GhiChu,
@@ -102,11 +95,9 @@ namespace be_quanlikhachsanapi.Services
                 ThoiGianDen = createDatPhong.ThoiGianDen,
                 NgayNhanPhong = createDatPhong.NgayNhanPhong,
                 NgayTraPhong = createDatPhong.NgayTraPhong,
-                TrangThai = createDatPhong.TrangThai,
+                TrangThai = "Chưa xác nhận",
                 NgayTao = DateTime.Now,
                 NgaySua = DateTime.Now,
-                GiaGoc = createDatPhong.GiaGoc ?? 0m, // Thêm chuyển đổi từ decimal? sang decimal
-                TongTien = createDatPhong.TongTien ?? 0m // Thêm chuyển đổi từ decimal? sang decimal
             };
 
             _context.DatPhongs.Add(datPhong);
@@ -132,8 +123,7 @@ namespace be_quanlikhachsanapi.Services
                     StatusCode = StatusCodes.Status404NotFound
                 };
             }
-
-            datPhong.MaKh = updateDatPhong.MaKH ?? datPhong.MaKh; // Sửa MaKH thành MaKh
+            // Cập nhật thông tin đặt phòng
             datPhong.TreEm = updateDatPhong.TreEm ?? datPhong.TreEm;
             datPhong.NguoiLon = updateDatPhong.NguoiLon ?? datPhong.NguoiLon;
             datPhong.GhiChu = updateDatPhong.GhiChu ?? datPhong.GhiChu;
@@ -141,10 +131,7 @@ namespace be_quanlikhachsanapi.Services
             datPhong.ThoiGianDen = updateDatPhong.ThoiGianDen ?? datPhong.ThoiGianDen;
             datPhong.NgayNhanPhong = updateDatPhong.NgayNhanPhong ?? datPhong.NgayNhanPhong;
             datPhong.NgayTraPhong = updateDatPhong.NgayTraPhong ?? datPhong.NgayTraPhong;
-            datPhong.TrangThai = updateDatPhong.TrangThai ?? datPhong.TrangThai;
             datPhong.NgaySua = DateTime.Now;
-            datPhong.GiaGoc = updateDatPhong.GiaGoc ?? datPhong.GiaGoc;
-            datPhong.TongTien = updateDatPhong.TongTien ?? datPhong.TongTien;
 
             _context.DatPhongs.Update(datPhong);
             _context.SaveChanges();
@@ -176,6 +163,29 @@ namespace be_quanlikhachsanapi.Services
             return new JsonResult(new
             {
                 message = "Xóa thông tin đặt phòng thành công.",
+                maDatPhong = MaDatPhong
+            })
+            {
+                StatusCode = StatusCodes.Status200OK
+            };
+        }
+
+        public JsonResult UpdateTrangThai(string MaDatPhong, string TrangThai)
+        {
+            var datPhong = _context.DatPhongs.FirstOrDefault(dp => dp.MaDatPhong == MaDatPhong);
+            if (datPhong == null)
+            {
+                return new JsonResult("Không tìm thấy thông tin đặt phòng với mã đã cho.")
+                {
+                    StatusCode = StatusCodes.Status404NotFound
+                };
+            }
+            datPhong.TrangThai = TrangThai;
+            datPhong.NgaySua = DateTime.Now;
+            _context.SaveChanges();
+            return new JsonResult(new
+            {
+                message = "Cập nhật trạng thái đặt phòng thành công.",
                 maDatPhong = MaDatPhong
             })
             {

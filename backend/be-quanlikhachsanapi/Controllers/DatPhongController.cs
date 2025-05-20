@@ -75,5 +75,17 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(result);
         }
+
+        [HttpPut("Cập nhật trạng thái đặt phòng")]
+        [Consumes("multipart/form-data")]
+        public IActionResult UpdateTrangThai(string maDatPhong, string trangThai)
+        {
+            var result = _datPhongRepo.UpdateTrangThai(maDatPhong, trangThai);
+            if (result == null)
+            {
+                return NotFound("Không tìm thấy thông tin đặt phòng với ID đã cho.");
+            }
+            return Ok(result);
+        }
     }
 }

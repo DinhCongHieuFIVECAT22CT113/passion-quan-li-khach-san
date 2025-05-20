@@ -29,9 +29,9 @@ namespace be_quanlikhachsanapi.Controllers
         }
         [HttpGet("Tìm chi tiết đặt phòng theo ID")]
         [Consumes("multipart/form-data")]
-        public IActionResult GetByID(string maDatPhong, string maPhong)
+        public IActionResult GetByID(string MaChiTietDatPhong)
         {
-            var chiTietDatPhong = _chiTietDatPhongRepo.GetChiTietDatPhongById(maDatPhong, maPhong);
+            var chiTietDatPhong = _chiTietDatPhongRepo.GetChiTietDatPhongById(MaChiTietDatPhong);
             if (chiTietDatPhong == null)
             {
                 return NotFound("Không tìm thấy chi tiết đặt phòng với ID đã cho.");
@@ -51,20 +51,32 @@ namespace be_quanlikhachsanapi.Controllers
         }
         [HttpPut("Cập nhật chi tiết đặt phòng")]
         [Consumes("multipart/form-data")]
-        public IActionResult UpdateChiTietDatPhong(string maDatPhong, string maPhong, [FromForm] UpdateChiTietDatPhongDto updateChiTietDatPhong)
+        public IActionResult UpdateChiTietDatPhong(string MaChiTietDatPhong, [FromForm] UpdateChiTietDatPhongDto updateChiTietDatPhong)
         {
-            var chiTietDatPhong = _chiTietDatPhongRepo.UpdateChiTietDatPhong(maDatPhong, maPhong, updateChiTietDatPhong);
+            var chiTietDatPhong = _chiTietDatPhongRepo.UpdateChiTietDatPhong(MaChiTietDatPhong, updateChiTietDatPhong);
             if (chiTietDatPhong == null)
             {
                 return NotFound("Không tìm thấy chi tiết đặt phòng với ID đã cho.");
             }
             return Ok(chiTietDatPhong);
         }
+        [HttpPut("Cập nhật trạng thái chi tiết đặt phòng")]
+        [Consumes("multipart/form-data")]
+        public IActionResult UpdateTrangThai(string MaChiTietDatPhong, string TrangThai)
+        {
+            var chiTietDatPhong = _chiTietDatPhongRepo.UpdateTrangThai(MaChiTietDatPhong, TrangThai);
+            if (chiTietDatPhong == null)
+            {
+                return NotFound("Không tìm thấy chi tiết đặt phòng với ID đã cho.");
+            }
+            return Ok(chiTietDatPhong);
+        }
+        
         [HttpDelete("Xóa chi tiết đặt phòng")]
         [Consumes("multipart/form-data")]
-        public IActionResult DeleteChiTietDatPhong(string maDatPhong, string maPhong)
+        public IActionResult DeleteChiTietDatPhong(string MaChiTietDatPhong)
         {
-            var chiTietDatPhong = _chiTietDatPhongRepo.DeleteChiTietDatPhong(maDatPhong, maPhong);
+            var chiTietDatPhong = _chiTietDatPhongRepo.DeleteChiTietDatPhong(MaChiTietDatPhong);
             if (chiTietDatPhong == null)
             {
                 return NotFound("Không tìm thấy chi tiết đặt phòng với ID đã cho.");

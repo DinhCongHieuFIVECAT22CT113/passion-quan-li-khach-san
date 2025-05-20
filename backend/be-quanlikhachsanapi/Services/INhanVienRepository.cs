@@ -38,8 +38,6 @@ namespace be_quanlikhachsanapi.Services
                 LuongCoBan = nv.LuongCoBan,
                 NgayVaoLam = nv.NgayVaoLam,
                 MaRole = nv.MaRole,
-                NgayTao = nv.NgayTao,
-                NgaySua = nv.NgaySua
             }).ToList();
         }
 
@@ -65,8 +63,6 @@ namespace be_quanlikhachsanapi.Services
                 LuongCoBan = nhanVien.LuongCoBan,
                 NgayVaoLam = nhanVien.NgayVaoLam,
                 MaRole = nhanVien.MaRole,
-                NgayTao = nhanVien.NgayTao,
-                NgaySua = nhanVien.NgaySua
             };
             return new JsonResult(_nhanVien) { StatusCode = 200 };
         }

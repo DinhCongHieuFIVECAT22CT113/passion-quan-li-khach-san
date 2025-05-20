@@ -8,9 +8,9 @@ namespace be_quanlikhachsanapi.DTOs
 
         public string TenCaLam { get; set; } = default!;
 
-        public DateTime GioBatDau { get; set; }
+        public TimeOnly GioBatDau { get; set; }
 
-        public DateTime GioKetThuc { get; set; }
+        public TimeOnly GioKetThuc { get; set; }
     }
 
     public class CreateCaLamViecDTO
@@ -21,11 +21,11 @@ namespace be_quanlikhachsanapi.DTOs
         [Required(ErrorMessage = "Giờ bắt đầu là bắt buộc.")]
         [DataType(DataType.Time)]
         [DisplayFormat(DataFormatString = "{0:HH:mm}", ApplyFormatInEditMode = true)]
-        public DateTime GioBatDau { get; set; }
+        public TimeOnly GioBatDau { get; set; }
         [Required(ErrorMessage = "Giờ kết thúc là bắt buộc.")]
         [DataType(DataType.Time)]
         [DisplayFormat(DataFormatString = "{0:HH:mm}", ApplyFormatInEditMode = true)]
-        public DateTime GioKetThuc { get; set; }
+        public TimeOnly GioKetThuc { get; set; }
     }
 
     public class UpdateCaLamViecDTO
@@ -36,10 +36,10 @@ namespace be_quanlikhachsanapi.DTOs
         [Required(ErrorMessage = "Giờ bắt đầu là bắt buộc.")]
         [DataType(DataType.Time)]
         [DisplayFormat(DataFormatString = "{0:HH:mm}", ApplyFormatInEditMode = true)]
-        public DateTime GioBatDau { get; set; }
+        public TimeOnly GioBatDau { get; set; }
         [Required(ErrorMessage = "Giờ kết thúc là bắt buộc.")]
         [DataType(DataType.Time)]
         [DisplayFormat(DataFormatString = "{0:HH:mm}", ApplyFormatInEditMode = true)]
-        public DateTime GioKetThuc { get; set; }
+        public TimeOnly GioKetThuc { get; set; }
     }
 }

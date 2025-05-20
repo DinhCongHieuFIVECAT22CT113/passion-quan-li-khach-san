@@ -64,12 +64,12 @@ namespace be_quanlikhachsanapi.Services
             string newMaReview;
             if (lastRewiew == null)
             {
-                newMaReview = "R001";
+                newMaReview = "RV001";
             }
             else
             {
                 int lastNumber = int.Parse(lastRewiew.MaReview.Substring(3));
-                newMaReview = "R" + (lastNumber + 1).ToString("D3");
+                newMaReview = "RV" + (lastNumber + 1).ToString("D3");
             }
 
             var review = new Review

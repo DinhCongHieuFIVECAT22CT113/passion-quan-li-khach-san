@@ -12,6 +12,7 @@ namespace be_quanlikhachsanapi.Services
         Task<string> CreateAsync(CreateSuDungDichVuDTO createDto);
         Task<bool> UpdateAsync(string maSuDung, UpdateSuDungDichVuDTO updateDto);
         Task<bool> DeleteAsync(string maSuDung);
+        Task<bool> UpdateTrangThaiAsync(string maSuDung, string trangThai);
     }
     public class SuDungDichVuRepository : ISuDungDichVuRepository
     {
@@ -111,12 +112,12 @@ namespace be_quanlikhachsanapi.Services
 
             if (lastSuDung == null || string.IsNullOrEmpty(lastSuDung.MaSuDung))
             {
-                newMaSuDung = "SD001";
+                newMaSuDung = "SDV001";
             }
             else
             {
                 var soHienTai = int.Parse(lastSuDung.MaSuDung.Substring(2));
-                newMaSuDung = "SD" + (soHienTai + 1).ToString("D3");
+                newMaSuDung = "SDV" + (soHienTai + 1).ToString("D3");
             }
 
             // Tính tổng tiền
@@ -130,7 +131,7 @@ namespace be_quanlikhachsanapi.Services
                 SoLuong = createDto.SoLuong,
                 TongTien = tongTien,
                 NgaySuDung = createDto.NgaySuDung ?? DateTime.Now,
-                TrangThai = createDto.TrangThai
+                TrangThai = "Đang xử lý"
             };
 
             _context.SuDungDichVus.Add(suDungDichVu);
@@ -195,11 +196,6 @@ namespace be_quanlikhachsanapi.Services
                 suDungDichVu.NgaySuDung = updateDto.NgaySuDung;
             }
 
-            if (!string.IsNullOrEmpty(updateDto.TrangThai))
-            {
-                suDungDichVu.TrangThai = updateDto.TrangThai;
-            }
-
             _context.SuDungDichVus.Update(suDungDichVu);
             await _context.SaveChangesAsync();
 
@@ -215,6 +211,21 @@ namespace be_quanlikhachsanapi.Services
             }
 
             _context.SuDungDichVus.Remove(suDungDichVu);
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+
+        public async Task<bool> UpdateTrangThaiAsync(string maSuDung, string trangThai)
+        {
+            var suDungDichVu = await _context.SuDungDichVus.FirstOrDefaultAsync(s => s.MaSuDung == maSuDung);
+            if (suDungDichVu == null)
+            {
+                return false;
+            }
+
+            suDungDichVu.TrangThai = trangThai;
+            _context.SuDungDichVus.Update(suDungDichVu);
             await _context.SaveChangesAsync();
 
             return true;

@@ -90,7 +90,7 @@ namespace be_quanlikhachsanapi.Services
                 SoTienGiam = createKhuyenMai.SoTienGiam,
                 NgayBatDau = createKhuyenMai.NgayBatDau,
                 NgayKetThuc = createKhuyenMai.NgayKetThuc,
-                TrangThai = createKhuyenMai.TrangThai
+                TrangThai = "Chưa bắt đầu"
             };
 
             _context.KhuyenMais.Add(khuyenMai);
@@ -125,7 +125,6 @@ namespace be_quanlikhachsanapi.Services
                 khuyenMai.SoTienGiam = updateKhuyenMai.SoTienGiam;
                 khuyenMai.NgayBatDau = updateKhuyenMai.NgayBatDau;
                 khuyenMai.NgayKetThuc = updateKhuyenMai.NgayKetThuc;
-                khuyenMai.TrangThai = updateKhuyenMai.TrangThai;
 
                 _context.SaveChanges();
 
