@@ -29,9 +29,10 @@ export default function StaffManager() {
       try {
         const data = await getStaffs();
         setStaffs(data);
-      } catch (err: any) {
-        setError(err.message || "Có lỗi xảy ra khi tải dữ liệu nhân viên");
-        console.error("Lỗi khi lấy dữ liệu nhân viên:", err);
+      } catch (err) {
+        const error = err as Error;
+        setError(error.message || "Có lỗi xảy ra khi tải dữ liệu nhân viên");
+        console.error("Lỗi khi lấy dữ liệu nhân viên:", error);
       } finally {
         setIsLoading(false);
       }
@@ -68,9 +69,10 @@ export default function StaffManager() {
       try {
         await deleteStaff(maNV);
         setStaffs(staffs.filter((s) => s.maNV !== maNV));
-      } catch (err: any) {
-        alert(`Lỗi khi xóa nhân viên: ${err.message}`);
-        console.error("Lỗi xóa nhân viên:", err);
+      } catch (err) {
+        const error = err as Error;
+        alert(`Lỗi khi xóa nhân viên: ${error.message}`);
+        console.error("Lỗi xóa nhân viên:", error);
       }
     }
   };
@@ -88,9 +90,10 @@ export default function StaffManager() {
         setStaffs([...staffs, newStaff]);
       }
       closeModal();
-    } catch (err: any) {
-      alert(`Lỗi: ${err.message}`);
-      console.error("Lỗi khi lưu nhân viên:", err);
+    } catch (err) {
+      const error = err as Error;
+      alert(`Lỗi: ${error.message}`);
+      console.error("Lỗi khi lưu nhân viên:", error);
     }
   };
 

@@ -109,7 +109,7 @@ export const roundNumber = (value: number | string | null | undefined, decimals:
  * @param defaultValue Giá trị mặc định nếu không thể chuyển đổi
  * @returns Giá trị boolean
  */
-export const safeBoolean = (value: any, defaultValue: boolean = false): boolean => {
+export const safeBoolean = (value: unknown, defaultValue: boolean = false): boolean => {
   if (value === null || value === undefined) {
     return defaultValue;
   }

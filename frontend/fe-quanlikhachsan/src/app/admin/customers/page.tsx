@@ -70,9 +70,10 @@ export default function CustomerManager() {
           ghiChu: customer.ghiChu || ''
         }));
         setCustomers(safeData);
-      } catch (err: any) {
-        setError(err.message || "Có lỗi xảy ra khi tải dữ liệu");
-        console.error("Error fetching customers:", err);
+      } catch (err) {
+        const error = err as Error;
+        setError(error.message || "Có lỗi xảy ra khi tải dữ liệu");
+        console.error("Error fetching customers:", error);
       } finally {
         setIsLoading(false);
       }
@@ -144,9 +145,10 @@ export default function CustomerManager() {
       const data = await handleResponse(customersResponse);
       setCustomers(Array.isArray(data) ? data : []);
       setShowAddModal(false);
-    } catch (err: any) {
-      alert(`Lỗi: ${err.message}`);
-      console.error("Error adding customer:", err);
+    } catch (err) {
+      const error = err as Error;
+      alert(`Lỗi: ${error.message}`);
+      console.error("Error adding customer:", error);
     }
   };
 
@@ -181,9 +183,10 @@ export default function CustomerManager() {
       const data = await handleResponse(customersResponse);
       setCustomers(Array.isArray(data) ? data : []);
       setEditCustomer(null);
-    } catch (err: any) {
-      alert(`Lỗi: ${err.message}`);
-      console.error("Error updating customer:", err);
+    } catch (err) {
+      const error = err as Error;
+      alert(`Lỗi: ${error.message}`);
+      console.error("Error updating customer:", error);
     }
   };
 
@@ -203,9 +206,10 @@ export default function CustomerManager() {
       // Cập nhật state
       setCustomers(customers.filter(c => c.maKh !== maKh));
       setShowDeleteConfirm(null);
-    } catch (err: any) {
-      alert(`Lỗi: ${err.message}`);
-      console.error("Error deleting customer:", err);
+    } catch (err) {
+      const error = err as Error;
+      alert(`Lỗi: ${error.message}`);
+      console.error("Error deleting customer:", error);
     }
   };
 

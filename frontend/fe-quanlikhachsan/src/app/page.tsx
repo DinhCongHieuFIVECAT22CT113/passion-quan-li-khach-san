@@ -3,10 +3,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getUserInfo, getRedirectPathByRole, APP_CONFIG } from '../lib/config';
-import Image from 'next/image';
-import Header from '../app/components/layout/Header';
-import BookingForm from '../app/components/forms/BookingForm';
-import styles from './page.module.css';
 
 export default function HomePage() {
   const router = useRouter();

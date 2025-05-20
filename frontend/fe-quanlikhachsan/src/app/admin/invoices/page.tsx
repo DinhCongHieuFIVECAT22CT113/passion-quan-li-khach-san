@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import styles from "./InvoiceManager.module.css";
 import { getInvoices, getBookingHistory, getCustomerProfile, deleteInvoice, updateInvoice } from "../../../lib/api";
-import { API_BASE_URL } from '../../../lib/config';
+// import { API_BASE_URL } from '../../../lib/config'; // Không sử dụng
 
 interface Invoice {
   maHoaDon: string;
@@ -49,11 +49,11 @@ export default function InvoiceManager() {
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
-  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
-  const [totalRevenue, setTotalRevenue] = useState<number>(0);
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [customers, setCustomers] = useState<Customer[]>([]);
+  // const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1); // Không sử dụng
+  // const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear()); // Không sử dụng
+  // const [totalRevenue, setTotalRevenue] = useState<number>(0); // Không sử dụng
+  // const [bookings, setBookings] = useState<Booking[]>([]); // Không sử dụng, dữ liệu bookings được lấy và xử lý trong fetchData nhưng không set vào state này
+  // const [customers, setCustomers] = useState<Customer[]>([]); // Không sử dụng, dữ liệu customers được lấy và xử lý trong fetchData nhưng không set vào state này
 
   // Lấy danh sách hóa đơn từ API
   useEffect(() => {
@@ -67,7 +67,7 @@ export default function InvoiceManager() {
         
         // Lấy danh sách đặt phòng
         const bookingsData = await getBookingHistory("");
-        setBookings(bookingsData);
+        // setBookings(bookingsData);
         
         // Lấy thông tin khách hàng cho mỗi đặt phòng
         const customersData: Customer[] = [];
@@ -92,8 +92,6 @@ export default function InvoiceManager() {
           }
         }
         
-        setCustomers(customersData);
-        
         // Kết hợp thông tin khách hàng vào hóa đơn
         const enhancedInvoices = invoicesData.map((invoice: Invoice) => {
           const booking = bookingsData.find((b: Booking) => b.maDatPhong === invoice.maDatPhong);
@@ -117,9 +115,10 @@ export default function InvoiceManager() {
         });
         
         setInvoices(enhancedInvoices);
-      } catch (err: any) {
-        setError(err.message || "Có lỗi xảy ra khi tải dữ liệu");
-        console.error("Error fetching data:", err);
+      } catch (err) {
+        const error = err as Error;
+        setError(error.message || "Có lỗi xảy ra khi tải dữ liệu");
+        console.error("Error fetching data:", error);
       } finally {
         setIsLoading(false);
       }
@@ -185,9 +184,10 @@ export default function InvoiceManager() {
       // Cập nhật danh sách hóa đơn
       setInvoices(invoices.map(inv => inv.maHoaDon === form.maHoaDon ? {...inv, ...updatedForm} : inv));
     setEditInvoice(null);
-    } catch (err: any) {
-      alert(`Lỗi: ${err.message}`);
-      console.error("Error updating invoice:", err);
+    } catch (err) {
+      const error = err as Error;
+      alert(`Lỗi: ${error.message}`);
+      console.error("Error updating invoice:", error);
     }
   };
 
@@ -197,9 +197,10 @@ export default function InvoiceManager() {
       try {
         await deleteInvoice(maHoaDon);
         setInvoices(invoices.filter(inv => inv.maHoaDon !== maHoaDon));
-      } catch (err: any) {
-        alert(`Lỗi: ${err.message}`);
-        console.error("Error deleting invoice:", err);
+      } catch (err) {
+        const error = err as Error;
+        alert(`Lỗi: ${error.message}`);
+        console.error("Error deleting invoice:", error);
       }
     }
   };

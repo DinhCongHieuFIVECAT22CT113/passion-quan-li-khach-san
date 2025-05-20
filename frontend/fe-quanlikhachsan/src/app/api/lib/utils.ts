@@ -70,7 +70,7 @@ export const validatePhone = (phone: string): boolean => {
   return re.test(phone);
 };
 
-export const debounce = <T extends (...args: any[]) => any>(
+export const debounce = <T extends (...args: unknown[]) => unknown>(
   func: T,
   wait: number
 ): ((...args: Parameters<T>) => void) => {

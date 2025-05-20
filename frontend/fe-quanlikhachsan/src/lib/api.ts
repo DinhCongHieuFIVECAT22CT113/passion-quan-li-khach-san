@@ -59,7 +59,7 @@ export const handleResponse = async (response: Response) => {
       }
       
       throw new Error(errorMessage);
-    } catch (e) {
+    } catch {
       console.error('Response error:', response.status, response.statusText);
       if (response.status === 0) {
         throw new Error(`Không thể kết nối đến server backend tại ${API_BASE_URL}. Vui lòng kiểm tra server đã chạy chưa và CORS đã được cấu hình đúng.`);
@@ -94,6 +94,85 @@ export const handleResponse = async (response: Response) => {
     throw new Error('Lỗi khi xử lý dữ liệu từ server');
   }
 };
+
+// Định nghĩa interfaces cho các đối tượng dữ liệu
+interface BookingData {
+  maDatPhong?: string;
+  maKh?: string;
+  maPhong?: string;
+  thangThai?: string;
+  ngayDat?: string;
+  ngayDen?: string;
+  ngayDi?: string;
+  soDem?: number;
+  soNguoi?: number;
+  ghiChu?: string;
+  tongTien?: number;
+  hinhThucThanhToan?: string;
+  [key: string]: string | number | undefined;
+}
+
+interface InvoiceData {
+  maHoaDon?: string;
+  maDatPhong?: string;
+  maKh?: string;
+  maNV?: string;
+  ngayTao?: string;
+  tongTien?: number;
+  trangThai?: string;
+  ghiChu?: string;
+  maPttt?: string;
+  ngayLap?: string;
+  chiTietDichVu?: Array<{
+    maDv: string;
+    soLuong: number;
+    donGia: number;
+  }>;
+  [key: string]: string | number | undefined | Array<{
+    maDv: string;
+    soLuong: number;
+    donGia: number;
+  }> | undefined;
+}
+
+interface RoomData {
+  maPhong?: string;
+  soPhong?: string | number;
+  maLoaiPhong?: string;
+  trangThai?: string;
+  ngayTao?: string;
+  tang?: string | number;
+  thumbnail?: string;
+  hinhAnh?: string;
+  giaTien?: number;
+  [key: string]: string | number | undefined;
+}
+
+interface StaffData {
+  maNV?: string;
+  hoNV?: string;
+  tenNV?: string;
+  ngaySinh?: string;
+  gioiTinh?: string;
+  diaChi?: string;
+  soDienThoai?: string;
+  email?: string;
+  chucVu?: string;
+  [key: string]: string | undefined;
+}
+
+interface ProfileData {
+  maKh?: string;
+  hoKh?: string;
+  tenKh?: string;
+  ngaySinh?: string;
+  gioiTinh?: string;
+  diaChi?: string;
+  soDienThoai?: string;
+  email?: string;
+  soCccd?: string;
+  [key: string]: string | undefined;
+}
 
 // API Đăng nhập - chính xác từ Swagger
 export const loginUser = async (loginData: UserLoginDto): Promise<UserDto> => {
@@ -208,7 +287,7 @@ export const getRoomTypes = async () => {
 };
 
 // API Tạo phòng mới
-export const createRoom = async (roomData: any) => {
+export const createRoom = async (roomData: RoomData) => {
   console.log(`Đang gọi API tạo phòng mới: ${API_BASE_URL}/Phong/Tạo phòng mới`);
 
   // Chuyển đổi key từ camelCase sang PascalCase cho phù hợp với API
@@ -229,7 +308,9 @@ export const createRoom = async (roomData: any) => {
   for (const key in roomData) {
     if (key !== 'tenLoaiPhong' && key !== 'maPhong' && key !== 'giaTien') {
       const backendKey = keyMapping[key] || key;
-      formData.append(backendKey, String(roomData[key] || ''));
+      if (roomData[key] !== undefined) {
+        formData.append(backendKey, String(roomData[key] || ''));
+      }
     }
   }
   
@@ -247,7 +328,7 @@ export const createRoom = async (roomData: any) => {
 };
 
 // API Cập nhật phòng
-export const updateRoom = async (maPhong: string, roomData: any) => {
+export const updateRoom = async (maPhong: string, roomData: unknown) => {
   console.log(`Đang gọi API cập nhật phòng: ${API_BASE_URL}/Phong/Cập nhật phòng?maPhong=${maPhong}`);
   
   // Chuyển đổi key từ camelCase sang PascalCase cho phù hợp với API
@@ -265,10 +346,10 @@ export const updateRoom = async (maPhong: string, roomData: any) => {
   };
 
   // Loại bỏ các trường không cần thiết và đảm bảo tên trường đúng với backend
-  for (const key in roomData) {
+  for (const key in roomData as Record<string, any>) {
     if (key !== 'tenLoaiPhong' && key !== 'maPhong' && key !== 'giaTien') {
       const backendKey = keyMapping[key] || key;
-      formData.append(backendKey, String(roomData[key] || ''));
+      formData.append(backendKey, String((roomData as Record<string, any>)[key] || ''));
     }
   }
   
@@ -304,11 +385,11 @@ export const deleteRoom = async (maPhong: string) => {
 };
 
 // API Đặt phòng - endpoint từ Swagger
-export const bookRoom = async (bookingData: any) => {
+export const bookRoom = async (bookingData: BookingData) => {
   const formData = new FormData();
   
   for (const key in bookingData) {
-    formData.append(key, bookingData[key]);
+    formData.append(key, String(bookingData[key] || ''));
   }
   
   console.log(`Đang gọi API đặt phòng: ${API_BASE_URL}/DatPhong/Tạo đặt phòng mới`);
@@ -338,11 +419,11 @@ export const getCustomerProfile = async (maKh: string) => {
 };
 
 // API Cập nhật thông tin khách hàng - endpoint từ Swagger
-export const updateCustomerProfile = async (profileData: any) => {
+export const updateCustomerProfile = async (profileData: unknown) => {
   const formData = new FormData();
   
-  for (const key in profileData) {
-    formData.append(key, profileData[key]);
+  for (const key in profileData as Record<string, any>) {
+    formData.append(key, (profileData as Record<string, any>)[key]);
   }
   
   console.log(`Đang gọi API cập nhật thông tin khách hàng: ${API_BASE_URL}/KhachHang/Cập nhật khách hàng`);
@@ -390,8 +471,8 @@ export const cancelBooking = async (bookingId: string) => {
   
   // Cập nhật trạng thái thành "Đã hủy"
   const formData = new FormData();
-  for (const key in bookingInfo) {
-    formData.append(key, bookingInfo[key]);
+  for (const key in bookingInfo as Record<string, any>) {
+    formData.append(key, (bookingInfo as Record<string, any>)[key]);
   }
   formData.set('TrangThai', "Đã hủy");
   
@@ -468,60 +549,6 @@ export const getPromotions = async () => {
   }
 };
 
-// Helper function để tạo request với token và xử lý refresh token khi cần
-const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
-  // Kiểm tra token
-  const token = getToken();
-  
-  // Thiết lập headers
-  const headers = {
-    ...options.headers,
-    'Accept': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
-  
-  try {
-    // Thực hiện request
-    const response = await fetch(url, {
-      ...options,
-      headers,
-      mode: 'cors',
-      credentials: 'include',
-    });
-    
-    // Xử lý lỗi 401 (token hết hạn)
-    if (response.status === 401) {
-      // Xóa thông tin người dùng hiện tại
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('token');
-        localStorage.removeItem('userName');
-        localStorage.removeItem('userRole');
-        localStorage.removeItem('userId');
-      }
-      
-      // Nếu ở môi trường client, chuyển hướng người dùng đến trang đăng nhập
-      if (typeof window !== 'undefined') {
-        console.log('Phiên đăng nhập hết hạn, chuyển hướng đến trang đăng nhập');
-        window.location.href = '/login';
-      }
-      
-      throw new Error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
-    }
-    
-    return response;
-  } catch (error) {
-    console.error('Error in fetchWithAuth:', error);
-    throw error;
-  }
-};
-
-// Hàm để làm mới token (có thể triển khai khi cần)
-const refreshToken = async () => {
-  // Triển khai hàm refresh token khi API hỗ trợ
-  console.log('refreshToken not implemented yet');
-  return null;
-};
-
 // API Lấy danh sách hóa đơn - endpoint từ Swagger
 export const getInvoices = async () => {
   console.log(`Đang gọi API lấy danh sách hóa đơn: ${API_BASE_URL}/HoaDon/Lấy danh sách tất cả hóa đơn`);
@@ -551,7 +578,7 @@ export const getInvoiceById = async (maHoaDon: string) => {
 };
 
 // API Tạo hóa đơn mới - endpoint từ Swagger
-export const createInvoice = async (invoiceData: any) => {
+export const createInvoice = async (invoiceData: InvoiceData) => {
   console.log(`Đang gọi API tạo hóa đơn mới: ${API_BASE_URL}/HoaDon/Tạo hóa đơn mới`);
   
   const formData = new FormData();
@@ -573,7 +600,7 @@ export const createInvoice = async (invoiceData: any) => {
 };
 
 // API Cập nhật hóa đơn - endpoint từ Swagger
-export const updateInvoice = async (maHoaDon: string, invoiceData: any) => {
+export const updateInvoice = async (maHoaDon: string, invoiceData: InvoiceData) => {
   console.log(`Đang gọi API cập nhật hóa đơn: ${API_BASE_URL}/HoaDon/Cập nhật hóa đơn?maHoaDon=${maHoaDon}`);
   
   const formData = new FormData();
@@ -637,13 +664,13 @@ export const getStaffs = async () => {
 };
 
 // API để tạo nhân viên mới
-export const createStaff = async (staffData: any) => {
+export const createStaff = async (staffData: unknown) => {
   console.log(`Đang gọi API tạo nhân viên mới: ${API_BASE_URL}/NhanVien/Tạo nhân viên mới`);
   
   const formData = new FormData();
-  for (const key in staffData) {
-    if (staffData[key] !== undefined && staffData[key] !== null) {
-      formData.append(key, String(staffData[key]));
+  for (const key in staffData as Record<string, any>) {
+    if ((staffData as Record<string, any>)[key] !== undefined && (staffData as Record<string, any>)[key] !== null) {
+      formData.append(key, String((staffData as Record<string, any>)[key]));
     }
   }
   
@@ -659,17 +686,17 @@ export const createStaff = async (staffData: any) => {
 };
 
 // API để cập nhật nhân viên
-export const updateStaff = async (staffData: any) => {
-  console.log(`Đang gọi API cập nhật nhân viên: ${API_BASE_URL}/NhanVien/Cập nhật nhân viên?maNv=${staffData.maNv}`);
+export const updateStaff = async (staffData: unknown) => {
+  console.log(`Đang gọi API cập nhật nhân viên: ${API_BASE_URL}/NhanVien/Cập nhật nhân viên?maNv=${(staffData as Record<string, any>).maNv}`);
   
   const formData = new FormData();
-  for (const key in staffData) {
-    if (staffData[key] !== undefined && staffData[key] !== null) {
-      formData.append(key, String(staffData[key]));
+  for (const key in staffData as Record<string, any>) {
+    if ((staffData as Record<string, any>)[key] !== undefined && (staffData as Record<string, any>)[key] !== null) {
+      formData.append(key, String((staffData as Record<string, any>)[key]));
     }
   }
   
-  const response = await fetch(`${API_BASE_URL}/NhanVien/Cập nhật nhân viên?maNv=${staffData.maNv}`, {
+  const response = await fetch(`${API_BASE_URL}/NhanVien/Cập nhật nhân viên?maNv=${(staffData as Record<string, any>).maNv}`, {
     method: 'PUT',
     mode: 'cors',
     credentials: 'include',
@@ -1012,7 +1039,7 @@ export const updateBookingStatus = async (maDatPhong: string, trangThai: string)
   const formData = new FormData();
   
   // Sử dụng forEach để thêm tất cả thuộc tính từ bookingData vào formData
-  Object.entries(bookingData).forEach(([key, value]) => {
+  Object.entries(bookingData as Record<string, any>).forEach(([key, value]) => {
     if (value !== null && value !== undefined) {
       formData.append(key, String(value));
     }
@@ -1033,7 +1060,7 @@ export const updateBookingStatus = async (maDatPhong: string, trangThai: string)
 };
 
 // API tạo đặt phòng mới cho nhân viên
-export const createEmployeeBooking = async (bookingData: any) => {
+export const createEmployeeBooking = async (bookingData: BookingData) => {
   console.log(`Đang gọi API tạo đặt phòng mới: ${API_BASE_URL}/DatPhong/Tạo đặt phòng mới`);
   
   const formData = new FormData();
@@ -1123,7 +1150,7 @@ export const getEmployeeInvoices = async () => {
 };
 
 // API tạo hóa đơn mới cho nhân viên
-export const createEmployeeInvoice = async (invoiceData: any) => {
+export const createEmployeeInvoice = async (invoiceData: InvoiceData) => {
   console.log(`Đang gọi API tạo hóa đơn mới: ${API_BASE_URL}/HoaDon/Tạo hóa đơn mới`);
   
   const formData = new FormData();
@@ -1144,7 +1171,7 @@ export const createEmployeeInvoice = async (invoiceData: any) => {
   }
   
   // Nếu không có ngày lập, thêm ngày hiện tại
-  if (!invoiceData.ngayLap) {
+  if (!(invoiceData as Record<string, any>).ngayLap) {
     formData.append('NgayLap', new Date().toISOString());
   }
   

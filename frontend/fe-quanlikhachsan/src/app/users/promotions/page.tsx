@@ -3,9 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FaUser, FaTag, FaPercent, FaClock, FaCalendarAlt, FaInfoCircle, FaCheck, FaCopy } from 'react-icons/fa';
+import { FaTag, FaPercent, FaClock, FaCalendarAlt, FaInfoCircle, FaCheck, FaCopy } from 'react-icons/fa';
 import styles from './styles.module.css';
-import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../../components/profile/LanguageContext';
 import i18n from '../../i18n';
 import { API_BASE_URL } from '../../../lib/config';
@@ -26,7 +25,6 @@ interface Promotion {
 }
 
 export default function PromotionsPage() {
-  const { t } = useTranslation();
   const { selectedLanguage } = useLanguage();
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [selectedPromotion, setSelectedPromotion] = useState<Promotion | null>(null);
@@ -158,7 +156,7 @@ export default function PromotionsPage() {
   });
 
   // Hàm kiểm tra chuỗi an toàn trước khi dùng các phương thức length, substring
-  const safeString = (value: any): string => {
+  const safeString = (value: unknown): string => {
     if (value === null || value === undefined) return '';
     return String(value);
   };

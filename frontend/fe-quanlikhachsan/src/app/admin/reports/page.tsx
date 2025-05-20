@@ -55,6 +55,7 @@ export default function RevenueReport() {
     if (startDate && endDate) {
       fetchRevenueData();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startDate, endDate, timeRange]);
 
   // Hàm lấy dữ liệu doanh thu từ API
@@ -127,7 +128,7 @@ export default function RevenueReport() {
         }
         
         // Tính tổng doanh thu cho từng ngày
-        invoices.forEach((invoice: any) => {
+        invoices.forEach((invoice: { ngayTao?: string; trangThai?: string; tongTien?: number }) => {
           if (
             invoice.ngayTao && 
             invoice.trangThai === "Đã thanh toán" &&
@@ -149,7 +150,8 @@ export default function RevenueReport() {
         
         setRevenueData(dateArray);
       }
-    } catch (error: any) {
+    } catch (err) {
+      const error = err as Error;
       setError(error.message || "Có lỗi xảy ra khi tải dữ liệu doanh thu");
       console.error('Error fetching revenue data:', error);
     } finally {
@@ -189,8 +191,11 @@ export default function RevenueReport() {
         type: 'linear',
         beginAtZero: true,
         ticks: {
-          callback: function(this: any, value: any) {
-            return value.toLocaleString('vi-VN') + 'đ';
+          callback: function(value: string | number) {
+            if (typeof value === 'number') {
+              return value.toLocaleString('vi-VN') + 'đ';
+            }
+            return value;
           }
         }
       }

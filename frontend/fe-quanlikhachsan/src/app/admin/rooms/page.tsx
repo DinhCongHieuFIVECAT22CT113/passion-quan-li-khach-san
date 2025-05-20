@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import styles from "./RoomManager.module.css";
 import { getRooms, getRoomTypes, createRoom, updateRoom, deleteRoom } from "../../../lib/api";
-import { API_BASE_URL } from '../../../lib/config';
 
 interface Room {
   maPhong: string;
@@ -65,9 +64,10 @@ export default function RoomManager() {
         });
         
         setRooms(roomsWithTypes);
-      } catch (err: any) {
-        setError(err.message || "Có lỗi xảy ra khi tải dữ liệu");
-        console.error("Error fetching data:", err);
+      } catch (err) {
+        const error = err as Error;
+        setError(error.message || "Có lỗi xảy ra khi tải dữ liệu");
+        console.error("Error fetching data:", error);
       } finally {
         setIsLoading(false);
       }
@@ -118,9 +118,10 @@ export default function RoomManager() {
         // Cập nhật danh sách phòng sau khi xóa
         setRooms(rooms.filter(room => room.maPhong !== maPhong));
         alert('Xóa phòng thành công');
-      } catch (err: any) {
-        alert(`Lỗi: ${err.message}`);
-        console.error("Error deleting room:", err);
+      } catch (err) {
+        const error = err as Error;
+        alert(`Lỗi: ${error.message}`);
+        console.error("Error deleting room:", error);
       }
     }
   };
@@ -134,7 +135,7 @@ export default function RoomManager() {
       if (!token) throw new Error("Bạn cần đăng nhập để thực hiện hành động này");
       
       // Chuẩn bị dữ liệu gửi đi
-      const normalizedForm: any = {
+      const normalizedForm: Omit<Room, 'tenLoaiPhong'> = {
         ...form,
         giaTien: Number(form.giaTien) || 0
       };
@@ -176,9 +177,10 @@ export default function RoomManager() {
       setRooms(updatedRoomsWithTypes);
       closeModal();
       alert(editingRoom ? 'Cập nhật phòng thành công' : 'Thêm phòng thành công');
-    } catch (err: any) {
-      alert(`Lỗi: ${err.message}`);
-      console.error("Error saving room:", err);
+    } catch (err) {
+      const error = err as Error;
+      alert(`Lỗi: ${error.message}`);
+      console.error("Error saving room:", error);
     }
   };
 

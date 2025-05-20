@@ -1,9 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import styles from './styles.module.css';
-import { FaUser } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../../../app/components/profile/LanguageContext';
 import i18n from '../../../app/i18n';
@@ -12,7 +10,7 @@ import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 
 export default function AboutPage() {
-  const { t, i18n: i18nInstance } = useTranslation();
+  const { t } = useTranslation();
   const { selectedLanguage } = useLanguage();
   const [isClient, setIsClient] = useState(false);
 

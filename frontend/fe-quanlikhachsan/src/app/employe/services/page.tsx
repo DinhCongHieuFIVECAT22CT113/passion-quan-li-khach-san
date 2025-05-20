@@ -34,6 +34,7 @@ interface Booking {
   customerName: string;
   roomId: string;
   roomName: string;
+  status?: string;
 }
 
 export default function ServiceManager() {
@@ -67,7 +68,7 @@ export default function ServiceManager() {
         const bookingsData = await getEmployeeBookings();
         // Chỉ lấy các đặt phòng đang ở
         const activeBookings = bookingsData.filter(
-          (b: any) => b.status === 'Đang ở' || b.status === 'Đã xác nhận'
+          (b: Booking) => b.status === 'Đang ở' || b.status === 'Đã xác nhận'
         );
         setBookings(activeBookings);
         
@@ -76,9 +77,10 @@ export default function ServiceManager() {
         setRooms(roomsData);
         
         setError(null);
-      } catch (err: any) {
-        console.error("Lỗi khi lấy dữ liệu:", err);
-        setError(err.message || "Không thể lấy dữ liệu");
+      } catch (err: unknown) {
+        const error = err as Error;
+        console.error("Lỗi khi lấy dữ liệu:", error);
+        setError(error.message || "Không thể lấy dữ liệu");
       } finally {
         setLoading(false);
       }

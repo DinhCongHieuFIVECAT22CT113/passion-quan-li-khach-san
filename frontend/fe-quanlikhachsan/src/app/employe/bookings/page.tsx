@@ -69,9 +69,10 @@ export default function BookingManager() {
         setRooms(roomsData);
         
         setError(null);
-      } catch (err: any) {
-        console.error("Lỗi khi lấy dữ liệu:", err);
-        setError(err.message || "Không thể lấy dữ liệu");
+      } catch (err) {
+        const error = err as Error;
+        console.error("Lỗi khi lấy dữ liệu:", error);
+        setError(error.message || "Không thể lấy dữ liệu");
       } finally {
         setLoading(false);
       }
@@ -87,10 +88,10 @@ export default function BookingManager() {
   };
 
   // Format date để nhập vào input
-  const formatDateForInput = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toISOString().split('T')[0];
-  };
+  // const formatDateForInput = (dateString: string) => { // Hàm này không được sử dụng
+  //   const date = new Date(dateString);
+  //   return date.toISOString().split('T')[0];
+  // };
 
   // Xử lý modal thêm mới
   const openAddModal = () => {
@@ -123,9 +124,10 @@ export default function BookingManager() {
       // Cập nhật trạng thái trong state
       setBookings(bookings.map(b => b.id === id ? { ...b, status } : b));
       setError(null);
-    } catch (err: any) {
-      console.error("Lỗi khi cập nhật trạng thái đặt phòng:", err);
-      setError(err.message || "Không thể cập nhật trạng thái đặt phòng");
+    } catch (err) {
+      const error = err as Error;
+      console.error("Lỗi khi cập nhật trạng thái đặt phòng:", error);
+      setError(error.message || "Không thể cập nhật trạng thái đặt phòng");
     } finally {
       setLoading(false);
     }
@@ -165,7 +167,7 @@ export default function BookingManager() {
       };
       
       // Gọi API để tạo đặt phòng mới
-      const result = await createEmployeeBooking(bookingData);
+      /*const result =*/ await createEmployeeBooking(bookingData); // Bỏ gán biến result không sử dụng
       
       // Làm mới danh sách đặt phòng
       const newBookings = await getEmployeeBookings();
@@ -174,9 +176,10 @@ export default function BookingManager() {
       // Đóng modal
       closeModal();
       
-    } catch (err: any) {
-      console.error("Lỗi khi tạo đặt phòng:", err);
-      setFormError(err.message || "Không thể tạo đặt phòng mới");
+    } catch (err) {
+      const error = err as Error;
+      console.error("Lỗi khi tạo đặt phòng:", error);
+      setFormError(error.message || "Không thể tạo đặt phòng mới");
     } finally {
       setLoading(false);
     }

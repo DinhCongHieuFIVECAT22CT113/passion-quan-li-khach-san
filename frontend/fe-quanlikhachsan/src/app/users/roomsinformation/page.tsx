@@ -1,22 +1,12 @@
 'use client';
 
-import Image from 'next/image';
-import Link from 'next/link';
-import styles from './styles.module.css';
-import { FaUser, FaBed, FaWifi, FaTv, FaSnowflake, FaCalendarAlt, FaStar, FaArrowLeft, FaArrowRight, FaExpand, FaUsers, FaEye, FaShower, FaCoffee, FaParking, FaCheck } from 'react-icons/fa';
-import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../../../app/components/profile/LanguageContext';
 import i18n from '../../../app/i18n';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { API_BASE_URL } from '../../../lib/config';
 import Header from '../../components/layout/Header';
-import Footer from '../../components/layout/Footer';
-
-interface Amenity {
-  icon: React.ReactNode;
-  name: string;
-}
+import styles from './styles.module.css';
 
 interface Review {
   id: string;
@@ -43,9 +33,7 @@ interface RoomType {
 }
 
 export default function RoomInformationPage() {
-  const { t } = useTranslation();
   const { selectedLanguage } = useLanguage();
-  const [isClient, setIsClient] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
   const roomId = searchParams?.get('id');
@@ -53,35 +41,25 @@ export default function RoomInformationPage() {
   const [roomType, setRoomType] = useState<RoomType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [showFullImage, setShowFullImage] = useState(false);
-  const [availableDates, setAvailableDates] = useState<string[]>([]);
-  const [selectedDates, setSelectedDates] = useState({
-    checkIn: '',
-    checkOut: '',
-  });
-  const [totalNights, setTotalNights] = useState(1);
 
-  useEffect(() => {
-    setIsClient(true);
-    i18n.changeLanguage(selectedLanguage);
+  const generateAvailableDates = useCallback(() => {
+    // Giả lập các ngày còn trống trong 30 ngày tới
+    const dates: string[] = [];
+    const today = new Date();
     
-    if (roomId) {
-      fetchRoomTypeDetails(roomId);
+    for (let i = 1; i <= 30; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      
+      // Giả sử một số ngày ngẫu nhiên đã được đặt
+      if (i % 5 !== 0) { // Ngày chia hết cho 5 sẽ là ngày đã đặt
+        dates.push(date.toISOString().split('T')[0]);
+      }
     }
-  }, [selectedLanguage, roomId]);
+    return dates;
+  }, []);
 
-  useEffect(() => {
-    if (selectedDates.checkIn && selectedDates.checkOut) {
-      const checkIn = new Date(selectedDates.checkIn);
-      const checkOut = new Date(selectedDates.checkOut);
-      const diffTime = checkOut.getTime() - checkIn.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      setTotalNights(diffDays > 0 ? diffDays : 1);
-    }
-  }, [selectedDates]);
-
-  const fetchRoomTypeDetails = async (id: string) => {
+  const fetchRoomTypeDetails = useCallback(async (id: string) => {
     setLoading(true);
     try {
       // Gọi API để lấy thông tin chi tiết loại phòng
@@ -154,99 +132,15 @@ export default function RoomInformationPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [generateAvailableDates]);
 
-  const generateAvailableDates = () => {
-    // Giả lập các ngày còn trống trong 30 ngày tới
-    const dates: string[] = [];
-    const today = new Date();
+  useEffect(() => {
+    i18n.changeLanguage(selectedLanguage);
     
-    for (let i = 1; i <= 30; i++) {
-      const date = new Date(today);
-      date.setDate(today.getDate() + i);
-      
-      // Giả sử một số ngày ngẫu nhiên đã được đặt
-      if (i % 5 !== 0) { // Ngày chia hết cho 5 sẽ là ngày đã đặt
-        dates.push(date.toISOString().split('T')[0]);
-      }
+    if (roomId) {
+      fetchRoomTypeDetails(roomId);
     }
-    
-    setAvailableDates(dates);
-  };
-
-  const nextImage = () => {
-    if (roomType?.galleryImages) {
-      setCurrentImageIndex((prevIndex) => 
-        prevIndex === roomType.galleryImages!.length - 1 ? 0 : prevIndex + 1
-      );
-    }
-  };
-
-  const prevImage = () => {
-    if (roomType?.galleryImages) {
-      setCurrentImageIndex((prevIndex) => 
-        prevIndex === 0 ? roomType.galleryImages!.length - 1 : prevIndex - 1
-      );
-    }
-  };
-
-  const handleBookNow = () => {
-    if (roomType && selectedDates.checkIn && selectedDates.checkOut) {
-      const bookingData = {
-        roomTypeId: roomType.maLoaiPhong,
-        roomName: roomType.tenLoaiPhong,
-        price: roomType.donGia,
-        image: roomType.hinhAnh,
-        checkIn: selectedDates.checkIn,
-        checkOut: selectedDates.checkOut,
-        nights: totalNights
-      };
-      
-      localStorage.setItem('selectedRoomData', JSON.stringify(bookingData));
-      router.push('/users/booking');
-    } else {
-      alert('Vui lòng chọn ngày nhận phòng và trả phòng');
-    }
-  };
-
-  const getValidImageSrc = (imagePath: string | undefined): string => {
-    if (!imagePath) return '/images/room-placeholder.jpg';
-    
-    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-      return imagePath;
-    }
-    
-    if (imagePath.startsWith('/')) {
-      return imagePath;
-    }
-    
-    return '/images/room-placeholder.jpg';
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN');
-  };
-
-  const renderStars = (rating: number) => {
-    const stars = [];
-    for (let i = 1; i <= 5; i++) {
-      stars.push(
-        <FaStar 
-          key={i} 
-          className={i <= rating ? styles.starFilled : styles.starEmpty} 
-        />
-      );
-    }
-    return stars;
-  };
-
-  const calculateAverageRating = () => {
-    if (!roomType?.reviews || roomType.reviews.length === 0) return 0;
-    
-    const sum = roomType.reviews.reduce((acc, review) => acc + review.rating, 0);
-    return (sum / roomType.reviews.length).toFixed(1);
-  };
+  }, [selectedLanguage, roomId, fetchRoomTypeDetails]);
 
   if (loading) {
     return (
@@ -272,19 +166,4 @@ export default function RoomInformationPage() {
   return (
       <Header />
   );
-}
-
-function getAmenityIcon(amenity: string) {
-  const amenityLower = amenity.toLowerCase();
-  
-  if (amenityLower.includes('wifi')) return <FaWifi className={styles.amenityIcon} />;
-  if (amenityLower.includes('tv') || amenityLower.includes('tivi')) return <FaTv className={styles.amenityIcon} />;
-  if (amenityLower.includes('điều hòa') || amenityLower.includes('máy lạnh')) return <FaSnowflake className={styles.amenityIcon} />;
-  if (amenityLower.includes('giường') || amenityLower.includes('bed')) return <FaBed className={styles.amenityIcon} />;
-  if (amenityLower.includes('tắm') || amenityLower.includes('shower')) return <FaShower className={styles.amenityIcon} />;
-  if (amenityLower.includes('coffee') || amenityLower.includes('cà phê') || amenityLower.includes('ấm')) return <FaCoffee className={styles.amenityIcon} />;
-  if (amenityLower.includes('đỗ xe') || amenityLower.includes('parking')) return <FaParking className={styles.amenityIcon} />;
-  
-  // Icon mặc định
-  return <FaCheck className={styles.amenityIcon} />;
 }

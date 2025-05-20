@@ -45,9 +45,10 @@ export default function RoomManager() {
         console.log("Dữ liệu phòng nhận được:", data);
         setRooms(data);
         setError(null);
-      } catch (err: any) {
-        console.error("Lỗi khi lấy danh sách phòng:", err);
-        setError(err.message || "Không thể lấy danh sách phòng");
+      } catch (err: unknown) {
+        const error = err as Error;
+        console.error("Lỗi khi lấy danh sách phòng:", error);
+        setError(error.message || "Không thể lấy danh sách phòng");
       } finally {
         setLoading(false);
       }
@@ -65,9 +66,10 @@ export default function RoomManager() {
       // Cập nhật trạng thái trong state
       setRooms(rooms.map(r => r.id === id ? { ...r, status } : r));
       setError(null);
-    } catch (err: any) {
-      console.error("Lỗi khi cập nhật trạng thái phòng:", err);
-      setError(err.message || "Không thể cập nhật trạng thái phòng");
+    } catch (err: unknown) {
+      const error = err as Error;
+      console.error("Lỗi khi cập nhật trạng thái phòng:", error);
+      setError(error.message || "Không thể cập nhật trạng thái phòng");
     } finally {
       setLoading(false);
     }

@@ -45,7 +45,7 @@ export default function PromotionManager() {
         const data = await getPromotions();
         
         // Chuyển đổi dữ liệu API sang định dạng cho giao diện
-        const formattedData = data.map((promo: any) => {
+        const formattedData = data.map((promo: Promotion) => {
           // Tính toán trạng thái dựa trên ngày
           const now = new Date();
           const startDate = new Date(promo.ngayBatDau);
@@ -65,9 +65,10 @@ export default function PromotionManager() {
         });
         
         setPromotions(formattedData);
-      } catch (err: any) {
-        setError(err.message || "Có lỗi xảy ra khi tải dữ liệu khuyến mãi");
-        console.error("Error fetching promotions:", err);
+      } catch (err) {
+        const error = err as Error;
+        setError(error.message || "Có lỗi xảy ra khi tải dữ liệu khuyến mãi");
+        console.error("Error fetching promotions:", error);
       } finally {
         setIsLoading(false);
       }
@@ -139,7 +140,7 @@ export default function PromotionManager() {
       const updatedPromotions = await getPromotions();
       
       // Cập nhật trạng thái dựa trên ngày
-      const formattedData = updatedPromotions.map((promo: any) => {
+      const formattedData = updatedPromotions.map((promo: Promotion) => {
         const now = new Date();
         const startDate = new Date(promo.ngayBatDau);
         const endDate = new Date(promo.ngayKetThuc);
@@ -159,9 +160,10 @@ export default function PromotionManager() {
       
       setPromotions(formattedData);
       setShowAddModal(false);
-    } catch (err: any) {
-      alert(`Lỗi: ${err.message}`);
-      console.error("Error adding promotion:", err);
+    } catch (err) {
+      const error = err as Error;
+      alert(`Lỗi: ${error.message}`);
+      console.error("Error adding promotion:", error);
     }
   };
 
@@ -192,7 +194,7 @@ export default function PromotionManager() {
       const updatedPromotions = await getPromotions();
       
       // Cập nhật trạng thái dựa trên ngày
-      const formattedData = updatedPromotions.map((promo: any) => {
+      const formattedData = updatedPromotions.map((promo: Promotion) => {
         const now = new Date();
         const startDate = new Date(promo.ngayBatDau);
         const endDate = new Date(promo.ngayKetThuc);
@@ -212,9 +214,10 @@ export default function PromotionManager() {
       
       setPromotions(formattedData);
       setEditPromotion(null);
-    } catch (err: any) {
-      alert(`Lỗi: ${err.message}`);
-      console.error("Error updating promotion:", err);
+    } catch (err) {
+      const error = err as Error;
+      alert(`Lỗi: ${error.message}`);
+      console.error("Error updating promotion:", error);
     }
   };
 
@@ -233,9 +236,10 @@ export default function PromotionManager() {
       
       setPromotions(promotions.filter(p => p.maKM !== maKM));
       setShowDeleteConfirm(null);
-    } catch (err: any) {
-      alert(`Lỗi: ${err.message}`);
-      console.error("Error deleting promotion:", err);
+    } catch (err) {
+      const error = err as Error;
+      alert(`Lỗi: ${error.message}`);
+      console.error("Error deleting promotion:", error);
     }
   };
 

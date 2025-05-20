@@ -87,7 +87,7 @@ const SignupForm: React.FC = () => {
       setIsLoading(true);
       try {
         // Gọi API đăng ký từ backend thực
-        const result = await registerUser(formData);
+        await registerUser(formData);
         
         setSuccessMessage('Đăng ký thành công! Vui lòng kiểm tra email để kích hoạt tài khoản.');
         

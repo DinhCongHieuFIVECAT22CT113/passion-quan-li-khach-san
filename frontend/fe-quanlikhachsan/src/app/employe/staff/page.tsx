@@ -14,7 +14,7 @@ interface Staff {
 
 export default function StaffDirectory() {
   const [staffs, setStaffs] = useState<Staff[]>([]);
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<Staff | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,18 +43,20 @@ export default function StaffDirectory() {
           );
           
           setProfile(currentUserStaff || {
-            hoTen: userInfo.userName,
+            hoTen: userInfo.userName || 'Unknown User',
             chucVu: userInfo.userRole === 'R01' ? 'Quản lý' : 
                    userInfo.userRole === 'R02' ? 'Nhân viên' : 
                    userInfo.userRole === 'R03' ? 'Kế toán' : 'Nhân viên',
             maNV: 'N/A',
             email: 'N/A',
-            soDienThoai: 'N/A'
-          });
+            soDienThoai: 'N/A',
+            trangThai: 'Hoạt động'
+          } as Staff);
         }
-      } catch (err: any) {
-        setError(err.message || "Có lỗi xảy ra khi tải dữ liệu nhân viên");
-        console.error("Lỗi khi lấy dữ liệu:", err);
+      } catch (err: unknown) {
+        const error = err as Error;
+        setError(error.message || "Có lỗi xảy ra khi tải dữ liệu nhân viên");
+        console.error("Lỗi khi lấy dữ liệu:", error);
       } finally {
         setIsLoading(false);
       }

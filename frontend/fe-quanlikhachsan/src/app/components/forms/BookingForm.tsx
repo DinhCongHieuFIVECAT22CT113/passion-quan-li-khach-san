@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { DatePicker } from '../ui/DatePicker';
 import { api } from '../../api/lib/api';
 import styles from './BookingForm.module.css';
-import { formatCurrency } from '../../api/lib/utils';
 
 interface BookingFormProps {
   minDate?: Date;
@@ -53,7 +52,7 @@ export default function BookingForm({ minDate = new Date(), maxDate }: BookingFo
       }
 
       router.push(`/rooms/search?checkIn=${checkIn.toISOString()}&checkOut=${checkOut.toISOString()}&adults=${adults}&children=${children}`);
-    } catch (err) {
+    } catch (_err) { // eslint-disable-line @typescript-eslint/no-unused-vars
       setError('Có lỗi xảy ra khi tìm phòng. Vui lòng thử lại sau.');
     } finally {
       setIsLoading(false);

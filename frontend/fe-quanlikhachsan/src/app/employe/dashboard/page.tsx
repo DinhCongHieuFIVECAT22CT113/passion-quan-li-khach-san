@@ -3,32 +3,56 @@ import React, { useEffect, useState } from 'react';
 import { getUserInfo } from '../../../lib/config';
 import { getDashboardStats } from '../../../lib/api';
 
+interface RoomStats { total: number; available: number; occupied: number; maintenance: number }
+interface BookingStats { today: number; pending: number; completed: number; cancelled: number }
+interface RevenueStats { today: number; week: number; month: number; average: number }
+interface StaffStats { total: number; onDuty: number; managers: number; employees: number; accountants: number }
+interface RecentBooking {
+  maDatPhong: string;
+  customerName?: string;
+  maKh: string;
+  roomName?: string;
+  maPhong: string;
+  ngayDen: string;
+  ngayDi: string;
+  trangThai: string;
+}
+interface DashboardData {
+  rooms: RoomStats;
+  bookings: BookingStats;
+  revenue: RevenueStats;
+  staff: StaffStats;
+  recentBookings: RecentBooking[];
+}
+
+const initialStats: DashboardData = {
+  rooms: { total: 0, available: 0, occupied: 0, maintenance: 0 },
+  bookings: { today: 0, pending: 0, completed: 0, cancelled: 0 },
+  revenue: { today: 0, week: 0, month: 0, average: 0 },
+  staff: { total: 0, onDuty: 0, managers: 0, employees: 0, accountants: 0 },
+  recentBookings: []
+};
+
 export default function ManagerDashboardPage() {
-  const [userInfo, setUserInfo] = useState<any>(null);
-  const [stats, setStats] = useState<any>({
-    rooms: { total: 0, available: 0, occupied: 0, maintenance: 0 },
-    bookings: { today: 0, pending: 0, completed: 0, cancelled: 0 },
-    revenue: { today: 0, week: 0, month: 0, average: 0 },
-    staff: { total: 0, onDuty: 0, managers: 0, employees: 0, accountants: 0 },
-    recentBookings: []
-  });
+  const [userInfo, setUserInfo] = useState<{ userName?: string } | null>(null);
+  const [stats, setStats] = useState<DashboardData>(initialStats);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
   useEffect(() => {
     const info = getUserInfo();
-    setUserInfo(info);
+    setUserInfo(info as { userName?: string } | null); // Type assertion
     
-    // Lấy dữ liệu thống kê từ API
     const fetchStats = async () => {
       try {
         setLoading(true);
         const data = await getDashboardStats();
-        setStats(data);
+        setStats(data as DashboardData); 
         setError(null);
-      } catch (err: any) {
-        console.error("Lỗi khi lấy dữ liệu dashboard:", err);
-        setError(err.message || "Không thể lấy dữ liệu thống kê");
+      } catch (err) {
+        const error = err as Error;
+        console.error("Lỗi khi lấy dữ liệu dashboard:", error);
+        setError(error.message || "Không thể lấy dữ liệu thống kê");
       } finally {
         setLoading(false);
       }
@@ -37,15 +61,18 @@ export default function ManagerDashboardPage() {
     fetchStats();
   }, []);
   
-  // Format tiền theo định dạng VND
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
   };
   
-  // Format ngày tháng
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN');
+    if (!dateString) return 'N/A';
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString('vi-VN');
+    } catch (e) { // eslint-disable-line @typescript-eslint/no-unused-vars
+      return dateString; // Trả về chuỗi gốc nếu không parse được
+    }
   };
   
   if (loading) {
@@ -106,29 +133,35 @@ export default function ManagerDashboardPage() {
               </tr>
             </thead>
             <tbody>
-              {stats.recentBookings.map((booking: any, index: number) => (
-                <tr key={index} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                  <td style={{ padding: '12px 8px' }}>{booking.maDatPhong}</td>
-                  <td style={{ padding: '12px 8px' }}>{booking.customerName || booking.maKh}</td>
-                  <td style={{ padding: '12px 8px' }}>{booking.roomName || booking.maPhong}</td>
-                  <td style={{ padding: '12px 8px' }}>{formatDate(booking.ngayDen)}</td>
-                  <td style={{ padding: '12px 8px' }}>{formatDate(booking.ngayDi)}</td>
-                  <td style={{ padding: '12px 8px' }}>
-                    <span style={{ 
-                      padding: '4px 8px', 
-                      borderRadius: '4px', 
-                      fontSize: '0.8rem',
-                      backgroundColor: 
-                        booking.trangThai === 'Đã xác nhận' ? '#9ae6b4' : 
-                        booking.trangThai === 'Đang xử lý' || booking.trangThai === 'Đã đặt' ? '#fbd38d' : 
-                        booking.trangThai === 'Đã thanh toán' || booking.trangThai === 'Đã trả phòng' ? '#90cdf4' : 
-                        '#e9d8fd'
-                    }}>
-                      {booking.trangThai}
-                    </span>
-                  </td>
+              {stats.recentBookings && stats.recentBookings.length > 0 ? (
+                stats.recentBookings.map((booking, index) => (
+                  <tr key={index} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                    <td style={{ padding: '12px 8px' }}>{booking.maDatPhong}</td>
+                    <td style={{ padding: '12px 8px' }}>{booking.customerName || booking.maKh}</td>
+                    <td style={{ padding: '12px 8px' }}>{booking.roomName || booking.maPhong}</td>
+                    <td style={{ padding: '12px 8px' }}>{formatDate(booking.ngayDen)}</td>
+                    <td style={{ padding: '12px 8px' }}>{formatDate(booking.ngayDi)}</td>
+                    <td style={{ padding: '12px 8px' }}>
+                      <span style={{
+                        padding: '4px 8px',
+                        borderRadius: '4px',
+                        fontSize: '0.8rem',
+                        backgroundColor:
+                          booking.trangThai === 'Đã xác nhận' ? '#9ae6b4' :
+                          booking.trangThai === 'Đang xử lý' || booking.trangThai === 'Đã đặt' ? '#fbd38d' :
+                          booking.trangThai === 'Đã thanh toán' || booking.trangThai === 'Đã trả phòng' ? '#90cdf4' :
+                          '#e9d8fd'
+                      }}>
+                        {booking.trangThai}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} style={{ textAlign: 'center', padding: '20px', fontStyle: 'italic', color: '#666' }}>Không có đặt phòng gần đây.</td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
@@ -177,4 +210,4 @@ export default function ManagerDashboardPage() {
       </div>
     </div>
   );
-} 
+}

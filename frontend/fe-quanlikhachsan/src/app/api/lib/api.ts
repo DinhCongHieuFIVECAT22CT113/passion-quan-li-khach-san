@@ -69,22 +69,22 @@ export const api = {
       }),
   },
   users: {
-    getProfile: () => fetchWithAuth<any>('/users/profile'),
-    updateProfile: (data: any) =>
+    getProfile: () => fetchWithAuth<unknown>('/users/profile'),
+    updateProfile: (data: unknown) =>
       fetchWithAuth('/users/profile', {
         method: 'PUT',
         body: JSON.stringify(data),
       }),
   },
   rooms: {
-    getAll: () => fetchWithAuth<any[]>('/rooms'),
-    getById: (id: string) => fetchWithAuth<any>(`/rooms/${id}`),
-    create: (data: any) =>
+    getAll: () => fetchWithAuth<unknown[]>('/rooms'),
+    getById: (id: string) => fetchWithAuth<unknown>(`/rooms/${id}`),
+    create: (data: unknown) =>
       fetchWithAuth('/rooms', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
-    update: (id: string, data: any) =>
+    update: (id: string, data: unknown) =>
       fetchWithAuth(`/rooms/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),
@@ -100,14 +100,14 @@ export const api = {
       }),
   },
   bookings: {
-    getAll: () => fetchWithAuth<any[]>('/bookings'),
-    getById: (id: string) => fetchWithAuth<any>(`/bookings/${id}`),
-    create: (data: any) =>
+    getAll: () => fetchWithAuth<unknown[]>('/bookings'),
+    getById: (id: string) => fetchWithAuth<unknown>(`/bookings/${id}`),
+    create: (data: unknown) =>
       fetchWithAuth('/bookings', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
-    update: (id: string, data: any) =>
+    update: (id: string, data: unknown) =>
       fetchWithAuth(`/bookings/${id}`, {
         method: 'PUT',
         body: JSON.stringify(data),

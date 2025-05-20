@@ -26,6 +26,15 @@ ChartJS.register(
   Legend
 );
 
+// Định nghĩa kiểu cho hóa đơn từ API getInvoices
+interface InvoiceFromApi {
+  maHoaDon: string;
+  ngayTao?: string; // Hoặc kiểu Date nếu API trả về Date object
+  trangThai: string;
+  tongTien: number;
+  // Thêm các trường khác nếu có từ API
+}
+
 interface RevenueData {
   date: string;
   amount: number;
@@ -48,20 +57,13 @@ export default function EmployeeReportPage() {
     setEndDate(today.toISOString().split('T')[0]);
   }, []);
 
-  // Lấy dữ liệu doanh thu khi thay đổi khoảng thời gian
-  useEffect(() => {
-    if (startDate && endDate) {
-      fetchRevenueData();
-    }
-  }, [startDate, endDate]);
-
-  // Hàm lấy dữ liệu doanh thu từ API
-  const fetchRevenueData = async () => {
+  // Hàm lấy dữ liệu doanh thu từ API, bọc trong useCallback
+  const fetchRevenueData = React.useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
       // Lấy tất cả hóa đơn và tính toán
-      const invoices = await getInvoices();
+      const invoices: InvoiceFromApi[] = await getInvoices(); // Sử dụng InvoiceFromApi
       
       // Lọc hóa đơn trong khoảng thời gian đã chọn
       const startDateObj = new Date(startDate);
@@ -81,7 +83,7 @@ export default function EmployeeReportPage() {
       }
       
       // Tính tổng doanh thu cho từng ngày
-      invoices.forEach((invoice: any) => {
+      invoices.forEach((invoice: InvoiceFromApi) => { // Sử dụng InvoiceFromApi
         if (
           invoice.ngayTao && 
           invoice.trangThai === "Đã thanh toán" &&
@@ -102,13 +104,21 @@ export default function EmployeeReportPage() {
       });
       
       setRevenueData(dateArray);
-    } catch (error: any) {
+    } catch (err) { // Bỏ : any, err sẽ là unknown
+      const error = err as Error; // Ép kiểu sang Error
       setError(error.message || "Có lỗi xảy ra khi tải dữ liệu doanh thu");
       console.error('Error fetching revenue data:', error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [startDate, endDate]);
+
+  // Lấy dữ liệu doanh thu khi thay đổi khoảng thời gian
+  useEffect(() => {
+    if (startDate && endDate) {
+      fetchRevenueData();
+    }
+  }, [startDate, endDate, fetchRevenueData]); // Thêm fetchRevenueData vào dependencies
 
   // Chuẩn bị dữ liệu cho biểu đồ
   const chartData = {
@@ -140,8 +150,11 @@ export default function EmployeeReportPage() {
         type: 'linear',
         beginAtZero: true,
         ticks: {
-          callback: function(this: any, value: any) {
-            return value.toLocaleString('vi-VN') + 'đ';
+          callback: function(this: unknown, value: string | number) { // Sửa kiểu cho this và value
+            if (typeof value === 'number') {
+              return value.toLocaleString('vi-VN') + 'đ';
+            }
+            return value;
           }
         }
       }

@@ -102,9 +102,10 @@ export default function BookingManager() {
         });
         
         setBookings(bookingsWithDetails);
-      } catch (err: any) {
-        setError(err.message || "Có lỗi xảy ra khi tải dữ liệu");
-        console.error("Error fetching data:", err);
+      } catch (err) {
+        const error = err as Error;
+        setError(error.message || "Có lỗi xảy ra khi tải dữ liệu");
+        console.error("Error fetching data:", error);
       } finally {
         setIsLoading(false);
       }
@@ -212,9 +213,10 @@ export default function BookingManager() {
       
       setBookings(bookingsWithDetails);
       setShowAddModal(false);
-    } catch (err: any) {
-      alert(`Lỗi: ${err.message}`);
-      console.error("Error adding booking:", err);
+    } catch (err) {
+      const error = err as Error;
+      alert(`Lỗi: ${error.message}`);
+      console.error("Error adding booking:", error);
     }
   };
 
@@ -267,9 +269,10 @@ export default function BookingManager() {
       
       setBookings(bookingsWithDetails);
       setEditBooking(null);
-    } catch (err: any) {
-      alert(`Lỗi: ${err.message}`);
-      console.error("Error updating booking:", err);
+    } catch (err) {
+      const error = err as Error;
+      alert(`Lỗi: ${error.message}`);
+      console.error("Error updating booking:", error);
     }
   };
 
@@ -279,29 +282,6 @@ export default function BookingManager() {
     (b.tenPhong || '').toLowerCase().includes(search.toLowerCase()) ||
     (b.maDatPhong || '').toLowerCase().includes(search.toLowerCase())
   );
-
-  const handleDelete = async (maDatPhong: string) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa đơn đặt phòng này?')) {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) throw new Error("Bạn cần đăng nhập để thực hiện hành động này");
-        
-        const response = await fetch(`${API_BASE_URL}/DatPhong/Xóa đặt phòng?maDatPhong=${maDatPhong}`, {
-          method: 'DELETE',
-          headers: getAuthHeaders('DELETE'),
-          credentials: 'include'
-        });
-        
-        await handleResponse(response);
-        
-        // Cập nhật danh sách đặt phòng
-        setBookings(bookings.filter(booking => booking.maDatPhong !== maDatPhong));
-      } catch (err: any) {
-        alert(`Lỗi: ${err.message}`);
-        console.error("Error deleting booking:", err);
-      }
-    }
-  };
 
   return (
     <div className={styles.container}>

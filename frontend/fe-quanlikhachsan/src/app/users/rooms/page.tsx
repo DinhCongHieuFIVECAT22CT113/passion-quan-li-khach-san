@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FaStar, FaWifi, FaTv, FaSnowflake, FaBath, FaUser, FaSearch, FaFilter, FaBed, FaDollarSign, FaUsers, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { FaStar, FaWifi, FaTv, FaSnowflake, FaBath, FaSearch, FaFilter, FaBed, FaDollarSign, FaUsers, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import styles from './styles.module.css';
-import { getRooms, getRoomTypes } from '../../../lib/api';
-import { Room, RoomType } from '../../../types/auth';
+import { getRoomTypes } from '../../../lib/api';
+import { RoomType } from '../../../types/auth';
 import { API_BASE_URL } from '../../../lib/config';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';

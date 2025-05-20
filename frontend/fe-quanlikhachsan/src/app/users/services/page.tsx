@@ -1,11 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
 import { FaUser, FaSpa, FaUtensils, FaSwimmer, FaDumbbell, FaCar, FaWifi, FaCoffee, FaShoppingBag, FaClock, FaMapMarkerAlt, FaStar } from 'react-icons/fa';
 import styles from './styles.module.css';
-import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../../components/profile/LanguageContext';
 import i18n from '../../i18n';
 import { API_BASE_URL } from '../../../lib/config';
@@ -23,9 +21,7 @@ interface Service {
 }
 
 export default function ServicesPage() {
-  const { t } = useTranslation();
   const { selectedLanguage } = useLanguage();
-  const [isClient, setIsClient] = useState(false);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -39,7 +35,6 @@ export default function ServicesPage() {
   });
 
   useEffect(() => {
-    setIsClient(true);
     i18n.changeLanguage(selectedLanguage);
     fetchServices();
   }, [selectedLanguage]);
@@ -66,9 +61,9 @@ export default function ServicesPage() {
   };
 
   // Hàm định dạng tiền tệ an toàn
-  const formatCurrency = (value: any): string => {
+  const formatCurrency = (value: unknown): string => {
     // Chuyển đổi sang number nếu là string
-    const numValue = typeof value === 'string' ? parseFloat(value) : value;
+    const numValue = typeof value === 'string' ? parseFloat(value) : (value as number);
     
     // Kiểm tra giá trị hợp lệ
     if (isNaN(numValue) || numValue === null || numValue === undefined) {
@@ -160,7 +155,7 @@ export default function ServicesPage() {
   };
 
   // Hàm kiểm tra chuỗi an toàn trước khi dùng các phương thức length, substring
-  const safeString = (value: any): string => {
+  const safeString = (value: unknown): string => {
     if (value === null || value === undefined) return '';
     return String(value);
   };

@@ -3,28 +3,14 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { FaStar, FaHotel, FaUtensils, FaUsers, FaSwimmingPool, FaRing } from 'react-icons/fa';
+import { FaStar } from 'react-icons/fa';
 import styles from './styles.module.css';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../../../app/components/profile/LanguageContext';
 import i18n from '../../../app/i18n';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
-import { getRoomTypes, getPromotions } from '../../../lib/api';
-import { formatCurrency, formatDate, safeString } from '../../../lib/utils';
-
-// Định nghĩa interface cho RoomType
-interface RoomType {
-  maLoaiPhong: string;
-  tenLoaiPhong: string;
-  moTa?: string;
-  donGia?: number;
-  soNguoi?: number;
-  dienTich?: number;
-  hinhAnh?: string;
-  trangThai?: string;
-}
+import { getPromotions } from '../../../lib/api';
 
 // Định nghĩa interface cho Promotion
 interface Promotion {
@@ -43,13 +29,9 @@ interface Promotion {
 export default function Home() {
   const { t } = useTranslation();
   const { selectedLanguage } = useLanguage();
-  const [adults, setAdults] = useState(2);
-  const [children, setChildren] = useState(0);
   const [isReady, setIsReady] = useState(false);
-  const router = useRouter();
   
   // Thêm state cho dữ liệu từ API với kiểu dữ liệu đã định nghĩa
-  const [featuredRooms, setFeaturedRooms] = useState<RoomType[]>([]);
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -67,12 +49,6 @@ export default function Home() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Lấy danh sách loại phòng nổi bật
-      const roomTypesData = await getRoomTypes();
-      console.log('Dữ liệu roomTypes:', roomTypesData);
-      // Chỉ lấy 3 phòng đầu tiên để hiển thị
-      setFeaturedRooms(roomTypesData.slice(0, 3));
-      
       // Lấy danh sách khuyến mãi
       const promotionsData = await getPromotions();
       console.log('Dữ liệu promotions:', promotionsData);
@@ -121,44 +97,6 @@ export default function Home() {
   };
 
   if (!isReady) return null;
-
-  const services = [
-    {
-      title: t('home.luxuriousRoom'),
-      description: t('home.luxuriousRoomDesc'),
-      icon: <FaHotel />,
-      image: '/images/reviews/room.jpg',
-      link: '/users/rooms',
-    },
-    {
-      title: t('home.diverseCuisine'),
-      description: t('home.diverseCuisineDesc'),
-      icon: <FaUtensils />,
-      image: '/images/reviews/dining.jpg',
-      link: '/users/services',
-    },
-    {
-      title: t('home.fiveStarService'),
-      description: t('home.fiveStarServiceDesc'),
-      icon: <FaUsers />,
-      image: '/images/reviews/conference.jpg',
-      link: '/users/services',
-    },
-    {
-      title: t('home.specialOffers'),
-      description: t('home.specialOffersDesc'),
-      icon: <FaSwimmingPool />,
-      image: '/images/reviews/pool.jpg',
-      link: '/users/services',
-    },
-    {
-      title: t('home.specialOffers'),
-      description: t('home.specialOffersDesc'),
-      icon: <FaRing />,
-      image: '/images/reviews/wedding.jpg',
-      link: '/users/services',
-    },
-  ];
 
   return (
     <div className={styles.container}>
@@ -253,9 +191,9 @@ export default function Home() {
                   <div className={styles.offerContent}>
                     <h3>{promotion.tenKhuyenMai || 'Khuyến mãi đặc biệt'}</h3>
                     <p>
-                      {safeString(promotion.moTa).length > 100 
-                        ? safeString(promotion.moTa).substring(0, 100) + '...' 
-                        : safeString(promotion.moTa)}
+                      {promotion.moTa.length > 100 
+                        ? promotion.moTa.substring(0, 100) + '...' 
+                        : promotion.moTa}
                     </p>
                     <div className={styles.offerRating}>
                       <FaStar className={styles.starActive} />

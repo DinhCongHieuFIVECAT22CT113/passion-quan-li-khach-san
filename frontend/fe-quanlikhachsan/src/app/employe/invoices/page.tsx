@@ -1,5 +1,5 @@
 "use client";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { getEmployeeInvoices, createEmployeeInvoice, updateInvoiceStatus, getEmployeeBookings, getServices } from '../../../lib/api';
 
 interface Invoice {
@@ -27,6 +27,7 @@ interface Booking {
   customerName: string;
   roomId: string;
   roomName: string;
+  status?: string;
 }
 
 // Hàm định dạng số tùy chỉnh để tránh lỗi hydration
@@ -49,7 +50,6 @@ export default function InvoiceManager() {
     note: ""
   });
   const [serviceInput, setServiceInput] = useState({ serviceId: "", quantity: 1 });
-  const printRef = useRef<HTMLDivElement>(null);
 
   // Lấy dữ liệu từ API khi component được mount
   useEffect(() => {
@@ -69,14 +69,15 @@ export default function InvoiceManager() {
         const bookingsData = await getEmployeeBookings();
         // Chỉ lấy các đặt phòng chưa thanh toán
         const unpaidBookings = bookingsData.filter(
-          (b: any) => b.status !== 'Đã hủy' && b.status !== 'Đã trả phòng'
+          (b: Booking) => b.status !== 'Đã hủy' && b.status !== 'Đã trả phòng'
         );
         setBookings(unpaidBookings);
         
         setError(null);
-      } catch (err: any) {
-        console.error("Lỗi khi lấy dữ liệu:", err);
-        setError(err.message || "Không thể lấy dữ liệu");
+      } catch (err: unknown) {
+        const error = err as Error;
+        console.error("Lỗi khi lấy dữ liệu:", error);
+        setError(error.message || "Không thể lấy dữ liệu");
       } finally {
         setLoading(false);
       }
@@ -169,9 +170,10 @@ export default function InvoiceManager() {
       // Cập nhật trạng thái trong state
       setInvoices(invoices.map(i => i.id === id ? { ...i, status } : i));
       setError(null);
-    } catch (err: any) {
-      console.error("Lỗi khi cập nhật trạng thái hóa đơn:", err);
-      setError(err.message || "Không thể cập nhật trạng thái hóa đơn");
+    } catch (err: unknown) {
+      const error = err as Error;
+      console.error("Lỗi khi cập nhật trạng thái hóa đơn:", error);
+      setError(error.message || "Không thể cập nhật trạng thái hóa đơn");
     } finally {
       setLoading(false);
     }
@@ -222,9 +224,10 @@ export default function InvoiceManager() {
       // Đóng modal
       closeModal();
       
-    } catch (err: any) {
-      console.error("Lỗi khi tạo hóa đơn:", err);
-      setFormError(err.message || "Không thể tạo hóa đơn mới");
+    } catch (err: unknown) {
+      const error = err as Error;
+      console.error("Lỗi khi tạo hóa đơn:", error);
+      setFormError(error.message || "Không thể tạo hóa đơn mới");
     } finally {
       setLoading(false);
     }
