@@ -15,8 +15,8 @@ namespace be_quanlikhachsanapi.Controllers
         {
             _reviewRepo = reviewRepo;
         }
-
-        [HttpGet("Lấy danh sách tất cả đánh giá")]
+        // Lấy danh sách tất cả đánh giá
+        [HttpGet]
         [Consumes("multipart/form-data")]
         public IActionResult GetAll()
         {
@@ -27,7 +27,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(reviews);
         }
-        [HttpGet("Tìm đánh giá theo ID")]
+        // Lấy đánh giá theo ID
+        [HttpGet("{maReview}")]
         [Consumes("multipart/form-data")]
         public IActionResult GetByID(string MaReview)
         {
@@ -38,7 +39,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(review);
         }
-        [HttpPost("Tạo đánh giá mới")]
+        // Tạo đánh giá mới
+        [HttpPost]
         [Consumes("multipart/form-data")]
         public IActionResult CreateReview([FromForm] CreateReviewDto createReview)
         {
@@ -49,7 +51,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(review);
         }
-        [HttpPut("Cập nhật đánh giá")]
+        // Cập nhật đánh giá
+        [HttpPut("{maReview}")]
         [Consumes("multipart/form-data")]
         public IActionResult UpdateReview(string MaReview, [FromForm] UpdateReviewDto updateReview)
         {
@@ -59,8 +62,9 @@ namespace be_quanlikhachsanapi.Controllers
                 return NotFound("Không tìm thấy đánh giá với ID đã cho.");
             }
             return Ok(review);
-        }
-        [HttpDelete("Xóa đánh giá")]
+        }   
+        // Xóa đánh giá
+        [HttpDelete("{maReview}")]
         [Consumes("multipart/form-data")]
         public IActionResult DeleteReview(string MaReview)
         {

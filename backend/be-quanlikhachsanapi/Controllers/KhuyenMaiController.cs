@@ -16,7 +16,8 @@ namespace be_quanlikhachsanapi.Controllers
             _khuyenMaiRepo = khuyenMaiRepo;
         }
 
-        [HttpGet("Lấy danh sách tất cả khuyến mãi")]
+        // Lấy danh sách tất cả khuyến mãi
+        [HttpGet]
         [Consumes("multipart/form-data")]
         public IActionResult GetAll()
         {
@@ -27,8 +28,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(khuyenMais);
         }
-
-        [HttpGet("Tìm khuyến mãi theo ID")]
+        // Lấy khuyến mãi theo ID
+        [HttpGet("{maKhuyenMai}")]
         [Consumes("multipart/form-data")]   
         public IActionResult GetByID(string maKhuyenMai)
         {
@@ -39,8 +40,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(khuyenMai);
         }
-
-        [HttpPost("Tạo mã khuyến mãi mới")]
+        // Tạo mã khuyến mãi mới
+        [HttpPost]
         [Consumes("multipart/form-data")]
         public IActionResult CreateKhuyenMai([FromForm] CreateKhuyenMaiDTO createKhuyenMai)
         {
@@ -51,8 +52,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(khuyenMai);
         }
-
-        [HttpPut("Cập nhật mã khuyến mãi")]
+        // Cập nhật mã khuyến mãi
+        [HttpPut("{maKhuyenMai}")]
         [Consumes("multipart/form-data")]
         public IActionResult UpdateKhuyenMai(string maKhuyenMai, [FromForm] UpdateKhuyenMaiDTO updateKhuyenMai)
         {
@@ -63,7 +64,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(khuyenMai);
         }
-        [HttpPut("Cập nhật trạng thái mã khuyến mãi")]
+        // Cập nhật trạng thái mã khuyến mãi
+        [HttpPut("{maKhuyenMai}/trangthai")]
         [Consumes("multipart/form-data")]
         public IActionResult UpdateTrangThai(string maKhuyenMai, string trangThai)
         {
@@ -74,8 +76,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(khuyenMai);
         }
-
-        [HttpDelete("Xóa mã khuyến mãi")]
+        // Xóa mã khuyến mãi
+        [HttpDelete("{maKhuyenMai}")]
         [Consumes("multipart/form-data")]
         public IActionResult DeleteKhuyenMai(string maKhuyenMai)
         {

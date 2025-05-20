@@ -18,7 +18,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// <summary>
         /// Lấy danh sách tất cả hóa đơn
         /// </summary>
-        [HttpGet("Lấy danh sách tất cả hóa đơn")]
+        [HttpGet]
         [Consumes("multipart/form-data")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -35,7 +35,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// <summary>
         /// Lấy thông tin hóa đơn theo mã
         /// </summary>
-        [HttpGet("Tìm hóa đơn theo ID")]
+        [HttpGet("{maHoaDon}")]
         [Consumes("multipart/form-data")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -52,7 +52,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// <summary>
         /// Lấy thông tin hóa đơn theo mã đặt phòng
         /// </summary>
-        [HttpGet("Tìm hóa đơn theo mã đặt phòng")]
+        [HttpGet("datphong/{maDatPhong}")]
         [Consumes("multipart/form-data")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -69,7 +69,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// <summary>
         /// Tạo mới hóa đơn
         /// </summary>
-        [HttpPost("Tạo hóa đơn mới")]
+        [HttpPost]
         [Consumes("multipart/form-data")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -90,7 +90,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// <summary>
         /// Cập nhật thông tin hóa đơn
         /// </summary>
-        [HttpPut("Cập nhật hóa đơn")]
+        [HttpPut("{maHoaDon}")]
         [Consumes("multipart/form-data")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -116,7 +116,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// <summary>
         /// Cập nhật trạng thái hóa đơn
         /// </summary>
-        [HttpPut("Cập nhật trạng thái hóa đơn")]
+        [HttpPut("{maHoaDon}/trangthai")]
         [Consumes("multipart/form-data")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -134,7 +134,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// <summary>
         /// Xóa hóa đơn
         /// </summary>
-        [HttpDelete("Xóa hóa đơn")]
+        [HttpDelete("{maHoaDon}")]
         [Consumes("multipart/form-data")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -151,7 +151,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// <summary>
         /// Tính tổng doanh thu theo tháng và năm
         /// </summary>
-        [HttpGet("Tính tổng doanh thu")]
+        [HttpGet("doanhthu?thang={thang}&nam={nam}")]
         [Consumes("multipart/form-data")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> TinhTongDoanhThu(int thang, int nam)

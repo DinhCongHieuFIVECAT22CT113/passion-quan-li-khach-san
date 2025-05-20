@@ -15,8 +15,8 @@ namespace be_quanlikhachsanapi.Controllers
         {
             _loaiKhachHangRepo = loaiKhachHangRepo;
         }
-
-        [HttpGet("Lấy danh sách tất cả loại khách hàng")]
+        // Lấy danh sách tất cả loại khách hàng
+        [HttpGet]
         [Consumes("multipart/form-data")]
         public IActionResult GetAll()
         {
@@ -27,7 +27,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(loaiKhachHangs);
         }
-        [HttpGet("Tìm loại khách hàng theo ID")]
+        // Lấy loại khách hàng theo ID
+        [HttpGet("{maLoaiKh}")]
         [Consumes("multipart/form-data")]
         public IActionResult GetByID(string maLoaiKh)
         {
@@ -38,7 +39,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(loaiKhachHang);
         }
-        [HttpPost("Tạo loại khách hàng mới")]
+        // Tạo loại khách hàng mới
+        [HttpPost]
         [Consumes("multipart/form-data")]
         public IActionResult CreateLoaiKhachHang([FromForm] CreateLoaiKhachHangDto createLoaiKhachHang)
         {
@@ -49,7 +51,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(loaiKhachHang);
         }
-        [HttpPut("Cập nhật loại khách hàng")]
+        // Cập nhật loại khách hàng
+        [HttpPut("{maLoaiKh}")]
         [Consumes("multipart/form-data")]
         public IActionResult UpdateLoaiKhachHang(string maLoaiKh, [FromForm] UpdateLoaiKhachHangDto updateLoaiKhachHang)
         {
@@ -60,7 +63,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(loaiKhachHang);
         }
-        [HttpDelete("Xóa loại khách hàng")]
+        // Xóa loại khách hàng
+        [HttpDelete("{maLoaiKh}")]
         [Consumes("multipart/form-data")]
         public IActionResult DeleteLoaiKhachHang(string maLoaiKh)
         {

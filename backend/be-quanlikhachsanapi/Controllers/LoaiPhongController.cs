@@ -15,8 +15,8 @@ namespace be_quanlikhachsanapi.Controllers
         {
             _loaiPhongRepo = loaiPhongRepo;
         }
-
-        [HttpGet("Lấy danh sách tất cả loại phòng")]
+        // Lấy danh sách tất cả loại phòng
+        [HttpGet]
         public IActionResult GetAll()
         {
             var loaiPhongs = _loaiPhongRepo.GetAll();
@@ -26,8 +26,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(loaiPhongs);
         }
-
-        [HttpGet("Tìm loại phòng theo ID")]
+        // Lấy loại phòng theo ID
+        [HttpGet("{maLoaiPhong}")]
         public IActionResult GetByID(string maLoaiPhong)
         {
             var loaiPhong = _loaiPhongRepo.GetLoaiPhongById(maLoaiPhong);
@@ -37,8 +37,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(loaiPhong);
         }
-
-        [HttpPost("Tạo loại phòng mới")]
+        // Tạo loại phòng mới
+        [HttpPost]
         [Consumes("multipart/form-data")]
         public IActionResult CreateLoaiPhong([FromForm] CreateLoaiPhongDTO createLoaiPhong)
         {
@@ -49,8 +49,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(loaiPhong);
         }
-
-        [HttpPut("Cập nhật loại phòng")]
+        // Cập nhật loại phòng
+        [HttpPut("{maLoaiPhong}")]
         [Consumes("multipart/form-data")]
         public IActionResult UpdateLoaiPhong(string maLoaiPhong, [FromForm] UpdateLoaiPhongDTO updateLoaiPhong)
         {
@@ -61,8 +61,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(loaiPhong);
         }
-
-        [HttpDelete("Xóa loại phòng")]
+        // Xóa loại phòng
+        [HttpDelete("{maLoaiPhong}")]
         [Consumes("multipart/form-data")]
         public IActionResult DeleteLoaiPhong(string maLoaiPhong)
         {

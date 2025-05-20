@@ -16,7 +16,8 @@ namespace be_quanlikhachsanapi.Controllers
             _chiTietDatPhongRepo = chiTietDatPhongRepo;
         }
 
-        [HttpGet("Lấy danh sách tất cả chi tiết đặt phòng")]
+        // Lấy danh sách tất cả chi tiết đặt phòng
+        [HttpGet]
         [Consumes("multipart/form-data")]
         public IActionResult GetAll()
         {
@@ -27,7 +28,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(chiTietDatPhongs);
         }
-        [HttpGet("Tìm chi tiết đặt phòng theo ID")]
+        // Tìm chi tiết đặt phòng theo ID
+        [HttpGet("{maChiTietDatPhong}")]
         [Consumes("multipart/form-data")]
         public IActionResult GetByID(string MaChiTietDatPhong)
         {
@@ -38,7 +40,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(chiTietDatPhong);
         }
-        [HttpPost("Tạo chi tiết đặt phòng mới")]
+        // Tạo chi tiết đặt phòng mới
+        [HttpPost]
         [Consumes("multipart/form-data")]
         public IActionResult CreateChiTietDatPhong([FromForm] CreateChiTietDatPhongDto createChiTietDatPhong)
         {
@@ -49,7 +52,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(chiTietDatPhong);
         }
-        [HttpPut("Cập nhật chi tiết đặt phòng")]
+        // Cập nhật chi tiết đặt phòng
+        [HttpPut("{maChiTietDatPhong}")]
         [Consumes("multipart/form-data")]
         public IActionResult UpdateChiTietDatPhong(string MaChiTietDatPhong, [FromForm] UpdateChiTietDatPhongDto updateChiTietDatPhong)
         {
@@ -60,7 +64,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(chiTietDatPhong);
         }
-        [HttpPut("Cập nhật trạng thái chi tiết đặt phòng")]
+        // Cập nhật trạng thái chi tiết đặt phòng
+        [HttpPut("{maChiTietDatPhong}/trangthai")]
         [Consumes("multipart/form-data")]
         public IActionResult UpdateTrangThai(string MaChiTietDatPhong, string TrangThai)
         {
@@ -71,8 +76,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(chiTietDatPhong);
         }
-        
-        [HttpDelete("Xóa chi tiết đặt phòng")]
+        // Xóa chi tiết đặt phòng
+        [HttpDelete("{maChiTietDatPhong}")]
         [Consumes("multipart/form-data")]
         public IActionResult DeleteChiTietDatPhong(string MaChiTietDatPhong)
         {

@@ -18,7 +18,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// <summary>
         /// Lấy danh sách tất cả phương thức thanh toán
         /// </summary>
-        [HttpGet("Lấy danh sách tất cả phương thức thanh toán")]
+        [HttpGet]
         [Consumes("multipart/form-data")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -48,7 +48,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// <summary>
         /// Lấy thông tin phương thức thanh toán theo mã
         /// </summary>
-        [HttpGet("Tìm phương thức thanh toán theo ID")]
+        [HttpGet("{maPhuongThucThanhToan}")]
         [Consumes("multipart/form-data")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -65,7 +65,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// <summary>
         /// Lấy danh sách phương thức thanh toán theo mã hóa đơn
         /// </summary>
-        [HttpGet("Tìm phương thức thanh toán theo mã hóa đơn")]
+        [HttpGet("HoaDon/{maHoaDon}")]
         [Consumes("multipart/form-data")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -82,7 +82,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// <summary>
         /// Tạo mới phương thức thanh toán
         /// </summary>
-        [HttpPost("Tạo phương thức thanh toán mới")]
+        [HttpPost]
         [Consumes("multipart/form-data")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -103,7 +103,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// <summary>
         /// Cập nhật thông tin phương thức thanh toán
         /// </summary>
-        [HttpPut("Cập nhật phương thức thanh toán")]
+        [HttpPut("{maPhuongThucThanhToan}")]
         [Consumes("multipart/form-data")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -129,7 +129,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// <summary>
         /// Cập nhật trạng thái phương thức thanh toán
         /// </summary>
-        [HttpPut("Cập nhật trạng thái phương thức thanh toán")]
+        [HttpPut("{maPhuongThucThanhToan}/trangThai")]
         [Consumes("multipart/form-data")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -147,7 +147,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// <summary>
         /// Xóa phương thức thanh toán
         /// </summary>
-        [HttpDelete("Xóa phương thức thanh toán")]
+        [HttpDelete("{maPhuongThucThanhToan}")]
         [Consumes("multipart/form-data")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

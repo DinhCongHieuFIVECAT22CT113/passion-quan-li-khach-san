@@ -16,7 +16,8 @@ namespace be_quanlikhachsanapi.Controllers
             _khachHangRepo = khachHangRepo;
         }
 
-        [HttpGet("Lấy danh sách tất cả khách hàng")]
+        // Lấy danh sách tất cả khách hàng
+        [HttpGet]
         [Consumes("multipart/form-data")]
         public IActionResult GetAll()
         {
@@ -27,8 +28,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(khachHangs);
         }
-
-        [HttpGet("Tìm khách hàng theo ID")]
+        // Tìm khách hàng theo ID
+        [HttpGet("{maKh}")]
         [Consumes("multipart/form-data")]
         public IActionResult GetByID(string maKh)
         {
@@ -39,8 +40,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(khachHang);
         }
-
-        [HttpPost("Tạo khách hàng mới")]
+        //Tao khách hàng mới
+        [HttpPost]
         [Consumes("multipart/form-data")]
         public IActionResult CreateKhachHang([FromForm] CreateKhachHangDto createKhachHang)
         {
@@ -51,8 +52,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(khachHang);
         }
-
-        [HttpPut("Cập nhật khách hàng")]
+        // Cập nhật khách hàng
+        [HttpPut("{maKh}")]
         [Consumes("multipart/form-data")]
         public IActionResult UpdateKhachHang(string maKh, [FromForm] UpdateKhachHangDto updateKhachHang)
         {
@@ -63,8 +64,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(khachHang);
         }
-
-        [HttpDelete("Xóa khách hàng")]
+        // Xóa khách hàng
+        [HttpDelete("{maKh}")]
         [Consumes("multipart/form-data")]
         public IActionResult DeleteKhachHang(string maKh)
         {
@@ -75,7 +76,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(khachHang);
         }
-        [HttpPut("Cập nhật loại khách hàng")]
+        // Cập nhật loại khách hàng
+        [HttpPut("{maKh}/loaiKhachHang/{maLoaiKh}")]
         [Consumes("multipart/form-data")]
         public IActionResult UpdateLoaiKhachHang(string maKh, string maLoaiKh)
         {

@@ -41,7 +41,7 @@ public class AuthController : ControllerBase
         _confMail = confMail;
     }
 
-    [HttpPost("Đăng ký")]
+    [HttpPost("register")]
     [Consumes("multipart/form-data")]
     public async Task<ActionResult<UserDto>> Register([FromForm] RegisterDto registerDto)
     {
@@ -135,7 +135,7 @@ public class AuthController : ControllerBase
         };
     }
 
-    [HttpPost("Đăng nhập")]
+    [HttpPost("login")]
     [Consumes("multipart/form-data")]
     public async Task<ActionResult<UserDto>> Login([FromForm] LoginDto loginDto)
     {
@@ -184,7 +184,7 @@ public class AuthController : ControllerBase
         };
     }
 
-    [HttpPost("Đổi mật khẩu")]
+    [HttpPut("change-password")]
     [Consumes("multipart/form-data")]
     public async Task<ActionResult<UserDto>> ChangePassword([FromForm] ChangePassDto changePassDto)
     {
@@ -248,7 +248,7 @@ public class AuthController : ControllerBase
         };
     }
 
-    [HttpPost("Khôi phục mật khẩu")]
+    [HttpPost("reset-password")]
     [Consumes("multipart/form-data")]
     public async Task<ActionResult<UserDto>> ResetPassword([FromForm] ResetPassDto resetPassDto)
     {
