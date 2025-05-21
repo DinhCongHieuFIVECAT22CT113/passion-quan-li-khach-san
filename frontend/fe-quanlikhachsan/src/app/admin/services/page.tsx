@@ -1,22 +1,22 @@
 'use client';
 import React, { useState, useEffect } from "react";
 import styles from "./ServiceManager.module.css";
-import { getServices } from "../../../lib/api";
-import { API_BASE_URL } from '../../../lib/config';
+import { API_BASE_URL } from '@/lib/config';
+import { getAuthHeaders, getFormDataHeaders, handleResponse } from '@/lib/api';
 
 interface Service {
-  maDichVu: string;
-  tenDichVu: string;
-  loaiDichVu: string;
-  giaTien: number;
-  moTa?: string;
+  serviceId: string;
+  serviceName: string;
+  serviceType: string;
+  price: number;
+  description?: string;
 }
 
 export default function ServiceManager() {
   const [services, setServices] = useState<Service[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
-  const [form, setForm] = useState<Service>({ maDichVu: "", tenDichVu: "", loaiDichVu: "", giaTien: 0, moTa: "" });
+  const [form, setForm] = useState<Service>({ serviceId: "", serviceName: "", serviceType: "", price: 0, description: "" });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,18 +26,20 @@ export default function ServiceManager() {
       setIsLoading(true);
       setError(null);
       try {
-        // Lấy danh sách dịch vụ
-        const data = await getServices();
-        // Đảm bảo giaTien luôn là số
-        const servicesWithSafePrice = data.map((service: Service) => ({
-          ...service,
-          giaTien: service.giaTien || 0
-        }));
-        setServices(servicesWithSafePrice);
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error("Bạn cần đăng nhập để xem dữ liệu");
+        
+        const response = await fetch(`${API_BASE_URL}/DichVu`, {
+          method: 'GET',
+          headers: getAuthHeaders('GET'),
+          credentials: 'include'
+        });
+        
+        const data = await handleResponse(response);
+        setServices(data);
       } catch (err) {
-        const error = err as Error;
-        setError(error.message || "Có lỗi xảy ra khi tải dữ liệu");
-        console.error("Error fetching services:", error);
+        console.error('Lỗi khi lấy danh sách dịch vụ:', err);
+        setError('Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại sau.');
       } finally {
         setIsLoading(false);
       }
@@ -48,7 +50,7 @@ export default function ServiceManager() {
 
   // Mở modal Thêm mới
   const openAddModal = () => {
-    setForm({ maDichVu: "", tenDichVu: "", loaiDichVu: "", giaTien: 0, moTa: "" });
+    setForm({ serviceId: "", serviceName: "", serviceType: "", price: 0, description: "" });
     setEditingService(null);
     setShowModal(true);
   };
@@ -64,23 +66,23 @@ export default function ServiceManager() {
   const closeModal = () => {
     setShowModal(false);
     setEditingService(null);
-    setForm({ maDichVu: "", tenDichVu: "", loaiDichVu: "", giaTien: 0, moTa: "" });
+    setForm({ serviceId: "", serviceName: "", serviceType: "", price: 0, description: "" });
   };
 
   // Xử lý thay đổi input
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setForm({ ...form, [name]: name === 'giaTien' ? Number(value) : value });
+    setForm({ ...form, [name]: name === 'price' ? Number(value) : value });
   };
 
   // Xác nhận xóa dịch vụ
-  const handleDelete = async (maDichVu: string) => {
+  const handleDelete = async (serviceId: string) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa dịch vụ này?')) {
       try {
         const token = localStorage.getItem('token');
         if (!token) throw new Error("Bạn cần đăng nhập để thực hiện hành động này");
         
-        const response = await fetch(`${API_BASE_URL}/DichVu/Xóa dịch vụ?id=${maDichVu}`, {
+        const response = await fetch(`${API_BASE_URL}/DichVu/${serviceId}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -95,7 +97,7 @@ export default function ServiceManager() {
         }
         
         // Cập nhật danh sách dịch vụ sau khi xóa
-        setServices(services.filter(service => service.maDichVu !== maDichVu));
+        setServices(services.filter(service => service.serviceId !== serviceId));
       } catch (err) {
         const error = err as Error;
         alert(`Lỗi: ${error.message}`);
@@ -112,10 +114,10 @@ export default function ServiceManager() {
       const token = localStorage.getItem('token');
       if (!token) throw new Error("Bạn cần đăng nhập để thực hiện hành động này");
       
-      // Đảm bảo giaTien là số
+      // Đảm bảo price là số
       const normalizedForm = {
         ...form,
-        giaTien: Number(form.giaTien) || 0
+        price: Number(form.price) || 0
       };
       
       const formData = new FormData();
@@ -127,7 +129,7 @@ export default function ServiceManager() {
       
       if (editingService) {
         // Cập nhật dịch vụ
-        response = await fetch(`${API_BASE_URL}/DichVu/Cập nhật dịch vụ`, {
+        response = await fetch(`${API_BASE_URL}/DichVu/${editingService.serviceId}`, {
           method: 'PUT',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -137,7 +139,7 @@ export default function ServiceManager() {
         });
       } else {
         // Thêm dịch vụ mới
-        response = await fetch(`${API_BASE_URL}/DichVu/Tạo dịch vụ mới`, {
+        response = await fetch(`${API_BASE_URL}/DichVu`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -153,13 +155,13 @@ export default function ServiceManager() {
       }
       
       // Lấy lại danh sách dịch vụ
-      const updatedServices = await getServices();
-      const servicesWithSafePrice = updatedServices.map((service: Service) => ({
-        ...service,
-        giaTien: service.giaTien || 0
-      }));
-      
-      setServices(servicesWithSafePrice);
+      const updatedServices = await fetch(`${API_BASE_URL}/DichVu`, {
+        method: 'GET',
+        headers: getAuthHeaders('GET'),
+        credentials: 'include'
+      });
+      const data = await handleResponse(updatedServices);
+      setServices(data);
       closeModal();
     } catch (err) {
       const error = err as Error;
@@ -198,15 +200,15 @@ export default function ServiceManager() {
                 </tr>
               ) : (
                 services.map(service => (
-                  <tr key={service.maDichVu}>
-                    <td>{service.maDichVu}</td>
-                    <td>{service.tenDichVu}</td>
-                    <td>{service.loaiDichVu}</td>
-                    <td>{service.giaTien === 0 ? <span className={styles.priceFree}>Miễn phí</span> : (service.giaTien || 0).toLocaleString()}</td>
-                    <td>{service.moTa || "-"}</td>
+                  <tr key={`service-${service.serviceId}`}>
+                    <td>{service.serviceId}</td>
+                    <td>{service.serviceName}</td>
+                    <td>{service.serviceType}</td>
+                    <td>{service.price === 0 ? <span className={styles.priceFree}>Miễn phí</span> : (service.price || 0).toLocaleString()}</td>
+                    <td>{service.description || "-"}</td>
                     <td>
                       <button className={styles.editBtn} onClick={() => openEditModal(service)}>Sửa</button>
-                      <button className={styles.deleteBtn} onClick={() => handleDelete(service.maDichVu)}>Xóa</button>
+                      <button className={styles.deleteBtn} onClick={() => handleDelete(service.serviceId)}>Xóa</button>
                     </td>
                   </tr>
                 ))
@@ -223,19 +225,19 @@ export default function ServiceManager() {
             <form onSubmit={handleSubmit}>
               <div>
                 <label>Tên dịch vụ:</label>
-                <input name="tenDichVu" value={form.tenDichVu} onChange={handleChange} placeholder="Tên dịch vụ" required />
+                <input name="serviceName" value={form.serviceName} onChange={handleChange} placeholder="Tên dịch vụ" required />
               </div>
               <div>
                 <label>Loại:</label>
-                <input name="loaiDichVu" value={form.loaiDichVu} onChange={handleChange} placeholder="Loại dịch vụ" required />
+                <input name="serviceType" value={form.serviceType} onChange={handleChange} placeholder="Loại dịch vụ" required />
               </div>
               <div>
                 <label>Giá (VNĐ):</label>
-                <input name="giaTien" type="number" value={form.giaTien} onChange={handleChange} placeholder="Giá" required min={0} />
+                <input name="price" type="number" value={form.price} onChange={handleChange} placeholder="Giá" required min={0} />
               </div>
               <div>
                 <label>Mô tả:</label>
-                <textarea name="moTa" value={form.moTa} onChange={handleChange} placeholder="Mô tả dịch vụ" rows={3} />
+                <textarea name="description" value={form.description} onChange={handleChange} placeholder="Mô tả dịch vụ" rows={3} />
               </div>
               <div className={styles.buttonGroup}>
                 <button type="submit" className={styles.addBtn}>{editingService ? 'Lưu' : 'Thêm'}</button>

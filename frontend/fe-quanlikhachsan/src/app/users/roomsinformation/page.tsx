@@ -4,36 +4,37 @@ import { useLanguage } from '../../../app/components/profile/LanguageContext';
 import i18n from '../../../app/i18n';
 import { useEffect, useState, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { API_BASE_URL } from '../../../lib/config';
+import { API_BASE_URL } from '@/lib/config';
+import { getAuthHeaders, handleResponse } from '@/lib/api';
 import Header from '../../components/layout/Header';
 import styles from './styles.module.css';
 import Image from 'next/image';
 import { FaStar, FaStarHalfAlt, FaWifi, FaSnowflake, FaTv, FaWineBottle, FaLock, FaBath, FaWater, FaPhone, FaDesktop, FaCoffee } from 'react-icons/fa';
 
 interface Review {
-  maReview: string;
-  maDatPhong: string;
-  danhGia: number;
-  binhLuan: string;
-  tenKhachHang?: string;
+  reviewId: string;
+  bookingId: string;
+  rating: number;
+  comment: string;
+  customerName?: string;
   avatar?: string;
-  ngayDanhGia?: string;
+  reviewDate?: string;
 }
 
-interface LoaiPhong {
-  maLoaiPhong: string;
-  tenLoaiPhong: string;
-  moTa: string;
-  giaMoiGio: number;
-  giaMoiDem: number;
-  soPhongTam: number;
-  soGiuongNgu: number;
-  giuongDoi: number;
-  giuongDon: number;
-  kichThuocPhong: number;
-  sucChua: number;
+interface RoomType {
+  roomTypeId: string;
+  roomTypeName: string;
+  description: string;
+  pricePerHour: number;
+  pricePerNight: number;
+  bathroomCount: number;
+  bedCount: number;
+  doubleBeds: number;
+  singleBeds: number;
+  roomSize: number;
+  capacity: number;
   thumbnail: string;
-  tienNghi?: string[];
+  amenities?: string[];
   galleryImages?: string[];
   reviews?: Review[];
 }
@@ -44,7 +45,7 @@ export default function RoomInformationPage() {
   const router = useRouter();
   const roomId = searchParams?.get('id');
   
-  const [roomType, setRoomType] = useState<LoaiPhong | null>(null);
+  const [roomType, setRoomType] = useState<RoomType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -96,7 +97,7 @@ export default function RoomInformationPage() {
       // Thêm dữ liệu mẫu cho gallery và tiện nghi
       data = {
         ...data,
-        tienNghi: [
+        amenities: [
           'WiFi miễn phí',
           'Điều hòa nhiệt độ',
           'TV màn hình phẳng',
@@ -136,31 +137,31 @@ export default function RoomInformationPage() {
       // Hiện tại lấy tất cả reviews và sử dụng mock data
       const mockReviews = [
         {
-          maReview: '1',
-          maDatPhong: 'DP001',
-          danhGia: 5,
-          binhLuan: 'Phòng rất thoải mái và sạch sẽ. Dịch vụ tuyệt vời!',
-          tenKhachHang: 'Nguyễn Văn A',
+          reviewId: '1',
+          bookingId: 'DP001',
+          rating: 5,
+          comment: 'Phòng rất thoải mái và sạch sẽ. Dịch vụ tuyệt vời!',
+          customerName: 'Nguyễn Văn A',
           avatar: '/images/members/member1.jpg',
-          ngayDanhGia: '2023-10-15'
+          reviewDate: '2023-10-15'
         },
         {
-          maReview: '2',
-          maDatPhong: 'DP002',
-          danhGia: 4,
-          binhLuan: 'Phòng đẹp, view tuyệt vời. Chỉ có điều hơi ồn một chút từ đường phố.',
-          tenKhachHang: 'Trần Thị B',
+          reviewId: '2',
+          bookingId: 'DP002',
+          rating: 4,
+          comment: 'Phòng đẹp, view tuyệt vời. Chỉ có điều hơi ồn một chút từ đường phố.',
+          customerName: 'Trần Thị B',
           avatar: '/images/members/member2.jpg',
-          ngayDanhGia: '2023-09-22'
+          reviewDate: '2023-09-22'
         },
         {
-          maReview: '3',
-          maDatPhong: 'DP003',
-          danhGia: 5,
-          binhLuan: 'Một trong những phòng khách sạn tốt nhất mà tôi từng ở. Sẽ quay lại lần sau!',
-          tenKhachHang: 'Lê Văn C',
+          reviewId: '3',
+          bookingId: 'DP003',
+          rating: 5,
+          comment: 'Một trong những phòng khách sạn tốt nhất mà tôi từng ở. Sẽ quay lại lần sau!',
+          customerName: 'Lê Văn C',
           avatar: '/images/members/member3.jpg',
-          ngayDanhGia: '2023-08-30'
+          reviewDate: '2023-08-30'
         }
       ];
       
@@ -220,14 +221,14 @@ export default function RoomInformationPage() {
       <Header />
       <div className={styles.roomInformationContainer}>
         <div className={styles.container}>
-          <h1 className={styles.roomTitle}>{roomType.tenLoaiPhong}</h1>
+          <h1 className={styles.roomTitle}>{roomType.roomTypeName}</h1>
           
           <div className={styles.roomGallery}>
             {roomType.galleryImages?.map((img, index) => (
               <div key={index} className={index === 0 ? styles.mainImage : styles.thumbnailImage}>
                 <Image 
                   src={img.startsWith('http') ? img : img} 
-                  alt={`${roomType.tenLoaiPhong} - Ảnh ${index + 1}`}
+                  alt={`${roomType.roomTypeName} - Ảnh ${index + 1}`}
                   width={index === 0 ? 800 : 200}
                   height={index === 0 ? 500 : 150}
                   className={styles.galleryImage}
@@ -242,42 +243,42 @@ export default function RoomInformationPage() {
               <div className={styles.roomFeatures}>
                 <div className={styles.feature}>
                   <span className={styles.featureLabel}>Diện tích:</span>
-                  <span className={styles.featureValue}>{roomType.kichThuocPhong}m²</span>
+                  <span className={styles.featureValue}>{roomType.roomSize}m²</span>
                 </div>
                 <div className={styles.feature}>
                   <span className={styles.featureLabel}>Sức chứa:</span>
-                  <span className={styles.featureValue}>{roomType.sucChua} người</span>
+                  <span className={styles.featureValue}>{roomType.capacity} người</span>
                 </div>
                 <div className={styles.feature}>
                   <span className={styles.featureLabel}>Số giường:</span>
                   <span className={styles.featureValue}>
-                    {roomType.giuongDoi} giường đôi, {roomType.giuongDon} giường đơn
+                    {roomType.doubleBeds} giường đôi, {roomType.singleBeds} giường đơn
                   </span>
                 </div>
                 <div className={styles.feature}>
                   <span className={styles.featureLabel}>Phòng tắm:</span>
-                  <span className={styles.featureValue}>{roomType.soPhongTam}</span>
+                  <span className={styles.featureValue}>{roomType.bathroomCount}</span>
                 </div>
                 <div className={styles.feature}>
                   <span className={styles.featureLabel}>Giá theo giờ:</span>
-                  <span className={styles.featureValue}>{roomType.giaMoiGio.toLocaleString('vi-VN')} VNĐ/giờ</span>
+                  <span className={styles.featureValue}>{roomType.pricePerHour.toLocaleString('vi-VN')} VNĐ/giờ</span>
                 </div>
                 <div className={styles.feature}>
                   <span className={styles.featureLabel}>Giá theo đêm:</span>
-                  <span className={styles.featureValue}>{roomType.giaMoiDem.toLocaleString('vi-VN')} VNĐ/đêm</span>
+                  <span className={styles.featureValue}>{roomType.pricePerNight.toLocaleString('vi-VN')} VNĐ/đêm</span>
                 </div>
               </div>
               
               <div className={styles.roomDescription}>
                 <h3>Mô tả</h3>
-                <p>{roomType.moTa || 'Không có mô tả cho loại phòng này.'}</p>
+                <p>{roomType.description || 'Không có mô tả cho loại phòng này.'}</p>
               </div>
             </div>
             
             <div className={styles.amenities}>
               <h3>Tiện nghi</h3>
               <ul className={styles.amenitiesList}>
-                {roomType.tienNghi?.map((amenity, index) => (
+                {roomType.amenities?.map((amenity, index) => (
                   <li key={index} className={styles.amenityItem}>
                     <span className={styles.amenityIcon}>{renderAmenityIcon(amenity)}</span>
                     <span className={styles.amenityName}>{amenity}</span>
@@ -291,7 +292,7 @@ export default function RoomInformationPage() {
             <h2>Đặt phòng</h2>
             <button 
               className={styles.bookButton}
-              onClick={() => router.push(`/users/booking?roomTypeId=${roomType.maLoaiPhong}`)}
+              onClick={() => router.push(`/users/booking?roomTypeId=${roomType.roomTypeId}`)}
             >
               Đặt phòng ngay
             </button>
@@ -302,29 +303,29 @@ export default function RoomInformationPage() {
             <div className={styles.reviewsList}>
               {reviews.length > 0 ? (
                 reviews.map((review) => (
-                  <div key={review.maReview} className={styles.reviewItem}>
+                  <div key={review.reviewId} className={styles.reviewItem}>
                     <div className={styles.reviewHeader}>
                       <div className={styles.reviewerInfo}>
                         {review.avatar && (
                           <Image 
                             src={review.avatar} 
-                            alt={review.tenKhachHang || 'Khách hàng'}
+                            alt={review.customerName || 'Khách hàng'}
                             width={50}
                             height={50}
                             className={styles.reviewerAvatar}
                           />
                         )}
                         <div>
-                          <p className={styles.reviewerName}>{review.tenKhachHang || 'Khách hàng'}</p>
-                          <p className={styles.reviewDate}>{review.ngayDanhGia}</p>
+                          <p className={styles.reviewerName}>{review.customerName || 'Khách hàng'}</p>
+                          <p className={styles.reviewDate}>{review.reviewDate}</p>
                         </div>
                       </div>
                       <div className={styles.reviewRating}>
-                        {renderRating(review.danhGia)}
+                        {renderRating(review.rating)}
                       </div>
                     </div>
                     <div className={styles.reviewContent}>
-                      <p>{review.binhLuan}</p>
+                      <p>{review.comment}</p>
                     </div>
                   </div>
                 ))

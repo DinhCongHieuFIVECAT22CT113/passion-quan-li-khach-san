@@ -46,7 +46,7 @@ const LoginForm: React.FC = () => {
       try {
         // Gọi API đăng nhập trực tiếp đến backend
         console.log(`Đang thử đăng nhập với tài khoản: ${userName}`);
-        console.log(`URL backend: ${API_BASE_URL}/Auth/Đăng nhập`);
+        console.log(`URL backend: ${API_BASE_URL}/Auth/login`);
         
         const userData = await loginUser({ userName, password });
         

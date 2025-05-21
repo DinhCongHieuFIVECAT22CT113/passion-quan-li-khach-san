@@ -42,33 +42,20 @@ export default function PromotionManager() {
       setIsLoading(true);
       setError(null);
       try {
-        const data = await getPromotions();
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error("Bạn cần đăng nhập để xem dữ liệu");
         
-        // Chuyển đổi dữ liệu API sang định dạng cho giao diện
-        const formattedData = data.map((promo: Promotion) => {
-          // Tính toán trạng thái dựa trên ngày
-          const now = new Date();
-          const startDate = new Date(promo.ngayBatDau);
-          const endDate = new Date(promo.ngayKetThuc);
-          
-          let trangThai: 'Đang áp dụng' | 'Đã hết hạn' | 'Sắp diễn ra' = 'Đang áp dụng';
-          if (now < startDate) {
-            trangThai = 'Sắp diễn ra';
-          } else if (now > endDate) {
-            trangThai = 'Đã hết hạn';
-          }
-          
-          return {
-            ...promo,
-            trangThai
-          };
+        const response = await fetch(`${API_BASE_URL}/KhuyenMai`, {
+          method: 'GET',
+          headers: getAuthHeaders('GET'),
+          credentials: 'include'
         });
         
-        setPromotions(formattedData);
+        const data = await handleResponse(response);
+        setPromotions(data);
       } catch (err) {
-        const error = err as Error;
-        setError(error.message || "Có lỗi xảy ra khi tải dữ liệu khuyến mãi");
-        console.error("Error fetching promotions:", error);
+        console.error('Lỗi khi lấy danh sách khuyến mãi:', err);
+        setError('Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại sau.');
       } finally {
         setIsLoading(false);
       }
@@ -127,7 +114,7 @@ export default function PromotionManager() {
         }
       }
       
-      const response = await fetch(`${API_BASE_URL}/KhuyenMai/Tạo khuyến mãi mới`, {
+      const response = await fetch(`${API_BASE_URL}/KhuyenMai`, {
         method: 'POST',
         headers: getFormDataHeaders(),
         body: formData,
@@ -181,7 +168,7 @@ export default function PromotionManager() {
         }
       }
       
-      const response = await fetch(`${API_BASE_URL}/KhuyenMai/Cập nhật khuyến mãi`, {
+      const response = await fetch(`${API_BASE_URL}/KhuyenMai`, {
         method: 'PUT',
         headers: getFormDataHeaders(),
         body: formData,
@@ -226,7 +213,7 @@ export default function PromotionManager() {
       const token = localStorage.getItem('token');
       if (!token) throw new Error("Bạn cần đăng nhập để thực hiện hành động này");
       
-      const response = await fetch(`${API_BASE_URL}/KhuyenMai/Xóa khuyến mãi?maKM=${maKM}`, {
+      const response = await fetch(`${API_BASE_URL}/KhuyenMai/${maKM}`, {
         method: 'DELETE',
         headers: getAuthHeaders('DELETE'),
         credentials: 'include',

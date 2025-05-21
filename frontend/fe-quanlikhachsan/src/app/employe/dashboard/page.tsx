@@ -134,8 +134,8 @@ export default function ManagerDashboardPage() {
             </thead>
             <tbody>
               {stats.recentBookings && stats.recentBookings.length > 0 ? (
-                stats.recentBookings.map((booking, index) => (
-                  <tr key={index} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                stats.recentBookings.map((booking) => (
+                  <tr key={booking.maDatPhong} style={{ borderBottom: '1px solid #e2e8f0' }}>
                     <td style={{ padding: '12px 8px' }}>{booking.maDatPhong}</td>
                     <td style={{ padding: '12px 8px' }}>{booking.customerName || booking.maKh}</td>
                     <td style={{ padding: '12px 8px' }}>{booking.roomName || booking.maPhong}</td>

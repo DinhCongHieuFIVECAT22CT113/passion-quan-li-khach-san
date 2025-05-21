@@ -1,8 +1,8 @@
 'use client';
 import React, { useState, useEffect } from "react";
 import styles from "./BookingManager.module.css";
-import { API_BASE_URL } from '../../../lib/config';
-import { getAuthHeaders, getFormDataHeaders, handleResponse } from '../../../lib/api';
+import { API_BASE_URL } from '@/lib/config';
+import { getAuthHeaders, getFormDataHeaders, handleResponse } from '@/lib/api';
 
 interface Booking {
   maDatPhong: string;
@@ -55,21 +55,21 @@ export default function BookingManager() {
         if (!token) throw new Error("Bạn cần đăng nhập để xem dữ liệu");
         
         // Lấy danh sách đặt phòng
-        const bookingsResponse = await fetch(`${API_BASE_URL}/DatPhong/Lấy danh sách đặt phòng`, {
+        const bookingsResponse = await fetch(`${API_BASE_URL}/DatPhong`, {
           method: 'GET',
           headers: getAuthHeaders('GET'),
           credentials: 'include'
         });
         
         // Lấy danh sách khách hàng
-        const customersResponse = await fetch(`${API_BASE_URL}/KhachHang/Lấy danh sách tất cả khách hàng`, {
+        const customersResponse = await fetch(`${API_BASE_URL}/KhachHang`, {
           method: 'GET',
           headers: getAuthHeaders('GET'),
           credentials: 'include'
         });
         
         // Lấy danh sách phòng
-        const roomsResponse = await fetch(`${API_BASE_URL}/Phong/Lấy danh sách tất cả phòng`, {
+        const roomsResponse = await fetch(`${API_BASE_URL}/Phong`, {
           method: 'GET',
           headers: getAuthHeaders('GET'),
           credentials: 'include'
@@ -179,7 +179,7 @@ export default function BookingManager() {
         }
       }
       
-      const response = await fetch(`${API_BASE_URL}/DatPhong/Tạo đặt phòng mới`, {
+      const response = await fetch(`${API_BASE_URL}/DatPhong`, {
         method: 'POST',
         headers: getFormDataHeaders(),
         body: formData,
@@ -189,7 +189,7 @@ export default function BookingManager() {
       await handleResponse(response);
       
       // Lấy lại danh sách đặt phòng
-      const bookingsResponse = await fetch(`${API_BASE_URL}/DatPhong/Lấy danh sách đặt phòng`, {
+      const bookingsResponse = await fetch(`${API_BASE_URL}/DatPhong`, {
         method: 'GET',
         headers: getAuthHeaders('GET'),
         credentials: 'include'
@@ -235,7 +235,7 @@ export default function BookingManager() {
         }
       }
       
-      const response = await fetch(`${API_BASE_URL}/DatPhong/Cập nhật đặt phòng?maDatPhong=${form.maDatPhong}`, {
+      const response = await fetch(`${API_BASE_URL}/DatPhong/${form.maDatPhong}`, {
         method: 'PUT',
         headers: getFormDataHeaders(),
         body: formData,
@@ -245,7 +245,7 @@ export default function BookingManager() {
       await handleResponse(response);
       
       // Lấy lại danh sách đặt phòng
-      const bookingsResponse = await fetch(`${API_BASE_URL}/DatPhong/Lấy danh sách đặt phòng`, {
+      const bookingsResponse = await fetch(`${API_BASE_URL}/DatPhong`, {
         method: 'GET',
         headers: getAuthHeaders('GET'),
         credentials: 'include'

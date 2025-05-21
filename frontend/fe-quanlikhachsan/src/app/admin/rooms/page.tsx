@@ -2,26 +2,28 @@
 import React, { useState, useEffect } from "react";
 import styles from "./RoomManager.module.css";
 import { getRooms, getRoomTypes, createRoom, updateRoom, deleteRoom } from "../../../lib/api";
+import { API_BASE_URL } from '@/lib/config';
+import { getAuthHeaders } from '@/lib/api';
 
 interface Room {
-  maPhong: string;
-  soPhong: string;
-  maLoaiPhong: string;
-  tenLoaiPhong?: string;
-  giaTien?: number;
-  trangThai: string;
+  roomId: string;
+  roomNumber: string;
+  roomTypeId: string;
+  roomTypeName?: string;
+  price?: number;
+  status: string;
   thumbnail?: string;
-  hinhAnh?: string;
-  tang?: number;
-  ngayTao?: string;
-  ngaySua?: string;
+  image?: string;
+  floor?: number;
+  createdDate?: string;
+  updatedDate?: string;
 }
 
 interface RoomType {
-  maLoaiPhong: string;
-  tenLoaiPhong: string;
-  moTa: string;
-  anhDaiDien?: string;
+  roomTypeId: string;
+  roomTypeName: string;
+  description: string;
+  thumbnail?: string;
 }
 
 export default function RoomManager() {
@@ -30,12 +32,12 @@ export default function RoomManager() {
   const [showModal, setShowModal] = useState(false);
   const [editingRoom, setEditingRoom] = useState<Room | null>(null);
   const [form, setForm] = useState<Room>({ 
-    maPhong: "", 
-    soPhong: "", 
-    maLoaiPhong: "", 
-    giaTien: 0,
-    trangThai: "",
-    tang: 1 
+    roomId: "", 
+    roomNumber: "", 
+    roomTypeId: "", 
+    price: 0,
+    status: "",
+    floor: 1 
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -46,20 +48,30 @@ export default function RoomManager() {
       setIsLoading(true);
       setError(null);
       try {
-        // Lấy danh sách loại phòng
-        const roomTypesData = await getRoomTypes();
-        setRoomTypes(roomTypesData);
-        
         // Lấy danh sách phòng
-        const roomsData = await getRooms();
+        const roomsResponse = await fetch(`${API_BASE_URL}/Phong`, {
+          method: 'GET',
+          headers: getAuthHeaders('GET'),
+          credentials: 'include'
+        });
+        
+        // Lấy danh sách loại phòng
+        const roomTypesResponse = await fetch(`${API_BASE_URL}/LoaiPhong`, {
+          method: 'GET',
+          headers: getAuthHeaders('GET'),
+          credentials: 'include'
+        });
         
         // Kết hợp thông tin loại phòng vào danh sách phòng và đảm bảo giaTien luôn là số
+        const roomsData = await roomsResponse.json();
+        const roomTypesData = await roomTypesResponse.json();
+        
         const roomsWithTypes = roomsData.map((room: Room) => {
-          const roomType = roomTypesData.find((type: RoomType) => type.maLoaiPhong === room.maLoaiPhong);
+          const roomType = roomTypesData.find((type: RoomType) => type.roomTypeId === room.roomTypeId);
           return {
             ...room,
-            giaTien: room.giaTien || 0, // Đảm bảo giaTien không null hoặc undefined
-            tenLoaiPhong: roomType?.tenLoaiPhong || "Không xác định"
+            price: room.price || 0, // Đảm bảo price không null hoặc undefined
+            roomTypeName: roomType?.roomTypeName || "Không xác định"
           };
         });
         
@@ -78,7 +90,7 @@ export default function RoomManager() {
 
   // Mở modal Thêm mới
   const openAddModal = () => {
-    setForm({ maPhong: "", soPhong: "", maLoaiPhong: "", giaTien: 0, trangThai: "", tang: 1 });
+    setForm({ roomId: "", roomNumber: "", roomTypeId: "", price: 0, status: "", floor: 1 });
     setEditingRoom(null);
     setShowModal(true);
   };
@@ -94,34 +106,44 @@ export default function RoomManager() {
   const closeModal = () => {
     setShowModal(false);
     setEditingRoom(null);
-    setForm({ maPhong: "", soPhong: "", maLoaiPhong: "", giaTien: 0, trangThai: "", tang: 1 });
+    setForm({ roomId: "", roomNumber: "", roomTypeId: "", price: 0, status: "", floor: 1 });
   };
 
   // Xử lý thay đổi input
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setForm({ ...form, [name]: name === 'giaTien' ? Number(value) : value });
+    setForm({ ...form, [name]: name === 'price' ? Number(value) : value });
   };
 
   // Xác nhận xóa phòng
-  const handleDelete = async (maPhong: string) => {
+  const handleDelete = async (roomId: string) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa phòng này?')) {
+      setIsLoading(true);
       try {
         const token = localStorage.getItem('token');
         if (!token) throw new Error("Bạn cần đăng nhập để thực hiện hành động này");
         
-        console.log(`Đang xóa phòng: ${maPhong}`);
+        const response = await fetch(`${API_BASE_URL}/Phong/${roomId}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          credentials: 'include',
+        });
         
-        // Sử dụng hàm API deleteRoom
-        await deleteRoom(maPhong);
-        
-        // Cập nhật danh sách phòng sau khi xóa
-        setRooms(rooms.filter(room => room.maPhong !== maPhong));
-        alert('Xóa phòng thành công');
+        if (response.ok) {
+          // Cập nhật danh sách phòng sau khi xóa
+          setRooms(rooms.filter(room => room.roomId !== roomId));
+          alert('Xóa phòng thành công');
+        } else {
+          throw new Error("Có lỗi xảy ra khi xóa phòng");
+        }
       } catch (err) {
         const error = err as Error;
         alert(`Lỗi: ${error.message}`);
         console.error("Error deleting room:", error);
+      } finally {
+        setIsLoading(false);
       }
     }
   };
@@ -135,48 +157,103 @@ export default function RoomManager() {
       if (!token) throw new Error("Bạn cần đăng nhập để thực hiện hành động này");
       
       // Chuẩn bị dữ liệu gửi đi
-      const normalizedForm: Omit<Room, 'tenLoaiPhong'> = {
+      const normalizedForm: Omit<Room, 'roomTypeName'> = {
         ...form,
-        giaTien: Number(form.giaTien) || 0
+        price: Number(form.price) || 0
       };
       
       // Thêm ngày tạo/sửa theo đúng yêu cầu backend
       if (editingRoom) {
-        normalizedForm.ngaySua = new Date().toISOString(); // Cập nhật ngày sửa khi edit
+        normalizedForm.updatedDate = new Date().toISOString(); // Cập nhật ngày sửa khi edit
       } else {
-        normalizedForm.ngayTao = new Date().toISOString(); // Thêm ngày tạo khi thêm mới
+        normalizedForm.createdDate = new Date().toISOString(); // Thêm ngày tạo khi thêm mới
       }
       
       console.log("Dữ liệu phòng:", normalizedForm);
       
-      let result;
+      let response;
       
       if (editingRoom) {
-        // Cập nhật phòng với hàm API mới
-        result = await updateRoom(editingRoom.maPhong, normalizedForm);
+        // Cập nhật phòng
+        response = await fetch(`${API_BASE_URL}/Phong/${form.roomId}`, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(normalizedForm),
+          credentials: 'include',
+        });
       } else {
-        // Thêm phòng mới với hàm API mới
-        result = await createRoom(normalizedForm);
+        // Tạo phòng mới
+        response = await fetch(`${API_BASE_URL}/Phong`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(normalizedForm),
+          credentials: 'include',
+        });
       }
       
-      console.log("Kết quả API:", result);
-      
-      // Lấy lại danh sách phòng để có dữ liệu mới nhất
-      const updatedRooms = await getRooms();
-      
-      // Kết hợp lại với thông tin loại phòng
-      const updatedRoomsWithTypes = updatedRooms.map((room: Room) => {
-        const roomType = roomTypes.find((type: RoomType) => type.maLoaiPhong === room.maLoaiPhong);
-        return {
-          ...room,
-          giaTien: room.giaTien || 0, // Đảm bảo giaTien luôn là số
-          tenLoaiPhong: roomType?.tenLoaiPhong || "Không xác định"
+      if (response.ok) {
+        // Lấy lại danh sách phòng để có dữ liệu mới nhất
+        // Sử dụng hàm fetchRooms thay cho fetchData
+        const fetchRooms = async () => {
+          try {
+            // Lấy danh sách phòng
+            const roomsResponse = await fetch(`${API_BASE_URL}/Phong`, {
+              method: 'GET',
+              headers: getAuthHeaders('GET'),
+              credentials: 'include'
+            });
+            
+            // Lấy danh sách loại phòng
+            const roomTypesResponse = await fetch(`${API_BASE_URL}/LoaiPhong`, {
+              method: 'GET',
+              headers: getAuthHeaders('GET'),
+              credentials: 'include'
+            });
+            
+            // Kết hợp thông tin loại phòng vào danh sách phòng và đảm bảo giaTien luôn là số
+            const roomsData = await roomsResponse.json();
+            const roomTypesData = await roomTypesResponse.json();
+            
+            const roomsWithTypes = roomsData.map((room: Room) => {
+              const roomType = roomTypesData.find((type: RoomType) => type.roomTypeId === room.roomTypeId);
+              return {
+                ...room,
+                price: room.price || 0, // Đảm bảo price không null hoặc undefined
+                roomTypeName: roomType?.roomTypeName || "Không xác định"
+              };
+            });
+            
+            setRooms(roomsWithTypes);
+          } catch (err) {
+            const error = err as Error;
+            setError(error.message || "Có lỗi xảy ra khi tải dữ liệu");
+            console.error("Error fetching data:", error);
+          }
         };
-      });
-      
-      setRooms(updatedRoomsWithTypes);
-      closeModal();
-      alert(editingRoom ? 'Cập nhật phòng thành công' : 'Thêm phòng thành công');
+
+        fetchRooms();
+        
+        // Reset form
+        setForm({ 
+          roomId: "", 
+          roomNumber: "", 
+          roomTypeId: "", 
+          price: 0,
+          status: "",
+          floor: 0
+        });
+        setEditingRoom(null);
+        closeModal();
+        alert(editingRoom ? 'Cập nhật phòng thành công' : 'Thêm phòng thành công');
+      } else {
+        throw new Error("Có lỗi xảy ra khi lưu phòng");
+      }
     } catch (err) {
       const error = err as Error;
       alert(`Lỗi: ${error.message}`);
@@ -186,9 +263,9 @@ export default function RoomManager() {
 
   // Hàm render trạng thái với màu sắc
   const renderStatus = (status: string) => {
-    if (status === 'Trống') return <span className={`${styles.status} ${styles['status-empty']}`}>Trống</span>;
-    if (status === 'Đã đặt') return <span className={`${styles.status} ${styles['status-booked']}`}>Đã đặt</span>;
-    if (status === 'Đang dọn') return <span className={`${styles.status} ${styles['status-cleaning']}`}>Đang dọn</span>;
+    if (status === 'Empty') return <span className={`${styles.status} ${styles['status-empty']}`}>Trống</span>;
+    if (status === 'Booked') return <span className={`${styles.status} ${styles['status-booked']}`}>Đã đặt</span>;
+    if (status === 'Cleaning') return <span className={`${styles.status} ${styles['status-cleaning']}`}>Đang dọn</span>;
     return <span className={styles.status}>{status}</span>;
   };
 
@@ -218,16 +295,16 @@ export default function RoomManager() {
           </thead>
           <tbody>
             {rooms.map(room => (
-                <tr key={room.maPhong}>
-                  <td>{room.maPhong}</td>
-                  <td>{room.soPhong}</td>
-                  <td>{room.tenLoaiPhong}</td>
-                  <td>{(room.giaTien || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}</td>
-                  <td>{room.tang || "-"}</td>
-                  <td>{renderStatus(room.trangThai)}</td>
+                <tr key={room.roomId}>
+                  <td>{room.roomId}</td>
+                  <td>{room.roomNumber}</td>
+                  <td>{room.roomTypeName}</td>
+                  <td>{(room.price || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}</td>
+                  <td>{room.floor || "-"}</td>
+                  <td>{renderStatus(room.status)}</td>
                 <td>
                   <button className={styles.editBtn} onClick={() => openEditModal(room)}>Sửa</button>
-                    <button className={styles.deleteBtn} onClick={() => handleDelete(room.maPhong)}>Xóa</button>
+                    <button className={styles.deleteBtn} onClick={() => handleDelete(room.roomId)}>Xóa</button>
                 </td>
               </tr>
             ))}
@@ -244,8 +321,8 @@ export default function RoomManager() {
               <div>
                 <label>Số phòng:</label>
                 <input 
-                  name="soPhong" 
-                  value={form.soPhong} 
+                  name="roomNumber" 
+                  value={form.roomNumber} 
                   onChange={handleChange} 
                   placeholder="Số phòng" 
                   required 
@@ -254,15 +331,15 @@ export default function RoomManager() {
               <div>
                 <label>Loại phòng:</label>
                 <select 
-                  name="maLoaiPhong" 
-                  value={form.maLoaiPhong} 
+                  name="roomTypeId" 
+                  value={form.roomTypeId} 
                   onChange={handleChange} 
                   required
                 >
                   <option value="">Chọn loại phòng</option>
                   {roomTypes.map(type => (
-                    <option key={type.maLoaiPhong} value={type.maLoaiPhong}>
-                      {type.tenLoaiPhong}
+                    <option key={type.roomTypeId} value={type.roomTypeId}>
+                      {type.roomTypeName}
                     </option>
                   ))}
                 </select>
@@ -270,9 +347,9 @@ export default function RoomManager() {
               <div>
                 <label>Giá (VNĐ):</label>
                 <input 
-                  name="giaTien" 
+                  name="price" 
                   type="number" 
-                  value={form.giaTien} 
+                  value={form.price} 
                   onChange={handleChange} 
                   placeholder="Giá phòng" 
                   required 
@@ -282,8 +359,8 @@ export default function RoomManager() {
               <div>
                 <label>Trạng thái:</label>
                 <select 
-                  name="trangThai" 
-                  value={form.trangThai} 
+                  name="status" 
+                  value={form.status} 
                   onChange={handleChange} 
                   required
                 >
@@ -296,9 +373,9 @@ export default function RoomManager() {
               <div>
                 <label>Tầng:</label>
                 <input
-                  name="tang"
+                  name="floor"
                   type="number"
-                  value={form.tang}
+                  value={form.floor}
                   onChange={handleChange}
                   placeholder="Tầng"
                   min={1}

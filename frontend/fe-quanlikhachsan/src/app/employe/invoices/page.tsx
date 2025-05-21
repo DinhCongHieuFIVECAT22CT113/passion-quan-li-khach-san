@@ -205,13 +205,17 @@ export default function InvoiceManager() {
       
       // Chuẩn bị dữ liệu để gửi đi
       const invoiceData = {
-        maDatPhong: form.bookingId,
-        tongTien: totalAmount,
-        maPttt: form.paymentMethod === "Tiền mặt" ? "TM" : "CK",
-        trangThai: "Chưa thanh toán",
-        ghiChu: form.note || "",
-        ngayLap: new Date().toISOString(),
-        chiTietDichVu: serviceDetails
+        bookingId: form.bookingId,
+        totalAmount: totalAmount,
+        paymentMethodId: form.paymentMethod === "Tiền mặt" ? "TM" : "CK",
+        status: "Chưa thanh toán",
+        notes: form.note || "",
+        issueDate: new Date().toISOString(),
+        serviceDetails: serviceDetails.map(s => ({
+          serviceId: s.maDv,
+          quantity: s.soLuong,
+          price: s.donGia
+        }))
       };
       
       // Gọi API để tạo hóa đơn mới
@@ -321,7 +325,7 @@ export default function InvoiceManager() {
       
       {/* Nội dung in hóa đơn */}
       {invoices.map(invoice => (
-        <div key={invoice.id} id={`invoice-print-${invoice.id}`} style={{display:'none'}}>
+        <div key={`print-${invoice.id}`} id={`invoice-print-${invoice.id}`} style={{display:'none'}}>
           <div style={{padding:32, fontFamily:'Arial'}}>
             <h2 style={{textAlign:'center', marginBottom:24}}>HÓA ĐƠN THANH TOÁN</h2>
             <div>Mã hóa đơn: <b>{invoice.id}</b></div>
