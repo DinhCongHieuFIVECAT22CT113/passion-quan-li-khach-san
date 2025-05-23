@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\PTUDW quản lý khách sạn\\code dev\\DEV FE-BE\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj": {}
+    "D:\\PTUDW quản lý khách sạn\\DEV-FE-BE\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj": {}
   },
   "projects": {
-    "D:\\PTUDW quản lý khách sạn\\code dev\\DEV FE-BE\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj": {
+    "D:\\PTUDW quản lý khách sạn\\DEV-FE-BE\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\PTUDW quản lý khách sạn\\code dev\\DEV FE-BE\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj",
+        "projectUniqueName": "D:\\PTUDW quản lý khách sạn\\DEV-FE-BE\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj",
         "projectName": "be-quanlikhachsanapi",
-        "projectPath": "D:\\PTUDW quản lý khách sạn\\code dev\\DEV FE-BE\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj",
+        "projectPath": "D:\\PTUDW quản lý khách sạn\\DEV-FE-BE\\backend\\be-quanlikhachsanapi\\be-quanlikhachsanapi.csproj",
         "packagesPath": "C:\\Users\\anhso\\.nuget\\packages\\",
-        "outputPath": "D:\\PTUDW quản lý khách sạn\\code dev\\DEV FE-BE\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\obj\\",
+        "outputPath": "D:\\PTUDW quản lý khách sạn\\DEV-FE-BE\\backend\\be-quanlikhachsanapi\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\anhso\\AppData\\Roaming\\NuGet\\NuGet.Config"

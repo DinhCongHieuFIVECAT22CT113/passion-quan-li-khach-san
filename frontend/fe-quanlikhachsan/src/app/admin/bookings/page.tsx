@@ -4,17 +4,41 @@ import styles from "./BookingManager.module.css";
 import { API_BASE_URL } from '@/lib/config';
 import { getAuthHeaders, getFormDataHeaders, handleResponse } from '@/lib/api';
 
-interface Booking {
-  maDatPhong: string;
-  maKh: string;
+// Interface cho dữ liệu Đặt phòng từ BE (PascalCase)
+interface BookingBE {
+  MaDatPhong: string;
+  MaKH: string;
+  NgayNhanPhong: string;
+  NgayTraPhong: string;
+  TrangThai: string;
+  GhiChu?: string;
+  TreEm?: number;
+  NguoiLon?: number;
+  SoLuongPhong?: number;
+  ThoiGianDen?: string;
+  // DatPhongDTO không có MaPhong, TongTien
+}
+
+// Interface để hiển thị trong bảng, có thể kết hợp thêm thông tin
+interface BookingDisplay extends BookingBE {
   tenKhachHang?: string;
-  maPhong: string;
-  tenPhong?: string;
-  ngayDen: string;
-  ngayDi: string;
-  trangThai: string;
-  ghiChu?: string;
-  tongTien?: number;
+  tenPhongDisplay?: string; // Sẽ luôn là 'N/A' vì DatPhongDTO không có chi tiết phòng
+  tongTienDisplay?: string; // Sẽ luôn là 'N/A' vì DatPhongDTO không có tổng tiền
+}
+
+// Interface cho state của form (PascalCase, khớp với Create/Update DTOs)
+// Lưu ý: CreateDatPhongDTO và UpdateDatPhongDTO có các trường khác nhau
+interface BookingFormState {
+  MaKH: string; // Bắt buộc khi thêm
+  NgayNhanPhong: string;
+  NgayTraPhong: string;
+  GhiChu?: string;
+  TreEm?: number;
+  NguoiLon?: number;
+  SoLuongPhong?: number;
+  ThoiGianDen?: string;
+  TrangThai?: string; // Chỉ dùng khi sửa và nếu BE cho phép sửa trạng thái qua endpoint này
+  // MaPhong không có trong CreateDatPhongDTO
 }
 
 const statusMap: Record<string, { label: string; className: string }> = {
@@ -23,37 +47,37 @@ const statusMap: Record<string, { label: string; className: string }> = {
   "Đã trả phòng": { label: "Đã trả phòng", className: styles["status"] + " " + styles["status-checkedout"] },
   "Đã hủy": { label: "Đã hủy", className: styles["status"] + " " + styles["status-cancelled"] },
   "Chờ thanh toán": { label: "Chờ thanh toán", className: styles["status"] + " " + styles["status-pending"] },
+  "Hoàn thành": { label: "Hoàn thành", className: styles["status"] + " " + styles["status-completed"] }, // Ví dụ thêm trạng thái
 };
 
 export default function BookingManager() {
-  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [bookings, setBookings] = useState<BookingDisplay[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [editBooking, setEditBooking] = useState<Booking | null>(null);
-  const [form, setForm] = useState<Booking>({ 
-    maDatPhong: "", 
-    maKh: "", 
-    maPhong: "", 
-    ngayDen: "", 
-    ngayDi: "", 
-    trangThai: "" 
+  const [editBooking, setEditBooking] = useState<BookingDisplay | null>(null);
+  const [form, setForm] = useState<BookingFormState>({
+    MaKH: "",
+    NgayNhanPhong: "",
+    NgayTraPhong: "",
+    TrangThai: "Đã đặt", // Mặc định khi thêm, nhưng không gửi nếu CreateDTO không có
+    GhiChu: "",
+    TreEm: 0,
+    NguoiLon: 1,
+    SoLuongPhong: 1,
+    ThoiGianDen: "14:00"
   });
-  const [historyBooking, setHistoryBooking] = useState<Booking | null>(null);
+  const [historyBooking, setHistoryBooking] = useState<BookingDisplay | null>(null);
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [customers, setCustomers] = useState<{maKh: string, hoKh: string, tenKh: string}[]>([]);
-  const [rooms, setRooms] = useState<{maPhong: string, tenPhong: string}[]>([]);
+  const [customers, setCustomers] = useState<{MaKh: string, hoKh: string, tenKh: string}[]>([]);
+  // const [rooms, setRooms] = useState<{MaPhong: string, SoPhong: string}[]>([]); // Không dùng rooms trong form này nữa vì DTO không có MaPhong
 
-  // Lấy dữ liệu đặt phòng, khách hàng và phòng từ API
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       setError(null);
 
       try {
-        const token = localStorage.getItem('token');
-        if (!token) throw new Error("Bạn cần đăng nhập để xem dữ liệu");
-        
         // Lấy danh sách đặt phòng
         const bookingsResponse = await fetch(`${API_BASE_URL}/DatPhong`, {
           method: 'GET',
@@ -68,36 +92,23 @@ export default function BookingManager() {
           credentials: 'include'
         });
         
-        // Lấy danh sách phòng
-        const roomsResponse = await fetch(`${API_BASE_URL}/Phong`, {
-          method: 'GET',
-          headers: getAuthHeaders('GET'),
-          credentials: 'include'
-        });
-        
-        // Xử lý dữ liệu
         const bookingsData = await handleResponse(bookingsResponse);
         const customersData = await handleResponse(customersResponse);
-        const roomsData = await handleResponse(roomsResponse);
         
-        // Đảm bảo dữ liệu là mảng
         const bookingsArray = Array.isArray(bookingsData) ? bookingsData : [];
         const customersArray = Array.isArray(customersData) ? customersData : [];
-        const roomsArray = Array.isArray(roomsData) ? roomsData : [];
         
-        setCustomers(customersArray);
-        setRooms(roomsArray);
+        // Lưu trữ customers để dùng trong select options
+        setCustomers(customersArray.map((c: any) => ({ MaKh: c.MaKh, hoKh: c.HoKh, tenKh: c.TenKh })));
         
-        // Kết hợp thông tin tên khách hàng và tên phòng vào đặt phòng
-        const bookingsWithDetails = bookingsArray.map((booking: Booking) => {
-          const customer = customersArray.find(c => c.maKh === booking.maKh);
-          const room = roomsArray.find(r => r.maPhong === booking.maPhong);
+        const bookingsWithDetails = bookingsArray.map((apiBooking: BookingBE): BookingDisplay => {
+          const customer = customersArray.find((c: any) => c.MaKh === apiBooking.MaKH);
           
           return {
-            ...booking,
-            tenKhachHang: customer ? `${customer.hoKh} ${customer.tenKh}` : 'Không xác định',
-            tenPhong: room?.tenPhong || 'Không xác định',
-            tongTien: booking.tongTien || 0
+            ...apiBooking, // Spread tất cả các trường từ BookingBE (PascalCase)
+            tenKhachHang: customer ? `${customer.HoKh} ${customer.TenKh}` : 'Không xác định',
+            tenPhongDisplay: 'N/A', 
+            tongTienDisplay: 'N/A',
           };
         });
         
@@ -114,173 +125,170 @@ export default function BookingManager() {
     fetchData();
   }, []);
 
-  // Format ngày tháng
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString?: string) => {
     try {
       if (!dateString) return '';
       const date = new Date(dateString);
+      if (isNaN(date.getTime())) return dateString; // Trả về chuỗi gốc nếu không parse được
       return date.toLocaleDateString('vi-VN');
     } catch {
       return dateString;
     }
   };
 
-  // Format ngày cho input date
-  const formatDateForInput = (dateString: string) => {
+  const formatDateForInput = (dateString?: string): string => {
+    if (!dateString) return '';
     try {
-      if (!dateString) return '';
-      const date = new Date(dateString);
+      let date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        // Thử parse định dạng dd/MM/yyyy nếu có
+        const parts = dateString.split('/');
+        if (parts.length === 3) {
+          const day = parseInt(parts[0], 10);
+          const month = parseInt(parts[1], 10) - 1; 
+          const year = parseInt(parts[2], 10);
+          date = new Date(year, month, day);
+        }
+        if (isNaN(date.getTime())) {
+          return ''; 
+        }
+      }
       return date.toISOString().split('T')[0];
-    } catch {
-      return dateString;
+    } catch (error) {
+      console.error("Error formatting date for input:", dateString, error);
+      return '';
     }
   };
 
-  // Khi mở modal Thêm mới
   const openAddModal = () => {
-    setForm({ 
-      maDatPhong: "", 
-      maKh: "", 
-      maPhong: "", 
-      ngayDen: new Date().toISOString().split('T')[0], 
-      ngayDi: new Date(Date.now() + 86400000).toISOString().split('T')[0], 
-      trangThai: "Đã đặt" 
+    setForm({
+      MaKH: "",
+      NgayNhanPhong: formatDateForInput(new Date().toISOString()),
+      NgayTraPhong: formatDateForInput(new Date(Date.now() + 86400000).toISOString()), // +1 day
+      // TrangThai không nằm trong CreateDatPhongDTO
+      GhiChu: "",
+      TreEm: 0,
+      NguoiLon: 1,
+      SoLuongPhong: 1,
+      ThoiGianDen: "14:00"
     });
+    setEditBooking(null);
     setShowAddModal(true);
   };
 
-  // Khi mở modal Sửa
-  const openEditModal = (booking: Booking) => {
+  const openEditModal = (booking: BookingDisplay) => {
     setForm({
-      ...booking,
-      ngayDen: formatDateForInput(booking.ngayDen),
-      ngayDi: formatDateForInput(booking.ngayDi)
+      MaKH: booking.MaKH, // UpdateDatPhongDTO không có MaKH, nhưng có thể cần để hiển thị
+      NgayNhanPhong: formatDateForInput(booking.NgayNhanPhong),
+      NgayTraPhong: formatDateForInput(booking.NgayTraPhong),
+      TrangThai: booking.TrangThai, // Form có thể có trạng thái, nhưng UpdateDTO không có.
+      GhiChu: booking.GhiChu || "",
+      TreEm: booking.TreEm !== undefined ? booking.TreEm : 0,
+      NguoiLon: booking.NguoiLon !== undefined ? booking.NguoiLon : 1,
+      SoLuongPhong: booking.SoLuongPhong !== undefined ? booking.SoLuongPhong : 1,
+      ThoiGianDen: booking.ThoiGianDen || "14:00",
     });
     setEditBooking(booking);
   };
 
-  // Xử lý thay đổi input
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm(prevForm => ({
+      ...prevForm,
+      [name]: (name === 'TreEm' || name === 'NguoiLon' || name === 'SoLuongPhong') && value !== '' ? parseInt(value, 10) : value
+    }));
   };
 
-  // Xử lý submit Thêm mới
-  const handleAdd = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+
+    const formData = new FormData();
     
+    // Các trường cho CreateDatPhongDTO (PascalCase)
+    if (!editBooking) { // Logic cho Thêm mới
+      formData.append('MaKH', form.MaKH);
+      formData.append('NgayNhanPhong', form.NgayNhanPhong);
+      formData.append('NgayTraPhong', form.NgayTraPhong);
+      if (form.GhiChu) formData.append('GhiChu', form.GhiChu);
+      formData.append('TreEm', String(form.TreEm || 0));
+      formData.append('NguoiLon', String(form.NguoiLon || 1));
+      formData.append('SoLuongPhong', String(form.SoLuongPhong || 1));
+      if (form.ThoiGianDen) formData.append('ThoiGianDen', form.ThoiGianDen);
+      // TrangThai không được gửi khi thêm mới theo CreateDatPhongDTO
+    }
+
+    // Các trường cho UpdateDatPhongDTO (PascalCase) - KHÔNG BAO GỒM MaKH, TrangThai
+    if (editBooking) { // Logic cho Sửa
+      // MaKH không được cập nhật
+      if (form.NgayNhanPhong) formData.append('NgayNhanPhong', form.NgayNhanPhong);
+      if (form.NgayTraPhong) formData.append('NgayTraPhong', form.NgayTraPhong);
+      if (form.GhiChu) formData.append('GhiChu', form.GhiChu);
+      formData.append('TreEm', String(form.TreEm || 0));
+      formData.append('NguoiLon', String(form.NguoiLon || 1));
+      formData.append('SoLuongPhong', String(form.SoLuongPhong || 1));
+      if (form.ThoiGianDen) formData.append('ThoiGianDen', form.ThoiGianDen);
+      // TrangThai không được cập nhật qua endpoint này theo UpdateDatPhongDTO
+    }
+
     try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error("Bạn cần đăng nhập để thực hiện hành động này");
-      
-      const formData = new FormData();
-      for (const key in form) {
-        if (key !== 'tenKhachHang' && key !== 'tenPhong' && key !== 'maDatPhong' && key !== 'tongTien') {
-          formData.append(key, String(form[key as keyof Booking] || ''));
-        }
-      }
-      
-      const response = await fetch(`${API_BASE_URL}/DatPhong`, {
-        method: 'POST',
-        headers: getFormDataHeaders(),
+      let response;
+      const endpoint = editBooking 
+        ? `${API_BASE_URL}/DatPhong/${editBooking.MaDatPhong}` 
+        : `${API_BASE_URL}/DatPhong`;
+      const method = editBooking ? 'PUT' : 'POST';
+
+      response = await fetch(endpoint, {
+        method: method,
+        headers: getFormDataHeaders(), // FormData nên không cần Content-Type: application/json
         body: formData,
         credentials: 'include'
       });
       
       await handleResponse(response);
       
-      // Lấy lại danh sách đặt phòng
-      const bookingsResponse = await fetch(`${API_BASE_URL}/DatPhong`, {
-        method: 'GET',
-        headers: getAuthHeaders('GET'),
-        credentials: 'include'
-      });
-      
+      // Tải lại dữ liệu sau khi thêm/sửa thành công
+      const bookingsResponse = await fetch(`${API_BASE_URL}/DatPhong`, { headers: getAuthHeaders('GET'), credentials: 'include' });
       const bookingsData = await handleResponse(bookingsResponse);
+      const customersResponse = await fetch(`${API_BASE_URL}/KhachHang`, { headers: getAuthHeaders('GET'), credentials: 'include' });
+      const customersData = await handleResponse(customersResponse);
+
       const bookingsArray = Array.isArray(bookingsData) ? bookingsData : [];
+      const customersArray = Array.isArray(customersData) ? customersData : [];
       
-      // Kết hợp lại thông tin
-      const bookingsWithDetails = bookingsArray.map((booking: Booking) => {
-        const customer = customers.find(c => c.maKh === booking.maKh);
-        const room = rooms.find(r => r.maPhong === booking.maPhong);
-        
+      setCustomers(customersArray.map((c: any) => ({ MaKh: c.MaKh, hoKh: c.HoKh, tenKh: c.TenKh })));
+      
+      const bookingsWithDetails = bookingsArray.map((apiBooking: BookingBE): BookingDisplay => {
+        const customer = customersArray.find((c: any) => c.MaKh === apiBooking.MaKH);
         return {
-          ...booking,
-          tenKhachHang: customer ? `${customer.hoKh} ${customer.tenKh}` : 'Không xác định',
-          tenPhong: room?.tenPhong || 'Không xác định',
-          tongTien: booking.tongTien || 0
+          ...apiBooking,
+          tenKhachHang: customer ? `${customer.HoKh} ${customer.TenKh}` : 'Không xác định',
+          tenPhongDisplay: 'N/A',
+          tongTienDisplay: 'N/A',
         };
       });
-      
       setBookings(bookingsWithDetails);
-      setShowAddModal(false);
-    } catch (err) {
-      const error = err as Error;
-      alert(`Lỗi: ${error.message}`);
-      console.error("Error adding booking:", error);
-    }
-  };
 
-  // Xử lý submit Sửa
-  const handleEdit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error("Bạn cần đăng nhập để thực hiện hành động này");
-      
-      const formData = new FormData();
-      for (const key in form) {
-        if (key !== 'tenKhachHang' && key !== 'tenPhong') {
-          formData.append(key, String(form[key as keyof Booking] || ''));
-        }
+      if (editBooking) {
+        setEditBooking(null);
+      } else {
+        setShowAddModal(false);
       }
-      
-      const response = await fetch(`${API_BASE_URL}/DatPhong/${form.maDatPhong}`, {
-        method: 'PUT',
-        headers: getFormDataHeaders(),
-        body: formData,
-        credentials: 'include'
-      });
-      
-      await handleResponse(response);
-      
-      // Lấy lại danh sách đặt phòng
-      const bookingsResponse = await fetch(`${API_BASE_URL}/DatPhong`, {
-        method: 'GET',
-        headers: getAuthHeaders('GET'),
-        credentials: 'include'
-      });
-      
-      const bookingsData = await handleResponse(bookingsResponse);
-      const bookingsArray = Array.isArray(bookingsData) ? bookingsData : [];
-      
-      // Kết hợp lại thông tin
-      const bookingsWithDetails = bookingsArray.map((booking: Booking) => {
-        const customer = customers.find(c => c.maKh === booking.maKh);
-        const room = rooms.find(r => r.maPhong === booking.maPhong);
-        
-        return {
-          ...booking,
-          tenKhachHang: customer ? `${customer.hoKh} ${customer.tenKh}` : 'Không xác định',
-          tenPhong: room?.tenPhong || 'Không xác định',
-          tongTien: booking.tongTien || 0
-        };
-      });
-      
-      setBookings(bookingsWithDetails);
-      setEditBooking(null);
+      alert(editBooking ? "Cập nhật đặt phòng thành công!" : "Thêm đặt phòng thành công!");
+
     } catch (err) {
       const error = err as Error;
       alert(`Lỗi: ${error.message}`);
-      console.error("Error updating booking:", error);
+      console.error(`Error ${editBooking ? 'updating' : 'adding'} booking:`, error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  // Lọc theo search
   const filtered = bookings.filter(b =>
     (b.tenKhachHang || '').toLowerCase().includes(search.toLowerCase()) ||
-    (b.tenPhong || '').toLowerCase().includes(search.toLowerCase()) ||
-    (b.maDatPhong || '').toLowerCase().includes(search.toLowerCase())
+    (b.MaDatPhong || '').toLowerCase().includes(search.toLowerCase()) ||
+    (b.MaKH || '').toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -291,7 +299,7 @@ export default function BookingManager() {
           <input
             className={styles.search}
             type="text"
-            placeholder="Tìm kiếm khách/phòng/mã đặt phòng..."
+            placeholder="Tìm kiếm khách/mã đặt phòng..."
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
@@ -307,31 +315,31 @@ export default function BookingManager() {
       <table className={styles.table}>
         <thead>
           <tr>
-                <th>Mã đặt phòng</th>
+            <th>Mã đặt phòng</th>
             <th>Khách hàng</th>
             <th>Phòng</th>
             <th>Nhận phòng</th>
             <th>Trả phòng</th>
-                <th>Tổng tiền</th>
+            <th>Tổng tiền</th>
             <th>Trạng thái</th>
             <th>Hành động</th>
           </tr>
         </thead>
         <tbody>
           {filtered.length === 0 ? (
-                <tr><td colSpan={8} style={{textAlign:'center', color:'#888', fontStyle:'italic'}}>Không có dữ liệu</td></tr>
+            <tr><td colSpan={8} style={{textAlign:'center', color:'#888', fontStyle:'italic'}}>Không có dữ liệu</td></tr>
           ) : filtered.map(booking => (
-                <tr key={booking.maDatPhong}>
-                  <td>{booking.maDatPhong}</td>
-                  <td>{booking.tenKhachHang}</td>
-                  <td>{booking.tenPhong}</td>
-                  <td>{formatDate(booking.ngayDen)}</td>
-                  <td>{formatDate(booking.ngayDi)}</td>
-                  <td>{(booking.tongTien || 0).toLocaleString()} đ</td>
-                  <td><span className={statusMap[booking.trangThai]?.className || styles.status}>{statusMap[booking.trangThai]?.label || booking.trangThai}</span></td>
+            <tr key={booking.MaDatPhong}>
+              <td>{booking.MaDatPhong}</td>
+              <td>{booking.tenKhachHang || booking.MaKH}</td>
+              <td>{booking.tenPhongDisplay}</td> 
+              <td>{formatDate(booking.NgayNhanPhong)}</td>
+              <td>{formatDate(booking.NgayTraPhong)}</td>
+              <td>{booking.tongTienDisplay}</td>
+              <td><span className={statusMap[booking.TrangThai]?.className || styles.status}>{statusMap[booking.TrangThai]?.label || booking.TrangThai}</span></td>
               <td style={{whiteSpace:'nowrap'}}>
                 <button className={styles.editBtn} onClick={() => openEditModal(booking)}>Sửa</button>
-                    <button className={styles.historyBtn} onClick={() => setHistoryBooking(booking)}>Chi tiết</button>
+                <button className={styles.historyBtn} onClick={() => setHistoryBooking(booking)}>Chi tiết</button>
               </td>
             </tr>
           ))}
@@ -340,59 +348,52 @@ export default function BookingManager() {
       </div>
       )}
 
-      {/* Modal Thêm mới */}
+      {/* Modal Thêm mới */} 
       {showAddModal && (
         <div className={styles.modal}>
           <div className={styles.modalContent}>
             <h3>Thêm đặt phòng</h3>
-            <form onSubmit={handleAdd} autoComplete="off">
-              <div>
-                <label>Khách hàng:</label>
-                <select name="maKh" value={form.maKh} onChange={handleChange} required>
+            <form onSubmit={handleSubmit} autoComplete="off">
+              <div className={styles.formGroup}>
+                <label htmlFor="MaKH">Khách hàng</label>
+                <select id="MaKH" name="MaKH" value={form.MaKH} onChange={handleChange} required>
                   <option value="">Chọn khách hàng</option>
                   {customers.map(customer => (
-                    <option key={customer.maKh} value={customer.maKh}>
-                      {customer.hoKh} {customer.tenKh}
-                    </option>
+                    <option key={customer.MaKh} value={customer.MaKh}>{customer.hoKh} {customer.tenKh} ({customer.MaKh})</option>
                   ))}
                 </select>
               </div>
-              <div>
-                <label>Phòng:</label>
-                <select name="maPhong" value={form.maPhong} onChange={handleChange} required>
-                  <option value="">Chọn phòng</option>
-                  {rooms.map(room => (
-                    <option key={room.maPhong} value={room.maPhong}>
-                      {room.tenPhong}
-                    </option>
-                  ))}
-                </select>
+              {/* Bỏ chọn phòng vì DTO không có MaPhong */}
+              <div className={styles.formGroup}>
+                <label htmlFor="NgayNhanPhong">Ngày đến</label>
+                <input type="date" id="NgayNhanPhong" name="NgayNhanPhong" value={form.NgayNhanPhong} onChange={handleChange} required />
               </div>
-              <div>
-                <label>Ngày nhận phòng:</label>
-                <input name="ngayDen" type="date" value={form.ngayDen} onChange={handleChange} required />
+              <div className={styles.formGroup}>
+                <label htmlFor="NgayTraPhong">Ngày đi</label>
+                <input type="date" id="NgayTraPhong" name="NgayTraPhong" value={form.NgayTraPhong} onChange={handleChange} required />
               </div>
-              <div>
-                <label>Ngày trả phòng:</label>
-                <input name="ngayDi" type="date" value={form.ngayDi} onChange={handleChange} required />
+              <div className={styles.formGroup}>
+                <label htmlFor="ThoiGianDen">Thời gian đến dự kiến</label>
+                <input type="text" id="ThoiGianDen" name="ThoiGianDen" value={form.ThoiGianDen || ""} onChange={handleChange} placeholder="HH:mm" />
               </div>
-              <div>
-                <label>Trạng thái:</label>
-                <select name="trangThai" value={form.trangThai} onChange={handleChange} required>
-                <option value="">Chọn trạng thái</option>
-                <option value="Đã đặt">Đã đặt</option>
-                <option value="Đã nhận phòng">Đã nhận phòng</option>
-                <option value="Đã trả phòng">Đã trả phòng</option>
-                  <option value="Đã hủy">Đã hủy</option>
-                  <option value="Chờ thanh toán">Chờ thanh toán</option>
-              </select>
+              <div className={styles.formGroup}>
+                <label htmlFor="NguoiLon">Số người lớn</label>
+                <input type="number" id="NguoiLon" name="NguoiLon" value={form.NguoiLon || 0} onChange={handleChange} min="1" />
               </div>
-              <div>
-                <label>Ghi chú:</label>
-                <textarea name="ghiChu" value={form.ghiChu || ''} onChange={handleChange} rows={3} />
+              <div className={styles.formGroup}>
+                <label htmlFor="TreEm">Số trẻ em</label>
+                <input type="number" id="TreEm" name="TreEm" value={form.TreEm || 0} onChange={handleChange} min="0" />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="SoLuongPhong">Số lượng phòng</label> {/* CreateDatPhongDTO có SoLuongPhong */}
+                <input type="number" id="SoLuongPhong" name="SoLuongPhong" value={form.SoLuongPhong || 0} onChange={handleChange} min="1" />
+              </div>
+               <div className={styles.formGroup}>
+                <label htmlFor="GhiChu">Ghi chú</label>
+                <textarea id="GhiChu" name="GhiChu" value={form.GhiChu || ""} onChange={handleChange} rows={3} />
               </div>
               <div className={styles.buttonGroup}>
-                <button type="submit" className={styles.editBtn}>Lưu</button>
+                <button type="submit" className={styles.editBtn} disabled={isLoading}>Lưu</button>
                 <button type="button" onClick={() => setShowAddModal(false)} className={styles.cancelBtn}>Hủy</button>
               </div>
             </form>
@@ -400,63 +401,55 @@ export default function BookingManager() {
         </div>
       )}
 
-      {/* Modal Sửa */}
+      {/* Modal Sửa */} 
       {editBooking && (
         <div className={styles.modal}>
           <div className={styles.modalContent}>
-            <h3>Sửa đặt phòng</h3>
-            <form onSubmit={handleEdit} autoComplete="off">
-              <div>
-                <label>Mã đặt phòng:</label>
-                <input name="maDatPhong" value={form.maDatPhong} disabled />
+            <h3>Sửa đặt phòng - Mã: {editBooking.MaDatPhong}</h3>
+            <form onSubmit={handleSubmit} autoComplete="off">
+              <div className={styles.formGroup}>
+                <label htmlFor="MaKH_edit">Khách hàng (Không thể sửa)</label>
+                <input id="MaKH_edit" name="MaKH_edit" value={`${editBooking.tenKhachHang} (${editBooking.MaKH})`} disabled />
               </div>
-              <div>
-                <label>Khách hàng:</label>
-                <select name="maKh" value={form.maKh} onChange={handleChange} required>
-                  <option value="">Chọn khách hàng</option>
-                  {customers.map(customer => (
-                    <option key={customer.maKh} value={customer.maKh}>
-                      {customer.hoKh} {customer.tenKh}
-                    </option>
+              {/* Bỏ chọn phòng vì DTO không có MaPhong */}
+              <div className={styles.formGroup}>
+                <label htmlFor="NgayNhanPhong_edit">Ngày đến</label>
+                <input type="date" id="NgayNhanPhong_edit" name="NgayNhanPhong" value={form.NgayNhanPhong} onChange={handleChange} required />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="NgayTraPhong_edit">Ngày đi</label>
+                <input type="date" id="NgayTraPhong_edit" name="NgayTraPhong" value={form.NgayTraPhong} onChange={handleChange} required />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="ThoiGianDen_edit">Thời gian đến dự kiến</label>
+                <input type="text" id="ThoiGianDen_edit" name="ThoiGianDen" value={form.ThoiGianDen || ""} onChange={handleChange} placeholder="HH:mm" />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="NguoiLon_edit">Số người lớn</label>
+                <input type="number" id="NguoiLon_edit" name="NguoiLon" value={form.NguoiLon || 0} onChange={handleChange} min="1" />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="TreEm_edit">Số trẻ em</label>
+                <input type="number" id="TreEm_edit" name="TreEm" value={form.TreEm || 0} onChange={handleChange} min="0" />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="SoLuongPhong_edit">Số lượng phòng</label> {/* UpdateDatPhongDTO có SoLuongPhong */}
+                <input type="number" id="SoLuongPhong_edit" name="SoLuongPhong" value={form.SoLuongPhong || 0} onChange={handleChange} min="1" />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="GhiChu_edit">Ghi chú</label>
+                <textarea id="GhiChu_edit" name="GhiChu" value={form.GhiChu || ""} onChange={handleChange} rows={3} />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="TrangThai_edit">Trạng thái (Chỉ hiển thị - Không sửa qua form này)</label>
+                <select id="TrangThai_edit" name="TrangThai" value={form.TrangThai} onChange={handleChange} disabled>
+                  {Object.entries(statusMap).map(([key, value]) => (
+                    <option key={key} value={key}>{value.label}</option>
                   ))}
                 </select>
-              </div>
-              <div>
-                <label>Phòng:</label>
-                <select name="maPhong" value={form.maPhong} onChange={handleChange} required>
-                  <option value="">Chọn phòng</option>
-                  {rooms.map(room => (
-                    <option key={room.maPhong} value={room.maPhong}>
-                      {room.tenPhong}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label>Ngày nhận phòng:</label>
-                <input name="ngayDen" type="date" value={form.ngayDen} onChange={handleChange} required />
-              </div>
-              <div>
-                <label>Ngày trả phòng:</label>
-                <input name="ngayDi" type="date" value={form.ngayDi} onChange={handleChange} required />
-              </div>
-              <div>
-                <label>Trạng thái:</label>
-                <select name="trangThai" value={form.trangThai} onChange={handleChange} required>
-                <option value="">Chọn trạng thái</option>
-                <option value="Đã đặt">Đã đặt</option>
-                <option value="Đã nhận phòng">Đã nhận phòng</option>
-                <option value="Đã trả phòng">Đã trả phòng</option>
-                  <option value="Đã hủy">Đã hủy</option>
-                  <option value="Chờ thanh toán">Chờ thanh toán</option>
-              </select>
-              </div>
-              <div>
-                <label>Ghi chú:</label>
-                <textarea name="ghiChu" value={form.ghiChu || ''} onChange={handleChange} rows={3} />
               </div>
               <div className={styles.buttonGroup}>
-                <button type="submit" className={styles.editBtn}>Lưu</button>
+                <button type="submit" className={styles.editBtn} disabled={isLoading}>Lưu thay đổi</button>
                 <button type="button" onClick={() => setEditBooking(null)} className={styles.cancelBtn}>Hủy</button>
               </div>
             </form>
@@ -464,7 +457,7 @@ export default function BookingManager() {
         </div>
       )}
 
-      {/* Modal Chi tiết */}
+      {/* Modal Chi tiết */} 
       {historyBooking && (
         <div className={styles.modal}>
           <div className={styles.modalContent}>
@@ -472,39 +465,55 @@ export default function BookingManager() {
             <div className={styles.bookingDetails}>
               <div className={styles.detailRow}>
                 <span className={styles.detailLabel}>Mã đặt phòng:</span>
-                <span className={styles.detailValue}>{historyBooking.maDatPhong}</span>
+                <span className={styles.detailValue}>{historyBooking.MaDatPhong}</span>
               </div>
               <div className={styles.detailRow}>
                 <span className={styles.detailLabel}>Khách hàng:</span>
-                <span className={styles.detailValue}>{historyBooking.tenKhachHang}</span>
+                <span className={styles.detailValue}>{historyBooking.tenKhachHang || historyBooking.MaKH}</span>
               </div>
               <div className={styles.detailRow}>
                 <span className={styles.detailLabel}>Phòng:</span>
-                <span className={styles.detailValue}>{historyBooking.tenPhong}</span>
+                <span className={styles.detailValue}>{historyBooking.tenPhongDisplay}</span>
               </div>
               <div className={styles.detailRow}>
                 <span className={styles.detailLabel}>Nhận phòng:</span>
-                <span className={styles.detailValue}>{formatDate(historyBooking.ngayDen)}</span>
+                <span className={styles.detailValue}>{formatDate(historyBooking.NgayNhanPhong)}</span>
               </div>
               <div className={styles.detailRow}>
                 <span className={styles.detailLabel}>Trả phòng:</span>
-                <span className={styles.detailValue}>{formatDate(historyBooking.ngayDi)}</span>
+                <span className={styles.detailValue}>{formatDate(historyBooking.NgayTraPhong)}</span>
+              </div>
+              <div className={styles.detailRow}>
+                <span className={styles.detailLabel}>Số người lớn:</span>
+                <span className={styles.detailValue}>{historyBooking.NguoiLon}</span>
+              </div>
+              <div className={styles.detailRow}>
+                <span className={styles.detailLabel}>Số trẻ em:</span>
+                <span className={styles.detailValue}>{historyBooking.TreEm}</span>
+              </div>
+              <div className={styles.detailRow}>
+                <span className={styles.detailLabel}>Số lượng phòng đặt:</span>
+                <span className={styles.detailValue}>{historyBooking.SoLuongPhong}</span>
+              </div>
+               <div className={styles.detailRow}>
+                <span className={styles.detailLabel}>Thời gian đến dự kiến:</span>
+                <span className={styles.detailValue}>{historyBooking.ThoiGianDen}</span>
               </div>
               <div className={styles.detailRow}>
                 <span className={styles.detailLabel}>Tổng tiền:</span>
-                <span className={styles.detailValue}>{(historyBooking.tongTien || 0).toLocaleString()} đ</span>
+                <span className={styles.detailValue}>{historyBooking.tongTienDisplay}</span>
               </div>
               <div className={styles.detailRow}>
                 <span className={styles.detailLabel}>Trạng thái:</span>
                 <span className={styles.detailValue}>
-                  <span className={statusMap[historyBooking.trangThai]?.className || styles.status}>
-                    {statusMap[historyBooking.trangThai]?.label || historyBooking.trangThai}
+                  <span className={statusMap[historyBooking.TrangThai]?.className || styles.status}>
+                    {statusMap[historyBooking.TrangThai]?.label || historyBooking.TrangThai}
                   </span>
                 </span>
               </div>
               <div className={styles.detailRow}>
                 <span className={styles.detailLabel}>Ghi chú:</span>
-                <span className={styles.detailValue}>{historyBooking.ghiChu || '(Không có)'}</span>
+                <span className={styles.detailValue}>{historyBooking.GhiChu || '(Không có)'}</span>
               </div>
             </div>
             <div className={styles.buttonGroup}>

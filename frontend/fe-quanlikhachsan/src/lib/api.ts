@@ -239,8 +239,8 @@ export const getRooms = async () => {
   });
 
   const data = await handleResponse(response);
-if (Array.isArray(data)) {
-  return data;
+  if (Array.isArray(data)) {
+    return data;
     } else {
       console.error('Dữ liệu rooms không phải mảng:', data);
       throw new Error('Định dạng dữ liệu không hợp lệ');
@@ -378,14 +378,19 @@ export const bookRoom = async (bookingData: BookingData) => {
 
 // API lấy thông tin hồ sơ khách hàng
 export const getCustomerProfile = async (customerId: string) => {
+  console.log(`Đang gọi API lấy thông tin khách hàng: ${API_BASE_URL}/KhachHang/${customerId}`);
   try {
     const response = await fetch(`${API_BASE_URL}/KhachHang/${customerId}`, {
-      headers: getAuthHeaders(),
+      method: 'GET',
+      headers: getAuthHeaders('GET'),
       credentials: 'include'
     });
-    return await handleResponse(response);
+    const data = await handleResponse(response);
+    // Trả về dữ liệu gốc từ KhachHangDTO, không map lại tên trường
+    // Ví dụ: data sẽ có MaKh, HoKh, TenKh, Email, Sdt, SoCccd
+    return data; 
   } catch (error) {
-    console.error('Lỗi khi lấy thông tin hồ sơ:', error);
+    console.error('Lỗi khi gọi API getCustomerProfile:', error);
     throw error;
   }
 };
@@ -417,19 +422,27 @@ export const updateCustomerProfile = async (profileData: unknown) => {
   }
 };
 
-// API lấy lịch sử đặt phòng của khách hàng
-export const getBookingHistory = async (customerId: string) => {
+// API lấy lịch sử đặt phòng của khách hàng (hoặc tất cả nếu customerId rỗng)
+export const getBookingHistory = async (customerId: string) => { // customerId có thể không dùng nếu API endpoint không hỗ trợ
+  console.log(`Đang gọi API lấy lịch sử đặt phòng: ${API_BASE_URL}/DatPhong`);
   try {
-    const response = await fetch(`${API_BASE_URL}/DatPhong/khachhang/${customerId}`, {
-    headers: getAuthHeaders(),
+    // Hiện tại API backend /DatPhong là lấy tất cả, không có filter theo customerId trực tiếp ở endpoint này
+    const url = `${API_BASE_URL}/DatPhong`; 
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: getAuthHeaders('GET'),
       credentials: 'include'
     });
-    
     const data = await handleResponse(response);
-    return Array.isArray(data) ? data : [];
-  } catch (error) {
-    console.error('Lỗi khi lấy lịch sử đặt phòng:', error);
+    // Trả về dữ liệu gốc từ DatPhongDTO, không map lại tên trường
+    // Ví dụ: data sẽ có MaDatPhong, MaKH, NgayNhanPhong, NgayTraPhong, TrangThai
+    if (Array.isArray(data)) {
+      return data;
+    }
     return [];
+  } catch (error) {
+    console.error('Lỗi khi gọi API getBookingHistory:', error);
+    throw error;
   }
 };
 
@@ -499,20 +512,33 @@ export const getPromotions = async () => {
 
 // API lấy danh sách hóa đơn
 export const getInvoices = async () => {
+  console.log(`Đang gọi API lấy danh sách hóa đơn: ${API_BASE_URL}/HoaDon`);
   try {
     const response = await fetch(`${API_BASE_URL}/HoaDon`, {
-      headers: getAuthHeaders(),
+      method: 'GET',
+      headers: getAuthHeaders('GET'),
       credentials: 'include'
     });
-    
-    return await handleResponse(response);
+    const data = await handleResponse(response);
+    if (Array.isArray(data)) {
+      // Trả về dữ liệu gốc từ HoaDonDTO, đảm bảo các trường số là number
+      return data.map(invoice => ({
+        ...invoice, // Giữ nguyên các trường gốc như MaHoaDon, MaDatPhong, MaKM, TenKhuyenMai, TrangThai
+        GiamGiaLoaiKM: invoice.GiamGiaLoaiKM !== null && invoice.GiamGiaLoaiKM !== undefined ? parseFloat(invoice.GiamGiaLoaiKM) : undefined,
+        GiamGiaLoaiKH: invoice.GiamGiaLoaiKH !== null && invoice.GiamGiaLoaiKH !== undefined ? parseFloat(invoice.GiamGiaLoaiKH) : undefined,
+        TongTien: parseFloat(invoice.TongTien) || 0,
+      }));
+    } else {
+      console.error('Dữ liệu invoices không phải mảng:', data);
+      throw new Error('Định dạng dữ liệu không hợp lệ');
+    }
   } catch (error) {
-    console.error('Lỗi khi lấy danh sách hóa đơn:', error);
+    console.error('Lỗi khi gọi API getInvoices:', error);
     throw error;
   }
 };
 
-// API lấy chi tiết hóa đơn theo ID
+// API lấy chi tiết hóa đơn
 export const getInvoiceById = async (invoiceId: string) => {
   try {
     const response = await fetch(`${API_BASE_URL}/HoaDon/${invoiceId}`, {
@@ -544,19 +570,19 @@ export const createInvoice = async (invoiceData: InvoiceData) => {
   }
 };
 
-// API cập nhật hóa đơn
-export const updateInvoice = async (invoiceId: string, invoiceData: InvoiceData) => {
+// API cập nhật hóa đơn (CHỈ CẬP NHẬT TRẠNG THÁI)
+export const updateInvoiceStatus = async (invoiceId: string, status: string) => {
+  console.log(`Đang gọi API cập nhật trạng thái hóa đơn: ${API_BASE_URL}/HoaDon/${invoiceId}/trangthai`);
   try {
-    const response = await fetch(`${API_BASE_URL}/HoaDon/${invoiceId}`, {
-    method: 'PUT',
-      headers: getAuthHeaders('PUT'),
-      body: JSON.stringify(invoiceData),
-      credentials: 'include'
+    const response = await fetch(`${API_BASE_URL}/HoaDon/${invoiceId}/trangthai?trangThai=${encodeURIComponent(status)}`, {
+      method: 'PUT',
+      headers: getAuthHeaders('PUT'), // Content-Type là application/json dù không có body
+      credentials: 'include',
+      // Body không cần thiết vì trạng thái được gửi qua query param
     });
-    
-    return await handleResponse(response);
+    return handleResponse(response);
   } catch (error) {
-    console.error(`Lỗi khi cập nhật hóa đơn #${invoiceId}:`, error);
+    console.error('Lỗi khi gọi API updateInvoiceStatus:', error);
     throw error;
   }
 };
@@ -990,25 +1016,6 @@ export const createEmployeeInvoice = async (invoiceData: InvoiceData) => {
   
   const response = await fetch(`${API_BASE_URL}/HoaDon`, {
     method: 'POST',
-    mode: 'cors',
-    credentials: 'include',
-    body: formData,
-    headers: getFormDataHeaders(),
-  });
-
-  return handleResponse(response);
-};
-
-// API cập nhật trạng thái hóa đơn cho nhân viên
-export const updateInvoiceStatus = async (invoiceId: string, status: string) => {
-  console.log(`Đang gọi API cập nhật trạng thái hóa đơn: ${API_BASE_URL}/HoaDon/${invoiceId}`);
-  
-  const formData = new FormData();
-  formData.append('invoiceId', invoiceId);
-  formData.append('status', status);
-  
-  const response = await fetch(`${API_BASE_URL}/HoaDon/${invoiceId}`, {
-    method: 'PUT',
     mode: 'cors',
     credentials: 'include',
     body: formData,
