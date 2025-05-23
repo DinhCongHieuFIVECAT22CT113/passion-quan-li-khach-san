@@ -4,6 +4,7 @@ namespace be_quanlikhachsanapi.DTOs
     {
         public string MaDatPhong { get; set; }
         public string MaKH { get; set; }
+        public string MaPhong { get; set; }
         public int? TreEm { get; set; }
         public int? NguoiLon { get; set; }
         public string GhiChu { get; set; }
@@ -15,7 +16,7 @@ namespace be_quanlikhachsanapi.DTOs
     }
 
     public class CreateDatPhongDTO
-    {
+    {   
         public string MaKH { get; set; }
         public int? TreEm { get; set; }
         public int? NguoiLon { get; set; }
@@ -28,7 +29,7 @@ namespace be_quanlikhachsanapi.DTOs
     }
 
     public class UpdateDatPhongDTO
-    {
+    {   
         public int? TreEm { get; set; }
         public int? NguoiLon { get; set; }
         public string GhiChu { get; set; }

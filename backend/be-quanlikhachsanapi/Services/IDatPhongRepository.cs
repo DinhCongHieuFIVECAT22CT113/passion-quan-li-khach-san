@@ -31,6 +31,10 @@ namespace be_quanlikhachsanapi.Services
             {
                 MaDatPhong = dp.MaDatPhong,
                 MaKH = dp.MaKh,
+                MaPhong = _context.ChiTietDatPhongs
+                    .Where(ct => ct.MaDatPhong == dp.MaDatPhong)
+                    .Select(ct => ct.MaPhong)
+                    .FirstOrDefault(),
                 TreEm = dp.TreEm,
                 NguoiLon = dp.NguoiLon,
                 GhiChu = dp.GhiChu,
@@ -54,6 +58,10 @@ namespace be_quanlikhachsanapi.Services
             {
                 MaDatPhong = datPhong.MaDatPhong,
                 MaKH = datPhong.MaKh, // Sửa MaKH thành MaKh
+                MaPhong = _context.ChiTietDatPhongs
+                    .Where(ct => ct.MaDatPhong == datPhong.MaDatPhong)
+                    .Select(ct => ct.MaPhong)
+                    .FirstOrDefault(),  
                 TreEm = datPhong.TreEm,
                 NguoiLon = datPhong.NguoiLon,
                 GhiChu = datPhong.GhiChu,
