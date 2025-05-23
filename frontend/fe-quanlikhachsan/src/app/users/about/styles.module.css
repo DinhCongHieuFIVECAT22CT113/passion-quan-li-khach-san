@@ -1,0 +1,146 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-top: 80px; /* Add padding for fixed header */
+}
+
+/* Hero Section */
+.hero {
+  height: 60vh;
+  min-height: 400px;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/heros/about-hero.jpg');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-align: center;
+  padding: 0 2rem;
+}
+
+.heroContent {
+  max-width: 800px;
+}
+
+.hero h1 {
+  font-size: 3.5rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.hero p {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  opacity: 0.9;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Team Section */
+.teamSection {
+  padding: 4rem 5%;
+}
+
+.teamMember {
+  display: flex;
+  gap: 4rem;
+  align-items: flex-start;
+  margin-bottom: 4rem;
+}
+
+.memberImage {
+  flex: 0 0 400px;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.memberInfo {
+  flex: 1;
+}
+
+.memberInfo h2 {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 1.5rem;
+}
+
+.memberDescription p {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+/* Clients Section */
+.clientsSection {
+  padding: 4rem 5%;
+  background: #f8f9fa;
+}
+
+.clientsSection h2 {
+  font-size: 2.5rem;
+  color: #333;
+  margin-bottom: 3rem;
+  text-align: center;
+}
+
+.clientsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 3rem;
+  align-items: center;
+  justify-items: center;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .teamMember {
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .memberImage {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    height: 50vh;
+  }
+
+  .hero h1 {
+    font-size: 2.5rem;
+  }
+
+  .hero p {
+    font-size: 1rem;
+  }
+
+  .teamSection {
+    padding: 2rem 1rem;
+  }
+
+  .memberInfo h2 {
+    font-size: 1.5rem;
+  }
+
+  .memberDescription p {
+    font-size: 1rem;
+  }
+
+  .clientsSection {
+    padding: 2rem 1rem;
+  }
+
+  .clientsSection h2 {
+    font-size: 2rem;
+  }
+}

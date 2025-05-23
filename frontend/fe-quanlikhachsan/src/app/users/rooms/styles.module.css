@@ -1,0 +1,782 @@
+/* ===== Base Styles ===== */
+.pageContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: 'Poppins', sans-serif;
+  color: #333;
+  background-color: #f8f9fa;
+}
+
+/* ===== Header Styles ===== */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.headerContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 2rem;
+}
+
+.logoContainer {
+  display: flex;
+  align-items: center;
+}
+
+.mainNav {
+  display: flex;
+  gap: 2rem;
+}
+
+.mainNav a {
+  color: #555;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  padding: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.mainNav a:hover {
+  color: #9c8250;
+}
+
+.mainNav a.active {
+  color: #9c8250;
+  border-bottom: 2px solid #9c8250;
+}
+
+.userActions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.profileIconLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #f5f5f5;
+  transition: all 0.3s ease;
+}
+
+.profileIconLink:hover {
+  background-color: #e0e0e0;
+  transform: scale(1.05);
+}
+
+.userIcon {
+  color: #9c8250;
+  font-size: 1.2rem;
+}
+
+/* ===== Hero Section ===== */
+.heroSection {
+  position: relative;
+  height: 60vh;
+  min-height: 400px;
+  max-height: 600px;
+  background-image: url('/heros/room-hero.jpg');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 70px;
+  padding: 1rem;
+  text-align: center;
+  color: white;
+}
+
+.heroOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7));
+  z-index: 1;
+}
+
+.heroContent {
+  position: relative;
+  max-width: 800px;
+  z-index: 2;
+}
+
+.heroContent h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.heroContent p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  margin-bottom: 2rem;
+}
+
+/* Search and Filter Controls */
+.searchContainer {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border-radius: 50px;
+  padding: 0.5rem 1.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  flex: 1;
+}
+
+.searchIcon {
+  color: #9c8250;
+  margin-right: 0.5rem;
+}
+
+.searchInput {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  padding: 0.5rem 0;
+}
+
+.filterToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background-color: #9c8250;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 0.8rem 1.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.filterToggle:hover {
+  background-color: #7d6942;
+  transform: translateY(-2px);
+}
+
+/* ===== Filters Panel ===== */
+.filtersPanel {
+  max-width: 1200px;
+  margin: 1.5rem auto;
+  padding: 1.5rem;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.filterGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+.filterCard {
+  padding: 1rem;
+  border-radius: 8px;
+  background-color: #f8f9fa;
+}
+
+.filterHeader {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  color: #555;
+  font-weight: 500;
+}
+
+.filterIcon {
+  color: #9c8250;
+}
+
+.filterSelect {
+  width: 100%;
+  padding: 0.7rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.filterSelect:focus {
+  border-color: #9c8250;
+}
+
+.rangeSliderContainer {
+  position: relative;
+  padding: 0.5rem 0;
+}
+
+.rangeSlider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 4px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  outline: none;
+  margin: 1rem 0;
+}
+
+.rangeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #9c8250;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.rangeSlider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.priceLabels, .capacityLabels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.capacitySlider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 4px;
+  background: #e0e0e0;
+  border-radius: 4px;
+  outline: none;
+  margin: 1rem 0;
+}
+
+.capacitySlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #9c8250;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.capacitySlider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+/* ===== Main Content ===== */
+.mainContent {
+  max-width: 1600px; /* Tăng max-width để có thêm không gian */
+  margin: 0 auto;
+  padding: 2rem;
+  flex: 1;
+}
+
+.sectionHeader {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.sectionHeader h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.sectionHeader p {
+  color: #777;
+  font-size: 0.9rem;
+}
+
+/* ===== No Results ===== */
+.noResults {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 3rem 0;
+  text-align: center;
+}
+
+.noResults h3 {
+  font-size: 1.4rem;
+  color: #333;
+}
+
+.noResults p {
+  color: #666;
+  max-width: 400px;
+  margin-bottom: 1rem;
+}
+
+.resetButton {
+  background-color: #9c8250;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 0.8rem 1.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.resetButton:hover {
+  background-color: #7d6942;
+  transform: translateY(-2px);
+}
+
+/* ===== Room Grid ===== */
+.roomGrid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* Giảm số cột xuống 5 để có thêm không gian */
+  gap: 2rem;
+  width: 100%;
+}
+
+/* Đặt kích thước tối thiểu cho card */
+.roomCard {
+  background-color: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  min-width: 280px; /* Đảm bảo card không bị co nhỏ quá */
+}
+
+/* Responsive adjustments */
+@media (max-width: 1440px) {
+  .mainContent {
+    max-width: 1200px; /* Giảm max-width trên màn hình nhỏ hơn */
+  }
+  .roomGrid {
+    grid-template-columns: repeat(4, 1fr); /* 4 cột */
+  }
+}
+
+@media (max-width: 1024px) {
+  .mainContent {
+    max-width: 900px;
+  }
+  .roomGrid {
+    grid-template-columns: repeat(3, 1fr); /* 3 cột */
+  }
+}
+
+@media (max-width: 768px) {
+  .mainContent {
+    max-width: 100%; /* Full width trên màn hình nhỏ */
+    padding: 1rem;
+  }
+  .roomGrid {
+    grid-template-columns: repeat(2, 1fr); /* 2 cột */
+  }
+}
+
+@media (max-width: 480px) {
+  .roomGrid {
+    grid-template-columns: 1fr; /* 1 cột */
+  }
+  .roomCard {
+    min-width: 100%; /* Card chiếm toàn bộ chiều rộng trên mobile */
+  }
+}
+
+.roomCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.roomImageContainer {
+  position: relative;
+  width: 100%;
+  height: 220px;
+}
+
+.roomImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.roomBadge {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background-color: rgba(156, 130, 80, 0.9);
+  color: white;
+  padding: 0.4rem 1rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  z-index: 2;
+}
+
+.roomRating {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  background-color: rgba(255, 255, 255, 0.9);
+  color: #333;
+  padding: 0.3rem 0.8rem;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.starIcon {
+  color: #ffb100;
+}
+
+.roomContent {
+  padding: 1.5rem;
+}
+
+.roomTitle {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+  color: #333;
+}
+
+.roomDescription {
+  font-size: 0.9rem;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 1.2rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.amenitiesRow {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.amenityItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.amenityIcon {
+  color: #9c8250;
+  font-size: 1.1rem;
+}
+
+.amenityItem span {
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.roomSpecifications {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem 0;
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.specItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.specLabel {
+  font-size: 0.75rem;
+  color: #888;
+  margin-bottom: 0.2rem;
+}
+
+.specValue {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.roomCardFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.priceInfo {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
+}
+
+.priceAmount {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #9c8250;
+}
+
+.priceUnit {
+  font-size: 0.9rem;
+  color: #888;
+}
+
+.viewDetailButton {
+  display: inline-block;
+  background-color: #9c8250;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.viewDetailButton:hover {
+  background-color: #7d6942;
+  transform: translateY(-2px);
+}
+
+/* ===== Footer ===== */
+.footer {
+  background-color: #303030;
+  color: white;
+  padding: 3rem 0 1rem;
+}
+
+.footerContent {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 3rem;
+}
+
+.footerLogo {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.footerLogo p {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  max-width: 250px;
+}
+
+.footerLinks {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.linkGroup h4 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1.2rem;
+  color: #f0f0f0;
+}
+
+.linkGroup a, .linkGroup p {
+  display: block;
+  color: #aaa;
+  text-decoration: none;
+  margin-bottom: 0.8rem;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.linkGroup a:hover {
+  color: #9c8250;
+}
+
+.copyright {
+  text-align: center;
+  padding-top: 2rem;
+  color: #777;
+  font-size: 0.8rem;
+  margin-top: 2rem;
+  border-top: 1px solid #444;
+}
+
+/* ===== Loading and Error States ===== */
+.loadingContainer, .errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  text-align: center;
+  padding: 2rem;
+}
+
+.spinner {
+  border: 4px solid rgba(156, 130, 80, 0.1);
+  border-radius: 50%;
+  border-top: 4px solid #9c8250;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.errorContainer h2 {
+  color: #e53935;
+  margin-bottom: 1rem;
+}
+
+.reloadButton {
+  margin-top: 1rem;
+  background-color: #9c8250;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.8rem 1.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.reloadButton:hover {
+  background-color: #7d6942;
+}
+
+/* ===== Nút Áp dụng trong bộ lọc ===== */
+.applyButton {
+  background-color: #9c8250;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 0.8rem 1.5rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.applyButton:hover {
+  background-color: #7d6942;
+  transform: translateY(-2px);
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 1024px) {
+  .footerContent {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .footerLogo {
+    text-align: center;
+    align-items: center;
+  }
+  
+  .footerLogo p {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .headerContent {
+    flex-direction: column;
+    padding: 1rem;
+  }
+  
+  .mainNav {
+    margin: 1rem 0;
+  }
+  
+  .heroSection {
+    height: 70vh;
+  }
+  
+  .heroContent h1 {
+    font-size: 2rem;
+  }
+  
+  .searchContainer {
+    flex-direction: column;
+  }
+  
+  .footerLinks {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .mainNav {
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .mainNav a {
+    font-size: 0.85rem;
+  }
+  
+  .heroContent h1 {
+    font-size: 1.5rem;
+  }
+  
+  .heroContent p {
+    font-size: 0.9rem;
+  }
+  
+  .roomCardFooter {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .viewDetailButton {
+    width: 100%;
+    text-align: center;
+  }
+}

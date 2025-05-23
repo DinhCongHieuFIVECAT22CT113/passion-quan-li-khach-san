@@ -1,44 +1,180 @@
+using Microsoft.EntityFrameworkCore;
+using be_quanlikhachsanapi.Data;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using be_quanlikhachsanapi.Services;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.OpenApi.Models;
+using System.Data.SqlClient;
+using System.Text.Json;
+using be_quanlikhachsanapi.Helpers;
+using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.Extensions.Options;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using be_quanlikhachsanapi.Configuration;
+using Newtonsoft.Json.Converters;
+using Newtonsoft.Json.Serialization;
+using Microsoft.AspNetCore.Mvc;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Đọc connection string từ appsettings.json
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+Console.WriteLine($"Đang thử kết nối đến: {connectionString}");
+
+// Cấu hình API Controllers
+builder.Services.AddControllers()
+    .AddNewtonsoftJson(options => {
+        options.SerializerSettings.Converters.Add(new StringEnumConverter());
+        options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+    });
+
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+
+// Cấu hình Swagger để gửi Token
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Nhập token theo định dạng: Bearer {token}",
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                },
+                Scheme = "oauth2",
+                Name = "Bearer",
+                In = ParameterLocation.Header
+            },
+            new List<string>()
+        }
+    });
+});
+
+builder.Services.AddSwaggerGenNewtonsoftSupport();
+
+// Cấu hình XML comments cho Swagger
+builder.Services.Configure<SwaggerGenOptions>(options => {
+    options.CustomSchemaIds(type => type.FullName);
+});
+
+// Add DbContext - sử dụng connection string từ appsettings.json
+builder.Services.AddDbContext<QuanLyKhachSanContext>(options =>
+    options.UseSqlServer(connectionString));
+
+// Add CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        builder =>
+        {
+            builder.AllowAnyOrigin()
+                   .AllowAnyMethod()
+                   .AllowAnyHeader();
+        });
+});
+
+// THÊM CORS policy mới với credentials
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowCredentials",
+        builder =>
+        {
+            builder.WithOrigins("http://localhost:3000")
+                   .AllowAnyMethod()
+                   .AllowAnyHeader()
+                   .WithExposedHeaders("Content-Disposition", "Content-Length", "Content-Type")
+                   .AllowCredentials();
+        });
+});
+
+// Add custom services
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<ISendEmailServices, SendEmailServices>();
+builder.Services.AddScoped<IWriteFileRepository, WriteFileRepository>();
+builder.Services.AddScoped<IPhongRepository, PhongRepository>();
+builder.Services.AddScoped<ILoaiPhongRepository, LoaiPhongRepository>();
+builder.Services.AddScoped<IDichVuRepository, DichVuRepository>();
+builder.Services.AddScoped<IKhuyenMaiRepository, KhuyenMaiRepository>();
+builder.Services.AddScoped<ICaLamViecRepository, CaLamViecRepository>();
+builder.Services.AddScoped<IPhanCongCaRepository, PhanCongCaRepository>();
+builder.Services.AddScoped<IApDungKMRepository, ApDungKMRepository>();
+builder.Services.AddScoped<ISuDungDichVuRepository, SuDungDichVuRepository>();
+builder.Services.AddScoped<IHoaDonRepository, HoaDonRepository>();
+builder.Services.AddScoped<IPhuongThucThanhToanRepository, PhuongThucThanhToanRepository>();
+builder.Services.AddScoped<IKhachHangRepository, KhachHangRepository>();
+builder.Services.AddScoped<INhanVienRepository, NhanVienRepository>();
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+builder.Services.AddScoped<ILoaiKhachHangRepository, LoaiKhachHangRepository>();
+// Thêm vào phần đăng ký services
+builder.Services.AddScoped<IDatPhongRepository, DatPhongRepository>();
+builder.Services.AddScoped<IChiTietDatPhongRepository, ChiTietDatPhongRepository>();
+
+builder.Services.AddScoped<IPasswordHasher<KhachHang>, PasswordHasher<KhachHang>>();
+builder.Services.AddScoped<IPasswordHasher<NhanVien>, PasswordHasher<NhanVien>>();
+
+
+// Add Authentication
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                builder.Configuration["TokenKey"] ?? throw new InvalidOperationException("TokenKey not found"))),
+            ValidateIssuer = false,
+            ValidateAudience = false
+        };
+    });
 
 var app = builder.Build();
+
+// Kiểm tra kết nối cơ sở dữ liệu
+try
+{
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<QuanLyKhachSanContext>();
+    dbContext.Database.OpenConnection();
+    Console.WriteLine("Kết nối cơ sở dữ liệu thành công!");
+    dbContext.Database.CloseConnection();
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"Lỗi kết nối cơ sở dữ liệu: {ex.Message}");
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c => {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "QuanLyKhachSan API v1");
+        c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.None);
+        c.DefaultModelsExpandDepth(-1); // Ẩn schema mặc định ở phía dưới trang
+        c.DisplayRequestDuration();
+    });
 }
 
+app.UseCors("AllowCredentials");
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+app.UseAuthentication();
+app.UseAuthorization();
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
+app.MapControllers();
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
