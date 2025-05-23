@@ -15,8 +15,8 @@ namespace be_quanlikhachsanapi.Controllers
         {
             _phongRepo = phongRepo;
         }
-
-        [HttpGet("Lấy danh sách tất cả phòng")]
+        // Lấy danh sách tất cả phòng
+        [HttpGet]
         public IActionResult GetAll()
         {
             var phongs = _phongRepo.GetAll();
@@ -26,8 +26,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(phongs);
         }
-
-        [HttpGet("Tìm phòng theo ID")]
+        // Lấy phòng theo ID
+        [HttpGet("{maPhong}")]
         public IActionResult GetByID(string maPhong)
         {
             var phong = _phongRepo.GetPhongById(maPhong);
@@ -37,8 +37,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(phong);
         }
-
-        [HttpPost("Tạo phòng mới")]
+        // Tao phòng mới
+        [HttpPost]
         [Consumes("multipart/form-data")]
         public IActionResult CreatePhong([FromForm] CreatePhongDTO createPhong)
         {
@@ -49,8 +49,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(phong);
         }
-        
-        [HttpPut("Cập nhật phòng")]
+        // Cập nhật phòng
+        [HttpPut("{maPhong}")]
         [Consumes("multipart/form-data")]
         public IActionResult UpdatePhong(string maPhong, [FromForm] UpdatePhongDTO updatePhong)
         {
@@ -61,8 +61,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(phong);
         }
-
-        [HttpPut("Cập nhật trạng thái phòng")]
+        // Cập nhật trạng thái phòng
+        [HttpPut("{maPhong}/trangThai")]
         [Consumes("multipart/form-data")]
         public IActionResult UpdateTrangThai(string maPhong, string trangThai)
         {
@@ -73,8 +73,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(phong);
         }
-
-        [HttpDelete("Xóa phòng")]
+        // Xóa phòng
+        [HttpDelete("{maPhong}")]
         [Consumes("multipart/form-data")]
         public IActionResult DeletePhong(string maPhong)
         {

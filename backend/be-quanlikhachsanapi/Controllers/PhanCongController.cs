@@ -15,8 +15,8 @@ namespace be_quanlikhachsanapi.Controllers
         {
             _phanCongCaRepo = phanCongCaRepo;
         }
-
-        [HttpPost("Giao ca làm")]
+        // Phân công ca làm
+        [HttpPost]
         [Consumes("multipart/form-data")]
         public IActionResult GiaoCaLam([FromForm] CreatePhanCongDTO createPhanCongDto)
         {
@@ -27,7 +27,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(result.Value);
         }
-        [HttpPut("Update ca làm")]
+        // Cập nhật ca làm
+        [HttpPut("{maPhanCong}")]
         [Consumes("multipart/form-data")]
         public IActionResult UpdateCaLam([FromForm] UpdatePhanCongDTO updatePhanCongDto)
         {
@@ -38,7 +39,8 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(result.Value);
         }
-        [HttpGet("Lịch làm việc")]
+        // Lấy danh sách ca làm
+        [HttpGet("nhanVien/{maNv}")]
         public IActionResult GetLichLamViecByNhanVien(string maNv)
         {
             var result = _phanCongCaRepo.GetLichLamViecByNhanVien(maNv);

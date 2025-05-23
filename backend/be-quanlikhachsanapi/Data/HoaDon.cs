@@ -17,12 +17,6 @@ public partial class HoaDon
 
     public decimal TongTien { get; set; }
 
-    public decimal? SoTienDaThanhToan { get; set; }
-
-    public decimal? SoTienConThieu { get; set; }
-
-    public decimal? SoTienThanhToanDu { get; set; }
-
     public string TrangThai { get; set; } = null!;
 
     public DateTime? NgayTao { get; set; }

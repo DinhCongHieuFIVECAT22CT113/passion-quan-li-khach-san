@@ -25,17 +25,8 @@ namespace be_quanlikhachsanapi.DTOs
 
         public string? HinhAnh { get; set; } = default; // Cho phép null
 
-        [Required(ErrorMessage = "Trạng thái phòng là bắt buộc.")]
-        public string TrangThai { get; set; } = default!;
-
         public int? Tang { get; set; } = default; // Cho phép null
 
-        [Required(ErrorMessage = "Ngày tạo phòng là bắt buộc.")]
-        [DataType(DataType.DateTime, ErrorMessage = "Ngày tạo không hợp lệ.")]
-        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
-        public DateTime NgayTao { get; set; } = default; // DateTime.MinValue
-
-        public DateTime? NgaySua { get; set; } = default; // Cho phép null
     }
 
     public class UpdatePhongDTO
@@ -50,14 +41,7 @@ namespace be_quanlikhachsanapi.DTOs
 
         public string? HinhAnh { get; set; } = default; // Cho phép null
 
-        [Required(ErrorMessage = "Trạng thái phòng là bắt buộc.")]
-        public string TrangThai { get; set; } = default!;
-
         public int? Tang { get; set; } = default; // Cho phép null
 
-        [Required(ErrorMessage = "Ngày sửa phòng là bắt buộc.")]
-        [DataType(DataType.DateTime, ErrorMessage = "Ngày sửa không hợp lệ.")]
-        [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
-        public DateTime? NgaySua { get; set; } = default; // Cho phép null
     }
 }

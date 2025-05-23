@@ -6,18 +6,19 @@ import { FaUser, FaSpa, FaUtensils, FaSwimmer, FaDumbbell, FaCar, FaWifi, FaCoff
 import styles from './styles.module.css';
 import { useLanguage } from '../../components/profile/LanguageContext';
 import i18n from '../../i18n';
-import { API_BASE_URL } from '../../../lib/config';
+import { API_BASE_URL } from '@/lib/config';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import { getServices } from '../../../lib/api';
+import { getAuthHeaders, handleResponse } from '@/lib/api';
 
 interface Service {
-  maDichVu: string;
-  tenDichVu: string;
-  moTa: string;
-  donGia: number;
+  serviceId: string;
+  serviceName: string;
+  description: string;
+  price: number;
   thumbnail: string;
-  trangThai: string;
+  status: string;
 }
 
 export default function ServicesPage() {
@@ -89,20 +90,20 @@ export default function ServicesPage() {
 
     try {
       // Thực hiện API call để đặt dịch vụ
-      const response = await fetch(`${API_BASE_URL}/SuDungDichVu/Tạo đặt dịch vụ mới`, {
+      const response = await fetch(`${API_BASE_URL}/SuDungDichVu`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          maDichVu: selectedService.maDichVu,
-          ngaySuDung: bookingDetails.date,
-          gioSuDung: bookingDetails.time,
-          soLuong: bookingDetails.guests,
-          ghiChu: bookingDetails.notes,
+          serviceId: selectedService.serviceId,
+          usageDate: bookingDetails.date,
+          usageTime: bookingDetails.time,
+          quantity: bookingDetails.guests,
+          notes: bookingDetails.notes,
           // Thêm thông tin người dùng từ localStorage hoặc context
-          maKhachHang: localStorage.getItem('userId') || '',
-        }),
+          customerId: localStorage.getItem('userId') || ''
+        })
       });
 
       if (!response.ok) {
@@ -210,18 +211,18 @@ export default function ServicesPage() {
               <div className={styles.serviceDetailImage}>
                 <Image 
                   src={getValidImageSrc(selectedService.thumbnail)} 
-                  alt={selectedService.tenDichVu || 'Dịch vụ'}
+                  alt={selectedService.serviceName || 'Dịch vụ'}
                   width={600}
                   height={400}
                   className={styles.detailImage}
                 />
               </div>
               <div className={styles.serviceDetailInfo}>
-                <h2>{selectedService.tenDichVu || 'Dịch vụ'}</h2>
+                <h2>{selectedService.serviceName || 'Dịch vụ'}</h2>
                 <div className={styles.servicePrice}>
-                  {formatCurrency(selectedService.donGia)}
+                  {formatCurrency(selectedService.price)}
                 </div>
-                <p className={styles.serviceDescription}>{safeString(selectedService.moTa)}</p>
+                <p className={styles.serviceDescription}>{safeString(selectedService.description)}</p>
                 <button 
                   onClick={() => setShowModal(true)} 
                   className={styles.bookServiceButton}
@@ -278,24 +279,24 @@ export default function ServicesPage() {
               {services.length > 0 ? (
                 services.map((service, index) => (
                   <div 
-                    key={service.maDichVu || index} 
+                    key={service.serviceId || index} 
                     className={styles.serviceCard}
                     onClick={() => handleServiceClick(service)}
                   >
                     <div className={styles.serviceImageContainer}>
                       <Image 
                         src={getValidImageSrc(service.thumbnail)} 
-                        alt={service.tenDichVu || 'Dịch vụ'}
+                        alt={service.serviceName || 'Dịch vụ'}
                         width={400}
                         height={250}
                         className={styles.serviceImage}
                       />
                       <div className={styles.serviceIcon}>
-                        {getServiceIcon(service.tenDichVu || '')}
+                        {getServiceIcon(service.serviceName || '')}
                       </div>
                     </div>
                     <div className={styles.serviceContent}>
-                      <h3>{service.tenDichVu || 'Dịch vụ'}</h3>
+                      <h3>{service.serviceName || 'Dịch vụ'}</h3>
                       <div className={styles.serviceRating}>
                         <FaStar className={styles.starIcon} />
                         <FaStar className={styles.starIcon} />
@@ -303,12 +304,12 @@ export default function ServicesPage() {
                         <FaStar className={styles.starIcon} />
                         <FaStar className={styles.starIcon} />
                       </div>
-                      <p>{safeString(service.moTa).length > 100 
-                          ? safeString(service.moTa).substring(0, 100) + '...' 
-                          : safeString(service.moTa)}
+                      <p>{safeString(service.description).length > 100 
+                          ? safeString(service.description).substring(0, 100) + '...' 
+                          : safeString(service.description)}
                       </p>
                       <div className={styles.serviceFooter}>
-                        <div className={styles.servicePrice}>{formatCurrency(service.donGia)}</div>
+                        <div className={styles.servicePrice}>{formatCurrency(service.price)}</div>
                         <button className={styles.viewDetailsBtn}>Xem chi tiết</button>
                       </div>
                     </div>
@@ -329,7 +330,7 @@ export default function ServicesPage() {
         <div className={styles.modalOverlay}>
           <div className={styles.modal}>
             <div className={styles.modalHeader}>
-              <h3>Đặt dịch vụ: {selectedService.tenDichVu}</h3>
+              <h3>Đặt dịch vụ: {selectedService.serviceName}</h3>
               <button className={styles.closeModal} onClick={() => setShowModal(false)}>&times;</button>
             </div>
             <div className={styles.modalBody}>
@@ -380,11 +381,11 @@ export default function ServicesPage() {
                   <h4>Thông tin đặt dịch vụ</h4>
                   <div className={styles.summaryItem}>
                     <span>Dịch vụ:</span>
-                    <span>{selectedService.tenDichVu}</span>
+                    <span>{selectedService.serviceName}</span>
                   </div>
                   <div className={styles.summaryItem}>
                     <span>Giá:</span>
-                    <span>{formatCurrency(selectedService.donGia)}</span>
+                    <span>{formatCurrency(selectedService.price)}</span>
                   </div>
                 </div>
                 <button type="submit" className={styles.submitBooking}>

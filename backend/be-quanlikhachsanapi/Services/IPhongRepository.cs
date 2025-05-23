@@ -78,7 +78,7 @@ namespace be_quanlikhachsanapi.Services
                 SoPhong = createPhong.SoPhong,
                 Thumbnail = createPhong.Thumbnail,
                 HinhAnh = createPhong.HinhAnh,
-                TrangThai = createPhong.TrangThai,
+                TrangThai = "Trống",
                 Tang = createPhong.Tang,
                 NgayTao = DateTime.Now,
                 NgaySua = DateTime.Now
@@ -113,7 +113,6 @@ namespace be_quanlikhachsanapi.Services
                 phong.SoPhong = updatePhong.SoPhong;
                 phong.Thumbnail = updatePhong.Thumbnail;
                 phong.HinhAnh = updatePhong.HinhAnh;
-                phong.TrangThai = updatePhong.TrangThai;
                 phong.Tang = updatePhong.Tang;
                 phong.NgaySua = DateTime.Now;
 
@@ -160,6 +159,7 @@ namespace be_quanlikhachsanapi.Services
             else
             {
                 phong.TrangThai = TrangThai;
+                phong.NgaySua = DateTime.Now;
                 _context.SaveChanges();
 
                 return new JsonResult("Cập nhật trạng thái phòng thành công.")

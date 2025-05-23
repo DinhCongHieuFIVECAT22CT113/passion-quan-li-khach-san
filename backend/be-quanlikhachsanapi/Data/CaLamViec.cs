@@ -9,9 +9,9 @@ public partial class CaLamViec
 
     public string TenCaLam { get; set; } = null!;
 
-    public DateTime GioBatDau { get; set; }
+    public TimeOnly GioBatDau { get; set; }
 
-    public DateTime GioKetThuc { get; set; }
+    public TimeOnly GioKetThuc { get; set; }
 
     public virtual ICollection<PhanCong> PhanCongs { get; set; } = new List<PhanCong>();
 }

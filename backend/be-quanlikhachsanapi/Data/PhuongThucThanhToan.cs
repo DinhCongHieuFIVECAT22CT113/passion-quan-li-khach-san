@@ -9,8 +9,6 @@ public partial class PhuongThucThanhToan
 
     public string MaHoaDon { get; set; } = null!;
 
-    public decimal SoTienCanThanhToan { get; set; }
-
     public string PhuongThucThanhToan1 { get; set; } = null!;
 
     public string TrangThai { get; set; } = null!;

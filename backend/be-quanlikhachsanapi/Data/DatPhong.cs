@@ -29,10 +29,6 @@ public partial class DatPhong
 
     public DateTime? NgaySua { get; set; }
 
-    public decimal GiaGoc { get; set; }
-
-    public decimal TongTien { get; set; }
-
     public virtual ICollection<ApDungKm> ApDungKms { get; set; } = new List<ApDungKm>();
 
     public virtual ICollection<ChiTietDatPhong> ChiTietDatPhongs { get; set; } = new List<ChiTietDatPhong>();

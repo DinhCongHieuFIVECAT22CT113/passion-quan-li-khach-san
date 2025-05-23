@@ -1,18 +1,18 @@
 'use client';
 import React, { useState, useEffect } from "react";
 import styles from "./CustomerManager.module.css";
-import { API_BASE_URL } from '../../../lib/config';
-import { getAuthHeaders, getFormDataHeaders, handleResponse } from '../../../lib/api';
+import { API_BASE_URL } from '@/lib/config';
+import { getAuthHeaders, getFormDataHeaders, handleResponse } from '@/lib/api';
 
 interface Customer {
-  maKh: string;
+  MaKh: string;
+  userName?: string;
   hoKh: string;
   tenKh: string;
   email: string;
-  soDienThoai: string;
-  soCccd: string;
+  Sdt: string;
+  SoCccd: string;
   diaChi?: string;
-  ghiChu?: string;
 }
 
 export default function CustomerManager() {
@@ -20,15 +20,15 @@ export default function CustomerManager() {
   const [search, setSearch] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [editCustomer, setEditCustomer] = useState<Customer | null>(null);
-  const [form, setForm] = useState<Customer>({ 
-    maKh: "", 
+  const [form, setForm] = useState<Partial<Customer>>({ 
+    MaKh: "", 
+    userName: "",
     hoKh: "",
     tenKh: "", 
     email: "", 
-    soDienThoai: "", 
-    soCccd: "",
+    Sdt: "", 
+    SoCccd: "",
     diaChi: "",
-    ghiChu: ""
   });
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -43,7 +43,7 @@ export default function CustomerManager() {
         const token = localStorage.getItem('token');
         if (!token) throw new Error("Bạn cần đăng nhập để xem dữ liệu");
         
-        const response = await fetch(`${API_BASE_URL}/KhachHang/Lấy danh sách tất cả khách hàng`, {
+        const response = await fetch(`${API_BASE_URL}/KhachHang`, {
           method: 'GET',
           headers: getAuthHeaders('GET'),
           credentials: 'include'
@@ -58,16 +58,16 @@ export default function CustomerManager() {
           data = [];
         }
         
-        // Đảm bảo các trường không null
-        const safeData = data.map((customer: Customer) => ({
-          ...customer,
-          hoKh: customer.hoKh || '',
-          tenKh: customer.tenKh || '',
-          email: customer.email || '',
-          soDienThoai: customer.soDienThoai || '',
-          soCccd: customer.soCccd || '',
-          diaChi: customer.diaChi || '',
-          ghiChu: customer.ghiChu || ''
+        // Đảm bảo các trường không null và đúng tên
+        const safeData = data.map((customer: any): Customer => ({
+          MaKh: customer.MaKh || customer.maKh || '',
+          userName: customer.UserName || customer.userName || '',
+          hoKh: customer.HoKh || customer.hoKh || '',
+          tenKh: customer.TenKh || customer.tenKh || '',
+          email: customer.Email || customer.email || '',
+          Sdt: customer.Sdt || customer.sdt || customer.soDienThoai || '',
+          SoCccd: customer.SoCccd || customer.soCccd || '',
+          diaChi: customer.DiaChi || customer.diaChi || '',
         }));
         setCustomers(safeData);
       } catch (err) {
@@ -85,20 +85,20 @@ export default function CustomerManager() {
   const filtered = customers.filter(c =>
     (c.hoKh + ' ' + c.tenKh).toLowerCase().includes(search.toLowerCase()) ||
     c.email.toLowerCase().includes(search.toLowerCase()) ||
-    c.soDienThoai.includes(search) ||
-    c.soCccd.includes(search)
+    c.Sdt.includes(search) ||
+    c.SoCccd.includes(search)
   );
 
   const openAddModal = () => {
     setForm({ 
-      maKh: "", 
+      MaKh: "", 
+      userName: "",
       hoKh: "",
       tenKh: "", 
       email: "", 
-      soDienThoai: "", 
-      soCccd: "",
+      Sdt: "", 
+      SoCccd: "",
       diaChi: "",
-      ghiChu: ""
     });
     setShowAddModal(true);
   };
@@ -120,13 +120,17 @@ export default function CustomerManager() {
       if (!token) throw new Error("Bạn cần đăng nhập để thực hiện hành động này");
       
       const formData = new FormData();
-      for (const key in form) {
-        if (key !== 'maKh') { // Không gửi mã KH khi tạo mới
-          formData.append(key, String(form[key as keyof Customer] || ''));
-        }
-      }
+      // Các trường gửi đi phải khớp với CreateKhachHangDto
+      if (form.userName) formData.append('UserName', form.userName);
+      if (form.hoKh) formData.append('HoKh', form.hoKh);
+      if (form.tenKh) formData.append('TenKh', form.tenKh);
+      if (form.email) formData.append('Email', form.email);
+      if (form.Sdt) formData.append('Sdt', form.Sdt);
+      if (form.SoCccd) formData.append('SoCccd', form.SoCccd);
+      if (form.diaChi) formData.append('DiaChi', form.diaChi);
+      // MaKh không gửi khi tạo mới, BE tự sinh
       
-      const response = await fetch(`${API_BASE_URL}/KhachHang/Tạo khách hàng mới`, {
+      const response = await fetch(`${API_BASE_URL}/KhachHang`, {
         method: 'POST',
         headers: getFormDataHeaders(),
         body: formData,
@@ -136,14 +140,25 @@ export default function CustomerManager() {
       await handleResponse(response);
       
       // Lấy lại danh sách khách hàng
-      const customersResponse = await fetch(`${API_BASE_URL}/KhachHang/Lấy danh sách tất cả khách hàng`, {
+      const customersResponse = await fetch(`${API_BASE_URL}/KhachHang`, {
         method: 'GET',
         headers: getAuthHeaders('GET'),
         credentials: 'include'
       });
       
-      const data = await handleResponse(customersResponse);
-      setCustomers(Array.isArray(data) ? data : []);
+      let data = await handleResponse(customersResponse);
+      if (!Array.isArray(data)) data = [];
+      const safeData = data.map((customer: any): Customer => ({
+        MaKh: customer.MaKh || customer.maKh || '',
+        userName: customer.UserName || customer.userName || '',
+        hoKh: customer.HoKh || customer.hoKh || '',
+        tenKh: customer.TenKh || customer.tenKh || '',
+        email: customer.Email || customer.email || '',
+        Sdt: customer.Sdt || customer.sdt || customer.soDienThoai || '',
+        SoCccd: customer.SoCccd || customer.soCccd || '',
+        diaChi: customer.DiaChi || customer.diaChi || '',
+      }));
+      setCustomers(safeData);
       setShowAddModal(false);
     } catch (err) {
       const error = err as Error;
@@ -154,17 +169,25 @@ export default function CustomerManager() {
 
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.MaKh) {
+      alert("Không tìm thấy mã khách hàng để cập nhật.");
+      return;
+    }
     
     try {
       const token = localStorage.getItem('token');
       if (!token) throw new Error("Bạn cần đăng nhập để thực hiện hành động này");
       
       const formData = new FormData();
-      for (const key in form) {
-        formData.append(key, String(form[key as keyof Customer] || ''));
-      }
+      // Các trường gửi đi phải khớp với UpdateKhachHangDto
+      if (form.email) formData.append('Email', form.email);
+      if (form.Sdt) formData.append('Sdt', form.Sdt);
+      if (form.diaChi) formData.append('DiaChi', form.diaChi);
+      if (form.SoCccd) formData.append('SoCccd', form.SoCccd);
+      // UpdateKhachHangDto không cho cập nhật HoKh, TenKh, UserName.
+      // MaKh được dùng trong URL.
       
-      const response = await fetch(`${API_BASE_URL}/KhachHang/Cập nhật khách hàng?maKh=${form.maKh}`, {
+      const response = await fetch(`${API_BASE_URL}/KhachHang/${form.MaKh}`, {
         method: 'PUT',
         headers: getFormDataHeaders(),
         body: formData,
@@ -174,14 +197,25 @@ export default function CustomerManager() {
       await handleResponse(response);
       
       // Lấy lại danh sách khách hàng
-      const customersResponse = await fetch(`${API_BASE_URL}/KhachHang/Lấy danh sách tất cả khách hàng`, {
+      const customersResponse = await fetch(`${API_BASE_URL}/KhachHang`, {
         method: 'GET',
         headers: getAuthHeaders('GET'),
         credentials: 'include'
       });
       
-      const data = await handleResponse(customersResponse);
-      setCustomers(Array.isArray(data) ? data : []);
+      let data = await handleResponse(customersResponse);
+      if (!Array.isArray(data)) data = [];
+      const safeData = data.map((customer: any): Customer => ({
+        MaKh: customer.MaKh || customer.maKh || '',
+        userName: customer.UserName || customer.userName || '',
+        hoKh: customer.HoKh || customer.hoKh || '',
+        tenKh: customer.TenKh || customer.tenKh || '',
+        email: customer.Email || customer.email || '',
+        Sdt: customer.Sdt || customer.sdt || customer.soDienThoai || '',
+        SoCccd: customer.SoCccd || customer.soCccd || '',
+        diaChi: customer.DiaChi || customer.diaChi || '',
+      }));
+      setCustomers(safeData);
       setEditCustomer(null);
     } catch (err) {
       const error = err as Error;
@@ -190,12 +224,12 @@ export default function CustomerManager() {
     }
   };
 
-  const handleDelete = async (maKh: string) => {
+  const handleDelete = async (MaKh: string) => {
     try {
       const token = localStorage.getItem('token');
       if (!token) throw new Error("Bạn cần đăng nhập để thực hiện hành động này");
       
-      const response = await fetch(`${API_BASE_URL}/KhachHang/Xóa khách hàng?maKh=${maKh}`, {
+      const response = await fetch(`${API_BASE_URL}/KhachHang/${MaKh}`, {
         method: 'DELETE',
         headers: getAuthHeaders('DELETE'),
         credentials: 'include'
@@ -204,7 +238,7 @@ export default function CustomerManager() {
       await handleResponse(response);
       
       // Cập nhật state
-      setCustomers(customers.filter(c => c.maKh !== maKh));
+      setCustomers(customers.filter(c => c.MaKh !== MaKh));
       setShowDeleteConfirm(null);
     } catch (err) {
       const error = err as Error;
@@ -243,7 +277,6 @@ export default function CustomerManager() {
                 <th>Số điện thoại</th>
                 <th>CCCD</th>
                 <th>Địa chỉ</th>
-                <th>Ghi chú</th>
                 <th>Hành động</th>
               </tr>
             </thead>
@@ -251,17 +284,16 @@ export default function CustomerManager() {
               {filtered.length === 0 ? (
                 <tr><td colSpan={8} style={{textAlign:'center', color:'#888', fontStyle:'italic'}}>Không có dữ liệu</td></tr>
               ) : filtered.map(customer => (
-                <tr key={customer.maKh}>
-                  <td>{customer.maKh}</td>
+                <tr key={customer.MaKh}>
+                  <td>{customer.MaKh}</td>
                   <td>{customer.hoKh} {customer.tenKh}</td>
                   <td>{customer.email}</td>
-                  <td>{customer.soDienThoai}</td>
-                  <td>{customer.soCccd}</td>
+                  <td>{customer.Sdt}</td>
+                  <td>{customer.SoCccd}</td>
                   <td>{customer.diaChi}</td>
-                  <td>{customer.ghiChu}</td>
                   <td style={{whiteSpace:'nowrap'}}>
                     <button className={styles.editBtn} onClick={() => openEditModal(customer)}>Sửa</button>
-                    <button className={styles.deleteBtn} onClick={() => setShowDeleteConfirm(customer.maKh)}>Xóa</button>
+                    <button className={styles.deleteBtn} onClick={() => setShowDeleteConfirm(customer.MaKh)}>Xóa</button>
                   </td>
                 </tr>
               ))}
@@ -276,13 +308,34 @@ export default function CustomerManager() {
           <div className={styles.modalContent}>
             <h3>Thêm khách hàng</h3>
             <form onSubmit={handleAdd}>
-              <input name="hoKh" value={form.hoKh} onChange={handleChange} placeholder="Họ" required />
-              <input name="tenKh" value={form.tenKh} onChange={handleChange} placeholder="Tên" required />
-              <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Email" required />
-              <input name="soDienThoai" value={form.soDienThoai} onChange={handleChange} placeholder="Số điện thoại" required />
-              <input name="soCccd" value={form.soCccd} onChange={handleChange} placeholder="CCCD" required />
-              <input name="diaChi" value={form.diaChi} onChange={handleChange} placeholder="Địa chỉ" />
-              <textarea name="ghiChu" value={form.ghiChu} onChange={handleChange} placeholder="Ghi chú" rows={3} />
+              <div className={styles.formGroup}>
+                <label htmlFor="userName">Tên đăng nhập*</label>
+                <input type="text" id="userName" name="userName" value={form.userName || ''} onChange={handleChange} required />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="hoKh">Họ khách hàng*</label>
+                <input type="text" id="hoKh" name="hoKh" value={form.hoKh || ''} onChange={handleChange} required />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="tenKh">Tên khách hàng*</label>
+                <input type="text" id="tenKh" name="tenKh" value={form.tenKh || ''} onChange={handleChange} required />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="email">Email*</label>
+                <input type="email" id="email" name="email" value={form.email || ''} onChange={handleChange} required />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="Sdt">Số điện thoại*</label>
+                <input type="tel" id="Sdt" name="Sdt" value={form.Sdt || ''} onChange={handleChange} required />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="SoCccd">Số CCCD*</label>
+                <input type="text" id="SoCccd" name="SoCccd" value={form.SoCccd || ''} onChange={handleChange} required />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="diaChi">Địa chỉ</label>
+                <input type="text" id="diaChi" name="diaChi" value={form.diaChi || ''} onChange={handleChange} />
+              </div>
               <div className={styles.buttonGroup}>
                 <button type="submit" className={styles.editBtn}>Lưu</button>
                 <button type="button" onClick={() => setShowAddModal(false)} className={styles.deleteBtn}>Hủy</button>
@@ -298,13 +351,34 @@ export default function CustomerManager() {
           <div className={styles.modalContent}>
             <h3>Sửa khách hàng</h3>
             <form onSubmit={handleEdit}>
-              <input name="hoKh" value={form.hoKh} onChange={handleChange} placeholder="Họ" required />
-              <input name="tenKh" value={form.tenKh} onChange={handleChange} placeholder="Tên" required />
-              <input name="email" type="email" value={form.email} onChange={handleChange} placeholder="Email" required />
-              <input name="soDienThoai" value={form.soDienThoai} onChange={handleChange} placeholder="Số điện thoại" required />
-              <input name="soCccd" value={form.soCccd} onChange={handleChange} placeholder="CCCD" required />
-              <input name="diaChi" value={form.diaChi} onChange={handleChange} placeholder="Địa chỉ" />
-              <textarea name="ghiChu" value={form.ghiChu} onChange={handleChange} placeholder="Ghi chú" rows={3} />
+              <div className={styles.formGroup}>
+                <label htmlFor="userName">Tên đăng nhập</label>
+                <input type="text" id="userName" name="userName" value={form.userName || ''} onChange={handleChange} disabled />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="hoKh">Họ khách hàng</label>
+                <input type="text" id="hoKh" name="hoKh" value={form.hoKh || ''} onChange={handleChange} disabled={!editCustomer} />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="tenKh">Tên khách hàng</label>
+                <input type="text" id="tenKh" name="tenKh" value={form.tenKh || ''} onChange={handleChange} disabled={!editCustomer} />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="email">Email*</label>
+                <input type="email" id="email" name="email" value={form.email || ''} onChange={handleChange} required disabled={!editCustomer} />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="Sdt">Số điện thoại*</label>
+                <input type="tel" id="Sdt" name="Sdt" value={form.Sdt || ''} onChange={handleChange} required disabled={!editCustomer} />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="SoCccd">Số CCCD*</label>
+                <input type="text" id="SoCccd" name="SoCccd" value={form.SoCccd || ''} onChange={handleChange} required disabled={!editCustomer} />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="diaChi">Địa chỉ</label>
+                <input type="text" id="diaChi" name="diaChi" value={form.diaChi || ''} onChange={handleChange} />
+              </div>
               <div className={styles.buttonGroup}>
                 <button type="submit" className={styles.editBtn}>Lưu</button>
                 <button type="button" onClick={() => setEditCustomer(null)} className={styles.deleteBtn}>Hủy</button>

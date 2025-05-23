@@ -12,9 +12,6 @@ namespace be_quanlikhachsanapi.DTOs
         public decimal? GiamGiaLoaiKM { get; set; }
         public decimal? GiamGiaLoaiKH { get; set; }
         public decimal TongTien { get; set; }
-        public decimal? SoTienDaThanhToan { get; set; }
-        public decimal? SoTienConThieu { get; set; }
-        public decimal? SoTienThanhToanDu { get; set; }
         public string TrangThai { get; set; } = null!;
         public DateTime? NgayTao { get; set; }
         public DateTime? NgaySua { get; set; }
@@ -35,13 +32,6 @@ namespace be_quanlikhachsanapi.DTOs
         [Range(0, double.MaxValue, ErrorMessage = "Tổng tiền phải lớn hơn hoặc bằng 0")]
         public decimal TongTien { get; set; }
         
-        public decimal? SoTienDaThanhToan { get; set; }
-        
-        public decimal? SoTienConThieu { get; set; }
-        
-        public decimal? SoTienThanhToanDu { get; set; }
-        
-        public string TrangThai { get; set; } = "Chưa thanh toán";
     }
 
     public class UpdateHoaDonDTO
@@ -54,12 +44,5 @@ namespace be_quanlikhachsanapi.DTOs
         
         public decimal? TongTien { get; set; }
         
-        public decimal? SoTienDaThanhToan { get; set; }
-        
-        public decimal? SoTienConThieu { get; set; }
-        
-        public decimal? SoTienThanhToanDu { get; set; }
-        
-        public string? TrangThai { get; set; }
     }
 }

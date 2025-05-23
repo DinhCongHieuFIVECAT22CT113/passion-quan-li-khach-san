@@ -17,9 +17,8 @@ namespace be_quanlikhachsanapi.Services
         JsonResult GetKhachHangById(string MaKh);
         JsonResult CreateKhachHang(CreateKhachHangDto createKhachHang);
         JsonResult UpdateKhachHang(string MaKh, UpdateKhachHangDto updateKhachHang);
+        JsonResult UpdateLoaiKhachHang(string MaKh, string MaLoaiKh);
         JsonResult DeleteKhachHang(string MaKh);
-        //JsonResult ChangePassword(string UserName, ChangePassDto changePassDto);
-        JsonResult ResetPassword(string UserName);
     }
     public class KhachHangRepository : IKhachHangRepository
     {
@@ -27,7 +26,7 @@ namespace be_quanlikhachsanapi.Services
         private readonly IPasswordHasher<KhachHang> _passwordHasher;
         private readonly ISendEmailServices _sendEmail;
         private readonly IConfiguration _confMail;
-        
+
         public KhachHangRepository(QuanLyKhachSanContext context, IPasswordHasher<KhachHang> passwordHasher, ISendEmailServices sendEmail, IConfiguration confMail)
         {
             _context = context;
@@ -51,8 +50,6 @@ namespace be_quanlikhachsanapi.Services
                 SoCccd = kh.SoCccd,
                 MaLoaiKh = kh.MaLoaiKh,
                 MaRole = kh.MaRole,
-                NgayTao = kh.NgayTao,
-                NgaySua = kh.NgaySua
             }).ToList();
         }
 
@@ -78,8 +75,6 @@ namespace be_quanlikhachsanapi.Services
                 SoCccd = khachHang.SoCccd,
                 MaLoaiKh = khachHang.MaLoaiKh,
                 MaRole = khachHang.MaRole,
-                NgayTao = khachHang.NgayTao,
-                NgaySua = khachHang.NgaySua
             };
             return new JsonResult(_khachHang);
         }
@@ -133,9 +128,9 @@ namespace be_quanlikhachsanapi.Services
                 NgaySua = DateTime.Now
             };
 
-            #pragma warning disable CS8601
+#pragma warning disable CS8601
             khachHang.PasswordHash = _passwordHasher.HashPassword(khachHang, password);
-            #pragma warning restore CS8601
+#pragma warning restore CS8601
 
             _context.KhachHangs.Add(khachHang);
             _context.SaveChanges();
@@ -170,7 +165,6 @@ namespace be_quanlikhachsanapi.Services
             khachHang.Sdt = updateKhachHang.Sdt;
             khachHang.DiaChi = updateKhachHang.DiaChi;
             khachHang.SoCccd = updateKhachHang.SoCccd;
-            khachHang.MaLoaiKh = updateKhachHang.MaLoaiKh;
             khachHang.NgaySua = DateTime.Now;
 
             _context.SaveChanges();
@@ -200,88 +194,23 @@ namespace be_quanlikhachsanapi.Services
                 StatusCode = StatusCodes.Status200OK
             };
         }
-
-        // public JsonResult ChangePassword(string userName, ChangePassDto changePassDto)
-        // {
-        //     var khachHang = _context.KhachHangs.FirstOrDefault(kh => kh.UserName == userName);
-        //     if (khachHang == null)
-        //     {
-        //         return new JsonResult("Không tìm thấy khách hàng với username đã cho.")
-        //         {
-        //             StatusCode = StatusCodes.Status404NotFound
-        //         };
-        //     }
-
-        //     // Kiểm tra mật khẩu cũ
-        //     var isOldPasswordValid = _passwordHasher.VerifyHashedPassword(khachHang, khachHang.PasswordHash, changePassDto.Password);
-        //     if (isOldPasswordValid == PasswordVerificationResult.Failed)
-        //     {
-        //         return new JsonResult("Mật khẩu cũ không chính xác.")
-        //         {
-        //             StatusCode = StatusCodes.Status400BadRequest
-        //         };
-        //     }
-
-        //     // So sánh mật khẩu mới và xác nhận mật khẩu
-        //     if (changePassDto.NewPassword != changePassDto.ConfirmPassword)
-        //     {
-        //         return new JsonResult("Mật khẩu xác nhận không khớp.")
-        //         {
-        //             StatusCode = StatusCodes.Status400BadRequest
-        //         };
-        //     }
-
-        //     // Cập nhật mật khẩu mới
-        //     khachHang.PasswordHash = _passwordHasher.HashPassword(khachHang, changePassDto.NewPassword);
-        //     _context.SaveChanges();
-
-        //     // Gửi email xác nhận
-        //     var email = new EmailModel
-        //     {
-        //         ToEmail = khachHang.Email,
-        //         Subject = "Mật khẩu đăng nhập vừa được thay đổi",
-        //         Body = "Bạn vừa thay đổi mật khẩu thành công. Nếu bạn không thực hiện điều này, vui lòng liên hệ với chúng tôi ngay."
-        //     };
-        //     bool emailSent = _sendEmail.SendEmail(email);
-        //     if (!emailSent)
-        //     {
-        //         Console.WriteLine("Không thể gửi email. Kiểm tra lại cấu hình SMTP.");
-        //     }
-
-        //     return new JsonResult("Đã thay đổi mật khẩu thành công.")
-        //     {
-        //         StatusCode = StatusCodes.Status200OK
-        //     };
-        // }
-
-        public JsonResult ResetPassword(string userName)
+        
+        public JsonResult UpdateLoaiKhachHang(string MaKh, string MaLoaiKh)
         {
-            var khachHang = _context.KhachHangs.FirstOrDefault(kh => kh.UserName == userName);
+            var khachHang = _context.KhachHangs.FirstOrDefault(kh => kh.MaKh == MaKh);
             if (khachHang == null)
             {
-                return new JsonResult("Không tìm thấy khách hàng với username đã cho.")
+                return new JsonResult("Không tìm thấy khách hàng với mã đã cho.")
                 {
                     StatusCode = StatusCodes.Status404NotFound
                 };
             }
 
-            // Sinh mật khẩu ngẫu nhiên
-            string password = Guid.NewGuid().ToString("N").Substring(0, 6); // Generate a random password
-
-            // Cập nhật mật khẩu mới
-            khachHang.PasswordHash = _passwordHasher.HashPassword(khachHang, password);
+            khachHang.MaLoaiKh = MaLoaiKh;
+            khachHang.NgaySua = DateTime.Now;
             _context.SaveChanges();
 
-            // Gửi email xác nhận
-            var email = new EmailModel
-            {
-                ToEmail = khachHang.Email,
-                Subject = "Mật khẩu đăng nhập đã được khôi phục",
-                Body = $"Mật khẩu mới của bạn là: {password}"
-            };
-            _sendEmail.SendEmail(email);
-
-            return new JsonResult("Đã khôi phục mật khẩu thành công.")
+            return new JsonResult("Đã cập nhật loại khách hàng thành công")
             {
                 StatusCode = StatusCodes.Status200OK
             };

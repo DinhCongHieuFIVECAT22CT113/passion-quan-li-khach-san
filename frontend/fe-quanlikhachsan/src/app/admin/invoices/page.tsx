@@ -1,37 +1,36 @@
 'use client';
 import React, { useState, useEffect } from "react";
 import styles from "./InvoiceManager.module.css";
-import { getInvoices, getBookingHistory, getCustomerProfile, deleteInvoice, updateInvoice } from "../../../lib/api";
+import { getInvoices, getBookingHistory, getCustomerProfile, deleteInvoice, updateInvoiceStatus } from "../../../lib/api";
 // import { API_BASE_URL } from '../../../lib/config'; // Không sử dụng
 
 interface Invoice {
-  maHoaDon: string;
-  maDatPhong: string;
-  maKM?: string;
-  tenKhuyenMai?: string;
-  giamGiaLoaiKM?: number;
-  giamGiaLoaiKH?: number;
-  tongTien: number;
-  soTienDaThanhToan?: number;
-  soTienConThieu?: number;
-  soTienThanhToanDu?: number;
-  trangThai: string;
-  ngayTao?: string;
-  ngaySua?: string;
+  MaHoaDon: string;
+  MaDatPhong: string;
+  MaKM?: string;
+  TenKhuyenMai?: string;
+  GiamGiaLoaiKM?: number;
+  GiamGiaLoaiKH?: number;
+  TongTien: number;
+  TrangThai: string;
+  NgayTao?: string;
+  NgaySua?: string;
   // Thông tin kết hợp
   tenKhachHang?: string;
+  soTienDaThanhToan?: number;
+  soTienConThieu?: number;
 }
 
 interface Booking {
-  maDatPhong: string;
-  maKh: string;
+  MaDatPhong: string;
+  MaKH: string;
   // các trường khác của đặt phòng
 }
 
 interface Customer {
-  maKh: string;
-  hoKh: string;
-  tenKh: string;
+  MaKh: string;
+  HoKh: string;
+  TenKh: string;
   // các trường khác của khách hàng
 }
 
@@ -40,11 +39,11 @@ export default function InvoiceManager() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editInvoice, setEditInvoice] = useState<Invoice | null>(null);
   const [viewInvoice, setViewInvoice] = useState<Invoice | null>(null);
-  const [form, setForm] = useState<Invoice>({ 
-    maHoaDon: "", 
-    maDatPhong: "", 
-    tongTien: 0, 
-    trangThai: "" 
+  const [form, setForm] = useState<Partial<Invoice>>({ 
+    MaHoaDon: "", 
+    MaDatPhong: "", 
+    TongTien: 0, 
+    TrangThai: "" 
   });
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -66,27 +65,25 @@ export default function InvoiceManager() {
         const invoicesData = await getInvoices();
         
         // Lấy danh sách đặt phòng
-        const bookingsData = await getBookingHistory("");
+        const bookingsData: Booking[] = await getBookingHistory("");
         // setBookings(bookingsData);
         
         // Lấy thông tin khách hàng cho mỗi đặt phòng
-        const customersData: Customer[] = [];
         const customerMap = new Map<string, Customer>();
         
-        // Trước tiên, tạo một danh sách các mã khách hàng duy nhất
         const uniqueCustomerIds: string[] = [];
         bookingsData.forEach((booking: Booking) => {
-          if (booking.maKh && !uniqueCustomerIds.includes(booking.maKh)) {
-            uniqueCustomerIds.push(booking.maKh);
+          if (booking.MaKH && !uniqueCustomerIds.includes(booking.MaKH)) {
+            uniqueCustomerIds.push(booking.MaKH);
           }
         });
         
-        // Lấy thông tin của từng khách hàng
         for (const maKh of uniqueCustomerIds) {
           try {
-            const customerData = await getCustomerProfile(maKh);
-            customersData.push(customerData);
-            customerMap.set(maKh, customerData);
+            const customerData: Customer = await getCustomerProfile(maKh);
+            if (customerData && customerData.MaKh) {
+              customerMap.set(customerData.MaKh, customerData);
+            }
           } catch (err) {
             console.error(`Không thể lấy thông tin khách hàng ${maKh}:`, err);
           }
@@ -94,23 +91,30 @@ export default function InvoiceManager() {
         
         // Kết hợp thông tin khách hàng vào hóa đơn
         const enhancedInvoices = invoicesData.map((invoice: Invoice) => {
-          const booking = bookingsData.find((b: Booking) => b.maDatPhong === invoice.maDatPhong);
+          const booking = bookingsData.find((b: Booking) => b.MaDatPhong === invoice.MaDatPhong);
           let tenKhachHang = "Không xác định";
           
-          if (booking) {
-            const customer = customerMap.get(booking.maKh);
+          if (booking && booking.MaKH) {
+            const customer = customerMap.get(booking.MaKH);
             if (customer) {
-              tenKhachHang = `${customer.hoKh} ${customer.tenKh}`;
+              tenKhachHang = `${customer.HoKh} ${customer.TenKh}`;
             }
           }
           
+          // Tính toán các giá trị hiển thị nếu cần
+          const tongTien = invoice.TongTien || 0;
+          // Giả sử soTienDaThanhToan được lấy từ đâu đó hoặc mặc định là 0 nếu chưa thanh toán
+          // Hiện tại HoaDonDTO không có, nên sẽ là undefined
+          const soTienDaThanhToan = invoice.soTienDaThanhToan || (invoice.TrangThai === "Đã thanh toán" ? tongTien : 0);
+          const soTienConThieu = Math.max(0, tongTien - soTienDaThanhToan);
+
           return {
             ...invoice,
             tenKhachHang,
-            tongTien: invoice.tongTien || 0,
-            soTienDaThanhToan: invoice.soTienDaThanhToan || 0,
-            soTienConThieu: invoice.soTienConThieu || 0,
-            trangThai: invoice.trangThai || "Chưa thanh toán"
+            TongTien: tongTien,
+            soTienDaThanhToan: soTienDaThanhToan,
+            soTienConThieu: soTienConThieu,
+            TrangThai: invoice.TrangThai || "Chưa thanh toán"
           };
         });
         
@@ -129,18 +133,32 @@ export default function InvoiceManager() {
 
   // Khi mở modal Thêm mới
   const openAddModal = () => {
-    setForm({ 
-      maHoaDon: "", 
-      maDatPhong: "", 
-      tongTien: 0, 
-      trangThai: "Chưa thanh toán"
-    });
-    setShowAddModal(true);
+    // setForm({ 
+    //   MaHoaDon: "", 
+    //   MaDatPhong: "", 
+    //   TongTien: 0, 
+    //   TrangThai: "Chưa thanh toán"
+    // });
+    // setShowAddModal(true);
+    // Chuyển hướng trực tiếp vì form thêm hóa đơn phức tạp hơn
+    window.location.href = `/admin/invoices/create`; 
   };
 
   // Khi mở modal Sửa
   const openEditModal = (invoice: Invoice) => {
-    setForm(invoice);
+    setForm({
+      MaHoaDon: invoice.MaHoaDon,
+      MaDatPhong: invoice.MaDatPhong,
+      TongTien: invoice.TongTien,
+      TrangThai: invoice.TrangThai,
+      MaKM: invoice.MaKM,
+      TenKhuyenMai: invoice.TenKhuyenMai,
+      GiamGiaLoaiKM: invoice.GiamGiaLoaiKM,
+      GiamGiaLoaiKH: invoice.GiamGiaLoaiKH,
+      NgayTao: invoice.NgayTao,
+      soTienDaThanhToan: invoice.soTienDaThanhToan,
+      soTienConThieu: invoice.soTienConThieu,
+    });
     setEditInvoice(invoice);
   };
 
@@ -152,42 +170,37 @@ export default function InvoiceManager() {
   // Xử lý thay đổi input
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setForm({ 
-      ...form, 
-      [name]: name === 'tongTien' || name === 'soTienDaThanhToan' || name === 'soTienConThieu' ? 
+    setForm(prevForm => ({ 
+      ...prevForm, 
+      [name]: (name === 'TongTien' || name === 'GiamGiaLoaiKM' || name === 'GiamGiaLoaiKH' || name === 'soTienDaThanhToan') ? 
         Number(value) : value 
-    });
+    }));
   };
 
-  // Xử lý submit Thêm mới - chuyển người dùng đến trang tạo hóa đơn riêng biệt
-  const handleAdd = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Chuyển hướng đến trang tạo hóa đơn chi tiết
-    window.location.href = `/admin/invoices/create`;
-  };
+  // Xử lý submit Thêm mới - đã chuyển hướng
+  // const handleAdd = (e: React.FormEvent) => { ... }; 
 
-  // Xử lý submit Sửa
+  // Xử lý submit Sửa (chỉ trạng thái)
   const handleEdit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form || !form.MaHoaDon || form.TrangThai === undefined) {
+      alert("Thông tin không hợp lệ để cập nhật trạng thái.");
+      return;
+    }
     
     try {
-      // Đảm bảo giá trị số
-      const updatedForm = {
-        ...form,
-        tongTien: Number(form.tongTien),
-        soTienDaThanhToan: form.soTienDaThanhToan !== undefined ? Number(form.soTienDaThanhToan) : undefined,
-        soTienConThieu: form.soTienConThieu !== undefined ? Number(form.soTienConThieu) : undefined
-      };
-      
-      await updateInvoice(form.maHoaDon, updatedForm);
+      await updateInvoiceStatus(form.MaHoaDon, form.TrangThai);
       
       // Cập nhật danh sách hóa đơn
-      setInvoices(invoices.map(inv => inv.maHoaDon === form.maHoaDon ? {...inv, ...updatedForm} : inv));
-    setEditInvoice(null);
+      setInvoices(invoices.map(inv => 
+        inv.MaHoaDon === form.MaHoaDon ? { ...inv, TrangThai: form.TrangThai as string } : inv
+      ));
+      setEditInvoice(null);
+      alert("Cập nhật trạng thái hóa đơn thành công!");
     } catch (err) {
       const error = err as Error;
       alert(`Lỗi: ${error.message}`);
-      console.error("Error updating invoice:", error);
+      console.error("Error updating invoice status:", error);
     }
   };
 
@@ -196,7 +209,7 @@ export default function InvoiceManager() {
     if (window.confirm("Bạn có chắc chắn muốn xóa hóa đơn này?")) {
       try {
         await deleteInvoice(maHoaDon);
-        setInvoices(invoices.filter(inv => inv.maHoaDon !== maHoaDon));
+        setInvoices(invoices.filter(inv => inv.MaHoaDon !== maHoaDon));
       } catch (err) {
         const error = err as Error;
         alert(`Lỗi: ${error.message}`);
@@ -207,14 +220,14 @@ export default function InvoiceManager() {
 
   // Xuất hóa đơn PDF
   const handleExportPDF = (invoice: Invoice) => {
-    window.open(`/admin/invoices/export?id=${invoice.maHoaDon}`, '_blank');
+    window.open(`/admin/invoices/export?id=${invoice.MaHoaDon}`, '_blank');
   };
 
   // Lọc theo search
   const filtered = invoices.filter(inv =>
     (inv.tenKhachHang || '').toLowerCase().includes(search.toLowerCase()) ||
-    inv.maHoaDon.toLowerCase().includes(search.toLowerCase()) ||
-    inv.maDatPhong.toLowerCase().includes(search.toLowerCase())
+    inv.MaHoaDon.toLowerCase().includes(search.toLowerCase()) ||
+    inv.MaDatPhong.toLowerCase().includes(search.toLowerCase())
   );
 
   // Định dạng tiền tệ
@@ -248,43 +261,38 @@ export default function InvoiceManager() {
         <thead>
           <tr>
                 <th>Mã HD</th>
-            <th>Khách hàng</th>
-                <th>Đặt phòng</th>
-                <th>Tổng tiền (VNĐ)</th>
-                <th>Đã thanh toán (VNĐ)</th>
-                <th>Còn thiếu (VNĐ)</th>
+                <th>Mã ĐP</th>
+                <th>Khách hàng</th>
+                <th>Tổng tiền</th>
+                <th>Đã thanh toán</th>
+                <th>Còn lại</th>
+                <th>Trạng thái</th>
                 <th>Ngày tạo</th>
-            <th>Trạng thái</th>
             <th>Hành động</th>
           </tr>
         </thead>
         <tbody>
           {filtered.length === 0 ? (
-                <tr><td colSpan={9} style={{textAlign:'center', color:'#888', fontStyle:'italic'}}>Không có dữ liệu</td></tr>
+                <tr><td colSpan={9} className={styles.noData}>Không có dữ liệu hóa đơn</td></tr>
           ) : filtered.map(invoice => (
-                <tr key={invoice.maHoaDon}>
-                  <td>{invoice.maHoaDon}</td>
-                  <td>{invoice.tenKhachHang || "Không xác định"}</td>
-                  <td>{invoice.maDatPhong}</td>
-                  <td>{formatCurrency(invoice.tongTien || 0)}</td>
+                <tr key={invoice.MaHoaDon}>
+                  <td>{invoice.MaHoaDon}</td>
+                  <td>{invoice.MaDatPhong}</td>
+                  <td>{invoice.tenKhachHang}</td>
+                  <td>{formatCurrency(invoice.TongTien)}</td>
                   <td>{formatCurrency(invoice.soTienDaThanhToan || 0)}</td>
                   <td>{formatCurrency(invoice.soTienConThieu || 0)}</td>
-                  <td>{invoice.ngayTao ? new Date(invoice.ngayTao).toLocaleDateString('vi-VN') : "N/A"}</td>
                   <td>
-                    <span 
-                      className={`${styles.status} ${
-                        invoice.trangThai === "Đã thanh toán" ? styles["status-paid"] : 
-                        invoice.trangThai === "Chưa thanh toán" ? styles["status-unpaid"] : styles["status"]
-                      }`}
-                    >
-                      {invoice.trangThai || "N/A"}
+                    <span className={`${styles.status} ${styles[`status-${invoice.TrangThai?.toLowerCase().replace(/\s+/g, '-')}`]}`}>
+                      {invoice.TrangThai}
                     </span>
                   </td>
+                  <td>{invoice.NgayTao ? new Date(invoice.NgayTao).toLocaleDateString('vi-VN') : 'N/A'}</td>
               <td style={{whiteSpace:'nowrap'}}>
                     <button className={styles.viewBtn} onClick={() => openViewModal(invoice)}>Xem</button>
                 <button className={styles.editBtn} onClick={() => openEditModal(invoice)}>Sửa</button>
                     <button className={styles.pdfBtn} onClick={() => handleExportPDF(invoice)}>PDF</button>
-                    <button className={styles.deleteBtn} onClick={() => handleDelete(invoice.maHoaDon)}>Xóa</button>
+                    <button className={styles.deleteBtn} onClick={() => handleDelete(invoice.MaHoaDon)}>Xóa</button>
               </td>
             </tr>
           ))}
@@ -298,11 +306,10 @@ export default function InvoiceManager() {
         <div className={styles.modal}>
           <div className={styles.modalContent}>
             <h3>Thêm hóa đơn</h3>
-            <form onSubmit={handleAdd} autoComplete="off">
+            <form onSubmit={openAddModal} autoComplete="off">
               <p style={{marginBottom:12}}>Hóa đơn sẽ được tạo dựa trên thông tin đặt phòng.</p>
               <div style={{marginTop: 12, display:'flex', gap:8}}>
                 <button type="submit" className={styles.editBtn}>Tiếp tục</button>
-                <button type="button" onClick={() => setShowAddModal(false)} className={styles.pdfBtn}>Hủy</button>
               </div>
             </form>
           </div>
@@ -313,55 +320,41 @@ export default function InvoiceManager() {
       {editInvoice && (
         <div className={styles.modal}>
           <div className={styles.modalContent}>
-            <h3>Sửa hóa đơn #{form.maHoaDon}</h3>
+            <h3>Sửa hóa đơn #{form.MaHoaDon}</h3>
             <form onSubmit={handleEdit} autoComplete="off">
-              <div className={styles.formGroup}>
-                <label>Tổng tiền (VNĐ)</label>
-                <input 
-                  name="tongTien" 
-                  type="number" 
-                  value={form.tongTien} 
-                  onChange={handleChange} 
-                  placeholder="Tổng tiền" 
-                  required 
-                  min={0} 
-                />
+              <div className={styles.formRow}>
+                <label>Mã Hóa Đơn:</label>
+                <span>{form.MaHoaDon}</span>
               </div>
-              
-              <div className={styles.formGroup}>
-                <label>Số tiền đã thanh toán (VNĐ)</label>
-                <input 
-                  name="soTienDaThanhToan" 
-                  type="number" 
-                  value={form.soTienDaThanhToan} 
-                  onChange={handleChange} 
-                  placeholder="Số tiền đã thanh toán" 
-                  min={0} 
-                />
+              <div className={styles.formRow}>
+                <label>Mã Đặt Phòng:</label>
+                <span>{form.MaDatPhong}</span>
               </div>
-              
-              <div className={styles.formGroup}>
-                <label>Số tiền còn thiếu (VNĐ)</label>
-                <input 
-                  name="soTienConThieu" 
-                  type="number" 
-                  value={form.soTienConThieu} 
-                  onChange={handleChange} 
-                  placeholder="Số tiền còn thiếu" 
-                  min={0} 
-                />
+              <div className={styles.formRow}>
+                <label>Tổng tiền:</label>
+                <span>{formatCurrency(form.TongTien || 0)}</span>
               </div>
-              
+              <div className={styles.formRow}>
+                <label>Khuyến mãi:</label>
+                <span>{form.TenKhuyenMai || "Không có"}{form.GiamGiaLoaiKM ? ` (-${formatCurrency(form.GiamGiaLoaiKM)})` : ""}</span>
+              </div>
+              <div className={styles.formRow}>
+                <label>Giảm giá theo KH:</label>
+                <span>{form.GiamGiaLoaiKH ? `${formatCurrency(form.GiamGiaLoaiKH)}` : "Không có"}</span>
+              </div>
               <div className={styles.formGroup}>
-                <label>Trạng thái</label>
-                <select name="trangThai" value={form.trangThai} onChange={handleChange} required>
-                <option value="">Chọn trạng thái</option>
-                <option value="Đã thanh toán">Đã thanh toán</option>
-                <option value="Chưa thanh toán">Chưa thanh toán</option>
+                <label htmlFor="TrangThai">Trạng thái:</label>
+                <select 
+                  id="TrangThai" 
+                  name="TrangThai" 
+                  value={form.TrangThai || ""} 
+                  onChange={handleChange}
+                >
+                  <option value="Chưa thanh toán">Chưa thanh toán</option>
+                  <option value="Đã thanh toán">Đã thanh toán</option>
                   <option value="Đã hủy">Đã hủy</option>
-              </select>
+                </select>
               </div>
-              
               <div style={{marginTop: 12, display:'flex', gap:8}}>
                 <button type="submit" className={styles.editBtn}>Lưu</button>
                 <button type="button" onClick={() => setEditInvoice(null)} className={styles.pdfBtn}>Hủy</button>
@@ -375,7 +368,7 @@ export default function InvoiceManager() {
       {viewInvoice && (
         <div className={styles.modal}>
           <div className={styles.modalContent}>
-            <h3>Chi tiết hóa đơn #{viewInvoice.maHoaDon}</h3>
+            <h3>Chi tiết hóa đơn #{viewInvoice.MaHoaDon}</h3>
             <div className={styles.invoiceDetails}>
               <div className={styles.detailRow}>
                 <strong>Khách hàng:</strong>
@@ -383,11 +376,11 @@ export default function InvoiceManager() {
               </div>
               <div className={styles.detailRow}>
                 <strong>Mã đặt phòng:</strong>
-                <span>{viewInvoice.maDatPhong}</span>
+                <span>{viewInvoice.MaDatPhong}</span>
               </div>
               <div className={styles.detailRow}>
                 <strong>Tổng tiền:</strong>
-                <span>{formatCurrency(viewInvoice.tongTien || 0)} VNĐ</span>
+                <span>{formatCurrency(viewInvoice.TongTien || 0)} VNĐ</span>
               </div>
               <div className={styles.detailRow}>
                 <strong>Đã thanh toán:</strong>
@@ -397,43 +390,43 @@ export default function InvoiceManager() {
                 <strong>Còn thiếu:</strong>
                 <span>{formatCurrency(viewInvoice.soTienConThieu || 0)} VNĐ</span>
               </div>
-              {viewInvoice.maKM && (
+              {viewInvoice.MaKM && (
                 <div className={styles.detailRow}>
                   <strong>Khuyến mãi:</strong>
-                  <span>{viewInvoice.tenKhuyenMai || viewInvoice.maKM}</span>
+                  <span>{viewInvoice.TenKhuyenMai || viewInvoice.MaKM}</span>
                 </div>
               )}
-              {viewInvoice.giamGiaLoaiKM && viewInvoice.giamGiaLoaiKM > 0 && (
+              {viewInvoice.GiamGiaLoaiKM && viewInvoice.GiamGiaLoaiKM > 0 && (
                 <div className={styles.detailRow}>
                   <strong>Giảm giá KM:</strong>
-                  <span>{viewInvoice.giamGiaLoaiKM}%</span>
+                  <span>{viewInvoice.GiamGiaLoaiKM}%</span>
                 </div>
               )}
-              {viewInvoice.giamGiaLoaiKH && viewInvoice.giamGiaLoaiKH > 0 && (
+              {viewInvoice.GiamGiaLoaiKH && viewInvoice.GiamGiaLoaiKH > 0 && (
                 <div className={styles.detailRow}>
                   <strong>Giảm giá KH:</strong>
-                  <span>{viewInvoice.giamGiaLoaiKH}%</span>
+                  <span>{viewInvoice.GiamGiaLoaiKH}%</span>
                 </div>
               )}
               <div className={styles.detailRow}>
                 <strong>Trạng thái:</strong>
                 <span 
                   className={`${styles.status} ${
-                    viewInvoice.trangThai === "Đã thanh toán" ? styles["status-paid"] : 
-                    viewInvoice.trangThai === "Chưa thanh toán" ? styles["status-unpaid"] : styles["status"]
+                    viewInvoice.TrangThai === "Đã thanh toán" ? styles["status-paid"] : 
+                    viewInvoice.TrangThai === "Chưa thanh toán" ? styles["status-unpaid"] : styles["status"]
                   }`}
                 >
-                  {viewInvoice.trangThai || "N/A"}
+                  {viewInvoice.TrangThai || "N/A"}
                 </span>
               </div>
               <div className={styles.detailRow}>
                 <strong>Ngày tạo:</strong>
-                <span>{viewInvoice.ngayTao ? new Date(viewInvoice.ngayTao).toLocaleString('vi-VN') : "N/A"}</span>
+                <span>{viewInvoice.NgayTao ? new Date(viewInvoice.NgayTao).toLocaleString('vi-VN') : "N/A"}</span>
               </div>
-              {viewInvoice.ngaySua && (
+              {viewInvoice.NgaySua && (
                 <div className={styles.detailRow}>
                   <strong>Cập nhật lần cuối:</strong>
-                  <span>{new Date(viewInvoice.ngaySua).toLocaleString('vi-VN')}</span>
+                  <span>{new Date(viewInvoice.NgaySua).toLocaleString('vi-VN')}</span>
                 </div>
               )}
             </div>

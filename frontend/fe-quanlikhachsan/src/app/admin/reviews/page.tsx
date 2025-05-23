@@ -120,20 +120,6 @@ export default function ReviewManager() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Kiểm tra tất cả các trường
-    const errors: Record<string, string> = {};
-    Object.entries(formData).forEach(([name, value]) => {
-      const error = validateInput(name, value);
-      if (error) errors[name] = error;
-    });
-
-    // Nếu có lỗi, hiển thị và không submit
-    if (Object.keys(errors).length > 0) {
-      setInputErrors(errors);
-      return;
-    }
-
     try {
       if (editingReview) {
         // Cập nhật đánh giá
@@ -162,44 +148,12 @@ export default function ReviewManager() {
     }
   };
 
-  const validateInput = (name: string, value: any): string | null => {
-    switch (name) {
-      case 'noiDung':
-        if (!value.trim()) return 'Nội dung đánh giá không được để trống';
-        if (value.length < 10) return 'Nội dung đánh giá phải có ít nhất 10 ký tự';
-        if (value.length > 500) return 'Nội dung đánh giá không được vượt quá 500 ký tự';
-        return null;
-      case 'danhGia':
-        const rating = Number(value);
-        if (isNaN(rating) || rating < 1 || rating > 5) return 'Đánh giá phải từ 1 đến 5 sao';
-        return null;
-      default:
-        return null;
-    }
-  };
-
-  const [inputErrors, setInputErrors] = useState<Record<string, string>>({});
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    const newValue = type === 'checkbox' ? (e.target as HTMLInputElement).checked : value;
-    
-    // Kiểm tra giá trị nhập vào
-    const error = validateInput(name, newValue);
-    
-    // Cập nhật lỗi
-    setInputErrors(prev => ({
+    setFormData(prev => ({
       ...prev,
-      [name]: error || ''
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
     }));
-
-    // Chỉ cập nhật giá trị nếu hợp lệ hoặc là checkbox
-    if (!error || type === 'checkbox') {
-      setFormData(prev => ({
-        ...prev,
-        [name]: newValue
-      }));
-    }
   };
 
   return (
@@ -325,12 +279,7 @@ export default function ReviewManager() {
                   onChange={handleInputChange}
                   rows={5}
                   required
-                  maxLength={500}
-                  placeholder="Nhập nội dung đánh giá (tối thiểu 10 ký tự, tối đa 500 ký tự)"
                 ></textarea>
-                {inputErrors.noiDung && (
-                  <p className={styles.error}>{inputErrors.noiDung}</p>
-                )}
               </div>
               <div>
                 <label>Trạng thái:</label>

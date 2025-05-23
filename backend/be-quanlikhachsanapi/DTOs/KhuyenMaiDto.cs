@@ -47,9 +47,7 @@ namespace be_quanlikhachsanapi.DTOs
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime NgayKetThuc { get; set; }
-        [Required(ErrorMessage = "Trạng thái là bắt buộc.")]
-        [MaxLength(50)]
-        public string TrangThai { get; set; } = default!;
+
     }
 
     public class UpdateKhuyenMaiDTO
@@ -80,8 +78,6 @@ namespace be_quanlikhachsanapi.DTOs
         [DataType(DataType.Date)]
         [DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
         public DateTime NgayKetThuc { get; set; }   
-        [Required(ErrorMessage = "Trạng thái là bắt buộc.")]
-        [MaxLength(50)] 
-        public string TrangThai { get; set; } = default!;
+
     }
 }

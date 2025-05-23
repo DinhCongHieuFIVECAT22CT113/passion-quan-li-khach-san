@@ -49,7 +49,7 @@ export default function RoomsPage() {
       setLoading(true);
       try {
         // Gọi API lấy danh sách loại phòng từ backend
-        console.log(`Đang gọi API lấy danh sách loại phòng từ: ${API_BASE_URL}/LoaiPhong`);
+        console.log(`Đang gọi API lấy danh sách loại phòng từ: ${API_BASE_URL}/RoomType`);
         const data = await getRoomTypes();
         setRoomTypes(data || []);
         console.log('Dữ liệu loại phòng nhận được:', data);

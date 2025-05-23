@@ -123,5 +123,23 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(new { Message = "Xóa thông tin sử dụng dịch vụ thành công" });
         }
+
+        /// <summary>
+        /// Update trạng thái sử dụng dịch vụ
+        /// </summary>
+        [HttpPut("update-trang-thai/{maSuDung}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UpdateTrangThai(string maSuDung, string trangThai)
+        {
+            var result = await _suDungDichVuRepo.UpdateTrangThaiAsync(maSuDung, trangThai);
+            if (!result)
+            {
+                return NotFound($"Không tìm thấy thông tin sử dụng dịch vụ với mã {maSuDung}");
+            }
+            return Ok(new { Message = "Cập nhật trạng thái sử dụng dịch vụ thành công" });
+        }
     }
 }
+

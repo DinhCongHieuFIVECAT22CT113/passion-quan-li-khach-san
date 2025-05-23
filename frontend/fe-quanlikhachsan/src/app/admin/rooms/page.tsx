@@ -1,73 +1,101 @@
 'use client';
 import React, { useState, useEffect } from "react";
 import styles from "./RoomManager.module.css";
-import { getRooms, getRoomTypes, createRoom, updateRoom, deleteRoom } from "../../../lib/api";
+import { API_BASE_URL } from '@/lib/config';
+import { getAuthHeaders, handleResponse, getFormDataHeaders } from '@/lib/api';
 
-interface Room {
+interface PhongBE {
   maPhong: string;
-  soPhong: string;
   maLoaiPhong: string;
-  tenLoaiPhong?: string;
-  giaTien?: number;
-  trangThai: string;
+  soPhong: string;
   thumbnail?: string;
   hinhAnh?: string;
+  trangThai: string;
   tang?: number;
-  ngayTao?: string;
-  ngaySua?: string;
 }
 
-interface RoomType {
+interface LoaiPhongBE {
   maLoaiPhong: string;
   tenLoaiPhong: string;
-  moTa: string;
-  anhDaiDien?: string;
+  moTa?: string;
+  giaMoiGio: number;
+  giaMoiDem: number;
+  soPhongTam: number;
+  soGiuongNgu: number;
+  giuongDoi?: number;
+  giuongDon?: number;
+  kichThuocPhong: number;
+  sucChua: number;
+  thumbnail?: string;
+}
+
+interface RoomDisplay extends PhongBE {
+  tenLoaiPhong?: string;
+  donGia?: number;
+}
+
+interface RoomFormState {
+  MaPhong?: string;
+  SoPhong: string;
+  MaLoaiPhong: string;
+  Thumbnail?: string | File;
+  HinhAnh?: string | File;
+  Tang?: number;
 }
 
 export default function RoomManager() {
-  const [rooms, setRooms] = useState<Room[]>([]);
-  const [roomTypes, setRoomTypes] = useState<RoomType[]>([]);
+  const [rooms, setRooms] = useState<RoomDisplay[]>([]);
+  const [roomTypes, setRoomTypes] = useState<LoaiPhongBE[]>([]);
   const [showModal, setShowModal] = useState(false);
-  const [editingRoom, setEditingRoom] = useState<Room | null>(null);
-  const [form, setForm] = useState<Room>({ 
-    maPhong: "", 
-    soPhong: "", 
-    maLoaiPhong: "", 
-    giaTien: 0,
-    trangThai: "",
-    tang: 1 
+  const [editingRoom, setEditingRoom] = useState<RoomDisplay | null>(null);
+  const [form, setForm] = useState<RoomFormState>({ 
+    SoPhong: "", 
+    MaLoaiPhong: "", 
+    Tang: 1,
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedThumbnailFile, setSelectedThumbnailFile] = useState<File | null>(null);
+  const [selectedHinhAnhFile, setSelectedHinhAnhFile] = useState<File | null>(null);
 
-  // Lấy danh sách phòng và loại phòng từ API
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       setError(null);
       try {
-        // Lấy danh sách loại phòng
-        const roomTypesData = await getRoomTypes();
+        const token = localStorage.getItem('token');
+        if (!token) throw new Error("Token không hợp lệ hoặc bạn chưa đăng nhập.");
+
+        const roomsResponse = await fetch(`${API_BASE_URL}/Phong`, {
+          method: 'GET',
+          headers: getAuthHeaders('GET'),
+          credentials: 'include'
+        });
+        const roomsData: PhongBE[] = await handleResponse(roomsResponse);
+        
+        const roomTypesResponse = await fetch(`${API_BASE_URL}/LoaiPhong`, {
+          method: 'GET',
+          headers: getAuthHeaders('GET'),
+          credentials: 'include'
+        });
+        const roomTypesData: LoaiPhongBE[] = await handleResponse(roomTypesResponse);
         setRoomTypes(roomTypesData);
         
-        // Lấy danh sách phòng
-        const roomsData = await getRooms();
-        
-        // Kết hợp thông tin loại phòng vào danh sách phòng và đảm bảo giaTien luôn là số
-        const roomsWithTypes = roomsData.map((room: Room) => {
-          const roomType = roomTypesData.find((type: RoomType) => type.maLoaiPhong === room.maLoaiPhong);
-          return {
-            ...room,
-            giaTien: room.giaTien || 0, // Đảm bảo giaTien không null hoặc undefined
-            tenLoaiPhong: roomType?.tenLoaiPhong || "Không xác định"
+        const roomsWithDetails = roomsData.map((phong): RoomDisplay => {
+          const loaiPhong = roomTypesData.find(lp => lp.maLoaiPhong === phong.maLoaiPhong);
+          const roomDetail: RoomDisplay = {
+            ...phong,
+            tenLoaiPhong: loaiPhong?.tenLoaiPhong || "Không xác định",
+            donGia: loaiPhong?.giaMoiDem || 0,
           };
+          return roomDetail;
         });
         
-        setRooms(roomsWithTypes);
+        setRooms(roomsWithDetails);
       } catch (err) {
-        const error = err as Error;
-        setError(error.message || "Có lỗi xảy ra khi tải dữ liệu");
-        console.error("Error fetching data:", error);
+        const e = err as Error;
+        setError(e.message || "Có lỗi xảy ra khi tải dữ liệu phòng.");
+        console.error("Error fetching data:", e);
       } finally {
         setIsLoading(false);
       }
@@ -76,57 +104,86 @@ export default function RoomManager() {
     fetchData();
   }, []);
 
-  // Mở modal Thêm mới
   const openAddModal = () => {
-    setForm({ maPhong: "", soPhong: "", maLoaiPhong: "", giaTien: 0, trangThai: "", tang: 1 });
+    setForm({ 
+      SoPhong: "", 
+      MaLoaiPhong: roomTypes.length > 0 ? roomTypes[0].maLoaiPhong : "",
+      Tang: 1,
+      Thumbnail: undefined,
+      HinhAnh: undefined,
+    });
+    setSelectedThumbnailFile(null);
+    setSelectedHinhAnhFile(null);
     setEditingRoom(null);
     setShowModal(true);
   };
 
-  // Mở modal Sửa
-  const openEditModal = (room: Room) => {
-    setForm(room);
+  const openEditModal = (room: RoomDisplay) => {
+    setForm({
+      MaPhong: room.maPhong,
+      SoPhong: room.soPhong,
+      MaLoaiPhong: room.maLoaiPhong,
+      Tang: room.tang,
+      Thumbnail: room.thumbnail, 
+      HinhAnh: room.hinhAnh,
+    });
+    setSelectedThumbnailFile(null);
+    setSelectedHinhAnhFile(null);
     setEditingRoom(room);
     setShowModal(true);
   };
 
-  // Đóng modal
   const closeModal = () => {
     setShowModal(false);
     setEditingRoom(null);
-    setForm({ maPhong: "", soPhong: "", maLoaiPhong: "", giaTien: 0, trangThai: "", tang: 1 });
+    setForm({ SoPhong: "", MaLoaiPhong: "", Tang: 1 });
+    setSelectedThumbnailFile(null);
+    setSelectedHinhAnhFile(null);
   };
 
-  // Xử lý thay đổi input
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: name === 'giaTien' ? Number(value) : value });
-  };
-
-  // Xác nhận xóa phòng
-  const handleDelete = async (maPhong: string) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa phòng này?')) {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) throw new Error("Bạn cần đăng nhập để thực hiện hành động này");
-        
-        console.log(`Đang xóa phòng: ${maPhong}`);
-        
-        // Sử dụng hàm API deleteRoom
-        await deleteRoom(maPhong);
-        
-        // Cập nhật danh sách phòng sau khi xóa
-        setRooms(rooms.filter(room => room.maPhong !== maPhong));
-        alert('Xóa phòng thành công');
-      } catch (err) {
-        const error = err as Error;
-        alert(`Lỗi: ${error.message}`);
-        console.error("Error deleting room:", error);
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>, fileType: 'thumbnail' | 'hinhAnh') => {
+    if (event.target.files && event.target.files[0]) {
+      const file = event.target.files[0];
+      if (fileType === 'thumbnail') {
+        setSelectedThumbnailFile(file);
+      } else if (fileType === 'hinhAnh') {
+        setSelectedHinhAnhFile(file);
       }
     }
   };
 
-  // Xử lý submit Thêm/Sửa
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setForm(prevForm => ({ 
+      ...prevForm, 
+      [name]: (name === 'Tang') ? (value === '' ? undefined : Number(value)) : value 
+    }));
+  };
+
+  const handleDelete = async (maPhongToDelete: string) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa phòng này?')) {
+      setIsLoading(true);
+      try {
+        const response = await fetch(`${API_BASE_URL}/Phong/${maPhongToDelete}`, {
+          method: 'DELETE',
+          headers: getAuthHeaders('DELETE'),
+          credentials: 'include',
+        });
+        
+        await handleResponse(response);
+        
+        setRooms(rooms.filter(room => room.maPhong !== maPhongToDelete));
+        alert('Xóa phòng thành công');
+      } catch (err) {
+        const e = err as Error;
+        alert(`Lỗi: ${e.message}`);
+        console.error("Error deleting room:", e);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -134,62 +191,72 @@ export default function RoomManager() {
       const token = localStorage.getItem('token');
       if (!token) throw new Error("Bạn cần đăng nhập để thực hiện hành động này");
       
-      // Chuẩn bị dữ liệu gửi đi
-      const normalizedForm: Omit<Room, 'tenLoaiPhong'> = {
-        ...form,
-        giaTien: Number(form.giaTien) || 0
-      };
-      
-      // Thêm ngày tạo/sửa theo đúng yêu cầu backend
-      if (editingRoom) {
-        normalizedForm.ngaySua = new Date().toISOString(); // Cập nhật ngày sửa khi edit
-      } else {
-        normalizedForm.ngayTao = new Date().toISOString(); // Thêm ngày tạo khi thêm mới
+      const formData = new FormData();
+      formData.append('SoPhong', form.SoPhong);
+      formData.append('MaLoaiPhong', form.MaLoaiPhong);
+      if (form.Tang !== undefined) {
+        formData.append('Tang', String(form.Tang));
+      }
+
+      if (selectedThumbnailFile) {
+        formData.append('ThumbnailFile', selectedThumbnailFile);
+      }
+      if (selectedHinhAnhFile) {
+        formData.append('HinhAnhFile', selectedHinhAnhFile);
       }
       
-      console.log("Dữ liệu phòng:", normalizedForm);
+      let response;
+      const maPhongBeingEdited = editingRoom?.maPhong;
       
-      let result;
-      
-      if (editingRoom) {
-        // Cập nhật phòng với hàm API mới
-        result = await updateRoom(editingRoom.maPhong, normalizedForm);
+      if (maPhongBeingEdited) {
+        response = await fetch(`${API_BASE_URL}/Phong/${maPhongBeingEdited}`, {
+          method: 'PUT',
+          headers: getFormDataHeaders(),
+          body: formData,
+          credentials: 'include',
+        });
       } else {
-        // Thêm phòng mới với hàm API mới
-        result = await createRoom(normalizedForm);
+        response = await fetch(`${API_BASE_URL}/Phong`, {
+          method: 'POST',
+          headers: getFormDataHeaders(),
+          body: formData,
+          credentials: 'include',
+        });
       }
       
-      console.log("Kết quả API:", result);
+      await handleResponse(response);
       
-      // Lấy lại danh sách phòng để có dữ liệu mới nhất
-      const updatedRooms = await getRooms();
-      
-      // Kết hợp lại với thông tin loại phòng
-      const updatedRoomsWithTypes = updatedRooms.map((room: Room) => {
-        const roomType = roomTypes.find((type: RoomType) => type.maLoaiPhong === room.maLoaiPhong);
+      const roomsResponse = await fetch(`${API_BASE_URL}/Phong`, {
+        method: 'GET',
+        headers: getAuthHeaders('GET'),
+        credentials: 'include'
+      });
+      const roomsData: PhongBE[] = await handleResponse(roomsResponse);
+      const roomsWithDetails = roomsData.map((phong): RoomDisplay => {
+        const loaiPhong = roomTypes.find(lp => lp.maLoaiPhong === phong.maLoaiPhong);
         return {
-          ...room,
-          giaTien: room.giaTien || 0, // Đảm bảo giaTien luôn là số
-          tenLoaiPhong: roomType?.tenLoaiPhong || "Không xác định"
+          ...phong,
+          tenLoaiPhong: loaiPhong?.tenLoaiPhong || "Không xác định",
+          donGia: loaiPhong?.giaMoiDem || 0,
         };
       });
-      
-      setRooms(updatedRoomsWithTypes);
+      setRooms(roomsWithDetails);
+            
       closeModal();
-      alert(editingRoom ? 'Cập nhật phòng thành công' : 'Thêm phòng thành công');
+      alert(editingRoom ? "Cập nhật phòng thành công!" : "Thêm phòng thành công!");
+
     } catch (err) {
-      const error = err as Error;
-      alert(`Lỗi: ${error.message}`);
-      console.error("Error saving room:", error);
+      const e = err as Error;
+      alert(`Lỗi: ${e.message}`);
+      console.error("Error submitting room:", e);
     }
   };
 
-  // Hàm render trạng thái với màu sắc
   const renderStatus = (status: string) => {
-    if (status === 'Trống') return <span className={`${styles.status} ${styles['status-empty']}`}>Trống</span>;
-    if (status === 'Đã đặt') return <span className={`${styles.status} ${styles['status-booked']}`}>Đã đặt</span>;
-    if (status === 'Đang dọn') return <span className={`${styles.status} ${styles['status-cleaning']}`}>Đang dọn</span>;
-    return <span className={styles.status}>{status}</span>;
+    if (status && status.toLowerCase() === 'trống' || status.toLowerCase() === 'empty') return <span className={`${styles.status} ${styles['status-empty']}`}>Trống</span>;
+    if (status && status.toLowerCase() === 'đã đặt' || status.toLowerCase() === 'booked') return <span className={`${styles.status} ${styles['status-booked']}`}>Đã đặt</span>;
+    if (status && status.toLowerCase() === 'đang dọn' || status.toLowerCase() === 'cleaning' || status.toLowerCase() === 'đang dọn dẹp') return <span className={`${styles.status} ${styles['status-cleaning']}`}>Đang dọn</span>;
+    return <span className={styles.status}>{status || "N/A"}</span>;
   };
 
   return (
@@ -207,9 +274,9 @@ export default function RoomManager() {
         <table className={styles.table}>
           <thead>
             <tr>
-                <th>Mã phòng</th>
+              <th>Mã phòng</th>
               <th>Số phòng</th>
-                <th>Loại phòng</th>
+              <th>Loại phòng</th>
               <th>Giá (VNĐ)</th>
               <th>Tầng</th>
               <th>Trạng thái</th>
@@ -218,16 +285,16 @@ export default function RoomManager() {
           </thead>
           <tbody>
             {rooms.map(room => (
-                <tr key={room.maPhong}>
-                  <td>{room.maPhong}</td>
-                  <td>{room.soPhong}</td>
-                  <td>{room.tenLoaiPhong}</td>
-                  <td>{(room.giaTien || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}</td>
-                  <td>{room.tang || "-"}</td>
-                  <td>{renderStatus(room.trangThai)}</td>
+              <tr key={room.maPhong}>
+                <td>{room.maPhong}</td>
+                <td>{room.soPhong}</td>
+                <td>{room.tenLoaiPhong}</td>
+                <td>{(room.donGia || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}</td>
+                <td>{room.tang || "-"}</td>
+                <td>{renderStatus(room.trangThai)}</td>
                 <td>
                   <button className={styles.editBtn} onClick={() => openEditModal(room)}>Sửa</button>
-                    <button className={styles.deleteBtn} onClick={() => handleDelete(room.maPhong)}>Xóa</button>
+                  <button className={styles.deleteBtn} onClick={() => handleDelete(room.maPhong)}>Xóa</button>
                 </td>
               </tr>
             ))}
@@ -244,8 +311,8 @@ export default function RoomManager() {
               <div>
                 <label>Số phòng:</label>
                 <input 
-                  name="soPhong" 
-                  value={form.soPhong} 
+                  name="SoPhong"
+                  value={form.SoPhong} 
                   onChange={handleChange} 
                   placeholder="Số phòng" 
                   required 
@@ -254,8 +321,8 @@ export default function RoomManager() {
               <div>
                 <label>Loại phòng:</label>
                 <select 
-                  name="maLoaiPhong" 
-                  value={form.maLoaiPhong} 
+                  name="MaLoaiPhong"
+                  value={form.MaLoaiPhong} 
                   onChange={handleChange} 
                   required
                 >
@@ -268,43 +335,40 @@ export default function RoomManager() {
                 </select>
               </div>
               <div>
-                <label>Giá (VNĐ):</label>
-                <input 
-                  name="giaTien" 
-                  type="number" 
-                  value={form.giaTien} 
-                  onChange={handleChange} 
-                  placeholder="Giá phòng" 
-                  required 
-                  min={0} 
-                />
-              </div>
-              <div>
-                <label>Trạng thái:</label>
-                <select 
-                  name="trangThai" 
-                  value={form.trangThai} 
-                  onChange={handleChange} 
-                  required
-                >
-                  <option value="">Chọn trạng thái</option>
-                  <option value="Trống">Trống</option>
-                  <option value="Đã đặt">Đã đặt</option>
-                  <option value="Đang dọn">Đang dọn</option>
-                </select>
-              </div>
-              <div>
                 <label>Tầng:</label>
                 <input
-                  name="tang"
+                  name="Tang"
                   type="number"
-                  value={form.tang}
+                  value={form.Tang ?? ''}
                   onChange={handleChange}
                   placeholder="Tầng"
-                  min={1}
+                  min="1"
                   required
                 />
               </div>
+              <div>
+                <label>Thumbnail:</label>
+                {editingRoom && form.Thumbnail && typeof form.Thumbnail === 'string' && 
+                  <img src={`${API_BASE_URL}${form.Thumbnail}`} alt="Thumbnail" style={{maxWidth: '100px', maxHeight: '100px'}}/>
+                }
+                <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={(e) => handleFileChange(e, 'thumbnail')} 
+                />
+              </div>
+               <div>
+                <label>Hình ảnh:</label>
+                {editingRoom && form.HinhAnh && typeof form.HinhAnh === 'string' && 
+                  <img src={`${API_BASE_URL}${form.HinhAnh}`} alt="Hình ảnh" style={{maxWidth: '100px', maxHeight: '100px'}}/>
+                }
+                <input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={(e) => handleFileChange(e, 'hinhAnh')} 
+                />
+              </div>
+
               <div className={styles.buttonGroup}>
                 <button type="submit" className={styles.addBtn}>{editingRoom ? 'Lưu' : 'Thêm'}</button>
                 <button type="button" onClick={closeModal} className={styles.deleteBtn}>Hủy</button>

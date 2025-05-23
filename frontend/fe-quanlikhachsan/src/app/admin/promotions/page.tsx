@@ -2,84 +2,107 @@
 import React, { useState, useEffect } from "react";
 import styles from "./PromotionManager.module.css";
 import { getPromotions, getAuthHeaders, getFormDataHeaders, handleResponse } from "../../../lib/api";
-import { API_BASE_URL } from '../../../lib/config';
+import { API_BASE_URL } from "../../../lib/config";
 
-interface Promotion {
-  maKM: string;
-  tenKM: string;
-  phanTramGiam: number;
-  loaiKhuyenMai: string;
-  doiTuongApDung: string;
-  ngayBatDau: string;
-  ngayKetThuc: string;
-  moTa?: string;
-  trangThai: 'Đang áp dụng' | 'Đã hết hạn' | 'Sắp diễn ra';
+interface PromotionFE {
+  MaKm: string;
+  TenKhuyenMai: string;
+  PhanTramGiam: number;
+  NgayBatDau: string;
+  NgayKetThuc: string;
+  MoTa?: string;
+  Thumbnail?: string;
+  MaGiamGia?: string;
+  SoTienGiam?: number;
+  trangThaiDisplay: 'Đang áp dụng' | 'Đã hết hạn' | 'Sắp diễn ra';
 }
 
 export default function PromotionManager() {
-  const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [promotions, setPromotions] = useState<PromotionFE[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [editPromotion, setEditPromotion] = useState<Promotion | null>(null);
+  const [editPromotion, setEditPromotion] = useState<PromotionFE | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [form, setForm] = useState<Promotion>({ 
-    maKM: "", 
-    tenKM: "", 
-    phanTramGiam: 0, 
-    loaiKhuyenMai: "", 
-    doiTuongApDung: "", 
-    ngayBatDau: "", 
-    ngayKetThuc: "",
-    moTa: "",
-    trangThai: 'Đang áp dụng'
+  
+  type PromotionFormState = {
+    MaKm?: string;
+    TenKhuyenMai: string;
+    PhanTramGiam: number;
+    NgayBatDau: string;
+    NgayKetThuc: string;
+    MoTa?: string;
+    Thumbnail?: string;
+    MaGiamGia?: string;
+    SoTienGiam?: number;
+  };
+
+  const [form, setForm] = useState<PromotionFormState>({ 
+    TenKhuyenMai: "", 
+    PhanTramGiam: 0, 
+    NgayBatDau: "", 
+    NgayKetThuc: "",
+    MoTa: "",
+    Thumbnail: "",
+    MaGiamGia: "",
+    SoTienGiam: 0,
   });
 
-  // Lấy danh sách khuyến mãi từ API
+  const formatDateForInput = (dateString?: string): string => {
+    if (!dateString) return '';
+    try {
+      return new Date(dateString).toISOString().split('T')[0];
+    } catch {
+      return dateString;
+    }
+  };
+
+  const calculateDisplayStatus = (startDateStr: string, endDateStr: string): PromotionFE['trangThaiDisplay'] => {
+    const now = new Date();
+    const startDate = new Date(startDateStr);
+    const endDate = new Date(endDateStr);
+    if (now < startDate) return 'Sắp diễn ra';
+    if (now > endDate) return 'Đã hết hạn';
+    return 'Đang áp dụng';
+  };
+
   useEffect(() => {
-    const fetchPromotions = async () => {
+    const fetchAndSetPromotions = async () => {
       setIsLoading(true);
       setError(null);
       try {
-        const data = await getPromotions();
-        
-        // Chuyển đổi dữ liệu API sang định dạng cho giao diện
-        const formattedData = data.map((promo: Promotion) => {
-          // Tính toán trạng thái dựa trên ngày
-          const now = new Date();
-          const startDate = new Date(promo.ngayBatDau);
-          const endDate = new Date(promo.ngayKetThuc);
-          
-          let trangThai: 'Đang áp dụng' | 'Đã hết hạn' | 'Sắp diễn ra' = 'Đang áp dụng';
-          if (now < startDate) {
-            trangThai = 'Sắp diễn ra';
-          } else if (now > endDate) {
-            trangThai = 'Đã hết hạn';
-          }
-          
-          return {
-            ...promo,
-            trangThai
-          };
-        });
-        
+        const data: any[] = await getPromotions();
+        const formattedData: PromotionFE[] = data.map(promo => ({
+          MaKm: promo.MaKm,
+          TenKhuyenMai: promo.TenKhuyenMai,
+          PhanTramGiam: promo.PhanTramGiam,
+          NgayBatDau: formatDateForInput(promo.NgayBatDau),
+          NgayKetThuc: formatDateForInput(promo.NgayKetThuc),
+          MoTa: promo.MoTa,
+          Thumbnail: promo.Thumbnail,
+          MaGiamGia: promo.MaGiamGia,
+          SoTienGiam: promo.SoTienGiam,
+          trangThaiDisplay: calculateDisplayStatus(promo.NgayBatDau, promo.NgayKetThuc),
+        }));
         setPromotions(formattedData);
       } catch (err) {
-        const error = err as Error;
-        setError(error.message || "Có lỗi xảy ra khi tải dữ liệu khuyến mãi");
-        console.error("Error fetching promotions:", error);
+        console.error('Lỗi khi lấy danh sách khuyến mãi:', err);
+        setError('Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại sau.');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchPromotions();
+    fetchAndSetPromotions();
   }, []);
 
-    const filtered = promotions.filter(p =>    (p.tenKM || '').toLowerCase().includes(search.toLowerCase()) ||    (p.loaiKhuyenMai || '').toLowerCase().includes(search.toLowerCase()) ||    (p.doiTuongApDung || '').toLowerCase().includes(search.toLowerCase())  );
+  const filtered = promotions.filter(p =>
+    (p.TenKhuyenMai || '').toLowerCase().includes(search.toLowerCase()) ||
+    (p.MaGiamGia || '').toLowerCase().includes(search.toLowerCase())
+  );
 
-  const getStatusClass = (status: Promotion['trangThai']) => {
+  const getStatusClass = (status: PromotionFE['trangThaiDisplay']) => {
     switch(status) {
       case 'Đang áp dụng': return styles.statusActive;
       case 'Đã hết hạn': return styles.statusExpired;
@@ -90,30 +113,44 @@ export default function PromotionManager() {
 
   const openAddModal = () => {
     setForm({ 
-      maKM: "", 
-      tenKM: "", 
-      phanTramGiam: 0, 
-      loaiKhuyenMai: "", 
-      doiTuongApDung: "", 
-      ngayBatDau: "", 
-      ngayKetThuc: "",
-      moTa: "",
-      trangThai: 'Đang áp dụng'
+      TenKhuyenMai: "", 
+      PhanTramGiam: 0, 
+      NgayBatDau: "", 
+      NgayKetThuc: "",
+      MoTa: "",
+      Thumbnail: "",
+      MaGiamGia: "",
+      SoTienGiam: 0,
     });
+    setEditPromotion(null);
     setShowAddModal(true);
   };
 
-  const openEditModal = (promo: Promotion) => {
-    setForm(promo);
+  const openEditModal = (promo: PromotionFE) => {
+    setForm({
+      MaKm: promo.MaKm,
+      TenKhuyenMai: promo.TenKhuyenMai,
+      PhanTramGiam: promo.PhanTramGiam,
+      NgayBatDau: promo.NgayBatDau,
+      NgayKetThuc: promo.NgayKetThuc,
+      MoTa: promo.MoTa,
+      Thumbnail: promo.Thumbnail,
+      MaGiamGia: promo.MaGiamGia,
+      SoTienGiam: promo.SoTienGiam,
+    });
     setEditPromotion(promo);
+    setShowAddModal(true);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setForm({ ...form, [name]: name === 'phanTramGiam' ? Number(value) : value });
+    setForm(prevForm => ({ 
+        ...prevForm, 
+        [name]: (name === 'PhanTramGiam' || name === 'SoTienGiam') ? Number(value) : value 
+    }));
   };
 
-  const handleAdd = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     try {
@@ -121,112 +158,63 @@ export default function PromotionManager() {
       if (!token) throw new Error("Bạn cần đăng nhập để thực hiện hành động này");
       
       const formData = new FormData();
-      for (const key in form) {
-        if (key !== 'trangThai') { // Bỏ qua trường tính toán
-          formData.append(key, String(form[key as keyof typeof form]));
-        }
-      }
-      
-      const response = await fetch(`${API_BASE_URL}/KhuyenMai/Tạo khuyến mãi mới`, {
+      formData.append('TenKhuyenMai', form.TenKhuyenMai);
+      formData.append('PhanTramGiam', String(form.PhanTramGiam || 0));
+      formData.append('NgayBatDau', form.NgayBatDau);
+      formData.append('NgayKetThuc', form.NgayKetThuc);
+      if (form.MoTa) formData.append('MoTa', form.MoTa);
+      if (form.Thumbnail) formData.append('Thumbnail', form.Thumbnail);
+      if (form.MaGiamGia) formData.append('MaGiamGia', form.MaGiamGia);
+      formData.append('SoTienGiam', String(form.SoTienGiam || 0));
+
+      let response;
+      if (editPromotion && editPromotion.MaKm) {
+        response = await fetch(`${API_BASE_URL}/KhuyenMai/${editPromotion.MaKm}`, {
+          method: 'PUT',
+          headers: getFormDataHeaders(),
+          body: formData,
+          credentials: 'include',
+        });
+      } else {
+        response = await fetch(`${API_BASE_URL}/KhuyenMai`, {
         method: 'POST',
         headers: getFormDataHeaders(),
         body: formData,
         credentials: 'include',
       });
-      
-      await handleResponse(response);
-      
-      // Lấy lại danh sách khuyến mãi mới nhất
-      const updatedPromotions = await getPromotions();
-      
-      // Cập nhật trạng thái dựa trên ngày
-      const formattedData = updatedPromotions.map((promo: Promotion) => {
-        const now = new Date();
-        const startDate = new Date(promo.ngayBatDau);
-        const endDate = new Date(promo.ngayKetThuc);
-        
-        let trangThai: 'Đang áp dụng' | 'Đã hết hạn' | 'Sắp diễn ra' = 'Đang áp dụng';
-        if (now < startDate) {
-          trangThai = 'Sắp diễn ra';
-        } else if (now > endDate) {
-          trangThai = 'Đã hết hạn';
-        }
-        
-        return {
-          ...promo,
-          trangThai
-        };
-      });
-      
-      setPromotions(formattedData);
-      setShowAddModal(false);
-    } catch (err) {
-      const error = err as Error;
-      alert(`Lỗi: ${error.message}`);
-      console.error("Error adding promotion:", error);
-    }
-  };
-
-  const handleEdit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    try {
-      const token = localStorage.getItem('token');
-      if (!token) throw new Error("Bạn cần đăng nhập để thực hiện hành động này");
-      
-      const formData = new FormData();
-      for (const key in form) {
-        if (key !== 'trangThai') { // Bỏ qua trường tính toán
-          formData.append(key, String(form[key as keyof typeof form]));
-        }
       }
       
-      const response = await fetch(`${API_BASE_URL}/KhuyenMai/Cập nhật khuyến mãi`, {
-        method: 'PUT',
-        headers: getFormDataHeaders(),
-        body: formData,
-        credentials: 'include',
-      });
-      
       await handleResponse(response);
       
-      // Lấy lại danh sách khuyến mãi mới nhất
-      const updatedPromotions = await getPromotions();
-      
-      // Cập nhật trạng thái dựa trên ngày
-      const formattedData = updatedPromotions.map((promo: Promotion) => {
-        const now = new Date();
-        const startDate = new Date(promo.ngayBatDau);
-        const endDate = new Date(promo.ngayKetThuc);
-        
-        let trangThai: 'Đang áp dụng' | 'Đã hết hạn' | 'Sắp diễn ra' = 'Đang áp dụng';
-        if (now < startDate) {
-          trangThai = 'Sắp diễn ra';
-        } else if (now > endDate) {
-          trangThai = 'Đã hết hạn';
-        }
-        
-        return {
-          ...promo,
-          trangThai
-        };
-      });
-      
+      const updatedData: any[] = await getPromotions();
+      const formattedData: PromotionFE[] = updatedData.map(promo => ({
+        MaKm: promo.MaKm,
+        TenKhuyenMai: promo.TenKhuyenMai,
+        PhanTramGiam: promo.PhanTramGiam,
+        NgayBatDau: formatDateForInput(promo.NgayBatDau),
+        NgayKetThuc: formatDateForInput(promo.NgayKetThuc),
+        MoTa: promo.MoTa,
+        Thumbnail: promo.Thumbnail,
+        MaGiamGia: promo.MaGiamGia,
+        SoTienGiam: promo.SoTienGiam,
+        trangThaiDisplay: calculateDisplayStatus(promo.NgayBatDau, promo.NgayKetThuc),
+      }));
       setPromotions(formattedData);
+      setShowAddModal(false);
       setEditPromotion(null);
     } catch (err) {
       const error = err as Error;
       alert(`Lỗi: ${error.message}`);
-      console.error("Error updating promotion:", error);
+      console.error("Error submitting promotion:", error);
     }
   };
 
-  const handleDelete = async (maKM: string) => {
+  const handleDelete = async (MaKm: string) => {
     try {
       const token = localStorage.getItem('token');
       if (!token) throw new Error("Bạn cần đăng nhập để thực hiện hành động này");
       
-      const response = await fetch(`${API_BASE_URL}/KhuyenMai/Xóa khuyến mãi?maKM=${maKM}`, {
+      const response = await fetch(`${API_BASE_URL}/KhuyenMai/${MaKm}`, {
         method: 'DELETE',
         headers: getAuthHeaders('DELETE'),
         credentials: 'include',
@@ -234,7 +222,7 @@ export default function PromotionManager() {
       
       await handleResponse(response);
       
-      setPromotions(promotions.filter(p => p.maKM !== maKM));
+      setPromotions(promotions.filter(p => p.MaKm !== MaKm));
       setShowDeleteConfirm(null);
     } catch (err) {
       const error = err as Error;
@@ -270,8 +258,8 @@ export default function PromotionManager() {
                 <th>Mã KM</th>
                 <th>Tên chương trình</th>
                 <th>Loại</th>
-                <th>Áp dụng cho</th>
                 <th>Giảm (%)</th>
+                <th>Số tiền giảm (VND)</th>
                 <th>Hiệu lực từ</th>
                 <th>Đến</th>
                 <th>Trạng thái</th>
@@ -282,18 +270,18 @@ export default function PromotionManager() {
               {filtered.length === 0 ? (
                 <tr><td colSpan={9} style={{textAlign:'center', color:'#888', fontStyle:'italic'}}>Không có dữ liệu</td></tr>
               ) : filtered.map(promo => (
-                <tr key={promo.maKM}>
-                  <td>{promo.maKM}</td>
-                  <td>{promo.tenKM}</td>
-                  <td>{promo.loaiKhuyenMai}</td>
-                  <td>{promo.doiTuongApDung}</td>
-                  <td className={styles.discount}>{promo.phanTramGiam}%</td>
-                  <td>{new Date(promo.ngayBatDau).toLocaleDateString('vi-VN')}</td>
-                  <td>{new Date(promo.ngayKetThuc).toLocaleDateString('vi-VN')}</td>
-                  <td><span className={getStatusClass(promo.trangThai)}>{promo.trangThai}</span></td>
+                <tr key={promo.MaKm}>
+                  <td>{promo.MaKm}</td>
+                  <td>{promo.TenKhuyenMai}</td>
+                  <td>{promo.MaGiamGia}</td>
+                  <td>{promo.PhanTramGiam}%</td>
+                  <td>{promo.SoTienGiam ? promo.SoTienGiam.toLocaleString() : '0'} VND</td>
+                  <td>{new Date(promo.NgayBatDau).toLocaleDateString('vi-VN')}</td>
+                  <td>{new Date(promo.NgayKetThuc).toLocaleDateString('vi-VN')}</td>
+                  <td><span className={getStatusClass(promo.trangThaiDisplay)}>{promo.trangThaiDisplay}</span></td>
                   <td style={{whiteSpace:'nowrap'}}>
                     <button className={styles.editBtn} onClick={() => openEditModal(promo)}>Sửa</button>
-                    <button className={styles.deleteBtn} onClick={() => setShowDeleteConfirm(promo.maKM)}>Xóa</button>
+                    <button className={styles.deleteBtn} onClick={() => setShowDeleteConfirm(promo.MaKm)}>Xóa</button>
                   </td>
                 </tr>
               ))}
@@ -302,26 +290,45 @@ export default function PromotionManager() {
         </div>
       )}
 
-      {/* Modal Thêm mới */}
       {showAddModal && (
         <div className={styles.modal}>
           <div className={styles.modalContent}>
-            <h3>Thêm khuyến mãi</h3>
-            <form onSubmit={handleAdd}>
-              <input name="tenKM" value={form.tenKM} onChange={handleChange} placeholder="Tên chương trình" required />
-              <input name="phanTramGiam" type="number" value={form.phanTramGiam} onChange={handleChange} placeholder="Giảm (%)" required min={0} max={100} />
-              <select name="loaiKhuyenMai" value={form.loaiKhuyenMai} onChange={handleChange} required>
-                <option key="loai-default" value="">Chọn loại</option>
-                <option key="loai-phong" value="Phòng">Phòng</option>
-                <option key="loai-dichvu" value="Dịch vụ">Dịch vụ</option>
-                <option key="loai-hoadon" value="Tổng hóa đơn">Tổng hóa đơn</option>
-              </select>
-              <input name="doiTuongApDung" value={form.doiTuongApDung} onChange={handleChange} placeholder="Áp dụng cho" required />
-              <input name="ngayBatDau" type="date" value={form.ngayBatDau} onChange={handleChange} required />
-              <input name="ngayKetThuc" type="date" value={form.ngayKetThuc} onChange={handleChange} required />
-              <textarea name="moTa" value={form.moTa} onChange={handleChange} placeholder="Mô tả" rows={3} />
-              <div style={{marginTop: 20, display:'flex', gap:8}}>
-                <button type="submit" className={styles.addBtn}>Thêm mới</button>
+            <h3>{editPromotion ? "Sửa khuyến mãi" : "Thêm khuyến mãi"}</h3>
+            <form onSubmit={handleSubmit} autoComplete="off">
+              <div className={styles.formGroup}>
+                <label htmlFor="TenKhuyenMai">Tên khuyến mãi*</label>
+                <input type="text" id="TenKhuyenMai" name="TenKhuyenMai" value={form.TenKhuyenMai} onChange={handleChange} required />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="MaGiamGia">Mã giảm giá (Loại KM)*</label>
+                <input type="text" id="MaGiamGia" name="MaGiamGia" value={form.MaGiamGia || ''} onChange={handleChange} required />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="PhanTramGiam">Phần trăm giảm (%)*</label>
+                <input type="number" id="PhanTramGiam" name="PhanTramGiam" value={form.PhanTramGiam} onChange={handleChange} required min="0" max="100"/>
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="SoTienGiam">Số tiền giảm (VND)*</label>
+                <input type="number" id="SoTienGiam" name="SoTienGiam" value={form.SoTienGiam || 0} onChange={handleChange} required min="0" />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="NgayBatDau">Ngày bắt đầu*</label>
+                <input type="date" id="NgayBatDau" name="NgayBatDau" value={form.NgayBatDau} onChange={handleChange} required />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="NgayKetThuc">Ngày kết thúc*</label>
+                <input type="date" id="NgayKetThuc" name="NgayKetThuc" value={form.NgayKetThuc} onChange={handleChange} required />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="Thumbnail">URL Hình ảnh thumbnail</label>
+                <input type="text" id="Thumbnail" name="Thumbnail" value={form.Thumbnail || ''} onChange={handleChange} />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="MoTa">Mô tả</label>
+                <textarea id="MoTa" name="MoTa" value={form.MoTa || ''} onChange={handleChange} rows={3}></textarea>
+              </div>
+              <div className={styles.buttonGroup}>
+                <button type="submit" className={styles.addBtn}>{editPromotion ? "Lưu thay đổi" : "Thêm mới"}</button>
                 <button type="button" onClick={() => setShowAddModal(false)} className={styles.deleteBtn}>Hủy</button>
               </div>
             </form>
@@ -329,34 +336,6 @@ export default function PromotionManager() {
         </div>
       )}
 
-      {/* Modal Sửa */}
-      {editPromotion && (
-        <div className={styles.modal}>
-          <div className={styles.modalContent}>
-            <h3>Sửa khuyến mãi</h3>
-            <form onSubmit={handleEdit}>
-              <input name="tenKM" value={form.tenKM} onChange={handleChange} placeholder="Tên chương trình" required />
-              <input name="phanTramGiam" type="number" value={form.phanTramGiam} onChange={handleChange} placeholder="Giảm (%)" required min={0} max={100} />
-              <select name="loaiKhuyenMai" value={form.loaiKhuyenMai} onChange={handleChange} required>
-                <option key="edit-loai-default" value="">Chọn loại</option>
-                <option key="edit-loai-phong" value="Phòng">Phòng</option>
-                <option key="edit-loai-dichvu" value="Dịch vụ">Dịch vụ</option>
-                <option key="edit-loai-hoadon" value="Tổng hóa đơn">Tổng hóa đơn</option>
-              </select>
-              <input name="doiTuongApDung" value={form.doiTuongApDung} onChange={handleChange} placeholder="Áp dụng cho" required />
-              <input name="ngayBatDau" type="date" value={form.ngayBatDau} onChange={handleChange} required />
-              <input name="ngayKetThuc" type="date" value={form.ngayKetThuc} onChange={handleChange} required />
-              <textarea name="moTa" value={form.moTa} onChange={handleChange} placeholder="Mô tả" rows={3} />
-              <div style={{marginTop: 20, display:'flex', gap:8}}>
-                <button type="submit" className={styles.addBtn}>Lưu thay đổi</button>
-                <button type="button" onClick={() => setEditPromotion(null)} className={styles.deleteBtn}>Hủy</button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Xác nhận xóa */}
       {showDeleteConfirm && (
         <div className={styles.modal}>
           <div className={styles.modalContent}>
