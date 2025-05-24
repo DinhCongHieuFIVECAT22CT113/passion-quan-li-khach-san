@@ -167,6 +167,7 @@ if (app.Environment.IsDevelopment())
         c.DisplayRequestDuration();
     });
 }
+app.UseStaticFiles(); // phải có để đọc wwwroot
 
 app.UseCors("AllowCredentials");
 app.UseHttpsRedirection();

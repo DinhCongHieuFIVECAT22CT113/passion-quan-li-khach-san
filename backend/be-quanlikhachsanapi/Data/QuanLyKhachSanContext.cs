@@ -50,7 +50,7 @@ public partial class QuanLyKhachSanContext : DbContext
     public virtual DbSet<Role> Roles { get; set; }
 
     public virtual DbSet<SuDungDichVu> SuDungDichVus { get; set; }
-
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<ApDungKm>(entity =>
@@ -135,7 +135,6 @@ public partial class QuanLyKhachSanContext : DbContext
             entity.Property(e => e.MaPhong)
                 .HasMaxLength(10)
                 .IsUnicode(false);
-            entity.Property(e => e.TrangThai).HasMaxLength(50);
 
             entity.HasOne(d => d.MaDatPhongNavigation).WithMany(p => p.ChiTietDatPhongs)
                 .HasForeignKey(d => d.MaDatPhong)
@@ -239,6 +238,7 @@ public partial class QuanLyKhachSanContext : DbContext
                 .HasMaxLength(10)
                 .IsUnicode(false)
                 .HasColumnName("MaKH");
+            entity.Property(e => e.AnhDaiDien).IsUnicode(false);
             entity.Property(e => e.Email)
                 .HasMaxLength(100)
                 .IsUnicode(false);

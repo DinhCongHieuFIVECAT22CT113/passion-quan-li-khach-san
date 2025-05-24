@@ -19,6 +19,7 @@ namespace be_quanlikhachsanapi.Services
         JsonResult UpdateKhachHang(string MaKh, UpdateKhachHangDto updateKhachHang);
         JsonResult UpdateLoaiKhachHang(string MaKh, string MaLoaiKh);
         JsonResult DeleteKhachHang(string MaKh);
+        Task<JsonResult> UploadAvatarAsync(string userName, UploadAvatarDTO dto);
     }
     public class KhachHangRepository : IKhachHangRepository
     {
@@ -26,13 +27,15 @@ namespace be_quanlikhachsanapi.Services
         private readonly IPasswordHasher<KhachHang> _passwordHasher;
         private readonly ISendEmailServices _sendEmail;
         private readonly IConfiguration _confMail;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public KhachHangRepository(QuanLyKhachSanContext context, IPasswordHasher<KhachHang> passwordHasher, ISendEmailServices sendEmail, IConfiguration confMail)
+        public KhachHangRepository(QuanLyKhachSanContext context, IPasswordHasher<KhachHang> passwordHasher, ISendEmailServices sendEmail, IConfiguration confMail, IWebHostEnvironment webHostEnvironment)
         {
             _context = context;
             _passwordHasher = passwordHasher;
             _sendEmail = sendEmail;
             _confMail = confMail;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         public List<KhachHangDto> GetAll()
@@ -194,7 +197,7 @@ namespace be_quanlikhachsanapi.Services
                 StatusCode = StatusCodes.Status200OK
             };
         }
-        
+
         public JsonResult UpdateLoaiKhachHang(string MaKh, string MaLoaiKh)
         {
             var khachHang = _context.KhachHangs.FirstOrDefault(kh => kh.MaKh == MaKh);
@@ -215,5 +218,56 @@ namespace be_quanlikhachsanapi.Services
                 StatusCode = StatusCodes.Status200OK
             };
         }
+        
+        public async Task<JsonResult> UploadAvatarAsync(string userName, UploadAvatarDTO dto)
+        {
+            var khachHang = await _context.KhachHangs.FirstOrDefaultAsync(kh => kh.UserName == userName);
+            if (khachHang == null)
+                return new JsonResult("Không tìm thấy khách hàng.") { StatusCode = 404 };
+
+            string fileName;
+            string avatarPath = Path.Combine(_webHostEnvironment.WebRootPath, "images/avatars");
+
+            if (!Directory.Exists(avatarPath))
+                Directory.CreateDirectory(avatarPath);
+
+            try
+            {
+                if (dto.AvatarFile != null && dto.AvatarFile.Length > 0)
+                {
+                    fileName = $"{Guid.NewGuid()}{Path.GetExtension(dto.AvatarFile.FileName)}";
+                    var filePath = Path.Combine(avatarPath, fileName);
+                    using var stream = new FileStream(filePath, FileMode.Create);
+                    await dto.AvatarFile.CopyToAsync(stream);
+                }
+                else if (!string.IsNullOrEmpty(dto.AvatarUrl))
+                {
+                    using var httpClient = new HttpClient();
+                    var imageBytes = await httpClient.GetByteArrayAsync(dto.AvatarUrl);
+                    var extension = Path.GetExtension(new Uri(dto.AvatarUrl).AbsolutePath);
+                    fileName = $"{Guid.NewGuid()}{extension}";
+                    var filePath = Path.Combine(avatarPath, fileName);
+                    await File.WriteAllBytesAsync(filePath, imageBytes);
+                }
+                else
+                {
+                    return new JsonResult("Vui lòng gửi ảnh hoặc URL.") { StatusCode = 400 };
+                }
+
+                khachHang.AnhDaiDien = $"/images/avatars/{fileName}";
+                await _context.SaveChangesAsync();
+
+                return new JsonResult(new
+                {
+                    message = "Cập nhật avatar thành công.",
+                    avatarUrl = khachHang.AnhDaiDien
+                }) { StatusCode = 200 };
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult($"Lỗi: {ex.Message}") { StatusCode = 500 };
+            }
+        }
+
     }
 }

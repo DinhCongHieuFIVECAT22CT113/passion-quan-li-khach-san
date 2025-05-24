@@ -111,6 +111,43 @@ namespace be_quanlikhachsanapi.Services
             _context.DatPhongs.Add(datPhong);
             _context.SaveChanges();
 
+            var loaiPhong = _context.Phongs
+                .Where(p => p.MaPhong == createDatPhong.MaPhong)
+                .Select(p => p.MaLoaiPhong)
+                .FirstOrDefault();
+
+            if (loaiPhong == null)
+            {
+                return new JsonResult("Không tìm thấy loại phòng với mã đã cho.")
+                {
+                    StatusCode = StatusCodes.Status404NotFound
+                };
+            }
+            var lastChiTietDatPhong = _context.ChiTietDatPhongs
+                .OrderByDescending(ctdp => ctdp.MaChiTietDatPhong)
+                .FirstOrDefault();
+
+            string newMaChiTietDatPhong;
+            if (lastChiTietDatPhong == null)
+            {
+                newMaChiTietDatPhong = "CTDP001";
+            }
+            else
+            {
+                int lastNumber = int.Parse(lastChiTietDatPhong.MaChiTietDatPhong.Substring(4));
+                newMaChiTietDatPhong = "CTDP" + (lastNumber + 1).ToString("D3");
+            }
+
+            var chiTietDatPhong = new ChiTietDatPhong
+            {
+                MaChiTietDatPhong = newMaChiTietDatPhong,
+                MaDatPhong = newMaDatPhong,
+                MaPhong = createDatPhong.MaPhong,
+                MaLoaiPhong = loaiPhong
+            };
+            _context.ChiTietDatPhongs.Add(chiTietDatPhong);
+            _context.SaveChanges();
+
             return new JsonResult(new
             {
                 message = "Đặt phòng thành công.",

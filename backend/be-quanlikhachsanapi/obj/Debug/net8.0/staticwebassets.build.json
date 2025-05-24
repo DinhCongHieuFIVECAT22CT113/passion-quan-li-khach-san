@@ -1,11 +1,19 @@
 {
   "Version": 1,
-  "Hash": "iZ7by9LL5cVZoYnNtrjW2ch/7SJDO3gaxYXsVDfkDQA=",
+  "Hash": "UuiB1Esb5YhB+VQxEMb4YLuail1E/KEz4xMuNj1/9Qk=",
   "Source": "be-quanlikhachsanapi",
   "BasePath": "_content/be-quanlikhachsanapi",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
+  "DiscoveryPatterns": [
+    {
+      "Name": "be-quanlikhachsanapi\\wwwroot",
+      "Source": "be-quanlikhachsanapi",
+      "ContentRoot": "C:\\Users\\Admin\\Desktop\\test\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\wwwroot\\",
+      "BasePath": "_content/be-quanlikhachsanapi",
+      "Pattern": "**"
+    }
+  ],
   "Assets": []
 }

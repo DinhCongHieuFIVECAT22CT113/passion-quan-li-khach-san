@@ -14,6 +14,7 @@ namespace be_quanlikhachsanapi.DTOs
         public string SoCccd { get; set; } = null!;
         public string? MaLoaiKh { get; set; }
         public string? MaRole { get; set; }
+        public string? AnhDaiDien { get; set; }
     }
 
     public class CreateKhachHangDto
@@ -34,5 +35,12 @@ namespace be_quanlikhachsanapi.DTOs
         public string Sdt { get; set; } = null!;
         public string? DiaChi { get; set; }
         public string SoCccd { get; set; } = null!;
+    }
+
+    public class UploadAvatarDTO
+    {
+        //public string UserName { get; set; } = null!;
+        public IFormFile? AvatarFile { get; set; } 
+        public string? AvatarUrl { get; set; }    
     }
 }

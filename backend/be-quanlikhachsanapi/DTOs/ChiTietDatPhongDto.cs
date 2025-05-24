@@ -12,7 +12,6 @@ namespace be_quanlikhachsanapi.DTOs
 
         public string? MaPhong { get; set; }
 
-        public string? TrangThai { get; set; }
     }
     public class CreateChiTietDatPhongDto
     {

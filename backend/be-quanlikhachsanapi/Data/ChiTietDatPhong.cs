@@ -13,8 +13,6 @@ public partial class ChiTietDatPhong
 
     public string? MaPhong { get; set; }
 
-    public string? TrangThai { get; set; }
-
     public virtual DatPhong MaDatPhongNavigation { get; set; } = null!;
 
     public virtual LoaiPhong MaLoaiPhongNavigation { get; set; } = null!;

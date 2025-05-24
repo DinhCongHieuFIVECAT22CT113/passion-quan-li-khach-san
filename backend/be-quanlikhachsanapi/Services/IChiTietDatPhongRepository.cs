@@ -11,7 +11,6 @@ namespace be_quanlikhachsanapi.Services
         JsonResult GetChiTietDatPhongById(string MaChiTietDatPhong);
         JsonResult CreateChiTietDatPhong(CreateChiTietDatPhongDto createChiTietDatPhong);
         JsonResult UpdateChiTietDatPhong(string MaChiTietDatPhong, UpdateChiTietDatPhongDto updateChiTietDatPhong);
-        JsonResult UpdateTrangThai(string MaChiTietDatPhong, string TrangThai);
         JsonResult DeleteChiTietDatPhong(string MaChiTietDatPhong);
     }
     public class ChiTietDatPhongRepository : IChiTietDatPhongRepository
@@ -30,8 +29,7 @@ namespace be_quanlikhachsanapi.Services
                 MaChiTietDatPhong = ctdp.MaChiTietDatPhong,
                 MaDatPhong = ctdp.MaDatPhong,
                 MaLoaiPhong = ctdp.MaLoaiPhong,
-                MaPhong = ctdp.MaPhong,
-                TrangThai = ctdp.TrangThai
+                MaPhong = ctdp.MaPhong
             }).ToList();
         }
 
@@ -50,8 +48,7 @@ namespace be_quanlikhachsanapi.Services
                 MaChiTietDatPhong = chiTietDatPhong.MaChiTietDatPhong,
                 MaDatPhong = chiTietDatPhong.MaDatPhong,
                 MaLoaiPhong = chiTietDatPhong.MaLoaiPhong,
-                MaPhong = chiTietDatPhong.MaPhong,
-                TrangThai = chiTietDatPhong.TrangThai
+                MaPhong = chiTietDatPhong.MaPhong
             };
             return new JsonResult(_chiTietDatPhong)
             {
@@ -80,8 +77,7 @@ namespace be_quanlikhachsanapi.Services
                 MaChiTietDatPhong = newMaChiTietDatPhong,
                 MaDatPhong = createChiTietDatPhong.MaDatPhong,
                 MaLoaiPhong = createChiTietDatPhong.MaLoaiPhong,
-                MaPhong = createChiTietDatPhong.MaPhong,
-                TrangThai = "Chưa xác nhận",
+                MaPhong = createChiTietDatPhong.MaPhong
             };
             _context.ChiTietDatPhongs.Add(chiTietDatPhong);
             _context.SaveChanges();
@@ -107,7 +103,6 @@ namespace be_quanlikhachsanapi.Services
             }
             chiTietDatPhong.MaLoaiPhong = updateChiTietDatPhong.MaLoaiPhong;
             chiTietDatPhong.MaPhong = updateChiTietDatPhong.MaPhong;
-            //chiTietDatPhong.TrangThai = updateChiTietDatPhong.TrangThai;
             _context.SaveChanges();
             return new JsonResult(new
             {
@@ -134,28 +129,6 @@ namespace be_quanlikhachsanapi.Services
             return new JsonResult(new
             {
                 message = "Xóa chi tiết đặt phòng thành công.",
-                chiTietDatPhong = chiTietDatPhong.MaChiTietDatPhong
-            })
-            {
-                StatusCode = StatusCodes.Status200OK
-            };
-        }
-        
-        public JsonResult UpdateTrangThai(string MaChiTietDatPhong, string TrangThai)
-        {
-            var chiTietDatPhong = _context.ChiTietDatPhongs.FirstOrDefault(ctdp => ctdp.MaChiTietDatPhong == MaChiTietDatPhong);
-            if (chiTietDatPhong == null)
-            {
-                return new JsonResult("Không tìm thấy chi tiết đặt phòng với mã đã cho.")
-                {
-                    StatusCode = StatusCodes.Status404NotFound
-                };
-            }
-            chiTietDatPhong.TrangThai = TrangThai;
-            _context.SaveChanges();
-            return new JsonResult(new
-            {
-                message = "Cập nhật trạng thái chi tiết đặt phòng thành công.",
                 chiTietDatPhong = chiTietDatPhong.MaChiTietDatPhong
             })
             {

@@ -64,18 +64,7 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(chiTietDatPhong);
         }
-        // Cập nhật trạng thái chi tiết đặt phòng
-        [HttpPut("{maChiTietDatPhong}/trangthai")]
-        [Consumes("multipart/form-data")]
-        public IActionResult UpdateTrangThai(string MaChiTietDatPhong, string TrangThai)
-        {
-            var chiTietDatPhong = _chiTietDatPhongRepo.UpdateTrangThai(MaChiTietDatPhong, TrangThai);
-            if (chiTietDatPhong == null)
-            {
-                return NotFound("Không tìm thấy chi tiết đặt phòng với ID đã cho.");
-            }
-            return Ok(chiTietDatPhong);
-        }
+        
         // Xóa chi tiết đặt phòng
         [HttpDelete("{maChiTietDatPhong}")]
         [Consumes("multipart/form-data")]

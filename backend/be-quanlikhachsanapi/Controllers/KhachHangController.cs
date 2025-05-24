@@ -87,6 +87,15 @@ namespace be_quanlikhachsanapi.Controllers
                 return NotFound("Không tìm thấy khách hàng với ID đã cho.");
             }
             return Ok(khachHang);
-        } 
+        }
+
+        [HttpPost("{username}/upload-avatar")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadAvatar(string username, [FromForm] UploadAvatarDTO dto)
+        {
+            var result = await _khachHangRepo.UploadAvatarAsync(username, dto);
+            return result;
+        }
+
     }
 }
