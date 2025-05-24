@@ -272,6 +272,7 @@ export default function CustomerManager() {
             <thead>
               <tr>
                 <th>Mã KH</th>
+                <th>Username</th> {/* Added Username column */}
                 <th>Họ tên</th>
                 <th>Email</th>
                 <th>Số điện thoại</th>
@@ -286,6 +287,7 @@ export default function CustomerManager() {
               ) : filtered.map(customer => (
                 <tr key={customer.MaKh}>
                   <td>{customer.MaKh}</td>
+                  <td>{customer.userName || 'N/A'}</td> {/* Added Username display */}
                   <td>{customer.hoKh} {customer.tenKh}</td>
                   <td>{customer.email}</td>
                   <td>{customer.Sdt}</td>
@@ -403,4 +405,4 @@ export default function CustomerManager() {
       )}
     </div>
   );
-} 
+}

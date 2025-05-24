@@ -114,13 +114,7 @@ export default function StaffManager() {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Mã NV</th>
-                <th>Họ tên</th>
-                <th>Chức vụ</th>
-                <th>Số điện thoại</th>
-                <th>Email</th>
-                <th>Trạng thái</th>
-                <th>Hành động</th>
+                <th>Mã NV</th><th>Họ tên</th><th>Chức vụ</th><th>Số điện thoại</th><th>Email</th><th>Trạng thái</th><th>Hành động</th>
               </tr>
             </thead>
             <tbody>
@@ -225,4 +219,4 @@ export default function StaffManager() {
       )}
     </div>
   );
-} 
+}
