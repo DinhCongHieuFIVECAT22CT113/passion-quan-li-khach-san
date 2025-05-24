@@ -32,6 +32,7 @@ interface LoaiPhongBE {
 interface RoomDisplay extends PhongBE {
   tenLoaiPhong?: string;
   donGia?: number;
+  giaGio?: number;
 }
 
 interface RoomFormState {
@@ -79,14 +80,23 @@ export default function RoomManager() {
           credentials: 'include'
         });
         const roomTypesData: LoaiPhongBE[] = await handleResponse(roomTypesResponse);
+        console.log("DEBUG: Fetched roomTypesData:", JSON.parse(JSON.stringify(roomTypesData)));
         setRoomTypes(roomTypesData);
         
         const roomsWithDetails = roomsData.map((phong): RoomDisplay => {
           const loaiPhong = roomTypesData.find(lp => lp.maLoaiPhong === phong.maLoaiPhong);
+          
+          if (phong.maPhong === 'P001' || phong.maPhong === 'P002') {
+            console.log(`DEBUG: Processing phong ${phong.maPhong} with maLoaiPhong ${phong.maLoaiPhong}`);
+            console.log("DEBUG: Found loaiPhong object:", JSON.parse(JSON.stringify(loaiPhong)));
+            console.log("DEBUG: Value of loaiPhong?.giaMoiGio:", loaiPhong?.giaMoiGio);
+          }
+
           const roomDetail: RoomDisplay = {
             ...phong,
             tenLoaiPhong: loaiPhong?.tenLoaiPhong || "Không xác định",
             donGia: loaiPhong?.giaMoiDem || 0,
+            giaGio: loaiPhong?.giaMoiGio || 0,
           };
           return roomDetail;
         });
@@ -164,9 +174,11 @@ export default function RoomManager() {
     if (window.confirm('Bạn có chắc chắn muốn xóa phòng này?')) {
       setIsLoading(true);
       try {
+        const formData = new FormData();
+        
         const response = await fetch(`${API_BASE_URL}/Phong/${maPhongToDelete}`, {
           method: 'DELETE',
-          headers: getAuthHeaders('DELETE'),
+          headers: getFormDataHeaders(),
           credentials: 'include',
         });
         
@@ -238,6 +250,7 @@ export default function RoomManager() {
           ...phong,
           tenLoaiPhong: loaiPhong?.tenLoaiPhong || "Không xác định",
           donGia: loaiPhong?.giaMoiDem || 0,
+          giaGio: loaiPhong?.giaMoiGio || 0,
         };
       });
       setRooms(roomsWithDetails);
@@ -277,7 +290,7 @@ export default function RoomManager() {
               <th>Mã phòng</th>
               <th>Số phòng</th>
               <th>Loại phòng</th>
-              <th>Giá (VNĐ)</th>
+              <th>Giá Đêm / Giờ (VNĐ)</th>
               <th>Tầng</th>
               <th>Trạng thái</th>
               <th>Hành động</th>
@@ -289,7 +302,10 @@ export default function RoomManager() {
                 <td>{room.maPhong}</td>
                 <td>{room.soPhong}</td>
                 <td>{room.tenLoaiPhong}</td>
-                <td>{(room.donGia || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}</td>
+                <td>
+                  {(room.donGia || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")} 
+                  / {(room.giaGio || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
+                </td>
                 <td>{room.tang || "-"}</td>
                 <td>{renderStatus(room.trangThai)}</td>
                 <td>

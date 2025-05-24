@@ -4,10 +4,16 @@ import styles from "./BookingManager.module.css";
 import { API_BASE_URL } from '@/lib/config';
 import { getAuthHeaders, getFormDataHeaders, handleResponse } from '@/lib/api';
 
-// Interface cho dữ liệu Đặt phòng từ BE (camelCase, khớp với JSON response)
+interface ChiTietDatPhongBE {
+  maPhong: string;
+  // Các trường khác nếu có, ví dụ: donGiaTaiThoiDiemDat, soLuongNguoi, ...
+}
+
+// Interface cho dữ liệu Đặt phòng từ BE
 interface BookingBE {
   maDatPhong: string;
   maKH: string;
+  maPhong: string;
   ngayNhanPhong: string;
   ngayTraPhong: string;
   trangThai: string;
@@ -16,6 +22,24 @@ interface BookingBE {
   nguoiLon?: number;
   soLuongPhong?: number;
   thoiGianDen?: string;
+  chiTietDatPhongs?: ChiTietDatPhongBE[];
+}
+
+// Interface cho dữ liệu Phòng từ BE (tương tự file quản lý phòng)
+interface PhongBE {
+  maPhong: string;
+  maLoaiPhong: string;
+  soPhong: string;
+  // Các trường khác như thumbnail, trangThai, tang nếu cần
+}
+
+// Interface cho dữ liệu Loại Phòng từ BE (tương tự file quản lý phòng)
+interface LoaiPhongBE {
+  maLoaiPhong: string;
+  tenLoaiPhong: string;
+  giaMoiGio: number;
+  giaMoiDem: number;
+  // Các trường khác nếu cần
 }
 
 // Interface để hiển thị trong bảng, có thể kết hợp thêm thông tin
@@ -71,6 +95,8 @@ export default function BookingManager() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [customers, setCustomers] = useState<{maKh: string, hoKh: string, tenKh: string}[]>([]);
+  const [allRooms, setAllRooms] = useState<PhongBE[]>([]);
+  const [allRoomTypes, setAllRoomTypes] = useState<LoaiPhongBE[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -93,11 +119,31 @@ export default function BookingManager() {
         });
         console.log("Customers API response status:", customersResponse.status); // DEBUG
         
+        const roomsResponse = await fetch(`${API_BASE_URL}/Phong`, {
+          method: 'GET',
+          headers: getAuthHeaders('GET'),
+          credentials: 'include'
+        });
+        console.log("Rooms API response status:", roomsResponse.status); // DEBUG
+
+        const roomTypesResponse = await fetch(`${API_BASE_URL}/LoaiPhong`, {
+          method: 'GET',
+          headers: getAuthHeaders('GET'),
+          credentials: 'include'
+        });
+        console.log("RoomTypes API response status:", roomTypesResponse.status); // DEBUG
+        
         const bookingsData = await handleResponse(bookingsResponse);
         console.log("Raw bookingsData from handleResponse:", JSON.stringify(bookingsData, null, 2)); // DEBUG
         
         const customersData = await handleResponse(customersResponse);
         console.log("Raw customersData from handleResponse:", JSON.stringify(customersData, null, 2)); // DEBUG
+        
+        const roomsData = await handleResponse(roomsResponse);
+        console.log("Raw roomsData from handleResponse:", JSON.stringify(roomsData, null, 2)); // DEBUG
+
+        const roomTypesData = await handleResponse(roomTypesResponse);
+        console.log("Raw roomTypesData from handleResponse:", JSON.stringify(roomTypesData, null, 2)); // DEBUG
         
         // Dữ liệu từ API là camelCase
         const bookingsArray: BookingBE[] = Array.isArray(bookingsData) ? bookingsData : [];
@@ -108,17 +154,38 @@ export default function BookingManager() {
         
         setCustomers(customersArray.map(c => ({ maKh: c.maKh, hoKh: c.hoKh, tenKh: c.tenKh })));
         
+        const allRoomsArray: PhongBE[] = Array.isArray(roomsData) ? roomsData : [];
+        setAllRooms(allRoomsArray);
+        console.log("Parsed allRoomsArray:", JSON.stringify(allRoomsArray, null, 2)); // DEBUG
+
+        const allRoomTypesArray: LoaiPhongBE[] = Array.isArray(roomTypesData) ? roomTypesData : [];
+        setAllRoomTypes(allRoomTypesArray);
+        console.log("Parsed allRoomTypesArray:", JSON.stringify(allRoomTypesArray, null, 2)); // DEBUG
+        
         const bookingsWithDetails = bookingsArray.map((apiBooking): BookingDisplay => {
-          console.log("Processing apiBooking:", JSON.stringify(apiBooking, null, 2)); // DEBUG
-          // Tìm khách hàng với maKH (camelCase)
+          console.log("Processing apiBooking:", JSON.stringify(apiBooking, null, 2));
           const customer = customersArray.find(c => c.maKh === apiBooking.maKH);
-          console.log("Found customer for maKH " + apiBooking.maKH + ":", JSON.stringify(customer, null, 2)); // DEBUG
+          console.log("Found customer for maKH " + apiBooking.maKH + ":", JSON.stringify(customer, null, 2));
+
+          let tenPhongDisplay = apiBooking.maPhong || "N/A";
+          let totalAmount = 0;
+
+          const room = allRoomsArray.find(r => r.maPhong === apiBooking.maPhong);
+          if (room) {
+            const roomType = allRoomTypesArray.find(rt => rt.maLoaiPhong === room.maLoaiPhong);
+            if (roomType) {
+              const { nights, hours } = calculateStayDetails(apiBooking.ngayNhanPhong, apiBooking.ngayTraPhong);
+              console.log(`DEBUG: Room ${room.maPhong} (Type: ${roomType.tenLoaiPhong}) - PriceNight: ${roomType.giaMoiDem}, PriceHour: ${roomType.giaMoiGio}`);
+              totalAmount = (nights * roomType.giaMoiDem) + (hours * roomType.giaMoiGio);
+              console.log(`DEBUG: Cost for room ${room.maPhong}: ${totalAmount}`);
+            }
+          }
           
           return {
-            ...apiBooking, // apiBooking đã là camelCase
+            ...apiBooking, 
             tenKhachHang: customer ? `${customer.hoKh} ${customer.tenKh}` : 'Không xác định',
-            tenPhongDisplay: 'N/A', 
-            tongTienDisplay: 'N/A',
+            tenPhongDisplay: tenPhongDisplay,
+            tongTienDisplay: totalAmount > 0 ? totalAmount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) : 'N/A',
           };
         });
         console.log("Final bookingsWithDetails:", JSON.stringify(bookingsWithDetails, null, 2)); // DEBUG
@@ -135,6 +202,44 @@ export default function BookingManager() {
 
     fetchData();
   }, []);
+
+  const calculateStayDetails = (startDateStr: string, endDateStr: string) => {
+    const startDate = new Date(startDateStr);
+    const endDate = new Date(endDateStr);
+
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || startDate >= endDate) {
+      return { nights: 0, hours: 0, display: "Invalid dates" };
+    }
+
+    let diffMillis = endDate.getTime() - startDate.getTime();
+
+    const MS_PER_DAY = 24 * 60 * 60 * 1000;
+    const MS_PER_HOUR = 60 * 60 * 1000;
+
+    let nights = 0;
+    let hours = 0;
+
+    // Tính số đêm tròn trước
+    nights = Math.floor(diffMillis / MS_PER_DAY);
+    diffMillis -= nights * MS_PER_DAY;
+
+    // Tính số giờ lẻ còn lại
+    if (diffMillis > 0) {
+      hours = Math.ceil(diffMillis / MS_PER_HOUR); // Làm tròn giờ lên
+    }
+    
+    // Logic đơn giản: nếu giờ lẻ >= 12 thì tính là 1 đêm, ngược lại giữ nguyên giờ.
+    // Hoặc có thể có quy tắc khác tùy theo nghiệp vụ (ví dụ: > 6 giờ tính 1 đêm)
+    // Hiện tại: giữ nguyên số đêm và số giờ lẻ.
+    // Nếu bạn muốn logic phức tạp hơn (vd: 28 giờ = 1 đêm + 4 giờ, hoặc = 2 đêm nếu > X giờ), cần điều chỉnh ở đây.
+
+    let display = `${nights} đêm`;
+    if (hours > 0) {
+      display += `, ${hours} giờ`;
+    }
+
+    return { nights, hours, display };
+  };
 
   const formatDate = (dateString?: string) => {
     try {
@@ -337,12 +442,12 @@ export default function BookingManager() {
         </thead>
         <tbody>
           {filtered.length === 0 ? (
-            <tr><td colSpan={8} style={{textAlign:'center', color:'#888', fontStyle:'italic'}}>Không có dữ liệu</td></tr>
+            <tr><td colSpan={8} style={{textAlign:'center', color:'#888', fontStyle:'italic'}}>Không có dữ liệu đặt phòng</td></tr>
           ) : (
             filtered.map(booking => {
               const maDatPhongDisplay = booking.maDatPhong;
-              const tenKhachHangDisplay = booking.tenKhachHang || booking.maKH;
-              const tenPhongDisplay = booking.tenPhongDisplay;
+              const tenKhachHangDisplay = booking.tenKhachHang || booking.maKH; // Ưu tiên tên, nếu không có thì hiển thị mã
+              const tenPhongDisplay = booking.tenPhongDisplay; // Đã là maPhong
               const ngayNhanPhongDisplay = formatDate(booking.ngayNhanPhong);
               const ngayTraPhongDisplay = formatDate(booking.ngayTraPhong);
               const tongTienDisplay = booking.tongTienDisplay;
@@ -356,10 +461,37 @@ export default function BookingManager() {
                   <td>{ngayNhanPhongDisplay}</td>
                   <td>{ngayTraPhongDisplay}</td>
                   <td>{tongTienDisplay}</td>
-                  <td><span className={statusMap[trangThaiDisplay]?.className || styles.status}>{statusMap[trangThaiDisplay]?.label || trangThaiDisplay}</span></td>
+                  <td>
+                    <span className={statusMap[trangThaiDisplay]?.className || styles.status}>
+                      {statusMap[trangThaiDisplay]?.label || trangThaiDisplay}
+                    </span>
+                  </td>
                   <td style={{whiteSpace:'nowrap'}}>
-                    <button className={styles.editBtn} onClick={() => openEditModal(booking)}>Sửa</button>
-                    <button className={styles.historyBtn} onClick={() => setHistoryBooking(booking)}>Chi tiết</button>
+                    <button 
+                      className={styles.editBtn} 
+                      onClick={() => openEditModal(booking)}
+                      // Vô hiệu hóa nếu trạng thái không cho phép sửa, ví dụ: Đã trả phòng, Đã hủy
+                      disabled={trangThaiDisplay === 'Đã trả phòng' || trangThaiDisplay === 'Đã hủy'}
+                    >
+                      Sửa
+                    </button>
+                    <button 
+                      className={styles.historyBtn} // Có thể đổi tên class thành detailBtn nếu muốn
+                      onClick={() => setHistoryBooking(booking)}
+                    >
+                      Chi tiết
+                    </button>
+                    {/* Cân nhắc thêm nút Hủy đặt phòng nếu cần */}
+                    {/* Ví dụ:
+                    { (trangThaiDisplay === 'Đã đặt' || trangThaiDisplay === 'Đã xác nhận' || trangThaiDisplay === 'Chờ xác nhận') && (
+                      <button
+                        className={styles.cancelBookingBtn} // Cần định nghĩa style này
+                        onClick={() => handleCancelBooking(booking.maDatPhong)} // Cần tạo hàm này
+                      >
+                        Hủy
+                      </button>
+                    )}
+                    */}
                   </td>
                 </tr>
               );
