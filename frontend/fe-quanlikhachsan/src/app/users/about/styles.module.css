@@ -42,17 +42,23 @@
 /* Team Section */
 .teamSection {
   padding: 4rem 5%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 2rem;
 }
 
 .teamMember {
   display: flex;
-  gap: 4rem;
-  align-items: flex-start;
-  margin-bottom: 4rem;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+  margin-bottom: 0;
 }
 
 .memberImage {
-  flex: 0 0 400px;
+  flex: 0 0 auto;
+  width: 100%;
+  max-width: 400px;
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
@@ -60,6 +66,7 @@
 
 .memberInfo {
   flex: 1;
+  text-align: center;
 }
 
 .memberInfo h2 {
@@ -98,16 +105,18 @@
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-  .teamMember {
-    flex-direction: column;
-    gap: 2rem;
+  .teamSection {
+    grid-template-columns: 1fr;
   }
-
-  .memberImage {
-    flex: 0 0 auto;
-    width: 100%;
-    max-width: 600px;
-    margin: 0 auto;
+  
+  .teamMember {
+    flex-direction: row;
+    align-items: flex-start;
+    text-align: left;
+  }
+  
+  .memberInfo {
+    text-align: left;
   }
 }
 
@@ -123,7 +132,15 @@
   .hero p {
     font-size: 1rem;
   }
-
+    .teamMember {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .memberInfo {
+    text-align: center;
+  }
   .teamSection {
     padding: 2rem 1rem;
   }

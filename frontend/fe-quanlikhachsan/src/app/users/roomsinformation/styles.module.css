@@ -1123,3 +1123,180 @@
     margin-top: 1rem;
   }
 }
+
+/* Rooms List */
+.roomsList {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.roomRow {
+  display: flex;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.roomRowImage {
+  flex: 0 0 250px;
+}
+
+.rowImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 5px;
+}
+
+.roomRowContent {
+  flex: 1;
+}
+
+.roomRowContent h3 {
+  font-size: 1.8rem;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.roomRowContent h4 {
+  font-size: 1.2rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.roomRowActions {
+  flex: 0 0 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Room Info */
+.roomInfo {
+  margin-bottom: 1.5rem;
+}
+
+.roomFeatures {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.feature {
+  flex: 1 1 45%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+/* Amenities */
+.amenitiesList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.amenityItem {
+  flex: 1 1 45%;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .roomRow {
+    flex-direction: column;
+  }
+
+  .roomRowImage {
+    flex: none;
+    width: 100%;
+    max-height: 200px;
+  }
+
+  .roomRowActions {
+    flex: none;
+    width: 100%;
+    flex-direction: row;
+    justify-content: flex-end;
+  }
+
+  .feature {
+    flex: 1 1 100%;
+  }
+
+  .amenityItem {
+    flex: 1 1 100%;
+  }
+}
+
+/* Card Buttons */
+.cardButtons {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.viewImagesButton {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.viewImagesButton:hover {
+  background-color: #218838;
+}
+
+/* Full Image Modal */
+.fullImageModal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+.fullImageContainer {
+  position: relative;
+  width: 90%;
+  max-width: 1200px;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 2rem;
+}
+
+.fullImage {
+  width: 100%;
+  height: auto;
+  max-height: 500px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.closeModalButton {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 2rem;
+  cursor: pointer;
+  z-index: 10;
+}
