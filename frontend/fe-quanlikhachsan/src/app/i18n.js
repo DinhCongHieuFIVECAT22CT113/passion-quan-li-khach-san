@@ -5,6 +5,19 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 const resources = {
   vi: {
     translation: {
+      //Footer
+    "footer.tagline": "Trải nghiệm lưu trú đẳng cấp và sang trọng",
+    "footer.links": "Liên kết",
+    "footer.policies": "Chính sách",
+    "footer.contact": "Liên hệ",
+    "footer.email": "Email",
+    "footer.phone": "Điện thoại",
+    "footer.address": "Địa chỉ",
+    "footer.privacy": "Bảo mật",
+    "footer.terms": "Điều khoản",
+    "footer.faq": "FAQ",
+    "footer.copyright": "Luxury Hotel. Mọi quyền được bảo lưu.",
+
       // Profile Page
       'profile.title': 'Thông tin cá nhân',
       'profile.changeAvatar': 'Đổi ảnh đại diện',
@@ -199,79 +212,60 @@ const resources = {
       'home.familyHolidayDesc': 'Tạo kỷ niệm cùng người thân yêu',
       'home.perNight': '/ đêm',
 
-    // Rooms Page
-    'rooms.title': 'Phòng và Căn Hộ Hot Nhất',
-    'rooms.description': 'Các phòng ngủ sang trọng và tinh tế trong bộ sưu tập này thể hiện thiết kế nội thất & ý tưởng trang trí độc đáo. Xem hình ảnh và tìm thiết kế phòng ngủ sang trọng hoàn hảo của bạn.',
-    'rooms.scrollDown': 'Cuộn xuống',
-    'rooms.status': 'Trạng thái',
-    'rooms.available': 'Có',
-    'rooms.notavailable': 'Không',
-    'rooms.tv': 'TV',
-    'rooms.wifi': 'WiFi',
-    'rooms.airConditioning': 'Điều hòa',
-    'rooms.booking':'Thông Tin Đặt Phòng',
-    "rooms.viewDetails": "Xem thông tin phòng",
-    "rooms.room1Name": "Phòng Gần Hồ",
-    "rooms.room2Name": "Căn Hộ Áp Mái",
-    "rooms.room3Name": "Phòng Quý Tộc",
-    "rooms.room4Name": "Căn Hộ Xanh",
-    "rooms.room5Name": "Phòng Đơn Giản",
-    "rooms.room6Name": "Phòng Hoàng Gia",
-    "rooms.perNight": "/ đêm",
-    "rooms.amenities": "Tiện Nghi",
-    "rooms.roomSpecs": "Thông Số Phòng",
-    "rooms.size": "Diện tích",
-    "rooms.maxGuests": "Số khách tối đa",
-    "rooms.people": "người",
-    "rooms.bedType": "Loại giường",
-    "rooms.view": "Hướng nhìn",
-    "rooms.additionalFeatures": "Tính Năng Bổ Sung",
-    "rooms.bookNow": "Đặt Phòng Ngay",
-    
-    // Rooms Page Room descriptions
-    "rooms.room1Description": "Phòng sang trọng với view nhìn ra hồ bơi, không gian thoáng đãng và yên tĩnh.",
-    "rooms.room2Description": "Căn hộ cao cấp với tầm nhìn panorama ra thành phố, thiết kế hiện đại và sang trọng.",
-    "rooms.room3Description": "Phòng phong cách châu Âu sang trọng, phù hợp cho kỳ nghỉ dài ngày.",
-    "rooms.room4Description": "Căn hộ rộng rãi với không gian xanh, phù hợp cho gia đình yêu thiên nhiên.",
-    "rooms.room5Description": "Phòng tiêu chuẩn với đầy đủ tiện nghi, lý tưởng cho kỳ nghỉ ngắn ngày.",
-    "rooms.room6Description": "Phòng sang trọng với thiết kế hoàng gia, mang lại trải nghiệm đẳng cấp.",
-    
-    // Rooms Page Amenities and features
-    "rooms.bedKingSize": "Giường King Size",
-    "rooms.bedQueen": "Giường Queen",
-    "rooms.bedSingle": "Giường Đơn",
-    "rooms.highSpeedWifi": "Wifi Tốc Độ Cao",
-    "rooms.flatScreenTV": "TV Màn Hình Phẳng",
-    "rooms.poolView": "Hồ bơi",
-    "rooms.cityView": "Thành phố",
-    "rooms.parkView": "Công viên",
-    "rooms.seaView": "Biển",
-    
-    // Rooms PageAdditional features
-    "rooms.minibar": "Minibar đầy đủ",
-    "rooms.luxuryBathroom": "Phòng tắm sang trọng",
-    "rooms.roomService247": "Dịch vụ phòng 24/7",
-    "rooms.safeBox": "Két sắt cá nhân",
-    "rooms.fullKitchen": "Bếp đầy đủ tiện nghi",
-    "rooms.separateLivingRoom": "Phòng khách riêng biệt",
-    "rooms.largeBalcony": "Ban công rộng",
-    "rooms.privateJacuzzi": "Jacuzzi riêng",
-    "rooms.hairDryer": "Máy sấy tóc",
-    "rooms.kettle": "Ấm đun nước",
-    "rooms.toiletries": "Đồ vệ sinh cá nhân",
-    "rooms.workDesk": "Bàn làm việc",
-    "rooms.miniFridge": "Tủ lạnh mini",
-    "rooms.smallKitchen": "Khu vực bếp nhỏ",
-    "rooms.greenBalcony": "Ban công xanh",
-    "rooms.standingShower": "Phòng tắm đứng",
-    "rooms.dressingMirror": "Gương trang điểm",
-    "rooms.privateBalcony": "Ban công riêng",
-    "rooms.bathtub": "Phòng tắm có bồn tắm",
-    "rooms.premiumMinibar": "Minibar cao cấp"
+    // Privacy
+    "privacy.title": "Chính sách Bảo mật",
+    "privacy.introduction": "Giới thiệu",
+    "privacy.introductionText": "Chúng tôi cam kết bảo vệ quyền riêng tư của bạn và đảm bảo rằng thông tin cá nhân của bạn được xử lý một cách an toàn và có trách nhiệm.",
+    "privacy.dataCollection": "Thu thập Dữ liệu",
+    "privacy.dataCollectionText": "Chúng tôi thu thập thông tin cá nhân như tên, địa chỉ email và chi tiết thanh toán khi bạn đặt phòng hoặc sử dụng dịch vụ của chúng tôi.",
+    "privacy.dataUsage": "Sử dụng Dữ liệu",
+    "privacy.dataUsageText": "Thông tin của bạn được sử dụng để xử lý đặt phòng, cải thiện dịch vụ và liên lạc với bạn về kỳ nghỉ của bạn.",
+    "privacy.dataProtection": "Bảo vệ Dữ liệu",
+    "privacy.dataProtectionText": "Chúng tôi áp dụng các biện pháp bảo mật tiêu chuẩn ngành để bảo vệ dữ liệu của bạn khỏi truy cập hoặc tiết lộ trái phép.",
+    "privacy.contact": "Liên hệ",
+    "privacy.contactText": "Nếu bạn có bất kỳ câu hỏi nào về chính sách bảo mật của chúng tôi, vui lòng liên hệ tại info@hotel.com.",
+
+      // Terms
+    "terms.title": "Điều khoản Dịch vụ",
+    "terms.introduction": "Giới thiệu",
+    "terms.introductionText": "Bằng cách sử dụng dịch vụ của chúng tôi, bạn đồng ý tuân thủ các điều khoản và điều kiện này.",
+    "terms.booking": "Chính sách Đặt phòng",
+    "terms.bookingText": "Tất cả các đặt phòng phải được thực hiện qua trang web chính thức của chúng tôi hoặc các đối tác được ủy quyền. Yêu cầu thanh toán toàn bộ tại thời điểm đặt phòng.",
+    "terms.cancellation": "Chính sách Hủy phòng",
+    "terms.cancellationText": "Các đặt phòng được hủy ít nhất 48 giờ trước ngày nhận phòng sẽ được hoàn tiền đầy đủ.",
+    "terms.liability": "Trách nhiệm",
+    "terms.liabilityText": "Khách sạn không chịu trách nhiệm về bất kỳ mất mát hoặc hư hỏng nào đối với tài sản cá nhân trong thời gian lưu trú của bạn.",
+    "terms.contact": "Liên hệ",
+    "terms.contactText": "Để biết thêm thông tin về điều khoản của chúng tôi, vui lòng liên hệ tại info@hotel.com.",
+
+      // FAQ
+    "faq.title": "Câu hỏi Thường gặp",
+    "faq.question1": "Làm thế nào để đặt phòng?",
+    "faq.answer1": "Bạn có thể đặt phòng trực tiếp qua trang web của chúng tôi hoặc liên hệ với đội ngũ đặt phòng.",
+    "faq.question2": "Chính sách hủy phòng là gì?",
+    "faq.answer2": "Hủy phòng ít nhất 48 giờ trước ngày nhận phòng sẽ được hoàn tiền đầy đủ.",
+    "faq.question3": "Khách sạn có cho phép mang theo thú cưng không?",
+    "faq.answer3": "Không cho phép mang theo thú cưng, trừ các động vật hỗ trợ có giấy tờ hợp lệ.",
+    "faq.question4": "Khách sạn cung cấp những tiện nghi gì?",
+    "faq.answer4": "Khách sạn cung cấp Wi-Fi miễn phí, bãi đỗ xe, bữa sáng, và quyền sử dụng phòng gym và hồ bơi."
+
     },
   },
   en: {
     translation: {
+      // Footer
+"footer.tagline": "Experience premium and luxurious stays",
+"footer.links": "Links",
+"footer.policies": "Policies",
+"footer.contact": "Contact",
+"footer.email": "Email",
+"footer.phone": "Phone",
+"footer.address": "Address",
+"footer.privacy": "Privacy",
+"footer.terms": "Terms",
+"footer.faq": "FAQ",
+"footer.copyright": "Luxury Hotel. All rights reserved.",
+
       // Profile Page
       "profile.title": "Profile Information",
       "profile.changeAvatar": "Change Avatar",
@@ -534,11 +528,62 @@ const resources = {
       "rooms.dressingMirror": "Dressing Mirror",
       "rooms.privateBalcony": "Private Balcony",
       "rooms.bathtub": "Bathtub",
-      "rooms.premiumMinibar": "Premium Minibar"
+      "rooms.premiumMinibar": "Premium Minibar",
+
+      // Privacy
+"privacy.title": "Privacy Policy",
+"privacy.introduction": "Introduction",
+"privacy.introductionText": "We are committed to protecting your privacy and ensuring that your personal information is processed safely and responsibly.",
+"privacy.dataCollection": "Data Collection",
+"privacy.dataCollectionText": "We collect personal information such as your name, email address, and payment details when you make a reservation or use our services.",
+"privacy.dataUsage": "Data Usage",
+"privacy.dataUsageText": "Your information is used to process bookings, improve services, and communicate with you about your stay.",
+"privacy.dataProtection": "Data Protection",
+"privacy.dataProtectionText": "We implement industry-standard security measures to protect your data from unauthorized access or disclosure.",
+"privacy.contact": "Contact",
+"privacy.contactText": "If you have any questions about our privacy policy, please contact us at info@hotel.com.",
+
+// Terms
+"terms.title": "Terms of Service",
+"terms.introduction": "Introduction",
+"terms.introductionText": "By using our services, you agree to comply with these terms and conditions.",
+"terms.booking": "Booking Policy",
+"terms.bookingText": "All bookings must be made through our official website or authorized partners. Full payment is required at the time of booking.",
+"terms.cancellation": "Cancellation Policy",
+"terms.cancellationText": "Bookings canceled at least 48 hours before check-in will receive a full refund.",
+"terms.liability": "Liability",
+"terms.liabilityText": "The hotel is not responsible for any loss or damage to personal property during your stay.",
+"terms.contact": "Contact",
+"terms.contactText": "For more information about our terms, please contact us at info@hotel.com.",
+
+// FAQ
+"faq.title": "Frequently Asked Questions",
+"faq.question1": "How do I make a booking?",
+"faq.answer1": "You can make a booking directly through our website or contact the booking team.",
+"faq.question2": "What is the cancellation policy?",
+"faq.answer2": "Canceling at least 48 hours before check-in will receive a full refund.",
+"faq.question3": "Does the hotel allow pets?",
+"faq.answer3": "Pets are not allowed, except for service animals with valid documentation.",
+"faq.question4": "What amenities does the hotel offer?",
+"faq.answer4": "The hotel offers free Wi-Fi, parking, breakfast, and access to the gym and pool."
+
     }
   },
   ja: {
     translation: {
+      // Footer
+"footer.tagline": "高級で贅沢な宿泊体験を",
+"footer.links": "リンク",
+"footer.policies": "ポリシー",
+"footer.contact": "お問い合わせ",
+"footer.email": "メールアドレス",
+"footer.phone": "電話番号",
+"footer.address": "住所",
+"footer.privacy": "プライバシー",
+"footer.terms": "利用規約",
+"footer.faq": "よくある質問",
+"footer.copyright": "Luxury Hotel. 無断転載を禁じます。",
+
       // Profile Page
       "profile.title": "プロフィール情報",
       "profile.changeAvatar": "アバターを変更",
@@ -801,11 +846,62 @@ const resources = {
       "rooms.dressingMirror": "ドレッシングミラー",
       "rooms.privateBalcony": "プライベートバルコニー",
       "rooms.bathtub": "バスタブ",
-      "rooms.premiumMinibar": "プレミアムミニバー"
+      "rooms.premiumMinibar": "プレミアムミニバー",
+
+      // Privacy
+"privacy.title": "プライバシーポリシー",
+"privacy.introduction": "はじめに",
+"privacy.introductionText": "私たちはあなたのプライバシーを保護し、個人情報が安全かつ責任を持って処理されることを約束します。",
+"privacy.dataCollection": "データ収集",
+"privacy.dataCollectionText": "予約をする際やサービスを利用する際に、名前、メールアドレス、支払い情報などの個人情報を収集します。",
+"privacy.dataUsage": "データの使用",
+"privacy.dataUsageText": "あなたの情報は、予約を処理し、サービスを改善し、滞在について連絡するために使用されます。",
+"privacy.dataProtection": "データ保護",
+"privacy.dataProtectionText": "私たちは、あなたのデータを不正アクセスや開示から保護するために業界標準のセキュリティ対策を実施しています。",
+"privacy.contact": "お問い合わせ",
+"privacy.contactText": "プライバシーポリシーに関する質問がある場合は、info@hotel.comまでお問い合わせください。",
+
+// Terms
+"terms.title": "サービス利用規約",
+"terms.introduction": "はじめに",
+"terms.introductionText": "私たちのサービスを利用することにより、これらの利用規約に従うことに同意したことになります。",
+"terms.booking": "予約ポリシー",
+"terms.bookingText": "すべての予約は、公式ウェブサイトまたは認可されたパートナーを通じて行う必要があります。予約時に全額の支払いが必要です。",
+"terms.cancellation": "キャンセルポリシー",
+"terms.cancellationText": "チェックインの48時間前までにキャンセルされた予約は全額返金されます。",
+"terms.liability": "責任",
+"terms.liabilityText": "ホテルは、滞在中の個人財産の損失または損傷について責任を負いません。",
+"terms.contact": "お問い合わせ",
+"terms.contactText": "当社の利用規約についての詳細は、info@hotel.comまでお問い合わせください。",
+
+// FAQ
+"faq.title": "よくある質問",
+"faq.question1": "予約はどのように行いますか？",
+"faq.answer1": "当社のウェブサイトから直接予約するか、予約チームにお問い合わせください。",
+"faq.question2": "キャンセルポリシーは何ですか？",
+"faq.answer2": "チェックインの48時間前までにキャンセルすると全額返金されます。",
+"faq.question3": "ホテルはペットを許可していますか？",
+"faq.answer3": "ペットは許可されていませんが、正当な書類を持つサービス動物は例外です。",
+"faq.question4": "ホテルはどのような設備を提供していますか？",
+"faq.answer4": "ホテルは無料Wi-Fi、駐車場、朝食、ジムやプールの利用を提供しています。"
+
     }
   },
   zh: {
     translation: {
+      // Footer
+"footer.tagline": "尊享高端奢华的住宿体验",
+"footer.links": "链接",
+"footer.policies": "政策",
+"footer.contact": "联系我们",
+"footer.email": "电子邮箱",
+"footer.phone": "电话",
+"footer.address": "地址",
+"footer.privacy": "隐私政策",
+"footer.terms": "服务条款",
+"footer.faq": "常见问题",
+"footer.copyright": "Luxury Hotel 版权所有",
+
       // Profile Page
       "profile.title": "个人信息",
       "profile.changeAvatar": "更改头像",
@@ -1068,11 +1164,62 @@ const resources = {
       "rooms.dressingMirror": "化妆镜",
       "rooms.privateBalcony": "私人阳台",
       "rooms.bathtub": "浴缸",
-      "rooms.premiumMinibar": "高级迷你吧"
+      "rooms.premiumMinibar": "高级迷你吧",
+
+      // Privacy
+"privacy.title": "隐私政策",
+"privacy.introduction": "简介",
+"privacy.introductionText": "我们致力于保护您的隐私，确保您的个人信息得到安全和负责任的处理。",
+"privacy.dataCollection": "数据收集",
+"privacy.dataCollectionText": "在您预订或使用我们的服务时，我们会收集您的姓名、电子邮件地址和付款信息等个人信息。",
+"privacy.dataUsage": "数据使用",
+"privacy.dataUsageText": "您的信息将用于处理预订、改进服务以及就您的住宿与您沟通。",
+"privacy.dataProtection": "数据保护",
+"privacy.dataProtectionText": "我们实施行业标准的安全措施，以防止您的数据被未经授权访问或泄露。",
+"privacy.contact": "联系方式",
+"privacy.contactText": "如果您对我们的隐私政策有任何疑问，请通过 info@hotel.com 与我们联系。",
+
+// Terms
+"terms.title": "服务条款",
+"terms.introduction": "简介",
+"terms.introductionText": "使用我们的服务即表示您同意遵守这些条款和条件。",
+"terms.booking": "预订政策",
+"terms.bookingText": "所有预订必须通过我们的官方网站或授权合作伙伴进行。预订时需全额付款。",
+"terms.cancellation": "取消政策",
+"terms.cancellationText": "在入住前至少 48 小时取消预订可获得全额退款。",
+"terms.liability": "责任",
+"terms.liabilityText": "酒店对您在入住期间的个人财产的任何损失或损坏概不负责。",
+"terms.contact": "联系方式",
+"terms.contactText": "如需了解更多关于我们的服务条款，请通过 info@hotel.com 与我们联系。",
+
+// FAQ
+"faq.title": "常见问题",
+"faq.question1": "如何进行预订？",
+"faq.answer1": "您可以直接通过我们的网站进行预订，或联系预订团队。",
+"faq.question2": "取消政策是怎样的？",
+"faq.answer2": "在入住前至少 48 小时取消可获得全额退款。",
+"faq.question3": "酒店允许携带宠物吗？",
+"faq.answer3": "除持有有效证明的服务动物外，酒店不允许携带宠物。",
+"faq.question4": "酒店提供哪些设施？",
+"faq.answer4": "酒店提供免费无线网络、停车位、早餐以及健身房和游泳池的使用权限。"
+
     }
   },
   ru: {
     translation: {
+      // Footer
+"footer.tagline": "Ощутите роскошное и первоклассное пребывание",
+"footer.links": "Ссылки",
+"footer.policies": "Политики",
+"footer.contact": "Контакты",
+"footer.email": "Электронная почта",
+"footer.phone": "Телефон",
+"footer.address": "Адрес",
+"footer.privacy": "Политика конфиденциальности",
+"footer.terms": "Условия использования",
+"footer.faq": "Вопросы и ответы",
+"footer.copyright": "Luxury Hotel. Все права защищены.",
+
       // Profile Page
       "profile.title": "Личная информация",
       "profile.changeAvatar": "Сменить аватар",
@@ -1335,11 +1482,62 @@ const resources = {
       "rooms.dressingMirror": "Зеркало для макияжа",
       "rooms.privateBalcony": "Частный балкон",
       "rooms.bathtub": "Ванна",
-      "rooms.premiumMinibar": "Премиум мини-бар"
+      "rooms.premiumMinibar": "Премиум мини-бар",
+
+      // Privacy
+"privacy.title": "Политика конфиденциальности",
+"privacy.introduction": "Введение",
+"privacy.introductionText": "Мы стремимся защищать вашу конфиденциальность и обеспечивать безопасную и ответственную обработку вашей личной информации.",
+"privacy.dataCollection": "Сбор данных",
+"privacy.dataCollectionText": "Мы собираем личную информацию, такую как ваше имя, адрес электронной почты и платежные данные, когда вы бронируете или пользуетесь нашими услугами.",
+"privacy.dataUsage": "Использование данных",
+"privacy.dataUsageText": "Ваша информация используется для обработки бронирований, улучшения качества услуг и связи с вами по поводу вашего пребывания.",
+"privacy.dataProtection": "Защита данных",
+"privacy.dataProtectionText": "Мы применяем отраслевые стандарты безопасности для защиты ваших данных от несанкционированного доступа или разглашения.",
+"privacy.contact": "Контакты",
+"privacy.contactText": "Если у вас есть вопросы по поводу нашей политики конфиденциальности, пожалуйста, свяжитесь с нами по адресу info@hotel.com.",
+
+// Terms
+"terms.title": "Условия обслуживания",
+"terms.introduction": "Введение",
+"terms.introductionText": "Используя наши услуги, вы соглашаетесь соблюдать данные условия.",
+"terms.booking": "Политика бронирования",
+"terms.bookingText": "Все бронирования должны осуществляться через наш официальный сайт или уполномоченных партнеров. Полная оплата требуется во время бронирования.",
+"terms.cancellation": "Политика отмены",
+"terms.cancellationText": "Отмена бронирования минимум за 48 часов до заезда дает право на полный возврат средств.",
+"terms.liability": "Ответственность",
+"terms.liabilityText": "Отель не несет ответственности за потерю или повреждение личного имущества во время пребывания.",
+"terms.contact": "Контакты",
+"terms.contactText": "Для получения дополнительной информации об условиях, пожалуйста, свяжитесь с нами по адресу info@hotel.com.",
+
+// FAQ
+"faq.title": "Часто задаваемые вопросы",
+"faq.question1": "Как забронировать номер?",
+"faq.answer1": "Вы можете забронировать номер напрямую через наш сайт или связаться с командой бронирования.",
+"faq.question2": "Какова политика отмены бронирования?",
+"faq.answer2": "При отмене бронирования как минимум за 48 часов до заезда возможен полный возврат средств.",
+"faq.question3": "Разрешены ли домашние животные в отеле?",
+"faq.answer3": "Домашние животные не допускаются, за исключением служебных животных с действующей документацией.",
+"faq.question4": "Какие удобства предлагает отель?",
+"faq.answer4": "Отель предоставляет бесплатный Wi-Fi, парковку, завтрак, а также доступ в тренажерный зал и бассейн."
+
     }
   },
   de: {
     translation: {
+      // Footer
+"footer.tagline": "Erleben Sie erstklassigen und luxuriösen Aufenthalt",
+"footer.links": "Links",
+"footer.policies": "Richtlinien",
+"footer.contact": "Kontakt",
+"footer.email": "E-Mail",
+"footer.phone": "Telefon",
+"footer.address": "Adresse",
+"footer.privacy": "Datenschutz",
+"footer.terms": "Nutzungsbedingungen",
+"footer.faq": "FAQ",
+"footer.copyright": "Luxury Hotel. Alle Rechte vorbehalten.",
+
       // Profile Page
       "profile.title": "Persönliche Informationen",
       "profile.changeAvatar": "Avatar ändern",
@@ -1602,11 +1800,63 @@ const resources = {
       "rooms.dressingMirror": "Schminkspiegel",
       "rooms.privateBalcony": "Privater Balkon",
       "rooms.bathtub": "Badewanne",
-      "rooms.premiumMinibar": "Premium-Minibar"
+      "rooms.premiumMinibar": "Premium-Minibar",
+
+      // Privacy
+"privacy.title": "Datenschutzrichtlinie",
+"privacy.introduction": "Einleitung",
+"privacy.introductionText": "Wir verpflichten uns, Ihre Privatsphäre zu schützen und sicherzustellen, dass Ihre persönlichen Daten sicher und verantwortungsvoll verarbeitet werden.",
+"privacy.dataCollection": "Datenerfassung",
+"privacy.dataCollectionText": "Wir erfassen persönliche Daten wie Ihren Namen, Ihre E-Mail-Adresse und Zahlungsinformationen, wenn Sie eine Reservierung vornehmen oder unsere Dienste nutzen.",
+"privacy.dataUsage": "Datennutzung",
+"privacy.dataUsageText": "Ihre Daten werden verwendet, um Buchungen zu bearbeiten, unsere Dienstleistungen zu verbessern und mit Ihnen bezüglich Ihres Aufenthalts zu kommunizieren.",
+"privacy.dataProtection": "Datenschutz",
+"privacy.dataProtectionText": "Wir setzen branchenübliche Sicherheitsmaßnahmen ein, um Ihre Daten vor unbefugtem Zugriff oder Offenlegung zu schützen.",
+"privacy.contact": "Kontakt",
+"privacy.contactText": "Wenn Sie Fragen zu unserer Datenschutzrichtlinie haben, kontaktieren Sie uns bitte unter info@hotel.com.",
+
+// Terms
+"terms.title": "Nutzungsbedingungen",
+"terms.introduction": "Einleitung",
+"terms.introductionText": "Durch die Nutzung unserer Dienste erklären Sie sich mit diesen Bedingungen einverstanden.",
+"terms.booking": "Buchungsrichtlinien",
+"terms.bookingText": "Alle Buchungen müssen über unsere offizielle Website oder autorisierte Partner erfolgen. Die vollständige Zahlung ist zum Zeitpunkt der Buchung erforderlich.",
+"terms.cancellation": "Stornierungsrichtlinie",
+"terms.cancellationText": "Bei einer Stornierung mindestens 48 Stunden vor dem Check-in erhalten Sie eine vollständige Rückerstattung.",
+"terms.liability": "Haftung",
+"terms.liabilityText": "Das Hotel haftet nicht für den Verlust oder die Beschädigung persönlicher Gegenstände während Ihres Aufenthalts.",
+"terms.contact": "Kontakt",
+"terms.contactText": "Für weitere Informationen zu unseren Bedingungen kontaktieren Sie uns bitte unter info@hotel.com.",
+
+// FAQ
+"faq.title": "Häufig gestellte Fragen",
+"faq.question1": "Wie kann ich eine Buchung vornehmen?",
+"faq.answer1": "Sie können direkt über unsere Website buchen oder das Buchungsteam kontaktieren.",
+"faq.question2": "Wie lautet die Stornierungsrichtlinie?",
+"faq.answer2": "Bei einer Stornierung mindestens 48 Stunden vor dem Check-in erhalten Sie eine vollständige Rückerstattung.",
+"faq.question3": "Sind Haustiere im Hotel erlaubt?",
+"faq.answer3": "Haustiere sind nicht erlaubt, mit Ausnahme von Assistenzhunden mit gültiger Dokumentation.",
+"faq.question4": "Welche Annehmlichkeiten bietet das Hotel?",
+"faq.answer4": "Das Hotel bietet kostenloses WLAN, Parkplätze, Frühstück sowie Zugang zum Fitnessraum und Pool."
+
+
     }
   },
   fr: {
     translation: {
+      // Footer
+"footer.tagline": "Vivez une expérience d'hébergement haut de gamme et luxueuse",
+"footer.links": "Liens",
+"footer.policies": "Politiques",
+"footer.contact": "Contact",
+"footer.email": "Email",
+"footer.phone": "Téléphone",
+"footer.address": "Adresse",
+"footer.privacy": "Confidentialité",
+"footer.terms": "Conditions d'utilisation",
+"footer.faq": "FAQ",
+"footer.copyright": "Luxury Hotel. Tous droits réservés.",
+
       // Profile Page
       "profile.title": "Informations personnelles",
       "profile.changeAvatar": "Changer d'avatar",
@@ -1869,11 +2119,62 @@ const resources = {
       "rooms.dressingMirror": "Miroir de maquillage",
       "rooms.privateBalcony": "Balcon privé",
       "rooms.bathtub": "Baignoire",
-      "rooms.premiumMinibar": "Minibar premium"
+      "rooms.premiumMinibar": "Minibar premium",
+
+      // Privacy
+"privacy.title": "Politique de confidentialité",
+"privacy.introduction": "Introduction",
+"privacy.introductionText": "Nous nous engageons à protéger votre vie privée et à garantir que vos informations personnelles soient traitées de manière sécurisée et responsable.",
+"privacy.dataCollection": "Collecte des données",
+"privacy.dataCollectionText": "Nous collectons des informations personnelles telles que votre nom, votre adresse e-mail et vos informations de paiement lorsque vous effectuez une réservation ou utilisez nos services.",
+"privacy.dataUsage": "Utilisation des données",
+"privacy.dataUsageText": "Vos informations sont utilisées pour traiter les réservations, améliorer nos services et communiquer avec vous concernant votre séjour.",
+"privacy.dataProtection": "Protection des données",
+"privacy.dataProtectionText": "Nous mettons en œuvre des mesures de sécurité conformes aux normes du secteur pour protéger vos données contre tout accès ou divulgation non autorisés.",
+"privacy.contact": "Contact",
+"privacy.contactText": "Si vous avez des questions concernant notre politique de confidentialité, veuillez nous contacter à l'adresse info@hotel.com.",
+
+// Terms
+"terms.title": "Conditions d'utilisation",
+"terms.introduction": "Introduction",
+"terms.introductionText": "En utilisant nos services, vous acceptez de vous conformer à ces conditions générales.",
+"terms.booking": "Politique de réservation",
+"terms.bookingText": "Toutes les réservations doivent être effectuées via notre site officiel ou des partenaires autorisés. Le paiement complet est requis au moment de la réservation.",
+"terms.cancellation": "Politique d'annulation",
+"terms.cancellationText": "Les réservations annulées au moins 48 heures avant l’enregistrement seront intégralement remboursées.",
+"terms.liability": "Responsabilité",
+"terms.liabilityText": "L'hôtel n'est pas responsable des pertes ou dommages aux biens personnels pendant votre séjour.",
+"terms.contact": "Contact",
+"terms.contactText": "Pour plus d'informations sur nos conditions, veuillez nous contacter à l'adresse info@hotel.com.",
+
+// FAQ
+"faq.title": "Foire aux questions",
+"faq.question1": "Comment puis-je faire une réservation ?",
+"faq.answer1": "Vous pouvez réserver directement sur notre site web ou contacter notre équipe de réservation.",
+"faq.question2": "Quelle est la politique d'annulation ?",
+"faq.answer2": "Une annulation effectuée au moins 48 heures avant l’enregistrement donne droit à un remboursement complet.",
+"faq.question3": "Les animaux sont-ils acceptés à l'hôtel ?",
+"faq.answer3": "Les animaux ne sont pas autorisés, sauf les animaux d’assistance disposant d’une documentation valide.",
+"faq.question4": "Quels sont les équipements proposés par l'hôtel ?",
+"faq.answer4": "L'hôtel propose le Wi-Fi gratuit, un parking, le petit-déjeuner et l'accès à la salle de sport et à la piscine."
+
     }
   },
   th: {
     translation: {
+      // Footer
+"footer.tagline": "สัมผัสประสบการณ์ที่พักระดับพรีเมียมและหรูหรา",
+"footer.links": "ลิงก์",
+"footer.policies": "นโยบาย",
+"footer.contact": "ติดต่อเรา",
+"footer.email": "อีเมล",
+"footer.phone": "โทรศัพท์",
+"footer.address": "ที่อยู่",
+"footer.privacy": "นโยบายความเป็นส่วนตัว",
+"footer.terms": "ข้อกำหนดและเงื่อนไข",
+"footer.faq": "คำถามที่พบบ่อย",
+"footer.copyright": "Luxury Hotel. สงวนลิขสิทธิ์ทั้งหมด",
+
       // Profile Page
       "profile.title": "ข้อมูลส่วนตัว",
       "profile.changeAvatar": "เปลี่ยนรูปประจำตัว",
@@ -2136,11 +2437,62 @@ const resources = {
       "rooms.dressingMirror": "กระจกแต่งตัว",
       "rooms.privateBalcony": "ระเบียงส่วนตัว",
       "rooms.bathtub": "อ่างอาบน้ำ",
-      "rooms.premiumMinibar": "มินิบาร์พรีเมียม"
+      "rooms.premiumMinibar": "มินิบาร์พรีเมียม",
+
+      // Privacy
+"privacy.title": "นโยบายความเป็นส่วนตัว",
+"privacy.introduction": "บทนำ",
+"privacy.introductionText": "เรามุ่งมั่นที่จะปกป้องความเป็นส่วนตัวของคุณ และรับรองว่าข้อมูลส่วนบุคคลของคุณจะได้รับการประมวลผลอย่างปลอดภัยและมีความรับผิดชอบ",
+"privacy.dataCollection": "การเก็บรวบรวมข้อมูล",
+"privacy.dataCollectionText": "เราจะเก็บข้อมูลส่วนบุคคล เช่น ชื่อ ที่อยู่อีเมล และรายละเอียดการชำระเงินของคุณ เมื่อคุณทำการจองหรือใช้บริการของเรา",
+"privacy.dataUsage": "การใช้ข้อมูล",
+"privacy.dataUsageText": "ข้อมูลของคุณจะถูกใช้เพื่อดำเนินการจอง ปรับปรุงบริการ และติดต่อกับคุณเกี่ยวกับการเข้าพักของคุณ",
+"privacy.dataProtection": "การปกป้องข้อมูล",
+"privacy.dataProtectionText": "เราใช้มาตรการรักษาความปลอดภัยตามมาตรฐานอุตสาหกรรมเพื่อปกป้องข้อมูลของคุณจากการเข้าถึงหรือเปิดเผยโดยไม่ได้รับอนุญาต",
+"privacy.contact": "ติดต่อ",
+"privacy.contactText": "หากคุณมีคำถามเกี่ยวกับนโยบายความเป็นส่วนตัวของเรา กรุณาติดต่อเราที่ info@hotel.com",
+
+// Terms
+"terms.title": "ข้อกำหนดในการให้บริการ",
+"terms.introduction": "บทนำ",
+"terms.introductionText": "โดยการใช้บริการของเรา ถือว่าคุณยอมรับที่จะปฏิบัติตามข้อกำหนดและเงื่อนไขเหล่านี้",
+"terms.booking": "นโยบายการจอง",
+"terms.bookingText": "การจองทั้งหมดต้องดำเนินการผ่านเว็บไซต์อย่างเป็นทางการของเราหรือพันธมิตรที่ได้รับอนุญาต ต้องชำระเงินเต็มจำนวนในขณะทำการจอง",
+"terms.cancellation": "นโยบายการยกเลิก",
+"terms.cancellationText": "การยกเลิกการจองอย่างน้อย 48 ชั่วโมงก่อนเช็คอินจะได้รับเงินคืนเต็มจำนวน",
+"terms.liability": "ความรับผิดชอบ",
+"terms.liabilityText": "โรงแรมไม่รับผิดชอบต่อการสูญหายหรือความเสียหายของทรัพย์สินส่วนบุคคลระหว่างการเข้าพักของคุณ",
+"terms.contact": "ติดต่อ",
+"terms.contactText": "หากต้องการข้อมูลเพิ่มเติมเกี่ยวกับข้อกำหนดของเรา กรุณาติดต่อเราที่ info@hotel.com",
+
+// FAQ
+"faq.title": "คำถามที่พบบ่อย",
+"faq.question1": "ฉันจะทำการจองได้อย่างไร?",
+"faq.answer1": "คุณสามารถจองได้โดยตรงผ่านเว็บไซต์ของเราหรือ ติดต่อทีมงานฝ่ายจอง",
+"faq.question2": "นโยบายการยกเลิกคืออะไร?",
+"faq.answer2": "การยกเลิกอย่างน้อย 48 ชั่วโมงก่อนเช็คอินจะได้รับเงินคืนเต็มจำนวน",
+"faq.question3": "โรงแรมอนุญาตให้นำสัตว์เลี้ยงเข้าพักหรือไม่?",
+"faq.answer3": "ไม่อนุญาตให้นำสัตว์เลี้ยงเข้าพัก ยกเว้นสัตว์บริการที่มีเอกสารรับรองที่ถูกต้อง",
+"faq.question4": "โรงแรมมีสิ่งอำนวยความสะดวกอะไรบ้าง?",
+"faq.answer4": "โรงแรมมีบริการ Wi-Fi ฟรี ที่จอดรถ อาหารเช้า และสามารถเข้าใช้ห้องออกกำลังกายและสระว่ายน้ำได้"
+
     }
   },
   ko: {
     translation: {
+      // Footer
+"footer.tagline": "고급스럽고 품격 있는 숙박 경험",
+"footer.links": "링크",
+"footer.policies": "정책",
+"footer.contact": "문의하기",
+"footer.email": "이메일",
+"footer.phone": "전화번호",
+"footer.address": "주소",
+"footer.privacy": "개인정보 처리방침",
+"footer.terms": "이용 약관",
+"footer.faq": "자주 묻는 질문",
+"footer.copyright": "Luxury Hotel. 모든 권리 보유.",
+
 // Profile Page
 'profile.title': '개인 정보',
 'profile.changeAvatar': '아바타 변경',
@@ -2404,6 +2756,44 @@ const resources = {
   "rooms.privateBalcony": "개인 발코니",
   "rooms.bathtub": "욕조",
   "rooms.premiumMinibar": "프리미엄 미니바",
+
+  // Privacy
+"privacy.title": "개인정보 처리방침",
+"privacy.introduction": "소개",
+"privacy.introductionText": "당사는 귀하의 개인정보를 안전하고 책임감 있게 처리하고 보호하기 위해 최선을 다하고 있습니다.",
+"privacy.dataCollection": "개인정보 수집",
+"privacy.dataCollectionText": "예약하거나 서비스를 이용하실 때, 성명, 이메일 주소 및 결제 정보를 포함한 개인정보를 수집합니다.",
+"privacy.dataUsage": "개인정보 이용",
+"privacy.dataUsageText": "수집된 정보는 예약 처리, 서비스 개선 및 숙박과 관련된 커뮤니케이션 목적으로 사용됩니다.",
+"privacy.dataProtection": "개인정보 보호",
+"privacy.dataProtectionText": "당사는 무단 접근 또는 공개로부터 귀하의 정보를 보호하기 위해 업계 표준 보안 조치를 시행하고 있습니다.",
+"privacy.contact": "문의",
+"privacy.contactText": "개인정보 처리방침에 대해 궁금하신 점이 있으시면 info@hotel.com 으로 문의해 주세요.",
+
+// Terms
+"terms.title": "서비스 이용약관",
+"terms.introduction": "소개",
+"terms.introductionText": "당사 서비스를 이용함으로써 귀하는 본 약관에 동의하는 것으로 간주됩니다.",
+"terms.booking": "예약 정책",
+"terms.bookingText": "모든 예약은 당사 공식 웹사이트 또는 공인 파트너를 통해 이루어져야 하며, 예약 시 전액 결제가 필요합니다.",
+"terms.cancellation": "취소 정책",
+"terms.cancellationText": "체크인 48시간 전까지 예약을 취소하시면 전액 환불을 받으실 수 있습니다.",
+"terms.liability": "책임",
+"terms.liabilityText": "숙박 중 개인 소지품의 분실 또는 손상에 대해서는 호텔이 책임지지 않습니다.",
+"terms.contact": "문의",
+"terms.contactText": "이용약관에 대한 추가 정보가 필요하시면 info@hotel.com 으로 연락해 주세요.",
+
+// FAQ
+"faq.title": "자주 묻는 질문",
+"faq.question1": "예약은 어떻게 하나요?",
+"faq.answer1": "호텔 공식 웹사이트에서 직접 예약하거나 예약팀에 문의하실 수 있습니다.",
+"faq.question2": "취소 정책은 어떻게 되나요?",
+"faq.answer2": "체크인 48시간 전까지 취소하시면 전액 환불됩니다.",
+"faq.question3": "호텔에 반려동물을 데려갈 수 있나요?",
+"faq.answer3": "서비스 동물로서 유효한 서류가 있는 경우를 제외하고 반려동물은 허용되지 않습니다.",
+"faq.question4": "호텔에 어떤 편의시설이 있나요?",
+"faq.answer4": "호텔은 무료 Wi-Fi, 주차장, 조식, 피트니스 센터 및 수영장 이용을 제공합니다."
+
     },
   },
 };
