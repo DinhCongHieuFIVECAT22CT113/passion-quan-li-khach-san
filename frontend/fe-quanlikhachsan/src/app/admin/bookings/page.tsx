@@ -4,16 +4,11 @@ import styles from "./BookingManager.module.css";
 import { API_BASE_URL } from '@/lib/config';
 import { getAuthHeaders, getFormDataHeaders, handleResponse } from '@/lib/api';
 
-interface ChiTietDatPhongBE {
-  maPhong: string;
-  // Các trường khác nếu có, ví dụ: donGiaTaiThoiDiemDat, soLuongNguoi, ...
-}
-
-// Interface cho dữ liệu Đặt phòng từ BE
+// Interface cho dữ liệu Đặt phòng từ BE (camelCase, khớp với JSON response)
 interface BookingBE {
   maDatPhong: string;
   maKH: string;
-  maPhong: string;
+  maPhong: string; // Thêm maPhong
   ngayNhanPhong: string;
   ngayTraPhong: string;
   trangThai: string;
@@ -22,24 +17,6 @@ interface BookingBE {
   nguoiLon?: number;
   soLuongPhong?: number;
   thoiGianDen?: string;
-  chiTietDatPhongs?: ChiTietDatPhongBE[];
-}
-
-// Interface cho dữ liệu Phòng từ BE (tương tự file quản lý phòng)
-interface PhongBE {
-  maPhong: string;
-  maLoaiPhong: string;
-  soPhong: string;
-  // Các trường khác như thumbnail, trangThai, tang nếu cần
-}
-
-// Interface cho dữ liệu Loại Phòng từ BE (tương tự file quản lý phòng)
-interface LoaiPhongBE {
-  maLoaiPhong: string;
-  tenLoaiPhong: string;
-  giaMoiGio: number;
-  giaMoiDem: number;
-  // Các trường khác nếu cần
 }
 
 // Interface để hiển thị trong bảng, có thể kết hợp thêm thông tin
@@ -50,9 +27,9 @@ interface BookingDisplay extends BookingBE {
 }
 
 // Interface cho state của form (camelCase, để nhất quán với dữ liệu hiển thị)
-// Khi gửi đi qua FormData, các key sẽ được chuyển thành PascalCase
 interface BookingFormState {
   maKH: string; 
+  maPhong: string; // Thêm maPhong
   ngayNhanPhong: string;
   ngayTraPhong: string;
   ghiChu?: string;
@@ -60,7 +37,7 @@ interface BookingFormState {
   nguoiLon?: number;
   soLuongPhong?: number;
   thoiGianDen?: string;
-  trangThai?: string; // Dùng để hiển thị trong form sửa, không gửi đi nếu DTO không yêu cầu
+  trangThai?: string;
 }
 
 const statusMap: Record<string, { label: string; className: string }> = {
@@ -70,9 +47,9 @@ const statusMap: Record<string, { label: string; className: string }> = {
   "Đã hủy": { label: "Đã hủy", className: styles["status"] + " " + styles["status-cancelled"] },
   "Chờ thanh toán": { label: "Chờ thanh toán", className: styles["status"] + " " + styles["status-pending"] },
   "Hoàn thành": { label: "Hoàn thành", className: styles["status"] + " " + styles["status-completed"] }, 
-  "Đã xác nhận": { label: "Đã xác nhận", className: styles["status"] + " " + styles["status-confirmed"] }, // Thêm từ data
-  "Chờ xác nhận": { label: "Chờ xác nhận", className: styles["status"] + " " + styles["status-waiting"] }, // Thêm từ data
-  "Chưa xác nhận": { label: "Chưa xác nhận", className: styles["status"] + " " + styles["status-unconfirmed"] }, // Thêm từ data
+  "Đã xác nhận": { label: "Đã xác nhận", className: styles["status"] + " " + styles["status-confirmed"] },
+  "Chờ xác nhận": { label: "Chờ xác nhận", className: styles["status"] + " " + styles["status-waiting"] },
+  "Chưa xác nhận": { label: "Chưa xác nhận", className: styles["status"] + " " + styles["status-unconfirmed"] },
 };
 
 export default function BookingManager() {
@@ -81,6 +58,7 @@ export default function BookingManager() {
   const [editBooking, setEditBooking] = useState<BookingDisplay | null>(null);
   const [form, setForm] = useState<BookingFormState>({
     maKH: "",
+    maPhong: "", // Thêm maPhong
     ngayNhanPhong: "",
     ngayTraPhong: "",
     trangThai: "Đã đặt",
@@ -95,14 +73,13 @@ export default function BookingManager() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [customers, setCustomers] = useState<{maKh: string, hoKh: string, tenKh: string}[]>([]);
-  const [allRooms, setAllRooms] = useState<PhongBE[]>([]);
-  const [allRoomTypes, setAllRoomTypes] = useState<LoaiPhongBE[]>([]);
+  const [rooms, setRooms] = useState<{maPhong: string, tenPhong: string}[]>([]); // Thêm state cho phòng
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       setError(null);
-      console.log("Fetching data..."); // DEBUG
+      console.log("Fetching data...");
 
       try {
         const bookingsResponse = await fetch(`${API_BASE_URL}/DatPhong`, {
@@ -110,85 +87,58 @@ export default function BookingManager() {
           headers: getAuthHeaders('GET'),
           credentials: 'include'
         });
-        console.log("Bookings API response status:", bookingsResponse.status); // DEBUG
+        console.log("Bookings API response status:", bookingsResponse.status);
         
         const customersResponse = await fetch(`${API_BASE_URL}/KhachHang`, {
           method: 'GET',
           headers: getAuthHeaders('GET'),
           credentials: 'include'
         });
-        console.log("Customers API response status:", customersResponse.status); // DEBUG
+        console.log("Customers API response status:", customersResponse.status);
         
         const roomsResponse = await fetch(`${API_BASE_URL}/Phong`, {
           method: 'GET',
           headers: getAuthHeaders('GET'),
           credentials: 'include'
         });
-        console.log("Rooms API response status:", roomsResponse.status); // DEBUG
+        console.log("Rooms API response status:", roomsResponse.status);
 
-        const roomTypesResponse = await fetch(`${API_BASE_URL}/LoaiPhong`, {
-          method: 'GET',
-          headers: getAuthHeaders('GET'),
-          credentials: 'include'
-        });
-        console.log("RoomTypes API response status:", roomTypesResponse.status); // DEBUG
-        
         const bookingsData = await handleResponse(bookingsResponse);
-        console.log("Raw bookingsData from handleResponse:", JSON.stringify(bookingsData, null, 2)); // DEBUG
+        console.log("Raw bookingsData from handleResponse:", JSON.stringify(bookingsData, null, 2));
         
         const customersData = await handleResponse(customersResponse);
-        console.log("Raw customersData from handleResponse:", JSON.stringify(customersData, null, 2)); // DEBUG
+        console.log("Raw customersData from handleResponse:", JSON.stringify(customersData, null, 2));
         
         const roomsData = await handleResponse(roomsResponse);
-        console.log("Raw roomsData from handleResponse:", JSON.stringify(roomsData, null, 2)); // DEBUG
+        console.log("Raw roomsData from handleResponse:", JSON.stringify(roomsData, null, 2));
 
-        const roomTypesData = await handleResponse(roomTypesResponse);
-        console.log("Raw roomTypesData from handleResponse:", JSON.stringify(roomTypesData, null, 2)); // DEBUG
-        
-        // Dữ liệu từ API là camelCase
         const bookingsArray: BookingBE[] = Array.isArray(bookingsData) ? bookingsData : [];
-        console.log("Parsed bookingsArray:", JSON.stringify(bookingsArray, null, 2)); // DEBUG
+        console.log("Parsed bookingsArray:", JSON.stringify(bookingsArray, null, 2));
 
         const customersArray: any[] = Array.isArray(customersData) ? customersData : [];
-        console.log("Parsed customersArray:", JSON.stringify(customersArray, null, 2)); // DEBUG
+        console.log("Parsed customersArray:", JSON.stringify(customersArray, null, 2));
         
-        setCustomers(customersArray.map(c => ({ maKh: c.maKh, hoKh: c.hoKh, tenKh: c.tenKh })));
-        
-        const allRoomsArray: PhongBE[] = Array.isArray(roomsData) ? roomsData : [];
-        setAllRooms(allRoomsArray);
-        console.log("Parsed allRoomsArray:", JSON.stringify(allRoomsArray, null, 2)); // DEBUG
+        const roomsArray: any[] = Array.isArray(roomsData) ? roomsData : [];
+        console.log("Parsed roomsArray:", JSON.stringify(roomsArray, null, 2));
 
-        const allRoomTypesArray: LoaiPhongBE[] = Array.isArray(roomTypesData) ? roomTypesData : [];
-        setAllRoomTypes(allRoomTypesArray);
-        console.log("Parsed allRoomTypesArray:", JSON.stringify(allRoomTypesArray, null, 2)); // DEBUG
+        setCustomers(customersArray.map(c => ({ maKh: c.maKh, hoKh: c.hoKh, tenKh: c.tenKh })));
+        setRooms(roomsArray.map(r => ({ maPhong: r.maPhong, tenPhong: r.tenPhong })));
         
         const bookingsWithDetails = bookingsArray.map((apiBooking): BookingDisplay => {
           console.log("Processing apiBooking:", JSON.stringify(apiBooking, null, 2));
           const customer = customersArray.find(c => c.maKh === apiBooking.maKH);
           console.log("Found customer for maKH " + apiBooking.maKH + ":", JSON.stringify(customer, null, 2));
-
-          let tenPhongDisplay = apiBooking.maPhong || "N/A";
-          let totalAmount = 0;
-
-          const room = allRoomsArray.find(r => r.maPhong === apiBooking.maPhong);
-          if (room) {
-            const roomType = allRoomTypesArray.find(rt => rt.maLoaiPhong === room.maLoaiPhong);
-            if (roomType) {
-              const { nights, hours } = calculateStayDetails(apiBooking.ngayNhanPhong, apiBooking.ngayTraPhong);
-              console.log(`DEBUG: Room ${room.maPhong} (Type: ${roomType.tenLoaiPhong}) - PriceNight: ${roomType.giaMoiDem}, PriceHour: ${roomType.giaMoiGio}`);
-              totalAmount = (nights * roomType.giaMoiDem) + (hours * roomType.giaMoiGio);
-              console.log(`DEBUG: Cost for room ${room.maPhong}: ${totalAmount}`);
-            }
-          }
+          const room = roomsArray.find(r => r.maPhong === apiBooking.maPhong);
+          console.log("Found room for maPhong " + apiBooking.maPhong + ":", JSON.stringify(room, null, 2));
           
           return {
-            ...apiBooking, 
+            ...apiBooking,
             tenKhachHang: customer ? `${customer.hoKh} ${customer.tenKh}` : 'Không xác định',
-            tenPhongDisplay: tenPhongDisplay,
-            tongTienDisplay: totalAmount > 0 ? totalAmount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) : 'N/A',
+            tenPhongDisplay: room ? room.tenPhong : 'N/A',
+            tongTienDisplay: 'N/A',
           };
         });
-        console.log("Final bookingsWithDetails:", JSON.stringify(bookingsWithDetails, null, 2)); // DEBUG
+        console.log("Final bookingsWithDetails:", JSON.stringify(bookingsWithDetails, null, 2));
         
         setBookings(bookingsWithDetails);
       } catch (err) {
@@ -203,48 +153,10 @@ export default function BookingManager() {
     fetchData();
   }, []);
 
-  const calculateStayDetails = (startDateStr: string, endDateStr: string) => {
-    const startDate = new Date(startDateStr);
-    const endDate = new Date(endDateStr);
-
-    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime()) || startDate >= endDate) {
-      return { nights: 0, hours: 0, display: "Invalid dates" };
-    }
-
-    let diffMillis = endDate.getTime() - startDate.getTime();
-
-    const MS_PER_DAY = 24 * 60 * 60 * 1000;
-    const MS_PER_HOUR = 60 * 60 * 1000;
-
-    let nights = 0;
-    let hours = 0;
-
-    // Tính số đêm tròn trước
-    nights = Math.floor(diffMillis / MS_PER_DAY);
-    diffMillis -= nights * MS_PER_DAY;
-
-    // Tính số giờ lẻ còn lại
-    if (diffMillis > 0) {
-      hours = Math.ceil(diffMillis / MS_PER_HOUR); // Làm tròn giờ lên
-    }
-    
-    // Logic đơn giản: nếu giờ lẻ >= 12 thì tính là 1 đêm, ngược lại giữ nguyên giờ.
-    // Hoặc có thể có quy tắc khác tùy theo nghiệp vụ (ví dụ: > 6 giờ tính 1 đêm)
-    // Hiện tại: giữ nguyên số đêm và số giờ lẻ.
-    // Nếu bạn muốn logic phức tạp hơn (vd: 28 giờ = 1 đêm + 4 giờ, hoặc = 2 đêm nếu > X giờ), cần điều chỉnh ở đây.
-
-    let display = `${nights} đêm`;
-    if (hours > 0) {
-      display += `, ${hours} giờ`;
-    }
-
-    return { nights, hours, display };
-  };
-
   const formatDate = (dateString?: string) => {
     try {
       if (!dateString) return '';
-      const date = new Date(dateString); // API trả về chuỗi ISO "2025-04-21T14:00:00"
+      const date = new Date(dateString);
       if (isNaN(date.getTime())) return dateString; 
       return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
     } catch {
@@ -276,6 +188,7 @@ export default function BookingManager() {
   const openAddModal = () => {
     setForm({
       maKH: "",
+      maPhong: "", // Thêm maPhong
       ngayNhanPhong: formatDateForInput(new Date().toISOString()),
       ngayTraPhong: formatDateForInput(new Date(Date.now() + 86400000).toISOString()), 
       ghiChu: "",
@@ -283,7 +196,7 @@ export default function BookingManager() {
       nguoiLon: 1,
       soLuongPhong: 1,
       thoiGianDen: "14:00",
-      trangThai: "Đã đặt" // Mặc định hiển thị, không gửi nếu CreateDTO không có
+      trangThai: "Đã đặt"
     });
     setEditBooking(null);
     setShowAddModal(true);
@@ -291,7 +204,8 @@ export default function BookingManager() {
 
   const openEditModal = (booking: BookingDisplay) => {
     setForm({
-      maKH: booking.maKH, // form state là camelCase
+      maKH: booking.maKH,
+      maPhong: booking.maPhong, // Thêm maPhong
       ngayNhanPhong: formatDateForInput(booking.ngayNhanPhong),
       ngayTraPhong: formatDateForInput(booking.ngayTraPhong),
       trangThai: booking.trangThai, 
@@ -308,7 +222,6 @@ export default function BookingManager() {
     const { name, value } = e.target;
     setForm(prevForm => ({
       ...prevForm,
-      // name của input trong form là camelCase
       [name]: (name === 'treEm' || name === 'nguoiLon' || name === 'soLuongPhong') && value !== '' ? parseInt(value, 10) : value
     }));
   };
@@ -319,9 +232,9 @@ export default function BookingManager() {
 
     const formData = new FormData();
     
-    // Gửi FormData với key PascalCase để khớp với DTO của BE
-    if (!editBooking) { // Thêm mới
+    if (!editBooking) {
       formData.append('MaKH', form.maKH);
+      formData.append('MaPhong', form.maPhong); // Thêm MaPhong
       formData.append('NgayNhanPhong', form.ngayNhanPhong);
       formData.append('NgayTraPhong', form.ngayTraPhong);
       if (form.ghiChu) formData.append('GhiChu', form.ghiChu);
@@ -329,11 +242,10 @@ export default function BookingManager() {
       formData.append('NguoiLon', String(form.nguoiLon || 1));
       formData.append('SoLuongPhong', String(form.soLuongPhong || 1));
       if (form.thoiGianDen) formData.append('ThoiGianDen', form.thoiGianDen);
-      // CreateDatPhongDTO không có TrangThai
     }
 
-    if (editBooking) { // Sửa
-      // UpdateDatPhongDTO không có MaKH
+    if (editBooking) {
+      if (form.maPhong) formData.append('MaPhong', form.maPhong); // Thêm MaPhong
       if (form.ngayNhanPhong) formData.append('NgayNhanPhong', form.ngayNhanPhong);
       if (form.ngayTraPhong) formData.append('NgayTraPhong', form.ngayTraPhong);
       if (form.ghiChu) formData.append('GhiChu', form.ghiChu);
@@ -341,12 +253,11 @@ export default function BookingManager() {
       formData.append('NguoiLon', String(form.nguoiLon || 1));
       formData.append('SoLuongPhong', String(form.soLuongPhong || 1));
       if (form.thoiGianDen) formData.append('ThoiGianDen', form.thoiGianDen);
-      // UpdateDatPhongDTO không có TrangThai
     }
 
     try {
       const endpoint = editBooking 
-        ? `${API_BASE_URL}/DatPhong/${editBooking.maDatPhong}` // editBooking.maDatPhong (camelCase)
+        ? `${API_BASE_URL}/DatPhong/${editBooking.maDatPhong}`
         : `${API_BASE_URL}/DatPhong`;
       const method = editBooking ? 'PUT' : 'POST';
 
@@ -363,18 +274,23 @@ export default function BookingManager() {
       const bookingsData = await handleResponse(bookingsResponse);
       const customersResponse = await fetch(`${API_BASE_URL}/KhachHang`, { headers: getAuthHeaders('GET'), credentials: 'include' });
       const customersData = await handleResponse(customersResponse);
+      const roomsResponse = await fetch(`${API_BASE_URL}/Phong`, { headers: getAuthHeaders('GET'), credentials: 'include' });
+      const roomsData = await handleResponse(roomsResponse);
 
       const bookingsArray: BookingBE[] = Array.isArray(bookingsData) ? bookingsData : [];
       const customersArray: any[] = Array.isArray(customersData) ? customersData : [];
+      const roomsArray: any[] = Array.isArray(roomsData) ? roomsData : [];
       
       setCustomers(customersArray.map(c => ({ maKh: c.maKh, hoKh: c.hoKh, tenKh: c.tenKh })));
+      setRooms(roomsArray.map(r => ({ maPhong: r.maPhong, tenPhong: r.tenPhong })));
       
       const bookingsWithDetails = bookingsArray.map((apiBooking): BookingDisplay => {
         const customer = customersArray.find(c => c.maKh === apiBooking.maKH);
+        const room = roomsArray.find(r => r.maPhong === apiBooking.maPhong);
         return {
           ...apiBooking,
           tenKhachHang: customer ? `${customer.hoKh} ${customer.tenKh}` : 'Không xác định',
-          tenPhongDisplay: 'N/A',
+          tenPhongDisplay: room ? room.tenPhong : 'N/A',
           tongTienDisplay: 'N/A',
         };
       });
@@ -399,10 +315,10 @@ export default function BookingManager() {
   const filtered = bookings.filter(b =>
     (b.tenKhachHang || '').toLowerCase().includes(search.toLowerCase()) ||
     (b.maDatPhong || '').toLowerCase().includes(search.toLowerCase()) ||
-    (b.maKH || '').toLowerCase().includes(search.toLowerCase())
+    (b.maKH || '').toLowerCase().includes(search.toLowerCase()) ||
+    (b.maPhong || '').toLowerCase().includes(search.toLowerCase()) // Thêm tìm kiếm theo maPhong
   );
 
-  // DEBUG: Log state and filtered array before rendering
   console.log("Rendering Bookings state:", JSON.stringify(bookings, null, 2));
   console.log("Rendering filtered Bookings:", JSON.stringify(filtered, null, 2));
 
@@ -414,7 +330,7 @@ export default function BookingManager() {
           <input
             className={styles.search}
             type="text"
-            placeholder="Tìm kiếm khách/mã đặt phòng..."
+            placeholder="Tìm kiếm khách/mã đặt phòng/mã phòng..."
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
@@ -442,12 +358,12 @@ export default function BookingManager() {
         </thead>
         <tbody>
           {filtered.length === 0 ? (
-            <tr><td colSpan={8} style={{textAlign:'center', color:'#888', fontStyle:'italic'}}>Không có dữ liệu đặt phòng</td></tr>
+            <tr><td colSpan={8} style={{textAlign:'center', color:'#888', fontStyle:'italic'}}>Không có dữ liệu</td></tr>
           ) : (
             filtered.map(booking => {
               const maDatPhongDisplay = booking.maDatPhong;
-              const tenKhachHangDisplay = booking.tenKhachHang || booking.maKH; // Ưu tiên tên, nếu không có thì hiển thị mã
-              const tenPhongDisplay = booking.tenPhongDisplay; // Đã là maPhong
+              const tenKhachHangDisplay = booking.tenKhachHang || booking.maKH;
+              const tenPhongDisplay = booking.tenPhongDisplay;
               const ngayNhanPhongDisplay = formatDate(booking.ngayNhanPhong);
               const ngayTraPhongDisplay = formatDate(booking.ngayTraPhong);
               const tongTienDisplay = booking.tongTienDisplay;
@@ -461,37 +377,10 @@ export default function BookingManager() {
                   <td>{ngayNhanPhongDisplay}</td>
                   <td>{ngayTraPhongDisplay}</td>
                   <td>{tongTienDisplay}</td>
-                  <td>
-                    <span className={statusMap[trangThaiDisplay]?.className || styles.status}>
-                      {statusMap[trangThaiDisplay]?.label || trangThaiDisplay}
-                    </span>
-                  </td>
+                  <td><span className={statusMap[trangThaiDisplay]?.className || styles.status}>{statusMap[trangThaiDisplay]?.label || trangThaiDisplay}</span></td>
                   <td style={{whiteSpace:'nowrap'}}>
-                    <button 
-                      className={styles.editBtn} 
-                      onClick={() => openEditModal(booking)}
-                      // Vô hiệu hóa nếu trạng thái không cho phép sửa, ví dụ: Đã trả phòng, Đã hủy
-                      disabled={trangThaiDisplay === 'Đã trả phòng' || trangThaiDisplay === 'Đã hủy'}
-                    >
-                      Sửa
-                    </button>
-                    <button 
-                      className={styles.historyBtn} // Có thể đổi tên class thành detailBtn nếu muốn
-                      onClick={() => setHistoryBooking(booking)}
-                    >
-                      Chi tiết
-                    </button>
-                    {/* Cân nhắc thêm nút Hủy đặt phòng nếu cần */}
-                    {/* Ví dụ:
-                    { (trangThaiDisplay === 'Đã đặt' || trangThaiDisplay === 'Đã xác nhận' || trangThaiDisplay === 'Chờ xác nhận') && (
-                      <button
-                        className={styles.cancelBookingBtn} // Cần định nghĩa style này
-                        onClick={() => handleCancelBooking(booking.maDatPhong)} // Cần tạo hàm này
-                      >
-                        Hủy
-                      </button>
-                    )}
-                    */}
+                    <button className={styles.editBtn} onClick={() => openEditModal(booking)}>Sửa</button>
+                    <button className={styles.historyBtn} onClick={() => setHistoryBooking(booking)}>Chi tiết</button>
                   </td>
                 </tr>
               );
@@ -509,11 +398,19 @@ export default function BookingManager() {
             <form onSubmit={handleSubmit} autoComplete="off">
               <div className={styles.formGroup}>
                 <label htmlFor="maKH">Khách hàng</label>
-                {/* name của select là maKH (camelCase) */}
                 <select id="maKH" name="maKH" value={form.maKH} onChange={handleChange} required>
                   <option value="">Chọn khách hàng</option>
                   {customers.map(customer => (
                     <option key={customer.maKh} value={customer.maKh}>{customer.hoKh} {customer.tenKh} ({customer.maKh})</option>
+                  ))}
+                </select>
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="maPhong">Mã Phòng</label>
+                <select id="maPhong" name="maPhong" value={form.maPhong} onChange={handleChange} required>
+                  <option value="">Chọn phòng</option>
+                  {rooms.map(room => (
+                    <option key={room.maPhong} value={room.maPhong}>{room.tenPhong} ({room.maPhong})</option>
                   ))}
                 </select>
               </div>
@@ -564,6 +461,15 @@ export default function BookingManager() {
                 <input id="maKH_edit" name="maKH_edit" value={`${editBooking.tenKhachHang} (${editBooking.maKH})`} disabled />
               </div>
               <div className={styles.formGroup}>
+                <label htmlFor="maPhong_edit">Mã Phòng</label>
+                <select id="maPhong_edit" name="maPhong" value={form.maPhong} onChange={handleChange} required>
+                  <option value="">Chọn phòng</option>
+                  {rooms.map(room => (
+                    <option key={room.maPhong} value={room.maPhong}>{room.tenPhong} ({room.maPhong})</option>
+                  ))}
+                </select>
+              </div>
+              <div className={styles.formGroup}>
                 <label htmlFor="ngayNhanPhong_edit">Ngày đến</label>
                 <input type="date" id="ngayNhanPhong_edit" name="ngayNhanPhong" value={form.ngayNhanPhong} onChange={handleChange} required />
               </div>
@@ -593,7 +499,6 @@ export default function BookingManager() {
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="trangThai_edit">Trạng thái (Chỉ hiển thị - Không sửa qua form này)</label>
-                {/* name của select là trangThai (camelCase) */}
                 <select id="trangThai_edit" name="trangThai" value={form.trangThai} onChange={handleChange} disabled>
                   {Object.entries(statusMap).map(([key, value]) => (
                     <option key={key} value={key}>{value.label}</option>
@@ -675,4 +580,4 @@ export default function BookingManager() {
       )}
     </div>
   );
-} 
+}
