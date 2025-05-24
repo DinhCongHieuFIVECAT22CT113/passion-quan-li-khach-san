@@ -1097,4 +1097,31 @@ export const getDashboardStats = async () => {
       ]
     };
   }
+};
+
+// API lấy chi tiết một đặt phòng theo Mã Đặt Phòng
+export const getBookingDetails = async (maDatPhong: string) => {
+  console.log(`Đang gọi API lấy chi tiết đặt phòng: ${API_BASE_URL}/DatPhong/${maDatPhong}`);
+  try {
+    const response = await fetch(`${API_BASE_URL}/DatPhong/${maDatPhong}`, {
+      method: 'GET',
+      headers: getAuthHeaders('GET'),
+      credentials: 'include'
+    });
+    const data = await handleResponse(response);
+    // Kiểm tra xem data có phải là object không, vì API có thể trả về lỗi dạng khác
+    if (data && typeof data === 'object' && !Array.isArray(data)) {
+      return data; // Mong muốn là một object chứa thông tin đặt phòng
+    } else {
+      // Nếu API trả về mảng hoặc không phải object mong đợi khi lấy chi tiết 1 record
+      console.error(`Dữ liệu chi tiết đặt phòng ${maDatPhong} không hợp lệ:`, data);
+      // Trả về null hoặc throw error tùy theo cách muốn xử lý ở nơi gọi
+      // Trong trường hợp này, trả về null để có thể bỏ qua nếu không tìm thấy
+      return null; 
+    }
+  } catch (error) {
+    console.error(`Lỗi khi gọi API getBookingDetails cho ${maDatPhong}:`, error);
+    // Quyết định trả về null để vòng lặp có thể tiếp tục thay vì dừng hẳn
+    return null; 
+  }
 }; 

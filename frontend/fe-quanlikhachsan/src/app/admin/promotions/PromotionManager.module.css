@@ -165,4 +165,13 @@
   border-radius: 8px;
   border: 1px solid #fca5a5;
   font-weight: 500;
+}
+
+.thumbnail {
+  max-width: 45px;
+  max-height: 45px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-right: 8px;
+  vertical-align: middle;
 } 

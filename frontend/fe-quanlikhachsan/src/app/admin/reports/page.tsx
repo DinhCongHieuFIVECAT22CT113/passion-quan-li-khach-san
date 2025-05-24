@@ -82,11 +82,14 @@ export default function RevenueReport() {
         ) {
           try {
             // Gọi API tính doanh thu theo tháng
-            const monthlyRevenue = await calculateRevenue(currentMonth, currentYear);
+            const monthlyRevenueResult = await calculateRevenue(currentMonth, currentYear);
+            // Giả sử monthlyRevenueResult có thể là số trực tiếp hoặc một object chứa giá trị
+            const amount = typeof monthlyRevenueResult === 'number' ? monthlyRevenueResult : (monthlyRevenueResult?.value || 0);
+            console.log(`[Month fetch] Month: ${currentMonth}/${currentYear}, API Result:`, monthlyRevenueResult, "Parsed amount:", amount);
             
             data.push({
               date: `${currentYear}-${currentMonth.toString().padStart(2, '0')}-01`,
-              amount: monthlyRevenue || 0
+              amount: amount // Sử dụng amount đã parse
             });
           } catch (err) {
             console.error(`Lỗi khi lấy doanh thu tháng ${currentMonth}/${currentYear}:`, err);
@@ -132,7 +135,7 @@ export default function RevenueReport() {
           if (
             invoice.ngayTao && 
             invoice.trangThai === "Đã thanh toán" &&
-            invoice.tongTien
+            typeof invoice.tongTien === 'number' // Đảm bảo tongTien là số
           ) {
             const invoiceDate = new Date(invoice.ngayTao);
             const dateString = invoiceDate.toISOString().split('T')[0];
@@ -142,12 +145,15 @@ export default function RevenueReport() {
               // Tìm ngày trong mảng và cộng dồn doanh thu
               const dateIndex = dateArray.findIndex(item => item.date === dateString);
               if (dateIndex !== -1) {
-                dateArray[dateIndex].amount += invoice.tongTien;
+                dateArray[dateIndex].amount += invoice.tongTien; // tongTien đã được kiểm tra là số
               }
             }
+          } else if (invoice.tongTien && typeof invoice.tongTien !== 'number') {
+            console.warn("[Day fetch] Invoice with invalid tongTien (not a number):", invoice);
           }
         });
         
+        console.log("[Day fetch] Processed daily revenueData:", JSON.stringify(dateArray, null, 2));
         setRevenueData(dateArray);
       }
     } catch (err) {
@@ -203,9 +209,16 @@ export default function RevenueReport() {
   };
 
   // Tính toán các thống kê
-  const totalRevenue = revenueData.reduce((sum, item) => sum + item.amount, 0);
-  const averageRevenue = totalRevenue / (revenueData.length || 1);
-  const maxRevenue = Math.max(...(revenueData.map(item => item.amount).length ? revenueData.map(item => item.amount) : [0]));
+  console.log("Data before calculating stats (revenueData):", JSON.stringify(revenueData, null, 2));
+
+  const validRevenueData = revenueData.filter(item => typeof item.amount === 'number' && !isNaN(item.amount));
+  console.log("Filtered validRevenueData for stats:", JSON.stringify(validRevenueData, null, 2));
+
+  const totalRevenue = validRevenueData.reduce((sum, item) => sum + item.amount, 0);
+  const averageRevenue = validRevenueData.length > 0 ? totalRevenue / validRevenueData.length : 0;
+  const maxRevenue = validRevenueData.length > 0 ? Math.max(...validRevenueData.map(item => item.amount)) : 0;
+
+  console.log("Calculated Stats:", { totalRevenue, averageRevenue, maxRevenue });
 
   return (
     <div className={styles.container}>
@@ -248,32 +261,17 @@ export default function RevenueReport() {
         <div className={styles.error}>Lỗi: {error}</div>
       ) : (
         <>
-          <div className={styles.chartContainer}>
-            <Line 
-              options={options} 
-              data={chartData} 
-            />
-          </div>
-
           <div className={styles.summary}>
-            <div className={styles.summaryCard}>
-              <h3>Tổng doanh thu</h3>
-              <p className={styles.amount}>
-                {totalRevenue.toLocaleString('vi-VN')}đ
-              </p>
-            </div>
-            <div className={styles.summaryCard}>
-              <h3>Doanh thu trung bình</h3>
-              <p className={styles.amount}>
-                {Math.round(averageRevenue).toLocaleString('vi-VN')}đ
-              </p>
-            </div>
-            <div className={styles.summaryCard}>
-              <h3>Doanh thu cao nhất</h3>
-              <p className={styles.amount}>
-                {maxRevenue.toLocaleString('vi-VN')}đ
-              </p>
-            </div>
+            <div>Tổng doanh thu: <span>{totalRevenue.toLocaleString('vi-VN')}đ</span></div>
+            <div>Doanh thu trung bình: <span>{averageRevenue.toLocaleString('vi-VN')}đ</span></div>
+            <div>Doanh thu cao nhất: <span>{maxRevenue.toLocaleString('vi-VN')}đ</span></div>
+          </div>
+          <div className={styles.chartContainer}>
+            {revenueData.length > 0 ? (
+              <Line options={options} data={chartData} />
+            ) : (
+              <p className={styles.noData}>Không có dữ liệu doanh thu cho khoảng thời gian đã chọn.</p>
+            )}
           </div>
         </>
       )}

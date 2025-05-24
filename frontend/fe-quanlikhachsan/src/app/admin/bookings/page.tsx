@@ -26,6 +26,23 @@ interface BookingDisplay extends BookingBE {
   tongTienDisplay?: string; 
 }
 
+// Interface cho Loại phòng từ BE
+interface RoomTypeBE {
+  maLoaiPhong: string;
+  tenLoaiPhong?: string;
+  giaMoiGio: number;
+  giaMoiDem: number;
+  // Các trường khác nếu cần
+}
+
+// Interface cho Phòng từ BE (cần chứa maLoaiPhong)
+interface RoomInfoBE {
+  maPhong: string;
+  soPhong: string;
+  maLoaiPhong: string;
+  // Các trường khác nếu cần
+}
+
 // Interface cho state của form (camelCase, để nhất quán với dữ liệu hiển thị)
 interface BookingFormState {
   maKH: string; 
@@ -73,7 +90,62 @@ export default function BookingManager() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [customers, setCustomers] = useState<{maKh: string, hoKh: string, tenKh: string}[]>([]);
-  const [rooms, setRooms] = useState<{maPhong: string, tenPhong: string}[]>([]); // Thêm state cho phòng
+  const [rooms, setRooms] = useState<RoomInfoBE[]>([]); // Cập nhật để chứa RoomInfoBE
+  const [roomTypes, setRoomTypes] = useState<RoomTypeBE[]>([]); // State cho loại phòng
+
+  // Hàm format tiền tệ
+  const formatCurrency = (amount?: number) => {
+    if (amount === undefined || amount === null) return 'N/A';
+    return amount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+  };
+
+  // Hàm tính toán thời gian ở và tổng tiền
+  const calculateStayDurationAndCost = (
+    checkInDateStr: string,
+    checkOutDateStr: string,
+    giaMoiDem: number,
+    giaMoiGio: number
+  ): { nights: number; hours: number; totalCost: number } => {
+    if (!checkInDateStr || !checkOutDateStr) {
+      return { nights: 0, hours: 0, totalCost: 0 };
+    }
+    try {
+      const checkInDate = new Date(checkInDateStr);
+      const checkOutDate = new Date(checkOutDateStr);
+
+      if (isNaN(checkInDate.getTime()) || isNaN(checkOutDate.getTime()) || checkOutDate <= checkInDate) {
+        return { nights: 0, hours: 0, totalCost: 0 };
+      }
+
+      const timeDiffMs = checkOutDate.getTime() - checkInDate.getTime();
+      const totalHours = timeDiffMs / (1000 * 60 * 60);
+      
+      const nights = Math.floor(totalHours / 24);
+      const remainingHours = totalHours % 24;
+
+      // Logic tính tiền: (số đêm * giá đêm) + (số giờ còn lại * giá giờ)
+      // Điều chỉnh logic này nếu chính sách khách sạn khác
+      let calculatedCost = (nights * giaMoiDem) + (remainingHours > 0 ? (Math.ceil(remainingHours) * giaMoiGio) : 0);
+      // Nếu không có đêm nào, và có giờ lẻ, chỉ tính tiền giờ.
+      if (nights === 0 && remainingHours > 0) {
+        calculatedCost = Math.ceil(remainingHours) * giaMoiGio;
+      } else if (nights > 0 && remainingHours > 0) {
+         // Nếu có đêm và có giờ lẻ, cộng thêm tiền của các giờ lẻ đó
+         // Giả sử nếu đã ở qua 1 đêm, thì các giờ lẻ trong ngày tiếp theo vẫn tính theo giá giờ
+         // Hoặc có thể có chính sách: nếu > X giờ thì tính thêm 1 đêm (cần làm rõ)
+         // Hiện tại: tính tiền giờ cho phần lẻ.
+      }
+
+      return {
+        nights,
+        hours: remainingHours > 0 ? Math.ceil(remainingHours) : 0,
+        totalCost: calculatedCost
+      };
+    } catch (e) {
+      console.error("Error calculating stay duration and cost:", e);
+      return { nights: 0, hours: 0, totalCost: 0 };
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -82,60 +154,90 @@ export default function BookingManager() {
       console.log("Fetching data...");
 
       try {
-        const bookingsResponse = await fetch(`${API_BASE_URL}/DatPhong`, {
-          method: 'GET',
-          headers: getAuthHeaders('GET'),
-          credentials: 'include'
-        });
-        console.log("Bookings API response status:", bookingsResponse.status);
-        
-        const customersResponse = await fetch(`${API_BASE_URL}/KhachHang`, {
-          method: 'GET',
-          headers: getAuthHeaders('GET'),
-          credentials: 'include'
-        });
-        console.log("Customers API response status:", customersResponse.status);
-        
-        const roomsResponse = await fetch(`${API_BASE_URL}/Phong`, {
-          method: 'GET',
-          headers: getAuthHeaders('GET'),
-          credentials: 'include'
-        });
-        console.log("Rooms API response status:", roomsResponse.status);
+        // Fetch all data concurrently
+        const [bookingsResponse, customersResponse, roomsResponse, roomTypesResponse] = await Promise.all([
+          fetch(`${API_BASE_URL}/DatPhong`, { method: 'GET', headers: getAuthHeaders('GET'), credentials: 'include' }),
+          fetch(`${API_BASE_URL}/KhachHang`, { method: 'GET', headers: getAuthHeaders('GET'), credentials: 'include' }),
+          fetch(`${API_BASE_URL}/Phong`, { method: 'GET', headers: getAuthHeaders('GET'), credentials: 'include' }),
+          fetch(`${API_BASE_URL}/LoaiPhong`, { method: 'GET', headers: getAuthHeaders('GET'), credentials: 'include' }) // Fetch Loại Phòng
+        ]);
 
+        console.log("Bookings API status:", bookingsResponse.status);
+        console.log("Customers API status:", customersResponse.status);
+        console.log("Rooms API status:", roomsResponse.status);
+        console.log("RoomTypes API status:", roomTypesResponse.status); // Log status
+
+        // Handle responses and parse data
         const bookingsData = await handleResponse(bookingsResponse);
-        console.log("Raw bookingsData from handleResponse:", JSON.stringify(bookingsData, null, 2));
-        
         const customersData = await handleResponse(customersResponse);
-        console.log("Raw customersData from handleResponse:", JSON.stringify(customersData, null, 2));
-        
-        const roomsData = await handleResponse(roomsResponse);
-        console.log("Raw roomsData from handleResponse:", JSON.stringify(roomsData, null, 2));
+        const roomsDataFromApi = await handleResponse(roomsResponse);
+        const roomTypesDataFromApi = await handleResponse(roomTypesResponse); // Parse Loại Phòng
+
+        console.log("Raw bookingsData:", JSON.stringify(bookingsData, null, 2));
+        console.log("Raw customersData:", JSON.stringify(customersData, null, 2));
+        console.log("Raw roomsDataFromApi:", JSON.stringify(roomsDataFromApi, null, 2));
+        console.log("Raw roomTypesDataFromApi:", JSON.stringify(roomTypesDataFromApi, null, 2)); // Log Loại Phòng
 
         const bookingsArray: BookingBE[] = Array.isArray(bookingsData) ? bookingsData : [];
-        console.log("Parsed bookingsArray:", JSON.stringify(bookingsArray, null, 2));
+        const customersApiArray: any[] = Array.isArray(customersData) ? customersData : [];
+        const roomsApiArray: any[] = Array.isArray(roomsDataFromApi) ? roomsDataFromApi : [];
+        const roomTypesApiArray: any[] = Array.isArray(roomTypesDataFromApi) ? roomTypesDataFromApi : []; // Mảng Loại Phòng từ API
 
-        const customersArray: any[] = Array.isArray(customersData) ? customersData : [];
-        console.log("Parsed customersArray:", JSON.stringify(customersArray, null, 2));
-        
-        const roomsArray: any[] = Array.isArray(roomsData) ? roomsData : [];
-        console.log("Parsed roomsArray:", JSON.stringify(roomsArray, null, 2));
+        // Process customers data
+        const processedCustomers = customersApiArray.map(c => ({ 
+          maKh: c.maKh || c.MaKh, 
+          hoKh: c.hoKh || c.HoKh || "", 
+          tenKh: c.tenKh || c.TenKh || "" 
+        }));
+        setCustomers(processedCustomers);
 
-        setCustomers(customersArray.map(c => ({ maKh: c.maKh, hoKh: c.hoKh, tenKh: c.tenKh })));
-        setRooms(roomsArray.map(r => ({ maPhong: r.maPhong, tenPhong: r.tenPhong })));
+        // Process rooms data, ensure maLoaiPhong is included
+        const processedRooms = roomsApiArray.map((r): RoomInfoBE => ({ 
+          maPhong: r.maPhong || r.MaPhong, 
+          soPhong: r.soPhong || r.SoPhong || "N/A",
+          maLoaiPhong: r.maLoaiPhong || r.MaLoaiPhong // Quan trọng: Lấy maLoaiPhong
+        }));
+        setRooms(processedRooms);
+
+        // Process room types data
+        const processedRoomTypes = roomTypesApiArray.map((rt): RoomTypeBE => ({ 
+          maLoaiPhong: rt.maLoaiPhong || rt.MaLoaiPhong,
+          tenLoaiPhong: rt.tenLoaiPhong || rt.TenLoaiPhong,
+          giaMoiGio: parseFloat(rt.giaMoiGio) || 0,
+          giaMoiDem: parseFloat(rt.giaMoiDem) || 0,
+        }));
+        setRoomTypes(processedRoomTypes);
         
         const bookingsWithDetails = bookingsArray.map((apiBooking): BookingDisplay => {
-          console.log("Processing apiBooking:", JSON.stringify(apiBooking, null, 2));
-          const customer = customersArray.find(c => c.maKh === apiBooking.maKH);
-          console.log("Found customer for maKH " + apiBooking.maKH + ":", JSON.stringify(customer, null, 2));
-          const room = roomsArray.find(r => r.maPhong === apiBooking.maPhong);
-          console.log("Found room for maPhong " + apiBooking.maPhong + ":", JSON.stringify(room, null, 2));
+          const currentMaKH = apiBooking.maKH;
+          const currentMaPhong = apiBooking.maPhong;
+
+          const customer = processedCustomers.find(c => c.maKh === currentMaKH);
+          const room = processedRooms.find(r => r.maPhong === currentMaPhong);
+          
+          let roomType: RoomTypeBE | undefined = undefined;
+          if (room && room.maLoaiPhong) {
+            roomType = processedRoomTypes.find(rt => rt.maLoaiPhong === room.maLoaiPhong);
+          }
+
+          console.log(`Processing MaDatPhong ${apiBooking.maDatPhong}: MaPhong=${currentMaPhong}, MaLoaiPhong=${room?.maLoaiPhong}, RoomType Found=${!!roomType}`);
+
+          let calculatedTotalCost = 0;
+          if (roomType) {
+            const { totalCost } = calculateStayDurationAndCost(
+              apiBooking.ngayNhanPhong,
+              apiBooking.ngayTraPhong,
+              roomType.giaMoiDem,
+              roomType.giaMoiGio
+            );
+            calculatedTotalCost = totalCost;
+          }
           
           return {
-            ...apiBooking,
-            tenKhachHang: customer ? `${customer.hoKh} ${customer.tenKh}` : 'Không xác định',
-            tenPhongDisplay: room ? room.tenPhong : 'N/A',
-            tongTienDisplay: 'N/A',
+            ...apiBooking, 
+            tenKhachHang: customer ? `${customer.hoKh} ${customer.tenKh}`.trim() : 'Không xác định',
+            tenPhongDisplay: room ? room.soPhong : (currentMaPhong ? `P:${currentMaPhong} (không tìm thấy)` : 'N/A'),
+            tongTienDisplay: formatCurrency(calculatedTotalCost), 
           };
         });
         console.log("Final bookingsWithDetails:", JSON.stringify(bookingsWithDetails, null, 2));
@@ -232,9 +334,10 @@ export default function BookingManager() {
 
     const formData = new FormData();
     
-    if (!editBooking) {
+    // API BE DatPhongController CreateDatPhongAsync nhận các trường PascalCase
+    if (!editBooking) { // Trường hợp thêm mới
       formData.append('MaKH', form.maKH);
-      formData.append('MaPhong', form.maPhong); // Thêm MaPhong
+      formData.append('MaPhong', form.maPhong); 
       formData.append('NgayNhanPhong', form.ngayNhanPhong);
       formData.append('NgayTraPhong', form.ngayTraPhong);
       if (form.ghiChu) formData.append('GhiChu', form.ghiChu);
@@ -242,17 +345,22 @@ export default function BookingManager() {
       formData.append('NguoiLon', String(form.nguoiLon || 1));
       formData.append('SoLuongPhong', String(form.soLuongPhong || 1));
       if (form.thoiGianDen) formData.append('ThoiGianDen', form.thoiGianDen);
-    }
+      // TrangThai thường do BE tự set khi tạo mới, hoặc có giá trị mặc định.
+      // Nếu BE yêu cầu gửi TrangThai khi POST, thêm dòng sau:
+      // if (form.trangThai) formData.append('TrangThai', form.trangThai);
 
-    if (editBooking) {
-      if (form.maPhong) formData.append('MaPhong', form.maPhong); // Thêm MaPhong
+    } else { // Trường hợp cập nhật
+      // Đối với PUT, chỉ gửi các trường có thể thay đổi và BE cho phép
+      // MaKH và MaDatPhong thường không đổi hoặc được xác định qua URL
+      if (form.maPhong) formData.append('MaPhong', form.maPhong);
       if (form.ngayNhanPhong) formData.append('NgayNhanPhong', form.ngayNhanPhong);
       if (form.ngayTraPhong) formData.append('NgayTraPhong', form.ngayTraPhong);
-      if (form.ghiChu) formData.append('GhiChu', form.ghiChu);
-      formData.append('TreEm', String(form.treEm || 0));
-      formData.append('NguoiLon', String(form.nguoiLon || 1));
-      formData.append('SoLuongPhong', String(form.soLuongPhong || 1));
-      if (form.thoiGianDen) formData.append('ThoiGianDen', form.thoiGianDen);
+      if (form.ghiChu !== undefined) formData.append('GhiChu', form.ghiChu); // Gửi cả chuỗi rỗng nếu người dùng xóa
+      if (form.treEm !== undefined) formData.append('TreEm', String(form.treEm));
+      if (form.nguoiLon !== undefined) formData.append('NguoiLon', String(form.nguoiLon));
+      if (form.soLuongPhong !== undefined) formData.append('SoLuongPhong', String(form.soLuongPhong));
+      if (form.thoiGianDen !== undefined) formData.append('ThoiGianDen', form.thoiGianDen);
+      if (form.trangThai) formData.append('TrangThai', form.trangThai); // Cho phép cập nhật trạng thái
     }
 
     try {
@@ -279,19 +387,34 @@ export default function BookingManager() {
 
       const bookingsArray: BookingBE[] = Array.isArray(bookingsData) ? bookingsData : [];
       const customersArray: any[] = Array.isArray(customersData) ? customersData : [];
-      const roomsArray: any[] = Array.isArray(roomsData) ? roomsData : [];
+      const roomsApiArray: any[] = Array.isArray(roomsData) ? roomsData : [];
       
-      setCustomers(customersArray.map(c => ({ maKh: c.maKh, hoKh: c.hoKh, tenKh: c.tenKh })));
-      setRooms(roomsArray.map(r => ({ maPhong: r.maPhong, tenPhong: r.tenPhong })));
+      // Process customers data immediately
+      const processedCustomersAfterSubmit = customersArray.map(c => ({ 
+        maKh: c.maKh || c.MaKh, 
+        hoKh: c.hoKh || c.HoKh || "", 
+        tenKh: c.tenKh || c.TenKh || "" 
+      }));
+      setCustomers(processedCustomersAfterSubmit);
+
+      // Process rooms data immediately
+      const processedRoomsAfterSubmit = roomsApiArray.map((r): RoomInfoBE => ({ 
+        maPhong: r.maPhong || r.MaPhong, 
+        soPhong: r.soPhong || r.SoPhong || "N/A",
+        maLoaiPhong: r.maLoaiPhong || r.MaLoaiPhong
+      }));
+      setRooms(processedRoomsAfterSubmit);
       
       const bookingsWithDetails = bookingsArray.map((apiBooking): BookingDisplay => {
-        const customer = customersArray.find(c => c.maKh === apiBooking.maKH);
-        const room = roomsArray.find(r => r.maPhong === apiBooking.maPhong);
+        const currentMaKH = apiBooking.maKH;
+        const currentMaPhong = apiBooking.maPhong;
+        const customer = processedCustomersAfterSubmit.find(c => c.maKh === currentMaKH);
+        const room = processedRoomsAfterSubmit.find(r => r.maPhong === currentMaPhong);
         return {
           ...apiBooking,
-          tenKhachHang: customer ? `${customer.hoKh} ${customer.tenKh}` : 'Không xác định',
-          tenPhongDisplay: room ? room.tenPhong : 'N/A',
-          tongTienDisplay: 'N/A',
+          tenKhachHang: customer ? `${customer.hoKh} ${customer.tenKh}`.trim() : 'Không xác định',
+          tenPhongDisplay: room ? room.soPhong : (currentMaPhong ? `P:${currentMaPhong} (không tìm thấy)` : 'N/A'),
+          tongTienDisplay: 'N/A', 
         };
       });
       setBookings(bookingsWithDetails);
@@ -410,7 +533,7 @@ export default function BookingManager() {
                 <select id="maPhong" name="maPhong" value={form.maPhong} onChange={handleChange} required>
                   <option value="">Chọn phòng</option>
                   {rooms.map(room => (
-                    <option key={room.maPhong} value={room.maPhong}>{room.tenPhong} ({room.maPhong})</option>
+                    <option key={room.maPhong} value={room.maPhong}>{room.soPhong} ({room.maPhong})</option>
                   ))}
                 </select>
               </div>
@@ -465,7 +588,7 @@ export default function BookingManager() {
                 <select id="maPhong_edit" name="maPhong" value={form.maPhong} onChange={handleChange} required>
                   <option value="">Chọn phòng</option>
                   {rooms.map(room => (
-                    <option key={room.maPhong} value={room.maPhong}>{room.tenPhong} ({room.maPhong})</option>
+                    <option key={room.maPhong} value={room.maPhong}>{room.soPhong} ({room.maPhong})</option>
                   ))}
                 </select>
               </div>

@@ -62,60 +62,111 @@ export default function InvoiceManager() {
       
       try {
         // Lấy danh sách hóa đơn
-        const invoicesData = await getInvoices();
+        const invoicesDataFromApi = await getInvoices(); // Assume this returns raw API data (camelCase or PascalCase)
         
         // Lấy danh sách đặt phòng
-        const bookingsData: Booking[] = await getBookingHistory("");
-        // setBookings(bookingsData);
-        
-        // Lấy thông tin khách hàng cho mỗi đặt phòng
-        const customerMap = new Map<string, Customer>();
+        const bookingsDataFromApi: any[] = await getBookingHistory(""); // Type as any for flexible property access
+                
+        const customerMap = new Map<string, Customer>(); // Customer interface uses PascalCase
         
         const uniqueCustomerIds: string[] = [];
-        bookingsData.forEach((booking: Booking) => {
-          if (booking.MaKH && !uniqueCustomerIds.includes(booking.MaKH)) {
-            uniqueCustomerIds.push(booking.MaKH);
+        bookingsDataFromApi.forEach((apiBooking: any) => {
+          const currentBookingMaKh = apiBooking.maKH || apiBooking.MaKH; // Safely get customer ID
+          if (currentBookingMaKh && !uniqueCustomerIds.includes(currentBookingMaKh)) {
+            uniqueCustomerIds.push(currentBookingMaKh);
           }
         });
         
         for (const maKh of uniqueCustomerIds) {
           try {
-            const customerData: Customer = await getCustomerProfile(maKh);
-            if (customerData && customerData.MaKh) {
-              customerMap.set(customerData.MaKh, customerData);
+            const customerDataWrapper: any = await getCustomerProfile(maKh); // API returns a wrapper object
+            // console.log(`Raw customerDataWrapper for MaKH ${maKh}:`, JSON.stringify(customerDataWrapper, null, 2)); // DEBUG
+
+            // Check if customerDataWrapper and customerDataWrapper.value exist
+            const customerDataFromApi = customerDataWrapper && customerDataWrapper.value ? customerDataWrapper.value : null;
+            console.log(`Extracted customerDataFromApi for MaKH ${maKh}:`, JSON.stringify(customerDataFromApi, null, 2)); // DEBUG
+
+            if (customerDataFromApi) {
+              // Normalize to the local Customer interface (PascalCase)
+              const normalizedCustomer: Customer = {
+                MaKh: customerDataFromApi.maKh || customerDataFromApi.MaKh || maKh, 
+                HoKh: customerDataFromApi.hoKh || customerDataFromApi.HoKh || "",
+                TenKh: customerDataFromApi.tenKh || customerDataFromApi.TenKh || "",
+              };
+              // console.log(`Normalized customer for MaKH ${maKh}:`, JSON.stringify(normalizedCustomer, null, 2)); // DEBUG
+
+              if (normalizedCustomer.MaKh) { 
+                  customerMap.set(normalizedCustomer.MaKh, normalizedCustomer);
+              }
+            } else {
+              console.warn(`Customer data is null, undefined, or not in expected wrapper for MaKH ${maKh}. Original wrapper:`, JSON.stringify(customerDataWrapper, null, 2)); // DEBUG
             }
           } catch (err) {
             console.error(`Không thể lấy thông tin khách hàng ${maKh}:`, err);
           }
         }
-        
+        // console.log("Final customerMap:", Array.from(customerMap.entries())); // DEBUG: Log map entries
+
         // Kết hợp thông tin khách hàng vào hóa đơn
-        const enhancedInvoices = invoicesData.map((invoice: Invoice) => {
-          const booking = bookingsData.find((b: Booking) => b.MaDatPhong === invoice.MaDatPhong);
-          let tenKhachHang = "Không xác định";
+        const enhancedInvoices = invoicesDataFromApi.map((apiInvoice: any) => {
+          // Safely get invoice fields (camelCase or PascalCase)
+          const invoiceMaDatPhong = apiInvoice.maDatPhong || apiInvoice.MaDatPhong;
           
-          if (booking && booking.MaKH) {
-            const customer = customerMap.get(booking.MaKH);
-            if (customer) {
-              tenKhachHang = `${customer.HoKh} ${customer.TenKh}`;
+          const bookingMatch = bookingsDataFromApi.find((apiBooking: any) => 
+            (apiBooking.maDatPhong || apiBooking.MaDatPhong) === invoiceMaDatPhong
+          );
+          
+          let tenKhachHangDisplay = "Không xác định";
+          if (bookingMatch) {
+            // Ưu tiên lấy tên trực tiếp từ bookingMatch nếu có (kiểm tra cả camelCase và PascalCase)
+            const directTenKhachHang = bookingMatch.tenKhachHang || bookingMatch.TenKhachHang;
+            if (directTenKhachHang && typeof directTenKhachHang === 'string' && directTenKhachHang.trim() !== "") {
+              tenKhachHangDisplay = directTenKhachHang.trim();
+            } else {
+              // Fallback: sử dụng customerMap nếu tên trực tiếp không có hoặc không hợp lệ
+              const bookingMaKh = bookingMatch.maKH || bookingMatch.MaKH;
+              if (bookingMaKh) {
+                const customer = customerMap.get(bookingMaKh);
+                // Kiểm tra customer tồn tại và HoKh, TenKh có giá trị (không phải chuỗi rỗng sau khi trim)
+                if (customer && customer.HoKh && customer.TenKh && (customer.HoKh.trim() !== "" || customer.TenKh.trim() !== "")) {
+                  tenKhachHangDisplay = `${customer.HoKh} ${customer.TenKh}`.trim();
+                  // Nếu sau khi ghép, tên vẫn rỗng (ví dụ HoKh và TenKh chỉ là khoảng trắng)
+                  if (tenKhachHangDisplay === "") {
+                      tenKhachHangDisplay = `Khách hàng (${customer.MaKh})`;
+                  }
+                } else if (customer && customer.MaKh) {
+                  // customer tồn tại trong map, nhưng HoKh/TenKh rỗng hoặc thiếu -> hiển thị Mã KH
+                  tenKhachHangDisplay = `Khách hàng (${customer.MaKh})`;
+                } else if (!customer && bookingMaKh) {
+                    // customer không có trong map nhưng có MaKH từ booking -> hiển thị ID tạm
+                    tenKhachHangDisplay = `Khách hàng (ID: ${bookingMaKh})`;
+                }
+                // Nếu không có bookingMaKh, tenKhachHangDisplay vẫn là "Không xác định"
+              }
             }
           }
           
-          // Tính toán các giá trị hiển thị nếu cần
-          const tongTien = invoice.TongTien || 0;
-          // Giả sử soTienDaThanhToan được lấy từ đâu đó hoặc mặc định là 0 nếu chưa thanh toán
-          // Hiện tại HoaDonDTO không có, nên sẽ là undefined
-          const soTienDaThanhToan = invoice.soTienDaThanhToan || (invoice.TrangThai === "Đã thanh toán" ? tongTien : 0);
-          const soTienConThieu = Math.max(0, tongTien - soTienDaThanhToan);
+          const finalTongTien = apiInvoice.tongTien || apiInvoice.TongTien || 0;
+          const finalTrangThai = apiInvoice.trangThai || apiInvoice.TrangThai || "Chưa thanh toán";
+          const finalDaThanhToan = finalTrangThai === "Đã thanh toán" ? finalTongTien : 0;
+          const finalConThieu = Math.max(0, finalTongTien - finalDaThanhToan);
 
+          // Map to Invoice interface (PascalCase)
           return {
-            ...invoice,
-            tenKhachHang,
-            TongTien: tongTien,
-            soTienDaThanhToan: soTienDaThanhToan,
-            soTienConThieu: soTienConThieu,
-            TrangThai: invoice.TrangThai || "Chưa thanh toán"
-          };
+            MaHoaDon: apiInvoice.maHoaDon || apiInvoice.MaHoaDon,
+            MaDatPhong: invoiceMaDatPhong,
+            MaKM: apiInvoice.maKM || apiInvoice.MaKM,
+            TenKhuyenMai: apiInvoice.tenKhuyenMai || apiInvoice.TenKhuyenMai,
+            GiamGiaLoaiKM: apiInvoice.giamGiaLoaiKM || apiInvoice.GiamGiaLoaiKM,
+            GiamGiaLoaiKH: apiInvoice.giamGiaLoaiKH || apiInvoice.GiamGiaLoaiKH,
+            TongTien: finalTongTien,
+            TrangThai: finalTrangThai,
+            NgayTao: apiInvoice.ngayTao || apiInvoice.NgayTao,
+            NgaySua: apiInvoice.ngaySua || apiInvoice.NgaySua,
+            tenKhachHang: tenKhachHangDisplay,
+            soTienDaThanhToan: finalDaThanhToan,
+            soTienConThieu: finalConThieu,
+          } as Invoice; // Assert as Invoice type
         });
         
         setInvoices(enhancedInvoices);

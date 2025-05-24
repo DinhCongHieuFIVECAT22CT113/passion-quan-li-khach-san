@@ -1,11 +1,11 @@
 'use client';
 import React, { useState, useEffect } from "react";
 import styles from "./ReviewManager.module.css";
-import { getReviews, approveReview } from "../../../lib/api";
+import { getReviews, approveReview, getBookingDetails, getCustomerProfile } from "../../../lib/api";
 
 interface Review {
   maDG: string;
-  maKH: string;
+  maKH?: string;
   tenKhachHang?: string;
   danhGia: number;
   noiDung: string;
@@ -30,24 +30,86 @@ export default function ReviewManager() {
 
   // Lấy danh sách đánh giá từ API
   useEffect(() => {
-    const fetchReviews = async () => {
+    const fetchReviewsAndCustomers = async () => {
       setIsLoading(true);
       setError(null);
       try {
-        const data = await getReviews();
-        
-        // Thêm tên khách hàng nếu không có
-        const reviewsWithNames = data.map((review: Review) => {
-          if (!review.tenKhachHang) {
-            return {
-              ...review,
-              tenKhachHang: `Khách hàng ${review.maKH}`
-            };
+        const rawReviewsFromApi: any[] = await getReviews();
+        console.log("Raw reviews data from getReviews():", JSON.stringify(rawReviewsFromApi, null, 2));
+
+        let processedReviews = await Promise.all(rawReviewsFromApi.map(async (apiReview) => {
+          let tenKhachHangDisplay = 'Khách hàng không xác định';
+          let maKhachHangFromBooking: string | undefined = apiReview.maKH; // Ưu tiên maKH trực tiếp từ review nếu có
+
+          if (apiReview.maDatPhong) {
+            console.log(`[Review ${apiReview.maReview}] Fetching booking details for MaDatPhong: ${apiReview.maDatPhong}`);
+            const bookingData: any = await getBookingDetails(apiReview.maDatPhong);
+            console.log(`[Review ${apiReview.maReview}] Booking data for ${apiReview.maDatPhong}:`, JSON.stringify(bookingData, null, 2));
+
+            if (bookingData) {
+              // Ưu tiên tên khách hàng trực tiếp từ bookingData nếu có
+              const directTenKH = bookingData.tenKhachHang || bookingData.TenKhachHang;
+              if (directTenKH && typeof directTenKH === 'string' && directTenKH.trim() !== "") {
+                tenKhachHangDisplay = directTenKH;
+                console.log(`[Review ${apiReview.maReview}] Found directTenKH from booking: ${directTenKH}`);
+              } else {
+                 // Nếu không có tên trực tiếp, lấy maKH từ bookingData
+                maKhachHangFromBooking = bookingData.maKH || bookingData.MaKH || bookingData.maKhachHang || bookingData.MaKhachHang;
+                console.log(`[Review ${apiReview.maReview}] maKhachHangFromBooking from booking: ${maKhachHangFromBooking}`);
+              }
+            } else {
+              console.log(`[Review ${apiReview.maReview}] No bookingData returned or bookingData is null for MaDatPhong: ${apiReview.maDatPhong}`);
+            }
           }
-          return review;
-        });
+          
+          // Nếu đã có tên khách hàng từ bookingData, hoặc không có maKhachHangFromBooking, thì không cần fetch customer profile nữa
+          if (tenKhachHangDisplay !== 'Khách hàng không xác định' && tenKhachHangDisplay !== `Khách hàng (DP: ${apiReview.maDatPhong})` ) {
+            // Đã có tên từ booking, không làm gì thêm
+          } else if (maKhachHangFromBooking) {
+            console.log(`[Review ${apiReview.maReview}] Fetching customer profile for MaKH: ${maKhachHangFromBooking}`);
+            const customerDataWrapper: any = await getCustomerProfile(maKhachHangFromBooking);
+            console.log(`[Review ${apiReview.maReview}] Customer data wrapper for ${maKhachHangFromBooking}:`, JSON.stringify(customerDataWrapper, null, 2));
+            const customerData = customerDataWrapper?.value || customerDataWrapper;
+
+            if (customerData) {
+              // Ưu tiên PascalCase theo comment trong lib/api.ts cho getCustomerProfile
+              const hoKh = customerData.HoKh || customerData.hoKh || ''; 
+              const tenKh = customerData.TenKh || customerData.tenKh || '';
+              if (hoKh || tenKh) {
+                tenKhachHangDisplay = `${hoKh} ${tenKh}`.trim();
+                console.log(`[Review ${apiReview.maReview}] Constructed customer name: ${tenKhachHangDisplay}`);
+              } else if (maKhachHangFromBooking) {
+                tenKhachHangDisplay = `Khách hàng (${maKhachHangFromBooking})`; // Fallback nếu không có họ tên
+              }
+            } else if (maKhachHangFromBooking) {
+                 tenKhachHangDisplay = `Khách hàng (${maKhachHangFromBooking})`;
+                 console.log(`[Review ${apiReview.maReview}] No customerData found for MaKH: ${maKhachHangFromBooking}, using fallback with MaKH.`);
+            } else {
+              console.log(`[Review ${apiReview.maReview}] No customerData and no maKhachHangFromBooking to construct name from MaKH.`);
+            }
+          } else if (apiReview.maDatPhong) {
+            // Fallback nếu không lấy được booking hoặc customer
+            tenKhachHangDisplay = `Khách hàng (DP: ${apiReview.maDatPhong})`;
+          } else {
+            console.log(`[Review ${apiReview.maReview}] No MaDatPhong in review and no initial MaKH. Cannot determine customer.`);
+          }
+
+          return {
+            maDG: apiReview.maReview,
+            maDatPhong: apiReview.maDatPhong,
+            maKH: maKhachHangFromBooking, // Lưu lại maKH lấy được (nếu có)
+            danhGia: apiReview.danhGia,
+            noiDung: apiReview.binhLuan,
+            ngayTao: apiReview.ngayTao || null,
+            trangThai: apiReview.trangThai || 'Chưa duyệt',
+            anHien: apiReview.anHien || false,
+            tenKhachHang: tenKhachHangDisplay,
+          };
+        })); // Kết thúc Promise.all(rawReviewsFromApi.map
         
-        setReviews(reviewsWithNames);
+        console.log("Processed reviews with customer names:", JSON.stringify(processedReviews, null, 2));
+        setReviews(processedReviews as Review[]);
+
       } catch (err) {
         const error = err as Error;
         setError(error.message || "Có lỗi xảy ra khi tải dữ liệu đánh giá");
@@ -57,7 +119,7 @@ export default function ReviewManager() {
       }
     };
 
-    fetchReviews();
+    fetchReviewsAndCustomers();
   }, []);
 
   const handleApprove = async (maDG: string) => {
@@ -193,7 +255,7 @@ export default function ReviewManager() {
                       {'★'.repeat(review.danhGia)}{'☆'.repeat(5 - review.danhGia)}
                     </td>
                     <td>{review.noiDung}</td>
-                    <td>{new Date(review.ngayTao).toLocaleDateString('vi-VN')}</td>
+                    <td>{review.ngayTao ? new Date(review.ngayTao).toLocaleDateString('vi-VN') : 'N/A'}</td>
                     <td>
                       <span className={
                         review.trangThai === 'Đã duyệt' ? styles.approved :

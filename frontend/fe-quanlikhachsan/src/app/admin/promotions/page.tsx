@@ -54,17 +54,30 @@ export default function PromotionManager() {
     try {
       return new Date(dateString).toISOString().split('T')[0];
     } catch {
-      return dateString;
+      console.warn('[formatDateForInput] Error formatting, returning part:', dateString);
+      return dateString.split('T')[0]; 
     }
   };
 
   const calculateDisplayStatus = (startDateStr: string, endDateStr: string): PromotionFE['trangThaiDisplay'] => {
-    const now = new Date();
-    const startDate = new Date(startDateStr);
-    const endDate = new Date(endDateStr);
-    if (now < startDate) return 'Sắp diễn ra';
-    if (now > endDate) return 'Đã hết hạn';
-    return 'Đang áp dụng';
+    console.log('[calculateDisplayStatus] Inputs:', { startDateStr, endDateStr });
+    try {
+      const now = new Date();
+      const startDate = new Date(startDateStr);
+      const endDate = new Date(endDateStr);
+
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        console.warn('[calculateDisplayStatus] Invalid date string received, defaulting status:', { startDateStr, endDateStr });
+        return 'Đang áp dụng';
+      }
+
+      if (now < startDate) return 'Sắp diễn ra';
+      if (now > endDate) return 'Đã hết hạn';
+      return 'Đang áp dụng';
+    } catch (e) {
+      console.error('[calculateDisplayStatus] Error during date calculation:', e, { startDateStr, endDateStr });
+      return 'Đang áp dụng';
+    }
   };
 
   useEffect(() => {
@@ -72,22 +85,52 @@ export default function PromotionManager() {
       setIsLoading(true);
       setError(null);
       try {
-        const data: any[] = await getPromotions();
-        const formattedData: PromotionFE[] = data.map(promo => ({
-          MaKm: promo.MaKm,
-          TenKhuyenMai: promo.TenKhuyenMai,
-          PhanTramGiam: promo.PhanTramGiam,
-          NgayBatDau: formatDateForInput(promo.NgayBatDau),
-          NgayKetThuc: formatDateForInput(promo.NgayKetThuc),
-          MoTa: promo.MoTa,
-          Thumbnail: promo.Thumbnail,
-          MaGiamGia: promo.MaGiamGia,
-          SoTienGiam: promo.SoTienGiam,
-          trangThaiDisplay: calculateDisplayStatus(promo.NgayBatDau, promo.NgayKetThuc),
-        }));
+        const dataFromApi: any[] = await getPromotions();
+        console.log("Raw promotion data from API (useEffect):", dataFromApi); 
+
+        const formattedData: PromotionFE[] = dataFromApi.map((apiPromo, index) => {
+          console.log(`[useEffect.map] Processing item ${index} (raw from API):`, JSON.stringify(apiPromo));
+          try {
+            const apiNgayBatDau = apiPromo.ngayBatDau;
+            const apiNgayKetThuc = apiPromo.ngayKetThuc;
+
+            console.log(`[useEffect.map] Item ${index} - API dates:`, { apiNgayBatDau, apiNgayKetThuc });
+
+            const trangThai = calculateDisplayStatus(apiNgayBatDau, apiNgayKetThuc);
+            
+            return {
+              MaKm: apiPromo.maKm,
+              TenKhuyenMai: apiPromo.tenKhuyenMai,
+              PhanTramGiam: apiPromo.phanTramGiam,
+              NgayBatDau: apiNgayBatDau,
+              NgayKetThuc: apiNgayKetThuc,
+              MoTa: apiPromo.moTa,
+              Thumbnail: apiPromo.thumbnail,
+              MaGiamGia: apiPromo.maGiamGia,
+              SoTienGiam: apiPromo.soTienGiam,
+              trangThaiDisplay: trangThai,
+            };
+          } catch (mapItemError) {
+            console.error(`[useEffect.map] Error processing item ${index} in map block:`, mapItemError, JSON.stringify(apiPromo));
+            return { 
+              MaKm: apiPromo.maKm || `ERROR_ITEM_EFFECT_${index}`,
+              TenKhuyenMai: "Lỗi xử lý dữ liệu",
+              PhanTramGiam: 0,
+              NgayBatDau: new Date(0).toISOString(),
+              NgayKetThuc: new Date(0).toISOString(),
+              MoTa: "Lỗi",
+              Thumbnail: undefined,
+              MaGiamGia: "Lỗi",
+              SoTienGiam: 0,
+              trangThaiDisplay: 'Đã hết hạn'
+            } as PromotionFE; 
+          }
+        });
+
+        console.log("Formatted promotions for state (useEffect):", formattedData); 
         setPromotions(formattedData);
-      } catch (err) {
-        console.error('Lỗi khi lấy danh sách khuyến mãi:', err);
+      } catch (err) { 
+        console.error('Lỗi trong fetchAndSetPromotions (useEffect):', err); 
         setError('Đã xảy ra lỗi khi tải dữ liệu. Vui lòng thử lại sau.');
       } finally {
         setIsLoading(false);
@@ -131,8 +174,8 @@ export default function PromotionManager() {
       MaKm: promo.MaKm,
       TenKhuyenMai: promo.TenKhuyenMai,
       PhanTramGiam: promo.PhanTramGiam,
-      NgayBatDau: promo.NgayBatDau,
-      NgayKetThuc: promo.NgayKetThuc,
+      NgayBatDau: formatDateForInput(promo.NgayBatDau),
+      NgayKetThuc: formatDateForInput(promo.NgayKetThuc),
       MoTa: promo.MoTa,
       Thumbnail: promo.Thumbnail,
       MaGiamGia: promo.MaGiamGia,
@@ -169,6 +212,7 @@ export default function PromotionManager() {
 
       let response;
       if (editPromotion && editPromotion.MaKm) {
+        formData.append('MaKm', editPromotion.MaKm);
         response = await fetch(`${API_BASE_URL}/KhuyenMai/${editPromotion.MaKm}`, {
           method: 'PUT',
           headers: getFormDataHeaders(),
@@ -186,20 +230,48 @@ export default function PromotionManager() {
       
       await handleResponse(response);
       
-      const updatedData: any[] = await getPromotions();
-      const formattedData: PromotionFE[] = updatedData.map(promo => ({
-        MaKm: promo.MaKm,
-        TenKhuyenMai: promo.TenKhuyenMai,
-        PhanTramGiam: promo.PhanTramGiam,
-        NgayBatDau: formatDateForInput(promo.NgayBatDau),
-        NgayKetThuc: formatDateForInput(promo.NgayKetThuc),
-        MoTa: promo.MoTa,
-        Thumbnail: promo.Thumbnail,
-        MaGiamGia: promo.MaGiamGia,
-        SoTienGiam: promo.SoTienGiam,
-        trangThaiDisplay: calculateDisplayStatus(promo.NgayBatDau, promo.NgayKetThuc),
-      }));
-      setPromotions(formattedData);
+      const updatedDataFromApi: any[] = await getPromotions();
+      console.log("Raw promotion data from API (handleSubmit):", updatedDataFromApi);
+
+      const formattedDataAfterSubmit: PromotionFE[] = updatedDataFromApi.map((apiPromo, index) => {
+        console.log(`[handleSubmit.map] Processing item ${index} (raw from API):`, JSON.stringify(apiPromo));
+        try {
+            const apiNgayBatDau = apiPromo.ngayBatDau;
+            const apiNgayKetThuc = apiPromo.ngayKetThuc;
+
+            console.log(`[handleSubmit.map] Item ${index} - API dates:`, { apiNgayBatDau, apiNgayKetThuc });
+            const trangThai = calculateDisplayStatus(apiNgayBatDau, apiNgayKetThuc);
+
+            return {
+              MaKm: apiPromo.maKm,
+              TenKhuyenMai: apiPromo.tenKhuyenMai,
+              PhanTramGiam: apiPromo.phanTramGiam,
+              NgayBatDau: apiNgayBatDau,
+              NgayKetThuc: apiNgayKetThuc,
+              MoTa: apiPromo.moTa,
+              Thumbnail: apiPromo.thumbnail,
+              MaGiamGia: apiPromo.maGiamGia,
+              SoTienGiam: apiPromo.soTienGiam,
+              trangThaiDisplay: trangThai,
+            };
+        } catch (mapError) {
+            console.error(`[handleSubmit.map] Error processing item ${index} in map block:`, mapError, JSON.stringify(apiPromo));
+            return { 
+              MaKm: apiPromo.maKm || `ERROR_ITEM_SUBMIT_${index}`,
+              TenKhuyenMai: "Lỗi xử lý dữ liệu",
+              PhanTramGiam: 0,
+              NgayBatDau: new Date(0).toISOString(),
+              NgayKetThuc: new Date(0).toISOString(),
+              MoTa: "Lỗi",
+              Thumbnail: undefined,
+              MaGiamGia: "Lỗi",
+              SoTienGiam: 0,
+              trangThaiDisplay: 'Đã hết hạn'
+            } as PromotionFE;
+        }
+      });
+      console.log("Formatted promotions for state (handleSubmit):", formattedDataAfterSubmit);
+      setPromotions(formattedDataAfterSubmit);
       setShowAddModal(false);
       setEditPromotion(null);
     } catch (err) {
@@ -268,23 +340,52 @@ export default function PromotionManager() {
             </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan={9} style={{textAlign:'center', color:'#888', fontStyle:'italic'}}>Không có dữ liệu</td></tr>
-              ) : filtered.map(promo => (
-                <tr key={promo.MaKm}>
-                  <td>{promo.MaKm}</td>
-                  <td>{promo.TenKhuyenMai}</td>
-                  <td>{promo.MaGiamGia}</td>
-                  <td>{promo.PhanTramGiam}%</td>
-                  <td>{promo.SoTienGiam ? promo.SoTienGiam.toLocaleString() : '0'} VND</td>
-                  <td>{new Date(promo.NgayBatDau).toLocaleDateString('vi-VN')}</td>
-                  <td>{new Date(promo.NgayKetThuc).toLocaleDateString('vi-VN')}</td>
-                  <td><span className={getStatusClass(promo.trangThaiDisplay)}>{promo.trangThaiDisplay}</span></td>
-                  <td style={{whiteSpace:'nowrap'}}>
-                    <button className={styles.editBtn} onClick={() => openEditModal(promo)}>Sửa</button>
-                    <button className={styles.deleteBtn} onClick={() => setShowDeleteConfirm(promo.MaKm)}>Xóa</button>
-                  </td>
-                </tr>
-              ))}
+                <tr><td colSpan={9} className={styles.noData}>Không có dữ liệu khuyến mãi</td></tr>
+              ) : filtered.map(promo => {
+                console.log(
+                  'Render promo:', 
+                  'MaKm:', promo.MaKm, 
+                  'TenKhuyenMai:', promo.TenKhuyenMai,
+                  'MaGiamGia:', promo.MaGiamGia,
+                  'PhanTramGiam:', promo.PhanTramGiam,
+                  'SoTienGiam:', promo.SoTienGiam,
+                  'NgayBatDau:', promo.NgayBatDau, 
+                  'NgayKetThuc:', promo.NgayKetThuc,
+                  'TrangThaiDisplay:', promo.trangThaiDisplay
+                );
+                let ngayBatDauDisplay = 'N/A';
+                let ngayKetThucDisplay = 'N/A';
+                try {
+                  if (promo.NgayBatDau) {
+                    ngayBatDauDisplay = new Date(promo.NgayBatDau).toLocaleDateString('vi-VN');
+                  }
+                } catch (e) { console.error("Error formatting NgayBatDau", promo.NgayBatDau, e); }
+                try {
+                  if (promo.NgayKetThuc) {
+                    ngayKetThucDisplay = new Date(promo.NgayKetThuc).toLocaleDateString('vi-VN');
+                  }
+                } catch (e) { console.error("Error formatting NgayKetThuc", promo.NgayKetThuc, e); }
+
+                return (
+                  <tr key={promo.MaKm}>
+                    <td>{promo.MaKm}</td>
+                    <td>
+                      {promo.Thumbnail && <img src={promo.Thumbnail} alt={promo.TenKhuyenMai} className={styles.thumbnail} />}
+                      {promo.TenKhuyenMai}
+                    </td>
+                    <td>{promo.MaGiamGia}</td>
+                    <td>{promo.PhanTramGiam}%</td>
+                    <td>{promo.SoTienGiam ? promo.SoTienGiam.toLocaleString('vi-VN') : '0'} VND</td>
+                    <td>{ngayBatDauDisplay}</td>
+                    <td>{ngayKetThucDisplay}</td>
+                    <td><span className={getStatusClass(promo.trangThaiDisplay)}>{promo.trangThaiDisplay}</span></td>
+                    <td style={{whiteSpace:'nowrap'}}>
+                      <button className={styles.editBtn} onClick={() => openEditModal(promo)}>Sửa</button>
+                      <button className={styles.deleteBtn} onClick={() => setShowDeleteConfirm(promo.MaKm)}>Xóa</button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

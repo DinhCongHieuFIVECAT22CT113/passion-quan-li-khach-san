@@ -6,10 +6,15 @@ import { getStaffs, createStaff, updateStaff, deleteStaff } from "../../../lib/a
 
 interface Staff {
   maNV: string;
-  hoTen: string;
+  hoNv: string;
+  tenNv: string;
+  userName?: string;
   chucVu: string;
   soDienThoai: string;
   email?: string;
+  ngayVaoLam?: string;
+  luongCoBan?: number;
+  maRole?: string;
   trangThai?: string;
 }
 
@@ -17,7 +22,19 @@ export default function StaffManager() {
   const [staffs, setStaffs] = useState<Staff[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editingStaff, setEditingStaff] = useState<Staff | null>(null);
-  const [form, setForm] = useState<Staff>({ maNV: "", hoTen: "", chucVu: "", soDienThoai: "", email: "", trangThai: "Hoạt động" });
+  const [form, setForm] = useState<Staff>({ 
+    maNV: "", 
+    hoNv: "", 
+    tenNv: "", 
+    userName: "",
+    chucVu: "", 
+    soDienThoai: "", 
+    email: "", 
+    ngayVaoLam: "",
+    luongCoBan: 0,
+    maRole: "",
+    trangThai: "Hoạt động" 
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,8 +44,27 @@ export default function StaffManager() {
       setIsLoading(true);
       setError(null);
       try {
-        const data = await getStaffs();
-        setStaffs(data);
+        const dataFromApi = await getStaffs();
+        // Log dữ liệu gốc từ API
+        console.log("Raw data from getStaffs():", JSON.stringify(dataFromApi, null, 2));
+
+        const processedStaffs = dataFromApi.map((item: any) => ({
+          maNV: item.maNv, // API trả về maNv
+          hoNv: item.hoNv,
+          tenNv: item.tenNv,
+          userName: item.userName,
+          chucVu: item.chucVu,
+          soDienThoai: item.sdt, // API trả về sdt
+          email: item.email,
+          ngayVaoLam: item.ngayVaoLam,
+          luongCoBan: item.luongCoBan,
+          maRole: item.maRole,
+          trangThai: item.trangThai || "Hoạt động", // Giả sử có trường trangThai hoặc mặc định
+        }));
+        
+        // Log dữ liệu đã xử lý
+        console.log("Processed staffs data:", JSON.stringify(processedStaffs, null, 2));
+        setStaffs(processedStaffs);
       } catch (err) {
         const error = err as Error;
         setError(error.message || "Có lỗi xảy ra khi tải dữ liệu nhân viên");
@@ -42,7 +78,19 @@ export default function StaffManager() {
   }, []);
 
   const openAddModal = () => {
-    setForm({ maNV: "", hoTen: "", chucVu: "", soDienThoai: "", email: "", trangThai: "Hoạt động" });
+    setForm({ 
+      maNV: "", 
+      hoNv: "", 
+      tenNv: "", 
+      userName: "",
+      chucVu: "", 
+      soDienThoai: "", 
+      email: "", 
+      ngayVaoLam: "",
+      luongCoBan: 0,
+      maRole: "",
+      trangThai: "Hoạt động" 
+    });
     setEditingStaff(null);
     setShowModal(true);
   };
@@ -56,7 +104,19 @@ export default function StaffManager() {
   const closeModal = () => {
     setShowModal(false);
     setEditingStaff(null);
-    setForm({ maNV: "", hoTen: "", chucVu: "", soDienThoai: "", email: "", trangThai: "Hoạt động" });
+    setForm({ 
+      maNV: "", 
+      hoNv: "", 
+      tenNv: "", 
+      userName: "",
+      chucVu: "", 
+      soDienThoai: "", 
+      email: "", 
+      ngayVaoLam: "",
+      luongCoBan: 0,
+      maRole: "",
+      trangThai: "Hoạt động" 
+    });
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -83,11 +143,21 @@ export default function StaffManager() {
       if (editingStaff) {
         // Cập nhật nhân viên
         await updateStaff(form);
-        setStaffs(staffs.map((s) => (s.maNV === form.maNV ? form : s)));
+        setStaffs(staffs.map((s) => (s.maNV === form.maNV ? { ...s, ...form } : s)));
       } else {
         // Thêm nhân viên mới
-        const newStaff = await createStaff(form);
-        setStaffs([...staffs, newStaff]);
+        const newStaffData = { ...form };
+        // Nếu API createStaff cần một trường hoTen ghép lại, bạn có thể tạo nó ở đây
+        // ví dụ: newStaffData.hoTen = `${form.hoNv} ${form.tenNv}`.trim();
+        const newStaff = await createStaff(newStaffData); 
+        // Giả sử createStaff trả về nhân viên đã được tạo với cấu trúc đầy đủ
+        // Nếu không, bạn cần map lại tương tự như lúc fetchStaffs
+        setStaffs([...staffs, {
+          ...newStaff, // Giả sử newStaff trả về từ API đã có hoNv, tenNv,...
+          hoNv: form.hoNv, // Hoặc lấy từ form nếu API không trả về đầy đủ
+          tenNv: form.tenNv,
+          // ... các trường khác từ form nếu cần
+        }]);
       }
       closeModal();
     } catch (err) {
@@ -126,7 +196,7 @@ export default function StaffManager() {
                 staffs.map((staff) => (
                   <tr key={staff.maNV}>
                     <td>{staff.maNV}</td>
-                    <td>{staff.hoTen}</td>
+                    <td>{`${staff.hoNv || ''} ${staff.tenNv || ''}`.trim()}</td>
                     <td>{staff.chucVu}</td>
                     <td>{staff.soDienThoai}</td>
                     <td>{staff.email || "N/A"}</td>
@@ -159,8 +229,16 @@ export default function StaffManager() {
                 </div>
               )}
               <div className={styles.formGroup}>
-                <label>Họ tên</label>
-                <input name="hoTen" value={form.hoTen} onChange={handleChange} required placeholder="Họ tên nhân viên" className={styles.input}/>
+                <label>Họ nhân viên</label>
+                <input name="hoNv" value={form.hoNv} onChange={handleChange} required placeholder="Họ nhân viên" className={styles.input}/>
+              </div>
+              <div className={styles.formGroup}>
+                <label>Tên nhân viên</label>
+                <input name="tenNv" value={form.tenNv} onChange={handleChange} required placeholder="Tên nhân viên" className={styles.input}/>
+              </div>
+              <div className={styles.formGroup}>
+                <label>Username</label>
+                <input name="userName" value={form.userName || ''} onChange={handleChange} placeholder="Username" className={styles.input}/>
               </div>
               <div className={styles.formGroup}>
                 <label>Chức vụ</label>
@@ -189,11 +267,43 @@ export default function StaffManager() {
                 <label>Email</label>
                 <input 
                   name="email" 
-                  value={form.email} 
+                  value={form.email || ''} 
                   onChange={handleChange} 
                   placeholder="Email" 
                   className={styles.input}
                   type="email" 
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Ngày vào làm</label>
+                <input 
+                  name="ngayVaoLam" 
+                  value={form.ngayVaoLam ? new Date(form.ngayVaoLam).toISOString().split('T')[0] : ''} 
+                  onChange={handleChange} 
+                  placeholder="Ngày vào làm" 
+                  className={styles.input}
+                  type="date" 
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Lương cơ bản</label>
+                <input 
+                  name="luongCoBan" 
+                  value={form.luongCoBan || 0} 
+                  onChange={handleChange} 
+                  placeholder="Lương cơ bản" 
+                  className={styles.input}
+                  type="number" 
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label>Mã Role</label>
+                <input 
+                  name="maRole" 
+                  value={form.maRole || ''} 
+                  onChange={handleChange} 
+                  placeholder="Mã Role (R01, R02,...)" 
+                  className={styles.input}
                 />
               </div>
               <div className={styles.formGroup}>
