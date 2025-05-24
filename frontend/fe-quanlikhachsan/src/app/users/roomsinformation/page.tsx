@@ -1,3 +1,4 @@
+// trang Roomsinformation
 'use client';
 
 import { useLanguage } from '../../../app/components/profile/LanguageContext';
@@ -5,6 +6,7 @@ import i18n from '../../../app/i18n';
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { API_BASE_URL } from '@/lib/config';
+import { getAuthHeaders } from '@/lib/api'; 
 import Header from '../../components/layout/Header';
 import styles from './styles.module.css';
 import Image from 'next/image';
@@ -101,34 +103,37 @@ export default function RoomsListPage() {
 const fetchRooms = async () => {
   setLoading(true);
   try {
-    const id = searchParams?.get('id') ?? null;
-    const apiUrl = id
-      ? `<span class="math-inline">\{API\_BASE\_URL\}/Phong?id\=</span>{encodeURIComponent(id)}`
-      : `${API_BASE_URL}/Phong`;
-
-    const response = await fetch(apiUrl);
+    const response = await fetch(`${API_BASE_URL}/Phong`, {
+      method: 'GET',
+      headers: getAuthHeaders('GET'),
+      credentials: 'include'
+    });
 
     if (!response.ok) {
       throw new Error(`Lỗi: ${response.status}`);
     }
 
     const data = await response.json();
-    // Ép kiểu dữ liệu thô nhận được từ API thành ApiRoomData[]
     const roomsData: ApiRoomData[] = Array.isArray(data) ? data : [data];
+    const maLoaiPhong = searchParams?.get('maLoaiPhong');
 
-    // Ánh xạ dữ liệu thô sang kiểu Room đã được xử lý
-    const roomsWithDetails: Room[] = roomsData.map((room: ApiRoomData) => ({
+    // Filter ở phía client nếu có maLoaiPhong
+    const filteredRooms = maLoaiPhong
+      ? roomsData.filter(room => room.maLoaiPhong === maLoaiPhong)
+      : roomsData;
+
+    const roomsWithDetails: Room[] = filteredRooms.map((room: ApiRoomData) => ({
       maPhong: room.maPhong,
       tenPhong: room.tenPhong || `Phòng ${room.maPhong}`,
       maLoaiPhong: room.maLoaiPhong,
       trangThai: room.trangThai,
-      moTa: room.moTa, // moTa vẫn có thể là undefined
-      thumbnail: getValidImageSrc(room.thumbnail), // room.thumbnail là string | undefined (từ ApiRoomData)
-      hinhAnh: parseHinhAnh(room.hinhAnh), // room.hinhAnh là string | undefined (từ ApiRoomData)
-      amenities: defaultAmenities // Hoặc bạn có thể xử lý room.amenities từ API nếu cần
+      moTa: room.moTa,
+      thumbnail: getValidImageSrc(room.thumbnail),
+      hinhAnh: parseHinhAnh(room.hinhAnh),
+      amenities: defaultAmenities
     }));
 
-    setRooms(roomsWithDetails); // Bây giờ roomsWithDetails là Room[], khớp với useState<Room[]>([]);
+    setRooms(roomsWithDetails);
   } catch (err) {
     console.error('Lỗi khi lấy danh sách phòng:', err);
     setError('Không thể tải danh sách phòng. Vui lòng thử lại sau.');

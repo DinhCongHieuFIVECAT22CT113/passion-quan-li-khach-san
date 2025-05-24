@@ -1,3 +1,4 @@
+// trang Rooms
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -358,12 +359,12 @@ export default function RoomsPage() {
                       <span className={styles.priceAmount}>{(roomType.giaMoiDem !== undefined) ? roomType.giaMoiDem.toLocaleString() : 0}đ</span>
                       <span className={styles.priceUnit}>/đêm</span>
                     </div>
-                    <Link 
-                      href={`/users/roomsinformation?id=${roomType.maLoaiPhong}`} 
-                      className={styles.viewDetailButton}
-                    >
-                      Xem chi tiết
-                    </Link>
+<Link 
+  href={`/users/roomsinformation?maLoaiPhong=${roomType.maLoaiPhong}`} 
+  className={styles.viewDetailButton}
+>
+  Xem chi tiết
+</Link>
                   </div>
                 </div>
               </div>
