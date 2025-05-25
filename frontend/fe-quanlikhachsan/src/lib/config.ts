@@ -61,7 +61,6 @@ export const getUserInfo = () => {
   try {
     const token = localStorage.getItem('token');
     const userName = localStorage.getItem('userName');
-    const userRole = localStorage.getItem('userRole');
     const userId = localStorage.getItem('userId');
     
     if (!token || !userName) {
@@ -69,28 +68,11 @@ export const getUserInfo = () => {
       return null;
     }
     
-    // Lấy giá trị role, sử dụng 'R04' làm mặc định nếu không có
-    const role = userRole || 'R04';
-    
-    // Debug: Log thông tin người dùng
-    console.log('getUserInfo: User authenticated', { userName, role, userId });
-    
     return {
       token,
       userName,
-      userRole: role,
       userId,
       isAuthenticated: !!token,
-      isAdmin: role === APP_CONFIG.roles.admin,                 // R00
-      isManager: role === APP_CONFIG.roles.manager,             // R01
-      isEmployee: role === APP_CONFIG.roles.employee,           // R02
-      isAccountant: role === APP_CONFIG.roles.accountant,       // R03
-      isCustomer: role === APP_CONFIG.roles.customer,           // R04
-      // Kiểm tra loại người dùng (staff = tất cả nhân viên)
-      isStaff: role === APP_CONFIG.roles.admin || 
-              role === APP_CONFIG.roles.manager || 
-              role === APP_CONFIG.roles.employee || 
-              role === APP_CONFIG.roles.accountant,
     };
   } catch (error) {
     console.error('getUserInfo: Error accessing localStorage', error);

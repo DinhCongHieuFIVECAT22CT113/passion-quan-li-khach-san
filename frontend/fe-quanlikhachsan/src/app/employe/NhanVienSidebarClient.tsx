@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { getUserInfo } from '../../lib/config';
+import { useAuth, ROLES, type Role } from '../../lib/auth';
 import { useLogout } from '../../lib/hooks';
 
 // Danh sách tất cả các mục menu có thể có
@@ -18,44 +18,47 @@ const allNavItems = [
 
 export default function NhanVienSidebarClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { user, loading: authLoading } = useAuth();
   const [profile, setProfile] = useState<{ name: string; role: string } | null>(null);
   const [navItems, setNavItems] = useState<typeof allNavItems>([]);
   const handleLogout = useLogout();
 
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const userInfo = getUserInfo();
+    if (authLoading) return;
+
+    if (user && user.role) {
+      const currentRole = user.role;
       
-      if (userInfo) {
-        // Lấy role hiện tại
-        const role = userInfo.userRole;
-        
-        // Cấu hình menu dựa theo role
-        const filteredNavs = allNavItems.filter(item => 
-          item.roles.includes(role) || 
-          // Hỗ trợ legacy code nếu cần thiết
-          (role === 'CRW' && item.roles.includes("R02"))
-        );
-        
-        setNavItems(filteredNavs);
-        
-        // Lưu thông tin profile
-        setProfile({
-          name: userInfo.userName || 'Nhân viên',
-          role: getRoleName(role)
-        });
-      }
+      const filteredNavs = allNavItems.filter(item => 
+        item.roles.includes(currentRole) || 
+        ((currentRole as string) === 'CRW' && item.roles.includes(ROLES.STAFF))
+      );
+      setNavItems(filteredNavs);
+      
+      setProfile({
+        name: user.hoTen || user.maNguoiDung || 'Nhân viên',
+        role: getRoleName(currentRole)
+      });
+    } else {
+      setNavItems([]);
+      setProfile(null);
     }
-  }, []);
+  }, [user, authLoading]);
 
   // Hàm lấy tên vai trò dựa vào mã vai trò
-  const getRoleName = (roleCode: string) => {
+  const getRoleName = (roleCode: Role | "CRW") => {
+    if (roleCode === 'CRW') {
+      return 'Nhân viên (Legacy)';
+    }
+    // Tại điểm này, roleCode chắc chắn là kiểu Role
     switch(roleCode) {
-      case 'R01': return 'Quản lý';
-      case 'R02': return 'Nhân viên';
-      case 'R03': return 'Kế toán';
-      case 'CRW': return 'Nhân viên'; // Legacy code
-      default: return 'Nhân viên';
+      case ROLES.ADMIN: return 'Admin';
+      case ROLES.MANAGER: return 'Quản lý';
+      case ROLES.STAFF: return 'Nhân viên';
+      case ROLES.CUSTOMER: return 'Khách hàng / Kế toán'; // R03
+      default: 
+        const exhaustiveCheck: never = roleCode; // Bây giờ roleCode chỉ có thể là các giá trị của Role
+        return `Role (${exhaustiveCheck}) không xác định`; 
     }
   };
 

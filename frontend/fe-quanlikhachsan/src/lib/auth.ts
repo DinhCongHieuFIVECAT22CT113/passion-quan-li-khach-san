@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
+import { useRouter } from 'next/navigation';
 import { jwtDecode } from 'jwt-decode';
 
 export const ROLES = {
@@ -9,7 +9,7 @@ export const ROLES = {
   CUSTOMER: 'R03', // Giả sử có thêm role Customer
 } as const;
 
-type Role = typeof ROLES[keyof typeof ROLES];
+export type Role = typeof ROLES[keyof typeof ROLES];
 
 // Định nghĩa các quyền có thể có trong hệ thống
 // Đây là một ví dụ, bạn cần tùy chỉnh cho phù hợp với ứng dụng của mình

@@ -3,20 +3,22 @@ import React, { Suspense, useEffect } from 'react';
 import LoginForm from '../../app/components/logsign/LoginForm';
 import './page.css';
 import { useRouter } from 'next/navigation';
-import { getUserInfo, getRedirectPathByRole } from '../../lib/config';
+import { getRedirectPathByRole } from '../../lib/config';
+import { useAuth } from '../../lib/auth';
 
 const LoginPage: React.FC = () => {
   const router = useRouter();
+  const { user, loading } = useAuth();
   
-  // Kiểm tra nếu người dùng đã đăng nhập, chuyển hướng tới trang theo role
   useEffect(() => {
-    const userInfo = getUserInfo();
-    if (userInfo && userInfo.isAuthenticated) {
-      console.log('Người dùng đã đăng nhập, chuyển hướng theo role');
-      const redirectPath = getRedirectPathByRole(userInfo.userRole);
+    if (loading) return;
+
+    if (user && user.role) {
+      console.log('Người dùng đã đăng nhập, chuyển hướng theo role từ trang login:', user.role);
+      const redirectPath = getRedirectPathByRole(user.role);
       router.push(redirectPath);
     }
-  }, [router]);
+  }, [router, user, loading]);
 
   return (
     <div className="login-container">
