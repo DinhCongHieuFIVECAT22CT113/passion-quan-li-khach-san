@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { getUserInfo } from '../../../lib/config';
+import { useAuth, ROLES } from '../../../lib/auth';
 import { getDashboardStats } from '../../../lib/api';
 
 interface RoomStats { total: number; available: number; occupied: number; maintenance: number }
@@ -34,15 +34,12 @@ const initialStats: DashboardData = {
 };
 
 export default function ManagerDashboardPage() {
-  const [userInfo, setUserInfo] = useState<{ userName?: string } | null>(null);
+  const { user, loading: authLoading } = useAuth();
   const [stats, setStats] = useState<DashboardData>(initialStats);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
   useEffect(() => {
-    const info = getUserInfo();
-    setUserInfo(info as { userName?: string } | null); // Type assertion
-    
     const fetchStats = async () => {
       try {
         setLoading(true);
@@ -75,8 +72,12 @@ export default function ManagerDashboardPage() {
     }
   };
   
-  if (loading) {
+  if (authLoading || loading) {
     return <div style={{padding:'24px', textAlign:'center'}}>Đang tải dữ liệu...</div>;
+  }
+  
+  if (!user || (user.role !== ROLES.MANAGER && user.role !== ROLES.ADMIN)) {
+    return <div style={{padding:'24px', color:'red', textAlign:'center'}}>Bạn không có quyền truy cập trang này. Chỉ dành cho Quản lý.</div>;
   }
   
   if (error) {
@@ -88,7 +89,7 @@ export default function ManagerDashboardPage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <h1 style={{ margin: 0, fontSize: '1.8rem' }}>Dashboard</h1>
         <div>
-          <span>Xin chào, {userInfo?.userName || 'Quản lý'}</span>
+          <span>Xin chào, {user?.hoTen || user?.maNguoiDung || 'Quản lý'}</span>
         </div>
       </div>
       

@@ -55,10 +55,12 @@ export default function NhanVienSidebarClient({ children }: { children: React.Re
       case ROLES.ADMIN: return 'Admin';
       case ROLES.MANAGER: return 'Quản lý';
       case ROLES.STAFF: return 'Nhân viên';
-      case ROLES.CUSTOMER: return 'Khách hàng / Kế toán'; // R03
+      case ROLES.ACCOUNTANT: return 'Kế toán';
+      case ROLES.CUSTOMER: return 'Khách hàng';
       default: 
-        const exhaustiveCheck: never = roleCode; // Bây giờ roleCode chỉ có thể là các giá trị của Role
-        return `Role (${exhaustiveCheck}) không xác định`; 
+        // Trường hợp này không nên xảy ra nếu roleCode là một trong các giá trị của ROLES
+        // và đã được kiểm tra bởi if (roleCode === 'CRW')
+        return `Role (${roleCode}) không xác định`; 
     }
   };
 

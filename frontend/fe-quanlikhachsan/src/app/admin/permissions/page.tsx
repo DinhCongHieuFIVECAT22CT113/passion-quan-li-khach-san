@@ -1,7 +1,9 @@
 'use client';
 import React, { useState, useEffect } from 'react';
+import { useAuth, ROLES } from '../../../lib/auth'; // Bỏ APP_CONFIG khỏi đây
+import { APP_CONFIG } from '../../../lib/config'; // Import APP_CONFIG từ đúng tệp
+import AuthCheck from '../../components/auth/AuthCheck'; // Thêm AuthCheck
 // import { getUserInfo } from '../../../lib/config'; // Xóa import này
-import { useAuth } from '../../../lib/auth'; // Thêm import useAuth
 // import styles from '../AdminLayout.module.css'; // Không sử dụng
 
 // Định nghĩa danh sách vai trò
@@ -60,30 +62,24 @@ const rolePermissions = {
   'R04': [], // Khách hàng không có quyền trong hệ thống quản trị
 };
 
-export default function PermissionsPage() {
+function PermissionsPageContent() { // Đổi tên component để bọc bởi AuthCheck
   const [selectedRole, setSelectedRole] = useState('R00');
   const [rolePerms, setRolePerms] = useState<string[]>([]);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const { user, loading: authLoading } = useAuth(); // Sử dụng useAuth
+  // const [isAdmin, setIsAdmin] = useState(false); // Sẽ không cần nữa nếu dùng AuthCheck
+  const { user, loading: authLoading } = useAuth(); 
   
   useEffect(() => {
-    // const userInfo = getUserInfo(); // Xóa dòng này
-    // if (userInfo) { // Xóa khối if này
-    //   setIsAdmin(userInfo.isAdmin);
+    // if (!authLoading) { 
+    //   if (user) {
+    //     // setIsAdmin(user.role === ROLES.ADMIN); // Sử dụng ROLES.ADMIN
+    //   } else {
+    //     // setIsAdmin(false); 
+    //   }
     // }
-    if (!authLoading) { // Chỉ cập nhật khi auth đã load xong
-      if (user) {
-        setIsAdmin(user.role === 'R00'); // Kiểm tra role của user từ useAuth
-      } else {
-        setIsAdmin(false); // Nếu không có user, không phải admin
-      }
-    }
     
-    // Lấy quyền cho vai trò đã chọn
     setRolePerms(rolePermissions[selectedRole as keyof typeof rolePermissions] || []);
-  }, [selectedRole, user, authLoading]); // Thêm user, authLoading vào dependencies
+  }, [selectedRole, user, authLoading]); 
   
-  // Nhóm quyền theo module
   const modulePermissions = permissions.reduce((acc, perm) => {
     if (!acc[perm.module]) {
       acc[perm.module] = [];
@@ -97,95 +93,108 @@ export default function PermissionsPage() {
     setRolePerms(rolePermissions[roleId as keyof typeof rolePermissions] || []);
   };
   
-  // Giả lập cập nhật quyền
   const handlePermissionChange = (permId: string, checked: boolean) => {
     if (checked) {
       setRolePerms(prev => [...prev, permId]);
     } else {
       setRolePerms(prev => prev.filter(id => id !== permId));
     }
-    
-    // Trong thực tế, bạn sẽ gọi API để cập nhật quyền
     console.log(`Cập nhật quyền ${permId} cho vai trò ${selectedRole}: ${checked ? 'Thêm' : 'Xóa'}`);
   };
+  
+  // authLoading đã được AuthCheck xử lý ở trên
+  // if (authLoading) {
+  //   return <div>Đang tải dữ liệu người dùng...</div>;
+  // }
+
+  // Việc kiểm tra user có phải admin không cũng do AuthCheck xử lý
+  // if (!user || user.role !== ROLES.ADMIN) { // Giả sử chỉ admin được vào
+  //   return (
+  //     <div style={{background: '#f8d7da', color: '#721c24', padding: '12px', borderRadius: '4px', marginBottom: '20px'}}>
+  //       Bạn không có quyền truy cập trang này. Chỉ Admin mới có thể quản lý phân quyền.
+  //     </div>
+  //   );
+  // }
   
   return (
     <div className="permissions-container" style={{padding: '24px', maxWidth: '1200px', margin: '0 auto'}}>
       <h1>Quản lý phân quyền</h1>
-      
-      {authLoading ? (
-        <div>Đang kiểm tra quyền truy cập...</div>
-      ) : !isAdmin ? (
-        <div style={{background: '#f8d7da', color: '#721c24', padding: '12px', borderRadius: '4px', marginBottom: '20px'}}>
-          Bạn không có quyền truy cập trang này. Chỉ Admin mới có thể quản lý phân quyền.
-        </div>
-      ) : (
-        <>
-          <div style={{display: 'flex', gap: '20px', marginTop: '20px'}}>
-            <div style={{width: '300px'}}>
-              <h2 style={{marginBottom: '16px', fontSize: '18px'}}>Vai trò</h2>
-              <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
-                {roleDefinitions.map(role => (
-                  <div 
-                    key={role.id} 
-                    style={{
-                      padding: '12px', 
-                      border: `1px solid ${selectedRole === role.id ? '#3182ce' : '#e2e8f0'}`,
-                      borderRadius: '4px',
-                      background: selectedRole === role.id ? '#ebf8ff' : '#fff',
-                      cursor: 'pointer'
-                    }}
-                    onClick={() => handleRoleChange(role.id)}
-                  >
-                    <h3 style={{fontWeight: 'bold'}}>{role.name} ({role.id})</h3>
-                    <p style={{fontSize: '14px', color: '#4a5568', marginTop: '4px'}}>{role.description}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-            
-            <div style={{flex: 1}}>
-              <h2 style={{marginBottom: '16px', fontSize: '18px'}}>Quyền hạn cho {roleDefinitions.find(r => r.id === selectedRole)?.name}</h2>
-              
-              {Object.entries(modulePermissions).map(([module, perms]) => (
-                <div key={module} style={{marginBottom: '24px'}}>
-                  <h3 style={{borderBottom: '1px solid #e2e8f0', paddingBottom: '8px', marginBottom: '12px'}}>{module}</h3>
-                  <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '12px'}}>
-                    {perms.map(perm => (
-                      <div key={perm.id} style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-                        <input 
-                          type="checkbox" 
-                          id={perm.id} 
-                          checked={rolePerms.includes(perm.id)}
-                          onChange={(e) => handlePermissionChange(perm.id, e.target.checked)}
-                          disabled={!isAdmin || selectedRole === 'R00'} // Admin (R00) luôn có tất cả quyền
-                        />
-                        <label htmlFor={perm.id}>{perm.name}</label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-              
-              {isAdmin && selectedRole !== 'R00' && (
-                <button 
+      {/* Phần kiểm tra isAdmin và authLoading sẽ được AuthCheck xử lý */}
+      {/* {authLoading ? ( ... ) : !isAdmin ? ( ... ) : ( ... ) } */}
+      <>
+        <div style={{display: 'flex', gap: '20px', marginTop: '20px'}}>
+          <div style={{width: '300px'}}>
+            <h2 style={{marginBottom: '16px', fontSize: '18px'}}>Vai trò</h2>
+            <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
+              {roleDefinitions.map(role => (
+                <div 
+                  key={role.id} 
                   style={{
-                    background: '#3182ce', 
-                    color: 'white', 
-                    padding: '10px 16px', 
+                    padding: '12px', 
+                    border: `1px solid ${selectedRole === role.id ? '#3182ce' : '#e2e8f0'}`,
                     borderRadius: '4px',
-                    border: 'none',
+                    background: selectedRole === role.id ? '#ebf8ff' : '#fff',
                     cursor: 'pointer'
                   }}
-                  onClick={() => alert('Đã lưu cấu hình phân quyền!')}
+                  onClick={() => handleRoleChange(role.id)}
                 >
-                  Lưu thay đổi
-                </button>
-              )}
+                  <h3 style={{fontWeight: 'bold'}}>{role.name} ({role.id})</h3>
+                  <p style={{fontSize: '14px', color: '#4a5568', marginTop: '4px'}}>{role.description}</p>
+                </div>
+              ))}
             </div>
           </div>
-        </>
-      )}
+          
+          <div style={{flex: 1}}>
+            <h2 style={{marginBottom: '16px', fontSize: '18px'}}>Quyền hạn cho {roleDefinitions.find(r => r.id === selectedRole)?.name}</h2>
+            
+            {Object.entries(modulePermissions).map(([module, perms]) => (
+              <div key={module} style={{marginBottom: '24px'}}>
+                <h3 style={{borderBottom: '1px solid #e2e8f0', paddingBottom: '8px', marginBottom: '12px'}}>{module}</h3>
+                <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '12px'}}>
+                  {perms.map(perm => (
+                    <div key={perm.id} style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                      <input 
+                        type="checkbox" 
+                        id={perm.id} 
+                        checked={rolePerms.includes(perm.id)}
+                        onChange={(e) => handlePermissionChange(perm.id, e.target.checked)}
+                        disabled={user?.role !== ROLES.ADMIN || selectedRole === ROLES.ADMIN} // Chỉ admin mới sửa được và ko sửa quyền admin
+                      />
+                      <label htmlFor={perm.id}>{perm.name}</label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+            
+            {user?.role === ROLES.ADMIN && selectedRole !== ROLES.ADMIN && (
+              <button 
+                style={{
+                  background: '#3182ce', 
+                  color: 'white', 
+                  padding: '10px 16px', 
+                  borderRadius: '4px',
+                  border: 'none',
+                  cursor: 'pointer'
+                }}
+                onClick={() => alert('Đã lưu cấu hình phân quyền!')}
+              >
+                Lưu thay đổi
+              </button>
+            )}
+          </div>
+        </div>
+      </>
     </div>
+  );
+}
+
+// Bọc PermissionsPageContent bằng AuthCheck
+export default function PermissionsPage() {
+  return (
+    <AuthCheck requireAuth={true} requiredRoles={[APP_CONFIG.roles.admin]}>
+      <PermissionsPageContent />
+    </AuthCheck>
   );
 }

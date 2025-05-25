@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { getEmployeeInvoices, createEmployeeInvoice, updateInvoiceStatus, getEmployeeBookings, getServices } from '../../../lib/api';
+import { useAuth } from '../../../lib/auth';
 
 interface Invoice {
   id: string;
@@ -36,6 +37,7 @@ const formatNumber = (number: number): string => {
 };
 
 export default function InvoiceManager() {
+  const { user, loading: authLoading } = useAuth();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -163,6 +165,10 @@ export default function InvoiceManager() {
 
   // Xử lý thay đổi trạng thái hóa đơn
   const handleStatusChange = async (id: string, status: string) => {
+    if (!user?.permissions.canManageInvoices) {
+      setError("Bạn không có quyền thực hiện hành động này.");
+      return;
+    }
     try {
       setLoading(true);
       await updateInvoiceStatus(id, status);
@@ -182,6 +188,10 @@ export default function InvoiceManager() {
   // Xử lý gửi form tạo hóa đơn
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user?.permissions.canManageInvoices) {
+      setFormError("Bạn không có quyền tạo hóa đơn.");
+      return;
+    }
     
     try {
       // Validate form
@@ -239,6 +249,11 @@ export default function InvoiceManager() {
 
   // Xử lý in hóa đơn
   const handlePrint = (inv: Invoice) => {
+    if (!user?.permissions.canManageInvoices) {
+      // Có thể hiển thị thông báo lỗi kín đáo hơn ở đây nếu cần
+      console.error("User does not have permission to print invoices.");
+      return;
+    }
     const printContent = document.getElementById(`invoice-print-${inv.id}`);
     if (!printContent) return;
     const printWindow = window.open('', '', 'width=800,height=600');
@@ -250,19 +265,30 @@ export default function InvoiceManager() {
     printWindow.close();
   };
 
-  if (loading && invoices.length === 0) {
-    return <div style={{padding:'24px', textAlign:'center'}}>Đang tải dữ liệu hóa đơn...</div>;
+  const getStatusBadgeStyle = (status: string) => {
+    // ... existing code ...
+  };
+
+  if (authLoading || (loading && invoices.length === 0 && services.length === 0)) {
+    return <div style={{padding:'24px', textAlign:'center'}}>Đang tải dữ liệu...</div>;
   }
 
-  if (error && invoices.length === 0) {
-    return <div style={{padding:'24px', color:'red', textAlign:'center'}}>Lỗi: {error}</div>;
+  if (!user?.permissions.canManageInvoices) {
+    return <div style={{padding:'24px', textAlign:'center', color: 'red'}}>Bạn không có quyền truy cập chức năng quản lý hóa đơn.</div>;
   }
 
   return (
-    <div style={{maxWidth:1100, margin:'32px auto', background:'#fff', borderRadius:16, boxShadow:'0 2px 16px #0001', padding:'32px 18px 32px 18px'}}>
+    <div style={{maxWidth:1200, margin:'32px auto', background:'#fff', borderRadius:16, boxShadow:'0 2px 16px #0001', padding:'32px 18px 32px 18px'}}>
       <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:18}}>
         <h2 style={{fontSize:'1.7rem', fontWeight:'bold', color:'#232a35'}}>Quản lý hóa đơn</h2>
-        <button style={{background:'#2563eb', color:'#fff', border:'none', borderRadius:8, padding:'8px 18px', fontSize:'1rem', cursor:'pointer'}} onClick={openAddModal}>+ Tạo hóa đơn</button>
+        {user?.permissions.canManageInvoices && (
+          <button 
+            style={{background:'#2563eb', color:'#fff', border:'none', borderRadius:8, padding:'8px 18px', fontSize:'1rem', cursor:'pointer'}} 
+            onClick={openAddModal}
+          >
+            + Thêm hóa đơn
+          </button>
+        )}
       </div>
       
       {error && <div style={{color:'red', marginBottom:'16px'}}>Lỗi: {error}</div>}

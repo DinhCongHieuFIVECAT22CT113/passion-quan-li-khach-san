@@ -1,86 +1,69 @@
 'use client';
 
-import { useEffect, ReactNode, FC } from 'react';
+import React, { ReactNode, useEffect } from 'react';
+import { useAuth, ROLES } from '../../../lib/auth';
 import { useRouter } from 'next/navigation';
-// import { getUserInfo, APP_CONFIG, getRedirectPathByRole } from '../../../lib/config'; // Bỏ getUserInfo
-import { APP_CONFIG, getRedirectPathByRole } from '../../../lib/config';
-import { useAuth } from '../../../lib/auth'; // Thêm useAuth
+import { APP_CONFIG } from '../../../lib/config';
 
 interface AuthCheckProps {
   children: ReactNode;
   requireAuth?: boolean;
-  requiredRoles?: string[]; // Giữ nguyên kiểu string[] vì allNavItems dùng string
+  requiredRoles?: string[];
+  fallbackPath?: string;
 }
 
-const AuthCheck: FC<AuthCheckProps> = ({ 
-  children, 
-  requireAuth = true,
-  requiredRoles = []
-}) => {
+const AuthCheck: React.FC<AuthCheckProps> = ({ children, requireAuth = false, requiredRoles, fallbackPath }) => {
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
-  const { user, loading: authLoading } = useAuth(); // Sử dụng useAuth
-  // Bỏ các state không cần thiết nếu dùng trực tiếp từ useAuth
-  // const [isAuthenticated, setIsAuthenticated] = useState(false);
-  // const [isAuthorized, setIsAuthorized] = useState(false);
-  // const [isLoading, setIsLoading] = useState(true);
-
-  // Bỏ qua xác thực trong chế độ development nếu cần thiết
-  // Có thể bỏ comment dòng dưới đây để bỏ qua xác thực trong môi trường development
-  /*
-  if (process.env.NODE_ENV === 'development') {
-    return <>{children}</>;
-  }
-  */
 
   useEffect(() => {
     if (authLoading) {
-      return; // Đợi cho đến khi thông tin auth được tải
-    }
-
-    console.log('AuthCheck with useAuth - User:', user, 'Loading:', authLoading);
-
-    if (requireAuth && !user) {
-      console.log('User not authenticated (useAuth), redirecting to login');
-      const currentPath = window.location.pathname + window.location.search;
-      router.push(`${APP_CONFIG.routes.login}?redirectUrl=${encodeURIComponent(currentPath)}`);
       return;
     }
 
-    if (user && requireAuth && requiredRoles.length > 0) {
-      const userRole = user.role; // Lấy role từ useAuth
-      console.log('Checking user role (useAuth):', userRole, 'against required roles:', requiredRoles);
-      const hasRequiredRole = requiredRoles.includes(userRole as string); // Ép kiểu nếu cần so sánh với string[]
-      
-      if (!hasRequiredRole) {
-        console.log('User does not have required role (useAuth), redirecting based on role');
-        const redirectPath = getRedirectPathByRole(userRole);
-        console.log('Redirecting to (useAuth):', redirectPath);
-        router.push(redirectPath);
+    if (requireAuth && !user) {
+      console.log("AuthCheck: User not logged in, redirecting to /login");
+      router.push(fallbackPath || '/login');
+      return;
+    }
+
+    if (user && requiredRoles && requiredRoles.length > 0) {
+      const userRole = user.role;
+      if (!userRole || !requiredRoles.includes(userRole)) {
+        console.log(`AuthCheck: User role '${userRole}' not in requiredRoles [${requiredRoles.join(', ')}].`);
+        if (fallbackPath) {
+          router.push(fallbackPath);
+        } else {
+          const defaultUserRoute = userRole ? APP_CONFIG.roleRoutes[userRole as keyof typeof APP_CONFIG.roleRoutes] : null;
+          if (defaultUserRoute && defaultUserRoute !== window.location.pathname) {
+            console.log(`AuthCheck: Redirecting to default route '${defaultUserRoute}' for role '${userRole}'.`);
+            router.push(defaultUserRoute);
+          } else {
+            console.log("AuthCheck: Redirecting to /unauthorized");
+            router.push('/unauthorized');
+          }
+        }
         return;
       }
-      console.log('User has required role (useAuth), authorizing');
     }
-    // Nếu không bị redirect, coi như authorized nếu user tồn tại (cho trường hợp requireAuth=true nhưng không có requiredRoles)
-    // hoặc không cần auth
 
-  }, [router, requireAuth, requiredRoles, user, authLoading]);
+  }, [user, authLoading, requireAuth, requiredRoles, router, fallbackPath]);
 
   if (authLoading) {
-    return <div>Đang kiểm tra quyền truy cập (useAuth)...</div>;
+    return <div>Đang kiểm tra quyền truy cập (AuthCheck)...</div>;
   }
 
-  // Nếu yêu cầu auth và không có user (đã xử lý redirect ở trên nhưng thêm 1 lớp kiểm tra)
   if (requireAuth && !user) {
-    // Không nên hiển thị children, redirect đã được gọi
-    return <div>Đang chuyển hướng đến đăng nhập...</div>; 
+    return <div>Đang chuyển hướng đến trang đăng nhập...</div>;
   }
 
-  // Nếu yêu cầu role cụ thể và user không có role đó (đã xử lý redirect)
-  if (user && requireAuth && requiredRoles.length > 0 && !requiredRoles.includes(user.role as string)) {
-    // Không nên hiển thị children, redirect đã được gọi
-    return <div>Không có quyền truy cập (đang chuyển hướng)...</div>;
+  if (user && requiredRoles && requiredRoles.length > 0) {
+    const userRole = user.role;
+    if (!userRole || !requiredRoles.includes(userRole)) {
+      return <div>Không có quyền truy cập. Đang chuyển hướng...</div>;
+    }
   }
-
+  
   return <>{children}</>;
 };
 

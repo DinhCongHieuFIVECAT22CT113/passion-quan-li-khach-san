@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { getEmployeeBookings, updateBookingStatus, createEmployeeBooking, getEmployeeRooms } from '../../../lib/api';
+import { useAuth } from '../../../lib/auth';
 
 interface Booking {
   id: string;
@@ -26,6 +27,7 @@ interface Room {
 }
 
 export default function BookingManager() {
+  const { user, loading: authLoading } = useAuth();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -117,6 +119,10 @@ export default function BookingManager() {
 
   // Xử lý thay đổi trạng thái đặt phòng
   const handleStatusChange = async (id: string, status: string) => {
+    if (!user?.permissions.canManageBookings) {
+      setError("Bạn không có quyền thực hiện hành động này.");
+      return;
+    }
     try {
       setLoading(true);
       await updateBookingStatus(id, status);
@@ -145,6 +151,10 @@ export default function BookingManager() {
   // Xử lý gửi form đặt phòng
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user?.permissions.canManageBookings) {
+      setFormError("Bạn không có quyền tạo đặt phòng.");
+      return;
+    }
     
     try {
       // Validate form
@@ -210,8 +220,13 @@ export default function BookingManager() {
     }
   };
 
-  if (loading && bookings.length === 0) {
-    return <div style={{padding:'24px', textAlign:'center'}}>Đang tải dữ liệu đặt phòng...</div>;
+  if (authLoading || (loading && bookings.length === 0)) {
+    return <div style={{padding:'24px', textAlign:'center'}}>Đang tải dữ liệu...</div>;
+  }
+
+  // Sau khi authLoading xong, kiểm tra quyền
+  if (!user?.permissions.canManageBookings) {
+    return <div style={{padding:'24px', textAlign:'center', color: 'red'}}>Bạn không có quyền truy cập chức năng quản lý đặt phòng.</div>;
   }
 
   const availableRooms = rooms.filter(room => room.status === 'Trống');
@@ -220,12 +235,14 @@ export default function BookingManager() {
     <div style={{maxWidth:1100, margin:'32px auto', background:'#fff', borderRadius:16, boxShadow:'0 2px 16px #0001', padding:'32px 18px 32px 18px'}}>
       <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:18}}>
         <h2 style={{fontSize:'1.7rem', fontWeight:'bold', color:'#232a35'}}>Quản lý đặt phòng</h2>
-        <button 
-          style={{background:'#2563eb', color:'#fff', border:'none', borderRadius:8, padding:'8px 18px', fontSize:'1rem', cursor:'pointer'}} 
-          onClick={openAddModal}
-        >
-          + Thêm đặt phòng
-        </button>
+        {user?.permissions.canManageBookings && (
+          <button 
+            style={{background:'#2563eb', color:'#fff', border:'none', borderRadius:8, padding:'8px 18px', fontSize:'1rem', cursor:'pointer'}} 
+            onClick={openAddModal}
+          >
+            + Thêm đặt phòng
+          </button>
+        )}
       </div>
       
       {error && <div style={{color:'red', marginBottom:'16px'}}>Lỗi: {error}</div>}

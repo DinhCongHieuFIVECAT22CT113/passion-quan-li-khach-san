@@ -8,7 +8,8 @@ export const ROLES = {
   ADMIN: 'R00',
   MANAGER: 'R01',
   STAFF: 'R02',
-  CUSTOMER: 'R04', // Đã cập nhật từ R03 trong middleware, đồng bộ ở đây
+  ACCOUNTANT: 'R03',
+  CUSTOMER: 'R04',
 } as const;
 
 export type Role = typeof ROLES[keyof typeof ROLES];
@@ -25,6 +26,7 @@ export interface UserPermissions {
   canManageServices: boolean;
   canViewUserProfile: boolean;
   canMakeBookings: boolean;
+  canManageInvoices: boolean;
   // Thêm các quyền khác nếu cần
 }
 
@@ -41,6 +43,7 @@ export function getUserPermissions(role: Role | string | undefined): UserPermiss
     canManageServices: false,
     canViewUserProfile: false,
     canMakeBookings: false,
+    canManageInvoices: false,
   };
 
   if (!role) return defaultPermissions;
@@ -56,30 +59,40 @@ export function getUserPermissions(role: Role | string | undefined): UserPermiss
         canViewReports: true,
         canManagePromotions: true,
         canManageServices: true,
-        canViewUserProfile: true, // Admin có thể xem profile của người khác
-        canMakeBookings: true, // Admin có thể đặt phòng
+        canViewUserProfile: true,
+        canMakeBookings: true,
+        canManageInvoices: true,
       };
     case ROLES.MANAGER: // R01
       return {
         ...defaultPermissions,
         canViewAdminDashboard: true,
+        canManageStaff: true,
         canManageRooms: true,
         canManageBookings: true,
         canViewReports: true,
         canManagePromotions: true,
         canManageServices: true,
+        canManageInvoices: true,
       };
     case ROLES.STAFF: // R02
       return {
         ...defaultPermissions,
-        canManageBookings: true, // Nhân viên có thể quản lý đặt phòng
-        canManageServices: true, // Nhân viên có thể quản lý dịch vụ
+        canManageRooms: true,
+        canManageBookings: true,
+        canManageServices: true,
+      };
+    case ROLES.ACCOUNTANT: // R03
+      return {
+        ...defaultPermissions,
+        canManageInvoices: true,
+        canViewReports: true,
       };
     case ROLES.CUSTOMER: // R04
       return {
         ...defaultPermissions,
-        canViewUserProfile: true, // Khách hàng xem profile của mình
-        canMakeBookings: true, // Khách hàng có thể đặt phòng
+        canViewUserProfile: true,
+        canMakeBookings: true,
       };
     default:
       return defaultPermissions;
@@ -91,6 +104,13 @@ interface DecodedToken {
   nameid?: string; // maNguoiDung
   unique_name?: string; // hoTen
   // Thêm các trường khác nếu có trong token
+  email?: string;
+  phone_number?: string; // Giả sử token dùng key này cho số điện thoại
+  address?: string;
+  family_name?: string; // Giả sử token dùng key này cho họ
+  given_name?: string;  // Giả sử token dùng key này cho tên
+  identity_number?: string; // Giả sử token dùng key này cho số CCCD
+  picture?: string; // Giả sử token dùng key này cho avatarUrl
 }
 
 export interface AuthUser {
@@ -98,6 +118,13 @@ export interface AuthUser {
   hoTen?: string;
   role: Role;
   permissions: UserPermissions;
+  email?: string;
+  soDienThoai?: string;
+  diaChi?: string;
+  hoKh?: string;
+  tenKh?: string;
+  soCccd?: string;
+  avatarUrl?: string;
 }
 
 interface AuthContextType {
@@ -123,6 +150,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         hoTen: decodedToken.unique_name,
         role: decodedToken.role,
         permissions,
+        email: decodedToken.email,
+        soDienThoai: decodedToken.phone_number,
+        diaChi: decodedToken.address,
+        hoKh: decodedToken.family_name,
+        tenKh: decodedToken.given_name,
+        soCccd: decodedToken.identity_number,
+        avatarUrl: decodedToken.picture,
       };
       setUser(currentUser);
       // Lưu các thông tin khác nếu cần, ví dụ:

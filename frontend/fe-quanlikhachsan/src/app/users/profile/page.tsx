@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, FC } from 'react';
-import AuthCheck from '../../../app/components/auth/AuthCheck';
 import Image from 'next/image';
 import styles from './styles.module.css';
 import PersonalInfoForm from '../../../app/components/profile/PersonalInfoForm';
@@ -14,9 +13,12 @@ import { useTranslation } from 'react-i18next';
 import i18n from '../../../app/i18n';
 import Header from '../../components/layout/Header';
 import { useLogout } from '../../../lib/hooks';
+import { useAuth, ROLES } from '../../../lib/auth';
+import AuthCheck from '../../components/auth/AuthCheck';
 
-const ProfilePage: FC = () => {
+const ProfilePageContent: FC = () => {
   const { t } = useTranslation();
+  const { user, loading: authLoading } = useAuth();
   const { languages, selectedLanguage, setSelectedLanguage } = useLanguage();
   const handleLogout = useLogout();
   const [isClient, setIsClient] = useState(false);
@@ -30,12 +32,7 @@ const ProfilePage: FC = () => {
   // User Info
   const [userInfo, setUserInfo] = useState({
     name: '',
-    email: '',
-    phone: '',
     address: '',
-    hokh: '',
-    tenkh: '',
-    idNumber: '',
   });
 
   // Transaction History
@@ -63,9 +60,11 @@ const ProfilePage: FC = () => {
   useEffect(() => {
     setIsClient(true);
     const savedLanguage = localStorage.getItem('selectedLanguage') || 'vi';
-    setSelectedLanguage(savedLanguage);
-    i18n.changeLanguage(savedLanguage);
-  }, [setSelectedLanguage]);
+    if (selectedLanguage !== savedLanguage) {
+      setSelectedLanguage(savedLanguage);
+      i18n.changeLanguage(savedLanguage);
+    }
+  }, [selectedLanguage, setSelectedLanguage]);
 
   // Handle Language Change
   const handleLanguageChange = (code: string) => {
@@ -82,54 +81,42 @@ const ProfilePage: FC = () => {
 
   // Fetch user profile and transaction history on page load
   useEffect(() => {
-    const fetchProfileAndTransactions = async () => {
+    if (user) {
+      setUserInfo({
+        name: user.hoTen || '',
+        address: user.diaChi || '',
+      });
+      setAvatarSrc(user.avatarUrl || null);
+    }
+
+    const fetchData = async () => {
+      if (!user?.maNguoiDung) {
+        setIsLoading(false);
+        return;
+      }
+      setIsLoading(true);
       try {
-        // Fetch profile data
-        const profileResponse = await fetch('/api/profile', {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        });
-
-        if (profileResponse.ok) {
-          const { data } = await profileResponse.json();
-          setUserInfo({
-            name: data.hokh && data.tenkh ? `${data.hokh} ${data.tenkh}` : '',
-            email: data.email || '',
-            phone: data.soDienThoai || '',
-            address: data.address || '',
-            hokh: data.hokh || '',
-            tenkh: data.tenkh || '',
-            idNumber: data.soCccd || '',
-          });
-          setAvatarSrc(data.avatarSrc || null);
-        } else {
-          const errorData = await profileResponse.json();
-          console.error('Error fetching profile:', errorData.message);
-        }
-
-        // Fetch transaction history
-        const transactionsResponse = await fetch('/api/transactions', {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        });
-
+        const transactionsResponse = await fetch(`/api/transactions?userId=${user.maNguoiDung}`);
         if (transactionsResponse.ok) {
           const { data } = await transactionsResponse.json();
           setTransactionHistory(data || []);
         } else {
-          const errorData = await transactionsResponse.json();
-          console.error('Error fetching transactions:', errorData.message);
+          console.error('Error fetching transactions:', await transactionsResponse.text());
           setTransactionHistory([]);
         }
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching page data:', error);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchProfileAndTransactions();
-  }, []);
+    if (user && !authLoading) {
+      fetchData();
+    } else if (!authLoading) {
+      setIsLoading(false);
+    }
+  }, [user, authLoading]);
 
   // Toggle edit mode
   const toggleEditMode = () => {
@@ -188,7 +175,7 @@ const ProfilePage: FC = () => {
   };
 
   // Handle Save Profile
-  const handleSaveProfile = async (data: { hokh: string; tenkh: string; email: string; soDienThoai: string; soCccd: string }) => {
+  const handleSaveProfile = async (data: any) => {
     try {
       const response = await fetch('/api/profile', {
         method: 'PATCH',
@@ -225,195 +212,154 @@ const ProfilePage: FC = () => {
     }
   };
 
+  // Hàm cập nhật avatar
+  const handleAvatarUpdated = (newAvatarUrl: string) => {
+    setAvatarSrc(newAvatarUrl);
+    // TODO: Gọi API để lưu newAvatarUrl cho user trên server
+    console.log("Avatar updated to:", newAvatarUrl);
+    // Cập nhật user context nếu cần thiết, hoặc fetch lại user
+  };
+
   // Tránh render nội dung phụ thuộc vào ngôn ngữ trước khi client mount
   if (!isClient) {
     return (
-      <AuthCheck>
-        <div className={styles.loadingContainer}>
-          <div className={styles.loadingSpinner} />
-          <p>Loading...</p>
-        </div>
-      </AuthCheck>
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingSpinner} />
+        <p>Loading authentication...</p>
+      </div>
     );
   }
 
-  if (isLoading) {
+  if (authLoading || isLoading || !user) {
     return (
-      <AuthCheck>
-        <div className={styles.loadingContainer}>
-          <div className={styles.loadingSpinner} />
-          <p>{t('profile.loading')}</p>
-        </div>
-      </AuthCheck>
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingSpinner} />
+        <p>{t('profile.loading')}</p>
+      </div>
     );
   }
 
   return (
-    <AuthCheck>
-      <div className={styles.container}>
-        {/* Header */}
-        <Header />
+    <div className={styles.profileContainer}>
+      <Header />
 
-        <main className={styles.main}>
-          <div className={styles.profileCard}>
-            <div className={styles.profileHeader}>
-              <h1>{t('profile.title')}</h1>
-              <div className={styles.headerButtons}>
-                <button onClick={() => setShowAvatarModal(true)} className={styles.editButton}>
-                  {t('profile.changeAvatar')}
+      <main className={styles.main}>
+        <div className={styles.profileCard}>
+          <div className={styles.profileHeader}>
+            <h1>{t('profile.title')}</h1>
+            <div className={styles.actionsContainer}>
+              <div className={styles.languageSelectorContainer}>
+                <button onClick={toggleLanguageDropdown} className={styles.languageButton}>
+                  {selectedLanguage.toUpperCase()} <span className={styles.dropdownArrow}>▼</span>
                 </button>
-                <button onClick={handleLogout} className={styles.logoutBtn}>
-                  {t('profile.logout')}
-                </button>
-              </div>
-            </div>
-
-            <div className={styles.profileContent}>
-              <div className={styles.avatarSection}>
-                <div className={styles.avatarWrapper}>
-                  <Image
-                    src={avatarSrc || '/images/default-avatar.png'}
-                    alt="Ảnh đại diện"
-                    className={styles.avatar}
-                    width={150}
-                    height={150}
-                  />
-                </div>
-              </div>
-
-              <div className={styles.infoSection}>
-                <div className={styles.infoGroup}>
-                  <label>{t('profile.language')}</label>
-                  <div className={styles.dropdownContainer}>
-                    <button onClick={toggleLanguageDropdown} className={styles.dropdownButton}>
-                      {languages.find((lang) => lang.code === selectedLanguage)?.name || t('profile.selectLanguage')}
-                      <span className={styles.dropdownArrow}>▼</span>
-                    </button>
-                    {isLanguageDropdownOpen && (
-                      <div className={styles.dropdownMenu}>
-                        {languages
-                          .filter((lang) => lang.status === 'Đang sử dụng')
-                          .map((lang) => (
-                            <button
-                              key={lang.id}
-                              onClick={() => handleLanguageChange(lang.code)}
-                              className={styles.dropdownItem}
-                            >
-                              {lang.name}
-                            </button>
-                          ))}
-                      </div>
-                    )}
+                {isLanguageDropdownOpen && (
+                  <div className={styles.languageDropdown}>
+                    {languages.map((lang) => (
+                      <button key={lang.code} onClick={() => handleLanguageChange(lang.code)}>
+                        {lang.name}
+                      </button>
+                    ))}
                   </div>
-                </div>
-                
-                {!isEditing ? (
-                  <div className={styles.userInfoDisplay}>
-                    <h3>{t('profile.personalInfo')}</h3>
-                    <div className={styles.infoGrid}>
-                      <div className={styles.infoItem}>
-                        <span className={styles.infoLabel}>{t('profile.fullName')}:</span>
-                        <span className={styles.infoValue}>{userInfo.name || t('profile.noData')}</span>
-                      </div>
-                      <div className={styles.infoItem}>
-                        <span className={styles.infoLabel}>{t('profile.email')}:</span>
-                        <span className={styles.infoValue}>{userInfo.email || t('profile.noData')}</span>
-                      </div>
-                      <div className={styles.infoItem}>
-                        <span className={styles.infoLabel}>{t('profile.phoneNumber')}:</span>
-                        <span className={styles.infoValue}>{userInfo.phone || t('profile.noData')}</span>
-                      </div>
-                      <div className={styles.infoItem}>
-                        <span className={styles.infoLabel}>{t('profile.idNumber')}:</span>
-                        <span className={styles.infoValue}>{userInfo.idNumber || t('profile.noData')}</span>
-                      </div>
-                      <div className={styles.infoItem}>
-                        <span className={styles.infoLabel}>{t('profile.address')}:</span>
-                        <span className={styles.infoValue}>{userInfo.address || t('profile.noData')}</span>
-                      </div>
-                    </div>
-                    <div className={styles.actionButtons}>
-                      <button onClick={toggleEditMode} className={styles.editProfileBtn}>
-                        {t('profile.editProfile')}
-                      </button>
-                      <button onClick={() => setShowChangePasswordModal(true)} className={styles.actionBtn}>
-                        {t('profile.editPassword')}
-                      </button>
-                      <button onClick={() => setShowPaymentOptionsModal(true)} className={styles.actionBtn}>
-                        {t('profile.paymentOptions')}
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <PersonalInfoForm
-                    initialValues={{
-                      hokh: userInfo.hokh,
-                      tenkh: userInfo.tenkh,
-                      email: userInfo.email,
-                      soDienThoai: userInfo.phone,
-                      soCccd: userInfo.idNumber
-                    }}
-                    onCancel={toggleEditMode}
-                    onSave={handleSaveProfile}
-                    onChangePassword={() => setShowChangePasswordModal(true)}
-                    onPaymentOptions={() => setShowPaymentOptionsModal(true)}
-                  />
                 )}
               </div>
-            </div>
-
-            <div className={styles.transactionSection}>
-              <h2 className={styles.sectionTitle}>{t('profile.transactionHistory')}</h2>
-              <TransactionHistory transactions={transactionHistory} />
+              <button className={styles.logoutButton} onClick={handleLogout}>
+                {t('profile.logout')}
+              </button>
             </div>
           </div>
-        </main>
 
-        {/* Modals */}
-        <ChangePasswordModal
-          isOpen={showChangePasswordModal}
-          onClose={() => setShowChangePasswordModal(false)}
-          currentPassword={currentPassword}
-          newPassword={newPassword}
-          confirmNewPassword={confirmNewPassword}
-          passwordErrors={passwordErrors}
-          onCurrentPasswordChange={(e) => setCurrentPassword(e.target.value)}
-          onNewPasswordChange={(e) => setNewPassword(e.target.value)}
-          onConfirmNewPasswordChange={(e) => setConfirmNewPassword(e.target.value)}
-          onChangePassword={handleChangePassword}
-          showSuccess={showChangePasswordSuccess}
-        />
-        {showPaymentOptionsModal && <PaymentOptionsModal onClose={() => setShowPaymentOptionsModal(false)} />}
-        {showAvatarModal && (
-          <AvatarUploadModal
-            onClose={() => setShowAvatarModal(false)}
-            onAvatarSelected={(src) => {
-              setAvatarSrc(src);
-              fetch('/api/profile', {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  action: 'updateAvatar',
-                  imageUrl: src,
-                }),
-              })
-                .then((res) => res.json())
-                .then((data) => {
-                  if (!data.success) {
-                    console.error('Error updating avatar:', data.message);
-                    setAvatarSrc(null);
-                  }
-                })
-                .catch((error) => {
-                  console.error('Error updating avatar:', error);
-                  setAvatarSrc(null);
-                });
-            }}
+          <div className={styles.profileBody}>
+            <div className={styles.avatarSection}>
+              <Image
+                src={avatarSrc || '/default-avatar.png'}
+                alt={t('profile.avatarAlt')}
+                width={150}
+                height={150}
+                className={styles.avatarImage}
+                onClick={() => setShowAvatarModal(true)}
+              />
+              <button onClick={() => setShowAvatarModal(true)} className={styles.editAvatarButton}>
+                {t('profile.editAvatar')}
+              </button>
+            </div>
+
+            <div className={styles.infoSection}>
+              {isEditing ? (
+                <PersonalInfoForm
+                  initialValues={{
+                    hokh: user.hoKh || '',
+                    tenkh: user.tenKh || '',
+                    email: user.email || '',
+                    soDienThoai: user.soDienThoai || '',
+                    soCccd: user.soCccd || '',
+                  }}
+                  onSave={handleSaveProfile} 
+                  onCancel={() => setIsEditing(false)} 
+                />
+              ) : (
+                <div className={styles.infoDisplay}>
+                  <h2>{user.hoTen || t('profile.noName')}</h2>
+                  <p>{t('profile.emailLabel')}: {user.email || t('profile.noEmail')}</p>
+                  <p>{t('profile.phoneLabel')}: {user.soDienThoai || t('profile.noPhone')}</p>
+                  <p>{t('profile.idNumberLabel')}: {user.soCccd || t('profile.noIdNumber')}</p>
+                  <p>{t('profile.addressLabel')}: {user.diaChi || t('profile.noAddress')}</p>
+                  <div className={styles.profileActionsRow}>
+                    <button onClick={toggleEditMode} className={styles.editButton}>
+                      {t('profile.editInfo')}
+                    </button>
+                    <button onClick={() => setShowChangePasswordModal(true)} className={styles.actionButton}>
+                      {t('profile.changePassword')}
+                    </button>
+                    <button onClick={() => setShowPaymentOptionsModal(true)} className={styles.actionButton}>
+                      {t('profile.paymentOptions')}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <TransactionHistory transactions={transactionHistory} />
+        </div>
+
+        {showChangePasswordModal && (
+          <ChangePasswordModal
+            isOpen={showChangePasswordModal}
+            onClose={() => setShowChangePasswordModal(false)}
+            currentPassword={currentPassword}
+            newPassword={newPassword}
+            confirmNewPassword={confirmNewPassword}
+            passwordErrors={passwordErrors}
+            onCurrentPasswordChange={(e) => setCurrentPassword(e.target.value)}
+            onNewPasswordChange={(e) => setNewPassword(e.target.value)}
+            onConfirmNewPasswordChange={(e) => setConfirmNewPassword(e.target.value)}
+            onChangePassword={handleChangePassword}
+            showSuccess={showChangePasswordSuccess}
           />
         )}
-      </div>
+
+        {showPaymentOptionsModal && (
+          <PaymentOptionsModal onClose={() => setShowPaymentOptionsModal(false)} />
+        )}
+
+        {showAvatarModal && (
+          <AvatarUploadModal 
+            onClose={() => setShowAvatarModal(false)} 
+            onAvatarSelected={handleAvatarUpdated}
+          />
+        )}
+      </main>
+    </div>
+  );
+};
+
+// Tạo một component mới để bọc ProfilePageContent với AuthCheck
+const UserProfilePage: FC = () => {
+  return (
+    <AuthCheck requireAuth={true} requiredRoles={[ROLES.CUSTOMER, ROLES.ADMIN]}>
+      <ProfilePageContent />
     </AuthCheck>
   );
 };
 
-export default ProfilePage;
+export default UserProfilePage; // Export component đã được bọc

@@ -17,14 +17,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     return <div>Loading admin session...</div>;
   }
 
-  if (!user || user.role !== APP_CONFIG.roles.admin) {
-    return <div>Access Denied or Not Authenticated. Redirecting...</div>;
+  if (!user || (user.role !== APP_CONFIG.roles.admin && user.role !== APP_CONFIG.roles.manager)) {
+    return <div>Access Denied. You must be an Admin or Manager to access this area. Redirecting...</div>;
   }
 
-  const displayUserName = user.hoTen || user.maNguoiDung || 'Admin';
+  const displayUserName = user.hoTen || user.maNguoiDung || 'User';
 
   return (
-    <AuthCheck requireAuth={true} requiredRoles={[APP_CONFIG.roles.admin]}>
+    <AuthCheck requireAuth={true} requiredRoles={[APP_CONFIG.roles.admin, APP_CONFIG.roles.manager]}>
     <div className={styles.adminContainer}>
       <aside className={styles.sidebar}>
         <div className={styles.logo}>🏨 <span>Admin</span></div>
@@ -36,10 +36,17 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/admin/services" className={`${styles.navLink} ${pathname === '/admin/services' ? styles.active : ''}`}>Dịch vụ</Link>
           <Link href="/admin/promotions" className={`${styles.navLink} ${pathname === '/admin/promotions' ? styles.active : ''}`}>Khuyến mãi</Link>
           <Link href="/admin/reviews" className={`${styles.navLink} ${pathname === '/admin/reviews' ? styles.active : ''}`}>Đánh giá</Link>
-          <Link href="/admin/staffs" className={`${styles.navLink} ${pathname === '/admin/staffs' ? styles.active : ''}`}>Nhân viên</Link>
+          
+          {/* Mục "Nhân viên" và "Phân Quyền" chỉ hiển thị cho ADMIN */} 
+          {user && user.role === APP_CONFIG.roles.admin && (
+            <>
+              <Link href="/admin/staffs" className={`${styles.navLink} ${pathname === '/admin/staffs' ? styles.active : ''}`}>Nhân viên</Link>
+              <Link href="/admin/permissions" className={`${styles.navLink} ${pathname === '/admin/permissions' ? styles.active : ''}`}>Phân Quyền</Link>
+            </>
+          )}
+          
           <Link href="/admin/reports" className={`${styles.navLink} ${pathname === '/admin/reports' ? styles.active : ''}`}>Báo cáo</Link>
           <Link href="/admin/languages" className={`${styles.navLink} ${pathname === '/admin/languages' ? styles.active : ''}`}>Ngôn Ngữ</Link>
-          <Link href="/admin/permissions" className={`${styles.navLink} ${pathname === '/admin/permissions' ? styles.active : ''}`}>Phân Quyền</Link>
         </nav>
           
           <div className={styles.userSection}>
