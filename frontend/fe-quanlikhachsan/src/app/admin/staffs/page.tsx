@@ -1,9 +1,9 @@
 "use client";
 import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import Link from 'next/link';
-import styles from "../../admin.module.css"; 
+import styles from '../AdminLayout.module.css'; 
 import { API_BASE_URL } from '@/lib/config'; 
-import { getAuthHeaders, handleResponse, getRoles } from '@/lib/api'; 
+import { getAuthHeaders, handleResponse } from '@/lib/api'; 
 import Image from 'next/image';
 import { withAuth, ROLES, useAuth } from '@/lib/auth'; // Import HOC và ROLES
 import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
@@ -51,12 +51,12 @@ function StaffPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingStaff, setEditingStaff] = useState<Staff | null>(null);
   const [formState, setFormState] = useState<StaffFormState>({
-    hoNv: "",
-    tenNv: "",
+    hoNv: "", 
+    tenNv: "", 
     userName: "",
-    chucVu: "",
-    soDienThoai: "",
-    email: "",
+    chucVu: "", 
+    soDienThoai: "", 
+    email: "", 
     ngayVaoLam: new Date().toISOString().split('T')[0],
     luongCoBan: 0,
     maRole: "",
@@ -66,10 +66,10 @@ function StaffPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const fetchStaffs = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
+    const fetchStaffs = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
       const response = await fetch(`${API_BASE_URL}/NhanVien`, { 
         method: 'GET', 
         headers: getAuthHeaders('GET'), 
@@ -99,18 +99,24 @@ function StaffPage() {
 
     } catch (err: any) {
       setError(err.message);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
   const fetchRoles = async () => {
-    try {
-      const rolesData = await getRoles(); 
-      setRoles(rolesData);
-    } catch (err: any) {
-      setError(err.message);
-    }
+    // try {
+    //   const rolesData = await getRoles(); 
+    //   if (rolesData && Array.isArray(rolesData.quyen)) {
+    //     setRoles(rolesData.quyen);
+    //   } else {
+    //     console.error("Lỗi: Dữ liệu quyền không hợp lệ", rolesData);
+    //     setRoles([]); 
+    //   }
+    // } catch (error) {
+    //   console.error("Lỗi khi lấy danh sách quyền:", error);
+    //   setRoles([]);
+    // }
   };
 
   useEffect(() => {
@@ -165,12 +171,12 @@ function StaffPage() {
 
   const openAddModal = () => {
     setFormState({
-      hoNv: "",
-      tenNv: "",
+      hoNv: "", 
+      tenNv: "", 
       userName: "",
-      chucVu: "",
-      soDienThoai: "",
-      email: "",
+      chucVu: "", 
+      soDienThoai: "", 
+      email: "", 
       ngayVaoLam: new Date().toISOString().split('T')[0],
       luongCoBan: 0,
       maRole: roles.length > 0 ? roles[0].maRole : "", // Chọn role đầu tiên làm mặc định
@@ -228,7 +234,7 @@ function StaffPage() {
     (staff.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     (staff.soDienThoai || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
-  
+
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Quản Lý Nhân Viên</h1>
@@ -248,10 +254,10 @@ function StaffPage() {
           <button onClick={openAddModal} className={`${styles.button} ${styles.addButton}`}>Thêm Nhân Viên</button>
         )}
       </div>
-
-      <table className={styles.table}>
-        <thead>
-          <tr>
+      
+          <table className={styles.table}>
+            <thead>
+              <tr>
             <th>Mã NV</th>
             <th>Họ tên</th>
             <th>Username</th>
@@ -263,21 +269,21 @@ function StaffPage() {
             <th>Vai trò</th>
             <th>Trạng thái</th>
             <th>Hành động</th>
-          </tr>
-        </thead>
-        <tbody>
+              </tr>
+            </thead>
+            <tbody>
           {filteredStaffs.length === 0 ? (
-            <tr>
+                <tr>
               <td colSpan={11} style={{textAlign: 'center', padding: '16px'}}>Không có dữ liệu nhân viên</td>
-            </tr>
-          ) : (
+                </tr>
+              ) : (
             filteredStaffs.map((staff) => (
-              <tr key={staff.maNV}>
-                <td>{staff.maNV}</td>
-                <td>{`${staff.hoNv || ''} ${staff.tenNv || ''}`.trim()}</td>
+                  <tr key={staff.maNV}>
+                    <td>{staff.maNV}</td>
+                    <td>{`${staff.hoNv || ''} ${staff.tenNv || ''}`.trim()}</td>
                 <td>{staff.userName || 'N/A'}</td>
-                <td>{staff.chucVu}</td>
-                <td>{staff.soDienThoai}</td>
+                    <td>{staff.chucVu}</td>
+                    <td>{staff.soDienThoai}</td>
                 <td>{staff.email}</td>
                 <td>{staff.ngayVaoLam ? new Date(staff.ngayVaoLam).toLocaleDateString() : 'N/A'}</td>
                 <td>{staff.luongCoBan?.toLocaleString()}</td>
@@ -286,13 +292,13 @@ function StaffPage() {
                 <td>
                   <button onClick={() => openEditModal(staff)} className={`${styles.button} ${styles.editButton}`}>Sửa</button>
                   <button onClick={() => handleDelete(staff.maNV)} className={`${styles.button} ${styles.deleteButton}`}>Xóa</button>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+      
       {(showAddModal || showEditModal) && (
         <div className={styles.modalBackdrop}>
           <div className={styles.modalContent}>
@@ -332,12 +338,12 @@ function StaffPage() {
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="maRole">Vai trò</label>
-                <select id="maRole" name="maRole" value={formState.maRole} onChange={handleInputChange} required>
-                  <option value="" disabled>Chọn vai trò</option>
-                  {roles.map(role => (
-                    <option key={role.maRole} value={role.maRole}>{role.tenRole}</option>
-                  ))}
-                </select>
+                {/* <select id="maRole" name="maRole" value={formState.maRole} onChange={handleInputChange} required> */}
+                {/* <option value="" disabled>Chọn vai trò</option> */}
+                {/* {roles.map(role => ( */}
+                {/* <option key={role.maRole} value={role.maRole}>{role.tenRole}</option> */}
+                {/* ))} */}
+                {/* </select> */}
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="trangThai">Trạng thái</label>

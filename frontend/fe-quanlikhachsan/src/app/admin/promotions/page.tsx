@@ -315,13 +315,13 @@ export default function PromotionManager() {
         <div style={{display:'flex', gap:12, alignItems:'center'}}>
           <div className={styles.searchContainer}>
             <label className={styles.label}>Tìm kiếm:</label>
-            <input
-              type="text"
-              value={search}
+          <input
+            type="text"
+            value={search}
               onChange={handleSearchChange}
               placeholder="Tìm theo tên hoặc mã giảm giá"
               className={styles.searchInput}
-            />
+          />
           </div>
           <button className={styles.addBtn} onClick={openAddModal}>+ Thêm khuyến mãi</button>
         </div>

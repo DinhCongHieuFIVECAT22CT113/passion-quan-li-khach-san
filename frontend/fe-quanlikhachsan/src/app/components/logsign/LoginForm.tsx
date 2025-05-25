@@ -6,6 +6,7 @@ import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import './logsign.css';
 import { loginUser } from '../../../lib/api';
 import { API_BASE_URL, getRedirectPathByRole } from '../../../lib/config';
+import * as Cookies from 'js-cookie';
 
 const LoginForm: React.FC = () => {
   const [userName, setUserName] = useState('');
@@ -57,11 +58,12 @@ const LoginForm: React.FC = () => {
           throw new Error('Dữ liệu đăng nhập không hợp lệ. Vui lòng thử lại.');
         }
         
-        // Lưu token vào localStorage
+        // Lưu token vào localStorage và cookie
         localStorage.setItem('token', userData.token);
         localStorage.setItem('userName', userData.userName || '');
         localStorage.setItem('userRole', userData.maRole || '');
         localStorage.setItem('userId', userData.maNguoiDung || '');
+        Cookies.set('token', userData.token, { expires: 7 });
         
         console.log('Đã lưu thông tin người dùng:', {
           userName: userData.userName,
@@ -102,6 +104,7 @@ const LoginForm: React.FC = () => {
         localStorage.removeItem('userName');
         localStorage.removeItem('userRole');
         localStorage.removeItem('userId');
+        Cookies.remove('token');
         
         setLoginError(`Lỗi: ${errorMessage}`);
       } finally {

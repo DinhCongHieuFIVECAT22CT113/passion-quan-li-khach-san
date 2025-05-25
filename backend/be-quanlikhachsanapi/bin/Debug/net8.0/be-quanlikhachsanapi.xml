@@ -59,7 +59,7 @@
             Cập nhật thông tin hóa đơn
             </summary>
         </member>
-        <member name="M:be_quanlikhachsanapi.Controllers.HoaDonController.UpdateTrangThai(System.String,System.String)">
+        <member name="M:be_quanlikhachsanapi.Controllers.HoaDonController.UpdateTrangThai(System.String,be_quanlikhachsanapi.DTOs.UpdateTrangThaiDTO)">
             <summary>
             Cập nhật trạng thái hóa đơn
             </summary>
@@ -99,7 +99,7 @@
             Cập nhật thông tin phương thức thanh toán
             </summary>
         </member>
-        <member name="M:be_quanlikhachsanapi.Controllers.PhuongThucThanhToanController.UpdateTrangThai(System.String,System.String)">
+        <member name="M:be_quanlikhachsanapi.Controllers.PhuongThucThanhToanController.UpdateTrangThai(System.String,be_quanlikhachsanapi.DTOs.UpdateTrangThaiDTO)">
             <summary>
             Cập nhật trạng thái phương thức thanh toán
             </summary>

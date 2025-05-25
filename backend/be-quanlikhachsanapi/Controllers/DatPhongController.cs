@@ -34,7 +34,7 @@ namespace be_quanlikhachsanapi.Controllers
         }
         // Tìm đặt phòng theo ID
         [HttpGet("{maDatPhong}")]
-        [RequireRole("R00", "R01", "R02", "R03")]
+        [RequireRole("R00", "R01", "R02", "R04")]
         public IActionResult GetByID(string maDatPhong)
         {
             var datPhong = _datPhongRepo.GetDatPhongById(maDatPhong);
@@ -47,7 +47,7 @@ namespace be_quanlikhachsanapi.Controllers
         // Tạo đặt phòng mới
         [HttpPost]
         [Consumes("multipart/form-data")]
-        [RequireRole("R00", "R01", "R02", "R03")]
+        [RequireRole("R00", "R01", "R02", "R04")]
         public IActionResult CreateDatPhong([FromForm] CreateDatPhongDTO createDatPhong)
         {
             var datPhong = _datPhongRepo.CreateDatPhong(createDatPhong);

@@ -30,9 +30,9 @@ namespace be_quanlikhachsanapi.Controllers
             {
                 return BadRequest(result.Value);
             }
-            if (result is ObjectResult okResult && okResult.StatusCode == 200)
+            if (result.StatusCode == 200)
             {
-                return Ok(okResult.Value);
+                return Ok(result.Value);
             }
             return StatusCode(result.StatusCode ?? 500, result.Value);
         }
@@ -47,9 +47,9 @@ namespace be_quanlikhachsanapi.Controllers
             {
                 return BadRequest(result.Value);
             }
-            if (result is ObjectResult okUpdResult && okUpdResult.StatusCode == 200)
+            if (result.StatusCode == 200)
             {
-                return Ok(okUpdResult.Value);
+                return Ok(result.Value);
             }
             return StatusCode(result.StatusCode ?? 500, result.Value);
         }
@@ -71,9 +71,9 @@ namespace be_quanlikhachsanapi.Controllers
             {
                 return BadRequest(result.Value);
             }
-            if (result is ObjectResult okGetResult && okGetResult.StatusCode == 200)
+            if (result.StatusCode == 200)
             {
-                return Ok(okGetResult.Value);
+                return Ok(result.Value);
             }
             return StatusCode(result.StatusCode ?? 500, result.Value);
         }

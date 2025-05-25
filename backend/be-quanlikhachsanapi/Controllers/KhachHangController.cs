@@ -35,13 +35,13 @@ namespace be_quanlikhachsanapi.Controllers
         }
         // Tìm khách hàng theo ID
         [HttpGet("{maKh}")]
-        [RequireRole("R00", "R01", "R02", "R03")]
+        [RequireRole("R00", "R01", "R02", "R04")]
         public IActionResult GetByID(string maKh)
         {
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
 
-            if (currentUserRole == "R03" && currentUserId != maKh)
+            if (currentUserRole == "R04" && currentUserId != maKh)
             {
                 return Forbid("Bạn chỉ có thể xem thông tin của chính mình.");
             }
@@ -69,13 +69,13 @@ namespace be_quanlikhachsanapi.Controllers
         // Cập nhật khách hàng
         [HttpPut("{maKh}")]
         [Consumes("multipart/form-data")]
-        [RequireRole("R00", "R01", "R02", "R03")]
+        [RequireRole("R00", "R01", "R02", "R04")]
         public IActionResult UpdateKhachHang(string maKh, [FromForm] UpdateKhachHangDto updateKhachHang)
         {
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
 
-            if (currentUserRole == "R03" && currentUserId != maKh)
+            if (currentUserRole == "R04" && currentUserId != maKh)
             {
                 return Forbid("Bạn chỉ có thể cập nhật thông tin của chính mình.");
             }
@@ -114,7 +114,7 @@ namespace be_quanlikhachsanapi.Controllers
 
         [HttpPost("{username}/upload-avatar")]
         [Consumes("multipart/form-data")]
-        [RequireRole("R00", "R01", "R02", "R03")]
+        [RequireRole("R00", "R01", "R02", "R04")]
         public async Task<IActionResult> UploadAvatar(string username, [FromForm] UploadAvatarDTO dto)
         {
             var result = await _khachHangRepo.UploadAvatarAsync(username, dto);

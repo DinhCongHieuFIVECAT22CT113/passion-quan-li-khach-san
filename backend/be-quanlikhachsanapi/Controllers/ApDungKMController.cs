@@ -61,7 +61,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// Lấy danh sách áp dụng khuyến mãi theo mã đặt phòng
         /// </summary>
         [HttpGet("theo-dat-phong/{maDatPhong}")]
-        [RequireRole("R00", "R01", "R02", "R03")]
+        [RequireRole("R00", "R01", "R02", "R04")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetByDatPhong(string maDatPhong)
@@ -79,7 +79,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// </summary>
         [HttpPost]
         [Consumes("multipart/form-data")]
-        [RequireRole("R00", "R01", "R02", "R03")]
+        [RequireRole("R00", "R01", "R02", "R04")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create([FromForm] CreateApDungKMDTO createDto)

@@ -43,7 +43,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// Lấy thông tin hóa đơn theo mã
         /// </summary>
         [HttpGet("{maHoaDon}")]
-        [RequireRole("R00", "R01", "R02", "R03")]
+        [RequireRole("R00", "R01", "R02", "R04")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(string maHoaDon)
@@ -60,7 +60,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// Lấy thông tin hóa đơn theo mã đặt phòng
         /// </summary>
         [HttpGet("datphong/{maDatPhong}")]
-        [RequireRole("R00", "R01", "R02", "R03")]
+        [RequireRole("R00", "R01", "R02", "R04")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetByDatPhong(string maDatPhong)
@@ -100,6 +100,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// </summary>
         [HttpPut("{maHoaDon}")]
         [Consumes("multipart/form-data")]
+        [RequireRole("R00", "R01", "R02")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -125,12 +126,12 @@ namespace be_quanlikhachsanapi.Controllers
         /// Cập nhật trạng thái hóa đơn
         /// </summary>
         [HttpPut("{maHoaDon}/trangthai")]
-        [Consumes("multipart/form-data")]
+        [RequireRole("R00", "R01", "R02")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateTrangThai(string maHoaDon, string trangThai)
+        public async Task<IActionResult> UpdateTrangThai(string maHoaDon, [FromBody] UpdateTrangThaiDTO trangThaiDto)
         {
-            var result = await _hoaDonRepo.UpdateTrangThaiAsync(maHoaDon, trangThai);
+            var result = await _hoaDonRepo.UpdateTrangThaiAsync(maHoaDon, trangThaiDto.TrangThai);
             if (!result)
             {
                 return NotFound($"Không tìm thấy hóa đơn với mã {maHoaDon}");
@@ -143,7 +144,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// Xóa hóa đơn
         /// </summary>
         [HttpDelete("{maHoaDon}")]
-        [Consumes("multipart/form-data")]
+        [RequireRole("R00", "R01")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(string maHoaDon)
@@ -160,7 +161,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// Tính tổng doanh thu theo tháng và năm
         /// </summary>
         [HttpGet("doanhthu")]
-        [Consumes("multipart/form-data")]
+        [RequireRole("R00", "R01")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> TinhTongDoanhThu([FromQuery] int thang, [FromQuery] int nam)
         {
