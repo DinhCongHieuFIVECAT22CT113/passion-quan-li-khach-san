@@ -235,6 +235,7 @@
 }
 
 .serviceContent {
+  color: black;
   padding: 1.5rem;
   text-align: center; /* Match home page text alignment */
 }
@@ -242,7 +243,6 @@
 .serviceContent h3 {
   font-size: 1.2rem; /* Match home page font size */
   margin-bottom: 0.5rem; /* Match home page margin */
-  color: #333;
 }
 
 .serviceShortDesc {
@@ -341,7 +341,7 @@
 }
 
 .serviceDescription {
-  color: #555;
+  color: black;
   line-height: 1.8;
   margin-bottom: 2rem;
 }
