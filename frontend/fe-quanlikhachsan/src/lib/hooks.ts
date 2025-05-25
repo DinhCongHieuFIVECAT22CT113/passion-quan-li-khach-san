@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 
 /**
  * Hook để xử lý đăng xuất
@@ -14,14 +15,16 @@ export const useLogout = () => {
       // Xóa tất cả thông tin đăng nhập từ localStorage
       localStorage.removeItem('token');
       localStorage.removeItem('userName');
-      localStorage.removeItem('userRole');
       localStorage.removeItem('userId');
       
       // Các thông tin khác nếu có
       localStorage.removeItem('staffInfo');
       
-      // Chuyển hướng về trang đăng nhập
-      router.push('/login');
+      // Xóa cookies liên quan đến phiên đăng nhập
+      Cookies.remove('token');
+      
+      // Chuyển hướng về trang chủ người dùng
+      router.push('/users/home');
     }
   };
 

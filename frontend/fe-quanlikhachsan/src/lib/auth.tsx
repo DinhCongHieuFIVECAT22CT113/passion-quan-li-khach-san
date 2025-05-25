@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from 'react';
+"use client";
+
+import React, { useEffect, useState, createContext, useContext, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { jwtDecode } from 'jwt-decode';
 
@@ -6,7 +8,7 @@ export const ROLES = {
   ADMIN: 'R00',
   MANAGER: 'R01',
   STAFF: 'R02',
-  CUSTOMER: 'R03', // Giả sử có thêm role Customer
+  CUSTOMER: 'R04', // Đã cập nhật từ R03 trong middleware, đồng bộ ở đây
 } as const;
 
 export type Role = typeof ROLES[keyof typeof ROLES];
@@ -73,7 +75,7 @@ export function getUserPermissions(role: Role | string | undefined): UserPermiss
         canManageBookings: true, // Nhân viên có thể quản lý đặt phòng
         canManageServices: true, // Nhân viên có thể quản lý dịch vụ
       };
-    case ROLES.CUSTOMER: // R03
+    case ROLES.CUSTOMER: // R04
       return {
         ...defaultPermissions,
         canViewUserProfile: true, // Khách hàng xem profile của mình
@@ -98,11 +100,18 @@ export interface AuthUser {
   permissions: UserPermissions;
 }
 
-// Custom hook để lấy thông tin người dùng hiện tại và quyền
-export function useAuth(): { user: AuthUser | null; loading: boolean } {
+interface AuthContextType {
+  user: AuthUser | null;
+  loading: boolean;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
+  // useRouter không dùng trực tiếp ở đây nữa, nhưng nếu cần redirect từ provider thì có thể thêm lại
+  // const router = useRouter(); 
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -116,17 +125,28 @@ export function useAuth(): { user: AuthUser | null; loading: boolean } {
           role: decodedToken.role,
           permissions,
         });
-      } catch (e) {
-        // Token không hợp lệ hoặc hết hạn
+      } catch {
         localStorage.removeItem('token');
-        // Có thể redirect về login tại đây nếu muốn, nhưng middleware đã xử lý
-        // router.push('/login'); 
+        // Nếu có lỗi token, có thể muốn xóa user và set loading false
+        setUser(null);
       }
     }
     setLoading(false);
-  }, [router]);
+  }, []); // Bỏ router khỏi dependencies nếu không dùng
 
-  return { user, loading };
+  return (
+    <AuthContext.Provider value={{ user, loading }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export function useAuth(): AuthContextType {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 }
 
 // Higher-Order Component để bảo vệ route/component
@@ -136,40 +156,53 @@ export function withAuth<P extends object>(
 ) {
   return function ComponentWithAuth(props: P) {
     const router = useRouter();
+    const { user, loading } = useAuth(); // Sử dụng useAuth từ context
     const [isAuthorized, setIsAuthorized] = useState(false);
-    const [authLoading, setAuthLoading] = useState(true);
+    // authLoading của HOC sẽ dựa vào loading từ context
 
     useEffect(() => {
-      const token = localStorage.getItem('token');
-      if (!token) {
+      if (loading) { // Đợi context load xong
+        return;
+      }
+
+      if (!user) { // Nếu không có user sau khi context đã load xong
         router.push('/login');
         return;
       }
 
-      try {
-        const decodedToken = jwtDecode<DecodedToken>(token);
-        const userRole = decodedToken.role;
-
-        if (requiredRoles && requiredRoles.length > 0 && !requiredRoles.includes(userRole)) {
-          router.push('/unauthorized'); // Trang báo không có quyền
-          return;
-        }
-        setIsAuthorized(true);
-      } catch (error) {
-        // Token không hợp lệ, xóa và redirect
-        localStorage.removeItem('token');
-        router.push('/login');
+      // Nếu có user, kiểm tra role
+      const userRole = user.role;
+      if (requiredRoles && requiredRoles.length > 0 && !requiredRoles.includes(userRole)) {
+        router.push('/unauthorized');
         return;
       }
-      setAuthLoading(false);
-    }, [router]);
+      
+      setIsAuthorized(true); // Nếu mọi thứ ổn, set authorized
+    }, [user, loading, router]); // Bỏ requiredRoles khỏi dependencies
 
-    if (authLoading) {
+    if (loading) { // Hiển thị loading dựa trên context
       return React.createElement('div', null, 'Loading authentication...');
     }
 
-    if (!isAuthorized) {
-      return null;
+    if (!isAuthorized && user) { // Nếu có user nhưng chưa authorized (vd: sai role)
+        // Redirect đã được xử lý trong useEffect, ở đây có thể return null hoặc loading state
+        return React.createElement('div', null, 'Checking authorization or redirecting...');
+    }
+    
+    if(!user && !loading){ // Nếu không có user và không loading -> đã bị redirect hoặc là trang công khai
+        // Nếu bị redirect, ComponentWithAuth không nên render gì
+        // Nếu là trang công khai mà HOC này vẫn bọc, thì logic HOC cần xem lại
+        // Tạm thời, nếu không có user và không loading (nghĩa là đã bị redirect hoặc lỗi)
+        // thì không render WrappedComponent
+         const currentPath = window.location.pathname;
+         if (currentPath !== '/login' && currentPath !== '/unauthorized') {
+            // Có thể đang ở trang lỗi sau khi redirect, không render gì thêm.
+         }
+         return null; 
+    }
+
+    if (!isAuthorized) { // If still not authorized after checks (e.g. no user and not loading)
+        return React.createElement('div', null, 'Checking authorization or redirecting...'); 
     }
 
     const Component = WrappedComponent as React.ComponentType<P>;

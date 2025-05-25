@@ -3,10 +3,10 @@
 
 import { useLanguage } from '../../../app/components/profile/LanguageContext';
 import i18n from '../../../app/i18n';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { API_BASE_URL } from '@/lib/config';
-import { getAuthHeaders } from '@/lib/api'; 
+import { useAuth } from '@/lib/auth';
 import Header from '../../components/layout/Header';
 import styles from './styles.module.css';
 import Image from 'next/image';
@@ -67,7 +67,7 @@ const parseHinhAnh = (hinhAnh: string | undefined | null): string[] => {
     if (Array.isArray(parsed)) {
       return parsed.length > 0 ? parsed.map(getValidImageSrc) : ['/images/no-results.png'];
     }
-  } catch (_) {
+  } catch {
     // Continue to other parsing methods
   }
 
@@ -95,18 +95,18 @@ export default function RoomsListPage() {
   const { selectedLanguage } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user, loading: authLoading } = useAuth();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedRoomImages, setSelectedRoomImages] = useState<string[] | null>(null);
 
-const fetchRooms = async () => {
+const fetchRooms = useCallback(async () => {
   setLoading(true);
+  setError('');
   try {
     const response = await fetch(`${API_BASE_URL}/Phong`, {
       method: 'GET',
-      headers: getAuthHeaders('GET'),
-      credentials: 'include'
     });
 
     if (!response.ok) {
@@ -117,7 +117,6 @@ const fetchRooms = async () => {
     const roomsData: ApiRoomData[] = Array.isArray(data) ? data : [data];
     const maLoaiPhong = searchParams?.get('maLoaiPhong');
 
-    // Filter ở phía client nếu có maLoaiPhong
     const filteredRooms = maLoaiPhong
       ? roomsData.filter(room => room.maLoaiPhong === maLoaiPhong)
       : roomsData;
@@ -134,18 +133,18 @@ const fetchRooms = async () => {
     }));
 
     setRooms(roomsWithDetails);
-  } catch (err) {
+  } catch (err: any) {
     console.error('Lỗi khi lấy danh sách phòng:', err);
-    setError('Không thể tải danh sách phòng. Vui lòng thử lại sau.');
+    setError(err.message || 'Không thể tải danh sách phòng. Vui lòng thử lại sau.');
   } finally {
     setLoading(false);
   }
-};
+}, [searchParams, setLoading, setError, setRooms]);
 
   useEffect(() => {
     i18n.changeLanguage(selectedLanguage);
     fetchRooms();
-  }, [selectedLanguage, searchParams, fetchRooms]);
+  }, [selectedLanguage, fetchRooms]);
 
 const renderAmenityIcon = (amenity: string) => {
   // Thay đổi JSX.Element thành React.ReactNode
@@ -178,7 +177,17 @@ const renderAmenityIcon = (amenity: string) => {
     setSelectedRoomImages(null);
   };
 
-  if (loading) {
+  const handleBookNow = (maPhong: string) => {
+    if (authLoading) return;
+
+    if (!user) {
+      router.push(`/login?redirect=/users/booking?maPhong=${maPhong}`);
+    } else {
+      router.push(`/users/booking?maPhong=${maPhong}`);
+    }
+  };
+
+  if (loading || authLoading) {
     return (
       <div className={styles.loadingContainer}>
         <div className={styles.spinner}></div>
@@ -204,7 +213,7 @@ const renderAmenityIcon = (amenity: string) => {
       <Header />
       <div className={styles.roomInformationContainer}>
         <div className={styles.container}>
-          <h1 className={styles.roomTitle}>Danh sách phòng</h1>
+          <h1 className={styles.roomTitle}>Danh sách phòng {searchParams?.get('maLoaiPhong') ? `(Loại: ${searchParams.get('maLoaiPhong')})` : ''}</h1>
           
           <div className={styles.roomsList}>
             {rooms.length > 0 ? (
@@ -243,7 +252,7 @@ const renderAmenityIcon = (amenity: string) => {
                     <div className={styles.amenities}>
                       <h4>Tiện nghi</h4>
                       <ul className={styles.amenitiesList}>
-                        {room.amenities?.map((amenity, index) => (
+                        {(room.amenities || defaultAmenities)?.map((amenity, index) => (
                           <li key={index} className={styles.amenityItem}>
                             <span className={styles.amenityIcon}>{renderAmenityIcon(amenity)}</span>
                             <span className={styles.amenityName}>{amenity}</span>
@@ -251,20 +260,21 @@ const renderAmenityIcon = (amenity: string) => {
                         ))}
                       </ul>
                     </div>
-                  </div>
-                  <div className={styles.roomRowActions}>
-                    <button 
-                      className={styles.viewImagesButton}
-                      onClick={() => handleViewImages(room.hinhAnh || [])}
-                    >
-                      Xem ảnh
-                    </button>
-                    <button 
-                      className={styles.bookButton}
-                      onClick={() => router.push(`/users/booking?roomId=${room.maPhong}`)}
-                    >
-                      Đặt phòng ngay
-                    </button>
+                    <div className={styles.roomActions}>
+                      <button 
+                        className={styles.detailsButton}
+                        onClick={() => handleViewImages(room.hinhAnh || [room.thumbnail])}
+                      >
+                        Xem chi tiết
+                      </button>
+                      <button 
+                        className={styles.bookButton}
+                        onClick={() => handleBookNow(room.maPhong)}
+                        disabled={authLoading}
+                      >
+                        {authLoading ? 'Đang tải...' : 'Đặt ngay'}
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))

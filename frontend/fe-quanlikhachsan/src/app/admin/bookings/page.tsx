@@ -91,6 +91,7 @@ export default function BookingManager() {
   const [error, setError] = useState<string | null>(null);
   const [customers, setCustomers] = useState<{maKh: string, hoKh: string, tenKh: string}[]>([]);
   const [rooms, setRooms] = useState<RoomInfoBE[]>([]); // Cập nhật để chứa RoomInfoBE
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [roomTypes, setRoomTypes] = useState<RoomTypeBE[]>([]); // State cho loại phòng
 
   // Hàm format tiền tệ

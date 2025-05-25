@@ -3,7 +3,6 @@
 import React, { useState, useEffect, FC } from 'react';
 import AuthCheck from '../../../app/components/auth/AuthCheck';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import styles from './styles.module.css';
 import PersonalInfoForm from '../../../app/components/profile/PersonalInfoForm';
 import ChangePasswordModal from '../../../app/components/profile/ChangePasswordModal';
@@ -14,11 +13,12 @@ import { useLanguage } from '../../../app/components/profile/LanguageContext';
 import { useTranslation } from 'react-i18next';
 import i18n from '../../../app/i18n';
 import Header from '../../components/layout/Header';
+import { useLogout } from '../../../lib/hooks';
 
 const ProfilePage: FC = () => {
-  const router = useRouter();
   const { t } = useTranslation();
   const { languages, selectedLanguage, setSelectedLanguage } = useLanguage();
+  const handleLogout = useLogout();
   const [isClient, setIsClient] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -130,12 +130,6 @@ const ProfilePage: FC = () => {
 
     fetchProfileAndTransactions();
   }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    sessionStorage.clear();
-    router.push('/login');
-  };
 
   // Toggle edit mode
   const toggleEditMode = () => {

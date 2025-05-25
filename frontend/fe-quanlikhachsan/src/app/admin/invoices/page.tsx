@@ -58,7 +58,7 @@ export default function InvoiceManager() {
         const invoicesDataFromApi = await getInvoices(); // Assume this returns raw API data (camelCase or PascalCase)
         
         // Lấy danh sách đặt phòng
-        const bookingsDataFromApi: any[] = await getBookingHistory(""); // Type as any for flexible property access
+        const bookingsDataFromApi: any[] = await getBookingHistory(); // Type as any for flexible property access
                 
         const customerMap = new Map<string, Customer>(); // Customer interface uses PascalCase
         

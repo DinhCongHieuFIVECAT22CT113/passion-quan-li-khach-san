@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { getUserInfo } from '../../../lib/config';
+// import { getUserInfo } from '../../../lib/config'; // Xóa import này
+import { useAuth } from '../../../lib/auth'; // Thêm import useAuth
 // import styles from '../AdminLayout.module.css'; // Không sử dụng
 
 // Định nghĩa danh sách vai trò
@@ -63,16 +64,24 @@ export default function PermissionsPage() {
   const [selectedRole, setSelectedRole] = useState('R00');
   const [rolePerms, setRolePerms] = useState<string[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
+  const { user, loading: authLoading } = useAuth(); // Sử dụng useAuth
   
   useEffect(() => {
-    const userInfo = getUserInfo();
-    if (userInfo) {
-      setIsAdmin(userInfo.isAdmin);
+    // const userInfo = getUserInfo(); // Xóa dòng này
+    // if (userInfo) { // Xóa khối if này
+    //   setIsAdmin(userInfo.isAdmin);
+    // }
+    if (!authLoading) { // Chỉ cập nhật khi auth đã load xong
+      if (user) {
+        setIsAdmin(user.role === 'R00'); // Kiểm tra role của user từ useAuth
+      } else {
+        setIsAdmin(false); // Nếu không có user, không phải admin
+      }
     }
     
     // Lấy quyền cho vai trò đã chọn
     setRolePerms(rolePermissions[selectedRole as keyof typeof rolePermissions] || []);
-  }, [selectedRole]);
+  }, [selectedRole, user, authLoading]); // Thêm user, authLoading vào dependencies
   
   // Nhóm quyền theo module
   const modulePermissions = permissions.reduce((acc, perm) => {
@@ -104,75 +113,79 @@ export default function PermissionsPage() {
     <div className="permissions-container" style={{padding: '24px', maxWidth: '1200px', margin: '0 auto'}}>
       <h1>Quản lý phân quyền</h1>
       
-      {!isAdmin && (
+      {authLoading ? (
+        <div>Đang kiểm tra quyền truy cập...</div>
+      ) : !isAdmin ? (
         <div style={{background: '#f8d7da', color: '#721c24', padding: '12px', borderRadius: '4px', marginBottom: '20px'}}>
           Bạn không có quyền truy cập trang này. Chỉ Admin mới có thể quản lý phân quyền.
         </div>
-      )}
-      
-      <div style={{display: 'flex', gap: '20px', marginTop: '20px'}}>
-        <div style={{width: '300px'}}>
-          <h2 style={{marginBottom: '16px', fontSize: '18px'}}>Vai trò</h2>
-          <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
-            {roleDefinitions.map(role => (
-              <div 
-                key={role.id} 
-                style={{
-                  padding: '12px', 
-                  border: `1px solid ${selectedRole === role.id ? '#3182ce' : '#e2e8f0'}`,
-                  borderRadius: '4px',
-                  background: selectedRole === role.id ? '#ebf8ff' : '#fff',
-                  cursor: 'pointer'
-                }}
-                onClick={() => handleRoleChange(role.id)}
-              >
-                <h3 style={{fontWeight: 'bold'}}>{role.name} ({role.id})</h3>
-                <p style={{fontSize: '14px', color: '#4a5568', marginTop: '4px'}}>{role.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-        
-        <div style={{flex: 1}}>
-          <h2 style={{marginBottom: '16px', fontSize: '18px'}}>Quyền hạn cho {roleDefinitions.find(r => r.id === selectedRole)?.name}</h2>
-          
-          {Object.entries(modulePermissions).map(([module, perms]) => (
-            <div key={module} style={{marginBottom: '24px'}}>
-              <h3 style={{borderBottom: '1px solid #e2e8f0', paddingBottom: '8px', marginBottom: '12px'}}>{module}</h3>
-              <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '12px'}}>
-                {perms.map(perm => (
-                  <div key={perm.id} style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-                    <input 
-                      type="checkbox" 
-                      id={perm.id} 
-                      checked={rolePerms.includes(perm.id)}
-                      onChange={(e) => handlePermissionChange(perm.id, e.target.checked)}
-                      disabled={!isAdmin || selectedRole === 'R00'} // Admin (R00) luôn có tất cả quyền
-                    />
-                    <label htmlFor={perm.id}>{perm.name}</label>
+      ) : (
+        <>
+          <div style={{display: 'flex', gap: '20px', marginTop: '20px'}}>
+            <div style={{width: '300px'}}>
+              <h2 style={{marginBottom: '16px', fontSize: '18px'}}>Vai trò</h2>
+              <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
+                {roleDefinitions.map(role => (
+                  <div 
+                    key={role.id} 
+                    style={{
+                      padding: '12px', 
+                      border: `1px solid ${selectedRole === role.id ? '#3182ce' : '#e2e8f0'}`,
+                      borderRadius: '4px',
+                      background: selectedRole === role.id ? '#ebf8ff' : '#fff',
+                      cursor: 'pointer'
+                    }}
+                    onClick={() => handleRoleChange(role.id)}
+                  >
+                    <h3 style={{fontWeight: 'bold'}}>{role.name} ({role.id})</h3>
+                    <p style={{fontSize: '14px', color: '#4a5568', marginTop: '4px'}}>{role.description}</p>
                   </div>
                 ))}
               </div>
             </div>
-          ))}
-          
-          {isAdmin && selectedRole !== 'R00' && (
-            <button 
-              style={{
-                background: '#3182ce', 
-                color: 'white', 
-                padding: '10px 16px', 
-                borderRadius: '4px',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-              onClick={() => alert('Đã lưu cấu hình phân quyền!')}
-            >
-              Lưu thay đổi
-            </button>
-          )}
-        </div>
-      </div>
+            
+            <div style={{flex: 1}}>
+              <h2 style={{marginBottom: '16px', fontSize: '18px'}}>Quyền hạn cho {roleDefinitions.find(r => r.id === selectedRole)?.name}</h2>
+              
+              {Object.entries(modulePermissions).map(([module, perms]) => (
+                <div key={module} style={{marginBottom: '24px'}}>
+                  <h3 style={{borderBottom: '1px solid #e2e8f0', paddingBottom: '8px', marginBottom: '12px'}}>{module}</h3>
+                  <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '12px'}}>
+                    {perms.map(perm => (
+                      <div key={perm.id} style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                        <input 
+                          type="checkbox" 
+                          id={perm.id} 
+                          checked={rolePerms.includes(perm.id)}
+                          onChange={(e) => handlePermissionChange(perm.id, e.target.checked)}
+                          disabled={!isAdmin || selectedRole === 'R00'} // Admin (R00) luôn có tất cả quyền
+                        />
+                        <label htmlFor={perm.id}>{perm.name}</label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              
+              {isAdmin && selectedRole !== 'R00' && (
+                <button 
+                  style={{
+                    background: '#3182ce', 
+                    color: 'white', 
+                    padding: '10px 16px', 
+                    borderRadius: '4px',
+                    border: 'none',
+                    cursor: 'pointer'
+                  }}
+                  onClick={() => alert('Đã lưu cấu hình phân quyền!')}
+                >
+                  Lưu thay đổi
+                </button>
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

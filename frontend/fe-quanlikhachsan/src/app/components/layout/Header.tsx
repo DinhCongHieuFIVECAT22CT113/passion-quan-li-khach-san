@@ -4,24 +4,50 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { FaUser } from 'react-icons/fa';
+import { FaUser, FaSignOutAlt } from 'react-icons/fa';
 import styles from './Header.module.css';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../profile/LanguageContext';
 import i18n from '../../i18n';
+import { useAuth } from '../../../lib/auth';
+import { useLogout } from '../../../lib/hooks';
 
 export default function Header() {
   const pathname = usePathname();
   const { t } = useTranslation();
   const { selectedLanguage } = useLanguage();
   const [isReady, setIsReady] = useState(false);
+  const { user, loading: authLoading } = useAuth();
+  const handleLogout = useLogout();
 
   useEffect(() => {
-    i18n.changeLanguage(selectedLanguage).then(() => {
+    if (i18n.language !== selectedLanguage) {
+      i18n.changeLanguage(selectedLanguage).then(() => {
+        setIsReady(true);
+      });
+    } else {
       setIsReady(true);
-    });
+    }
   }, [selectedLanguage]);
 
+  if (authLoading) {
+    return (
+      <header className={styles.header}>
+        <div className={styles.headerContent}>
+          <div className={styles.logoContainer}>
+            <Link href="/">
+              <Image src="/images/logo.png" alt="Hotel Logo" width={120} height={40} />
+            </Link>
+          </div>
+          <nav className={styles.mainNav}>
+          </nav>
+          <div className={styles.userActions}>
+          </div>
+        </div>
+      </header>
+    );
+  }
+  
   if (!isReady) return null;
 
   return (
@@ -53,9 +79,26 @@ export default function Header() {
           </Link>
         </nav>
         <div className={styles.userActions}>
-          <Link href="/users/profile" className={styles.profileIconLink}>
-            <FaUser className={styles.userIcon} />
-          </Link>
+          {user ? (
+            <>
+              <Link href="/users/profile" className={styles.profileLink}>
+                <FaUser className={styles.userIcon} />
+                <span className={styles.userName}>{user.hoTen || user.maNguoiDung}</span>
+              </Link>
+              <button onClick={handleLogout} className={styles.logoutButton}>
+                <FaSignOutAlt /> {t('profile.logout', 'Đăng xuất')}
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/login" className={styles.authLink}>
+                {t('profile.login', 'Đăng nhập')}
+              </Link>
+              <Link href="/signup" className={`${styles.authLink} ${styles.signupButton}`}>
+                {t('profile.signup', 'Đăng ký')}
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </header>

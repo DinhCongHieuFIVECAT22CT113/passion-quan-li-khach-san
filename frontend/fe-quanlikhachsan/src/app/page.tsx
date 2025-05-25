@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getRedirectPathByRole, APP_CONFIG } from '../lib/config';
+import { getRedirectPathByRole } from '../lib/config';
 import { useAuth } from '../lib/auth';
 
 export default function HomePage() {
@@ -18,9 +18,9 @@ export default function HomePage() {
       const redirectPath = getRedirectPathByRole(user.role);
       router.push(redirectPath);
     } else {
-      // Chưa đăng nhập hoặc không có role, chuyển hướng đến trang đăng nhập
-      console.log('Người dùng chưa đăng nhập hoặc không có role, chuyển hướng đến trang đăng nhập');
-      router.push(APP_CONFIG.routes.login);
+      // Chưa đăng nhập hoặc không có role, chuyển hướng đến trang chủ công khai
+      console.log('Người dùng chưa đăng nhập hoặc không có role, chuyển hướng đến trang chủ công khai');
+      router.push('/users/home');
     }
   }, [router, user, loading]);
   

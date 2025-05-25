@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { getStaffs } from '../../../lib/api';
-import { getUserInfo } from '../../../lib/config';
+// import { getUserInfo } from '../../../lib/config'; // Xóa getUserInfo
+import { useAuth } from '../../../lib/auth'; // Thêm useAuth
 
 interface Staff {
   maNV: string;
@@ -17,6 +18,7 @@ export default function StaffDirectory() {
   const [profile, setProfile] = useState<Staff | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user, loading: authLoading } = useAuth(); // Sử dụng useAuth
 
   // Lấy danh sách nhân viên từ API
   useEffect(() => {
@@ -34,22 +36,21 @@ export default function StaffDirectory() {
         
         setStaffs(activeStaffs);
         
-        // Lấy thông tin người dùng từ localStorage
-        const userInfo = getUserInfo();
-        if (userInfo) {
+        // Lấy thông tin người dùng từ useAuth
+        if (!authLoading && user) { // Kiểm tra authLoading và user
           // Tìm thông tin nhân viên tương ứng với người dùng hiện tại
           const currentUserStaff = staffData.find((staff: Staff) => 
-            staff.hoTen?.toLowerCase().includes(userInfo.userName?.toLowerCase())
+            staff.hoTen?.toLowerCase().includes(user.hoTen?.toLowerCase() || '') // Sử dụng user.hoTen
           );
           
           setProfile(currentUserStaff || {
-            hoTen: userInfo.userName || 'Unknown User',
-            chucVu: userInfo.userRole === 'R01' ? 'Quản lý' : 
-                   userInfo.userRole === 'R02' ? 'Nhân viên' : 
-                   userInfo.userRole === 'R03' ? 'Kế toán' : 'Nhân viên',
-            maNV: 'N/A',
-            email: 'N/A',
-            soDienThoai: 'N/A',
+            hoTen: user.hoTen || 'Unknown User', // Sử dụng user.hoTen
+            chucVu: user.role === 'R01' ? 'Quản lý' : 
+                   user.role === 'R02' ? 'Nhân viên' : 
+                   'Nhân viên', // Mặc định là Nhân viên
+            maNV: user.maNguoiDung || 'N/A', // Sử dụng user.maNguoiDung nếu có
+            email: 'N/A', // Cần xem xét lại cách lấy email nếu cần
+            soDienThoai: 'N/A', // Cần xem xét lại cách lấy SĐT nếu cần
             trangThai: 'Hoạt động'
           } as Staff);
         }
@@ -63,7 +64,7 @@ export default function StaffDirectory() {
     };
 
     fetchData();
-  }, []);
+  }, [user, authLoading]); // Thêm user, authLoading vào dependencies
 
   // Dùng màu khác nhau cho các vai trò
   const getRoleBadgeStyle = (role: string) => {

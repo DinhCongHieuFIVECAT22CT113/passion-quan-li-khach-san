@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, ReactNode, FC, useState } from 'react';
+import { useEffect, ReactNode, FC } from 'react';
 import { useRouter } from 'next/navigation';
 // import { getUserInfo, APP_CONFIG, getRedirectPathByRole } from '../../../lib/config'; // Bỏ getUserInfo
 import { APP_CONFIG, getRedirectPathByRole } from '../../../lib/config';

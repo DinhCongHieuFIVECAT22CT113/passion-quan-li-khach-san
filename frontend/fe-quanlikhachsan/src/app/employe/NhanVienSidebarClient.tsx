@@ -25,20 +25,20 @@ export default function NhanVienSidebarClient({ children }: { children: React.Re
 
   useEffect(() => {
     if (authLoading) return;
-
+      
     if (user && user.role) {
       const currentRole = user.role;
-      
-      const filteredNavs = allNavItems.filter(item => 
+        
+        const filteredNavs = allNavItems.filter(item => 
         item.roles.includes(currentRole) || 
         ((currentRole as string) === 'CRW' && item.roles.includes(ROLES.STAFF))
-      );
-      setNavItems(filteredNavs);
-      
-      setProfile({
+        );
+        setNavItems(filteredNavs);
+        
+        setProfile({
         name: user.hoTen || user.maNguoiDung || 'Nhân viên',
         role: getRoleName(currentRole)
-      });
+        });
     } else {
       setNavItems([]);
       setProfile(null);

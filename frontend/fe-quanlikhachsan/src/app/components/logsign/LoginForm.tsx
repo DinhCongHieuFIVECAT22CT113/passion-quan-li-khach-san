@@ -61,13 +61,11 @@ const LoginForm: React.FC = () => {
         // Lưu token vào localStorage và cookie
         localStorage.setItem('token', userData.token);
         localStorage.setItem('userName', userData.userName || '');
-        localStorage.setItem('userRole', userData.maRole || '');
         localStorage.setItem('userId', userData.maNguoiDung || '');
         Cookies.set('token', userData.token, { expires: 7 });
         
-        console.log('Đã lưu thông tin người dùng:', {
+        console.log('Đã lưu thông tin người dùng (không lưu userRole riêng lẻ nữa):', {
           userName: userData.userName,
-          userRole: userData.maRole,
           userId: userData.maNguoiDung
         });
         
@@ -102,7 +100,6 @@ const LoginForm: React.FC = () => {
         // Xóa thông tin đăng nhập nếu có lỗi
         localStorage.removeItem('token');
         localStorage.removeItem('userName');
-        localStorage.removeItem('userRole');
         localStorage.removeItem('userId');
         Cookies.remove('token');
         

@@ -396,15 +396,11 @@ export const updateCustomerProfile = async (profileData: unknown) => {
   }
 };
 
-// API lấy lịch sử đặt phòng của khách hàng
-export const getBookingHistory = async (_customerId: string) => { // Đổi customerId thành _customerId vì không dùng
-  // Hiện tại, API endpoint có thể không lọc theo customerId, nên customerId có thể không cần thiết
-  // hoặc có thể API lấy tất cả rồi lọc ở client (tùy theo thiết kế API)
-  console.log(`Đang gọi API lấy lịch sử đặt phòng`);
+// API lấy lịch sử đặt phòng của người dùng hiện tại (từ token)
+export const getBookingHistory = async () => {
+  console.log(`Đang gọi API lấy lịch sử đặt phòng của người dùng hiện tại`);
   try {
-    // Nếu API của bạn hỗ trợ lọc theo customerId, hãy thêm nó vào URL
-    // const response = await fetch(`${API_BASE_URL}/DatPhong/khachhang/${customerId}`, {
-    const response = await fetch(`${API_BASE_URL}/DatPhong`, { // Giả sử API này trả về tất cả đặt phòng
+    const response = await fetch(`${API_BASE_URL}/DatPhong/KhachHang`, {
       method: 'GET',
       headers: getAuthHeaders('GET'),
       credentials: 'include'
@@ -413,18 +409,9 @@ export const getBookingHistory = async (_customerId: string) => { // Đổi cust
     const data = await handleResponse(response);
     if (Array.isArray(data)) {
       return data;
-    } else if (typeof data === 'object' && data !== null) {
-      // Nếu API trả về một object chứa mảng, ví dụ { bookings: [...] }
-      // Hoặc nếu trả về một object đơn lẻ khi chỉ có 1 booking (ít gặp)
-      // Cần điều chỉnh dựa trên cấu trúc thực tế của response
-      // Ví dụ nếu data là { value: [...] }
-      if (data.value && Array.isArray(data.value)) {
-        return data.value;
-      }
-      return [data]; // Gói vào mảng nếu là object đơn lẻ
     } else {
-      console.warn('Dữ liệu lịch sử đặt phòng không phải mảng hoặc object hợp lệ:', data);
-      return []; // Trả về mảng rỗng nếu không có dữ liệu hoặc định dạng không đúng
+      console.error('Dữ liệu lịch sử đặt phòng không phải mảng:', data);
+      throw new Error('Định dạng dữ liệu không hợp lệ');
     }
   } catch (error) {
     console.error('Lỗi khi gọi API getBookingHistory:', error);

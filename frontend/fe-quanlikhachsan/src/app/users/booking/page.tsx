@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './styles.module.css';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../../../app/components/profile/LanguageContext';
 import i18n from '../../../app/i18n';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
+import { useAuth } from '@/lib/auth';
+import { APP_CONFIG, API_BASE_URL } from '@/lib/config';
 
 // Define the shape of selectedRoomData
 interface RoomData {
@@ -53,6 +55,8 @@ export default function BookingPage() {
   const { t } = useTranslation();
   const { selectedLanguage } = useLanguage();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { user, loading: authLoading } = useAuth();
   const [isClient, setIsClient] = useState(false);
   const [selectedRoomData, setSelectedRoomData] = useState<RoomData | null>(null);
   const [mainImage, setMainImage] = useState('/images/default-room.jpg');
@@ -71,6 +75,8 @@ export default function BookingPage() {
   });
   const [errors, setErrors] = useState<Errors>({});
   const [success, setSuccess] = useState('');
+  const [apiError, setApiError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -78,30 +84,47 @@ export default function BookingPage() {
   }, [selectedLanguage]);
 
   useEffect(() => {
-    const data = JSON.parse(localStorage.getItem('selectedRoomData') || '{}');
-    if (data.name) {
-      setSelectedRoomData({
-        name: data.name || 'Unknown Room',
-        image: data.image || '/images/default-room.jpg',
-        price: data.price || '0đ',
-        checkInDate: data.checkInDate || '',
-        checkOutDate: data.checkOutDate || '',
-        adults: data.adults || 1,
-        children: data.children || 0,
-      });
-      setMainImage(data.image || '/images/default-room.jpg');
-      setFormData((prev) => ({
-        ...prev,
-        message: data.name
-          ? `${t('booking.bookingFor')} ${data.name} ${data.checkInDate ? t('booking.from') + ' ' + data.checkInDate : ''} ${data.checkOutDate ? t('booking.to') + ' ' + data.checkOutDate : ''}`
-          : t('booking.noRoomSelected'),
-        checkInDate: data.checkInDate || '',
-        checkOutDate: data.checkOutDate || '',
-        adults: data.adults || 1,
-        children: data.children || 0,
-      }));
+    if (!authLoading && !user) {
+      const maPhong = searchParams?.get('maPhong');
+      const redirectUrl = maPhong ? `/users/booking?maPhong=${maPhong}` : '/users/booking';
+      router.push(`${APP_CONFIG.routes.login}?redirect=${encodeURIComponent(redirectUrl)}`);
     }
-  }, [t]);
+  }, [user, authLoading, router, searchParams]);
+
+  useEffect(() => {
+    if (user) {
+      const maPhongFromUrl = searchParams?.get('maPhong');
+      
+      const data = JSON.parse(localStorage.getItem('selectedRoomData') || '{}');
+      
+      if (data.name) {
+        setSelectedRoomData({
+          name: data.name || 'Unknown Room',
+          image: data.image || '/images/default-room.jpg',
+          price: data.price || '0đ',
+          checkInDate: data.checkInDate || '',
+          checkOutDate: data.checkOutDate || '',
+          adults: data.adults || 1,
+          children: data.children || 0,
+        });
+        setMainImage(data.image || '/images/default-room.jpg');
+        setFormData((prev) => ({
+          ...prev,
+          name: user.hoTen || '',
+          email: prev.email,
+          message: data.name
+            ? `${t('booking.bookingFor')} ${data.name} ${data.checkInDate ? t('booking.from') + ' ' + data.checkInDate : ''} ${data.checkOutDate ? t('booking.to') + ' ' + data.checkOutDate : ''}`
+            : t('booking.noRoomSelected'),
+          checkInDate: data.checkInDate || '',
+          checkOutDate: data.checkOutDate || '',
+          adults: data.adults || 1,
+          children: data.children || 0,
+        }));
+      } else if (maPhongFromUrl) {
+        console.log("Cần fetch chi tiết phòng cho: ", maPhongFromUrl)
+      }
+    }
+  }, [user, t, searchParams]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -112,6 +135,7 @@ export default function BookingPage() {
       [name]: name === 'adults' || name === 'children' ? parseInt(value) || 0 : value,
     }));
     setErrors((prev) => ({ ...prev, [name]: '' }));
+    setApiError('');
     if (name === 'checkInDate' || name === 'checkOutDate' || name === 'adults' || name === 'children') {
       setSelectedRoomData((prev) => ({
         ...prev,
@@ -120,16 +144,23 @@ export default function BookingPage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const currentToken = localStorage.getItem('token');
+    if (!user || !currentToken) {
+      const maPhong = searchParams?.get('maPhong');
+      const redirectUrl = maPhong ? `/users/booking?maPhong=${maPhong}` : '/users/booking';
+      router.push(`${APP_CONFIG.routes.login}?redirect=${encodeURIComponent(redirectUrl)}`);
+      return;
+    }
+    setIsSubmitting(true);
+    setApiError('');
     const newErrors: Errors = {};
 
-    // Validate Name
     if (!formData.name) {
       newErrors.name = t('booking.nameRequired') || 'Vui lòng điền Họ và Tên của bạn';
     }
 
-    // Validate Email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!formData.email) {
       newErrors.email = t('booking.emailRequired') || 'Vui lòng điền Email của bạn';
@@ -137,12 +168,10 @@ export default function BookingPage() {
       newErrors.email = t('booking.invalidEmail') || 'Email không hợp lệ';
     }
 
-    // Validate Phone
     if (!formData.phone) {
       newErrors.phone = t('booking.phoneRequired') || 'Vui lòng điền số điện thoại của bạn';
     }
 
-    // Validate ID Number
     const idNumberRegex = /^[0-9]{12}$/;
     if (!formData.idNumber) {
       newErrors.idNumber = t('booking.idNumberRequired') || 'Vui lòng điền số CMND/CCCD của bạn';
@@ -152,18 +181,15 @@ export default function BookingPage() {
         'Số CMND/CCCD phải có tối đa 12 số và không chứa chữ cái hoặc ký tự đặc biệt';
     }
 
-    // Validate Payment Method
     if (!formData.paymentMethod) {
       newErrors.paymentMethod =
         t('booking.paymentMethodRequired') || 'Vui lòng chọn phương thức thanh toán';
     }
 
-    // Validate Card Type if payment is by card
     if (formData.paymentMethod !== 'cash' && !formData.cardType) {
       newErrors.cardType = t('booking.selectCardType') || 'Vui lòng chọn loại thẻ';
     }
 
-    // Validate Room Data
     if (!selectedRoomData?.name) {
       newErrors.name = t('booking.noRoomSelected') || 'Vui lòng chọn phòng';
     }
@@ -177,14 +203,13 @@ export default function BookingPage() {
       newErrors.adults = t('booking.adultsRequired') || 'Vui lòng chọn số người lớn';
     }
 
-    // If there are errors, update state and stop submission
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       setSuccess('');
+      setIsSubmitting(false);
       return;
     }
 
-    // Update localStorage with formData
     localStorage.setItem('selectedRoomData', JSON.stringify({
       ...selectedRoomData,
       checkInDate: formData.checkInDate,
@@ -193,27 +218,52 @@ export default function BookingPage() {
       children: formData.children,
     }));
 
-    // If no errors, proceed with submission
     setErrors({});
-    setSuccess(t('booking.notification') || 'Đặt phòng thành công!');
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      idNumber: '',
-      message: formData.message,
-      paymentMethod: '',
-      cardType: '',
-      checkInDate: '',
-      checkOutDate: '',
-      adults: 1,
-      children: 0,
-    });
+    try {
+      const maPhong = searchParams?.get('maPhong');
+      if (!maPhong) {
+        throw new Error('Mã phòng không tồn tại để thực hiện đặt phòng.');
+      }
+      const bookingData = {
+        maNguoiDung: user.maNguoiDung,
+        maPhong: maPhong, 
+        ngayNhan: formData.checkInDate,
+        ngayTra: formData.checkOutDate,
+        soLuongNguoiLon: formData.adults,
+        soLuongTreEm: formData.children,
+        tongTien: calculatePrice().total,
+        ghiChu: formData.message,
+      };
 
-    setTimeout(() => {
+      const response = await fetch(`${API_BASE_URL}/PhieuDatPhong`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${currentToken}`,
+        },
+        body: JSON.stringify(bookingData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Lỗi không xác định từ server.' }));
+        throw new Error(errorData.message || `Lỗi đặt phòng: ${response.status}`);
+      }
+
+      setSuccess(t('booking.notification') || 'Đặt phòng thành công!');
+      localStorage.removeItem('selectedRoomData');
+      
+      setTimeout(() => {
+        setSuccess('');
+        router.push('/users/profile?tab=bookings');
+      }, 3000);
+
+    } catch (error: any) {
+      console.error('Lỗi khi đặt phòng:', error);
+      setApiError(error.message || 'Đã có lỗi xảy ra trong quá trình đặt phòng.');
       setSuccess('');
-      router.push('/users/home');
-    }, 3000);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const calculatePrice = () => {
@@ -227,19 +277,30 @@ export default function BookingPage() {
 
   const priceDetails = calculatePrice();
 
-  if (!isClient) {
-    return null;
+  if (!isClient || authLoading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <p>Đang tải trang đặt phòng...</p>
+      </div>
+    );
+  }
+  
+  if (!user) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+         <p>Đang chuyển hướng đến trang đăng nhập...</p>
+      </div>
+    );
   }
 
   return (
     <div className={styles.container}>
-      {/* Header */}
       <Header />
 
-      {/* Main Content */}
       <main className={styles.main}>
         <div className={styles.bookingContainer}>
-          {success && <div className={styles.notification}>{success}</div>}
+          {success && <div className={styles.notificationSuccess}>{success}</div>}
+          {apiError && <div className={styles.notificationError}>{apiError}</div>}
 
           <section className={styles.hero}>
             <div className={styles.heroContent}>
@@ -284,7 +345,6 @@ export default function BookingPage() {
                 )}
 
                 <form onSubmit={handleSubmit} className={styles.bookingForm} noValidate>
-                  {/* Guest Information */}
                   <div className={styles.formGroup}>
                     <label htmlFor="name">{t('booking.name')}</label>
                     <input
@@ -334,7 +394,6 @@ export default function BookingPage() {
                     {errors.idNumber && <p className={styles.error}>{errors.idNumber}</p>}
                   </div>
 
-                  {/* Room and Stay Details */}
                   <div className={styles.formGroup}>
                     <label htmlFor="checkInDate">{t('booking.checkIn')}</label>
                     <input
@@ -393,7 +452,6 @@ export default function BookingPage() {
                     />
                   </div>
 
-                  {/* Payment Information */}
                   <div className={styles.formGroup}>
                     <label htmlFor="paymentMethod">{t('profile.paymentMethod')}</label>
                     <select
@@ -458,9 +516,11 @@ export default function BookingPage() {
                     </div>
                   )}
 
-                  <button type="submit" className={styles.bookNowBtn}>
-                    {t('booking.bookNow')}
-                  </button>
+                  <div className={styles.formActions}>
+                    <button type="submit" className={styles.submitButton} disabled={isSubmitting}>
+                      {isSubmitting ? t('booking.submitting') : t('booking.submitBooking')}
+                    </button>
+                  </div>
                 </form>
               </div>
             </div>

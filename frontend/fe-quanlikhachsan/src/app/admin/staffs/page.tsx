@@ -1,13 +1,12 @@
 "use client";
 import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
-import Link from 'next/link';
+// import Link from 'next/link'; // Xóa import Link không sử dụng
 import styles from '../AdminLayout.module.css'; 
 import { API_BASE_URL } from '@/lib/config'; 
 import { getAuthHeaders, handleResponse } from '@/lib/api'; 
-import Image from 'next/image';
+// import Image from 'next/image'; // Xóa import Image không sử dụng
 import { withAuth, ROLES, useAuth } from '@/lib/auth'; // Import HOC và ROLES
-import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
-import { getStaffs, createStaff, updateStaff, deleteStaff } from "../../../lib/api";
+// import { FaPlus, FaEdit, FaTrash } from "react-icons/fa"; // Xóa import icons không sử dụng
 
 interface Staff {
   maNV: string;
@@ -104,24 +103,29 @@ function StaffPage() {
       }
     };
 
-  const fetchRoles = async () => {
-    // try {
-    //   const rolesData = await getRoles(); 
-    //   if (rolesData && Array.isArray(rolesData.quyen)) {
-    //     setRoles(rolesData.quyen);
-    //   } else {
-    //     console.error("Lỗi: Dữ liệu quyền không hợp lệ", rolesData);
-    //     setRoles([]); 
-    //   }
-    // } catch (error) {
-    //   console.error("Lỗi khi lấy danh sách quyền:", error);
-    //   setRoles([]);
-    // }
+  const fetchAllRoles = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/Role`, {
+        method: 'GET',
+        headers: getAuthHeaders('GET'),
+        credentials: 'include'
+      });
+      const rolesData = await handleResponse(response);
+      if (rolesData && Array.isArray(rolesData)) {
+        setRoles(rolesData.map((r: any) => ({ maRole: r.maRole, tenRole: r.tenRole })));
+      } else {
+        console.error("Lỗi: Dữ liệu Role không hợp lệ", rolesData);
+        setRoles([]); 
+      }
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách Role:", error);
+      setRoles([]);
+    }
   };
 
   useEffect(() => {
     fetchStaffs();
-    fetchRoles();
+    fetchAllRoles();
   }, []);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -235,12 +239,15 @@ function StaffPage() {
     (staff.soDienThoai || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  if (authLoading || isLoading) {
+    return <p>Đang tải dữ liệu trang nhân viên...</p>;
+  }
+
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Quản Lý Nhân Viên</h1>
 
       {error && <p className={styles.errorText}>Lỗi: {error}</p>}
-      {isLoading && <p>Đang tải dữ liệu...</p>}
 
       <div className={styles.toolbar}>
         <input 

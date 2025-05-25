@@ -7,17 +7,22 @@ interface DecodedToken {
   // Thêm các trường khác trong token nếu cần
 }
 
+// Danh sách các đường dẫn công khai không yêu cầu token
+const PUBLIC_PATHS = ['/login', '/signup', '/users/home', '/users/about', '/users/explore', '/users/rooms', '/users/roomsinformation', '/users/services', '/users/promotions'];
+
 export function middleware(request: NextRequest) {
   const token = request.cookies.get('token')?.value; // Lấy giá trị của cookie
+  const currentPath = request.nextUrl.pathname;
 
-  // Nếu không có token và không phải trang login, redirect về trang login
-  if (!token && !request.nextUrl.pathname.startsWith('/login')) {
+  // Nếu không có token và đường dẫn hiện tại không nằm trong danh sách công khai và không phải là trang gốc
+  if (!token && !PUBLIC_PATHS.includes(currentPath) && currentPath !== '/') {
     // Giữ lại redirectUrl nếu có để sau khi login thành công sẽ quay lại trang đó
-    const redirectUrl = request.nextUrl.pathname + request.nextUrl.search;
+    const redirectUrl = currentPath + request.nextUrl.search;
     const loginUrl = new URL('/login', request.url);
     if (redirectUrl !== '/' && redirectUrl !== '/login') { // Tránh redirectUrl trống hoặc về chính login
         loginUrl.searchParams.set('redirectUrl', redirectUrl);
     }
+    console.log(`Middleware: No token, path ${currentPath} is not public. Redirecting to login with redirectUrl: ${redirectUrl}`);
     return NextResponse.redirect(loginUrl);
   }
 
