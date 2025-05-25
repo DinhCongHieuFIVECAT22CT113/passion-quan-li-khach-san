@@ -10,7 +10,6 @@ import { API_BASE_URL } from '@/lib/config';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import { getServices } from '../../../lib/api';
-import { getAuthHeaders, handleResponse } from '@/lib/api';
 
 interface Service {
   maDichVu: string;

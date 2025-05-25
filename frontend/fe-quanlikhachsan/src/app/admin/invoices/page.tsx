@@ -21,12 +21,6 @@ interface Invoice {
   soTienConThieu?: number;
 }
 
-interface Booking {
-  MaDatPhong: string;
-  MaKH: string;
-  // các trường khác của đặt phòng
-}
-
 interface Customer {
   MaKh: string;
   HoKh: string;
@@ -36,7 +30,6 @@ interface Customer {
 
 export default function InvoiceManager() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
-  const [showAddModal, setShowAddModal] = useState(false);
   const [editInvoice, setEditInvoice] = useState<Invoice | null>(null);
   const [viewInvoice, setViewInvoice] = useState<Invoice | null>(null);
   const [form, setForm] = useState<Partial<Invoice>>({ 
@@ -184,13 +177,6 @@ export default function InvoiceManager() {
 
   // Khi mở modal Thêm mới
   const openAddModal = () => {
-    // setForm({ 
-    //   MaHoaDon: "", 
-    //   MaDatPhong: "", 
-    //   TongTien: 0, 
-    //   TrangThai: "Chưa thanh toán"
-    // });
-    // setShowAddModal(true);
     // Chuyển hướng trực tiếp vì form thêm hóa đơn phức tạp hơn
     window.location.href = `/admin/invoices/create`; 
   };
@@ -353,7 +339,7 @@ export default function InvoiceManager() {
       )}
 
       {/* Modal Thêm mới */}
-      {showAddModal && (
+      {/* {showAddModal && (
         <div className={styles.modal}>
           <div className={styles.modalContent}>
             <h3>Thêm hóa đơn</h3>
@@ -365,7 +351,7 @@ export default function InvoiceManager() {
             </form>
           </div>
         </div>
-      )}
+      )} */}
 
       {/* Modal Sửa */}
       {editInvoice && (

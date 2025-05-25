@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "UuiB1Esb5YhB+VQxEMb4YLuail1E/KEz4xMuNj1/9Qk=",
+  "Hash": "Gw0bQ0yyIk6+TJd9KW4xpxqnP4ri89PmvdwjNDP5QZY=",
   "Source": "be-quanlikhachsanapi",
   "BasePath": "_content/be-quanlikhachsanapi",
   "Mode": "Default",
@@ -10,10 +10,49 @@
     {
       "Name": "be-quanlikhachsanapi\\wwwroot",
       "Source": "be-quanlikhachsanapi",
-      "ContentRoot": "C:\\Users\\Admin\\Desktop\\test\\passion-quan-li-khach-san\\backend\\be-quanlikhachsanapi\\wwwroot\\",
+      "ContentRoot": "D:\\PTUDW quản lý khách sạn\\DEV-FE-BE\\backend\\be-quanlikhachsanapi\\wwwroot\\",
       "BasePath": "_content/be-quanlikhachsanapi",
       "Pattern": "**"
     }
   ],
-  "Assets": []
+  "Assets": [
+    {
+      "Identity": "D:\\PTUDW quản lý khách sạn\\DEV-FE-BE\\backend\\be-quanlikhachsanapi\\wwwroot\\images\\avatars\\c2d6b29c-1f63-4142-8c6d-876afde8a13d.jpg",
+      "SourceId": "be-quanlikhachsanapi",
+      "SourceType": "Discovered",
+      "ContentRoot": "D:\\PTUDW quản lý khách sạn\\DEV-FE-BE\\backend\\be-quanlikhachsanapi\\wwwroot\\",
+      "BasePath": "_content/be-quanlikhachsanapi",
+      "RelativePath": "images/avatars/c2d6b29c-1f63-4142-8c6d-876afde8a13d.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\images\\avatars\\c2d6b29c-1f63-4142-8c6d-876afde8a13d.jpg"
+    },
+    {
+      "Identity": "D:\\PTUDW quản lý khách sạn\\DEV-FE-BE\\backend\\be-quanlikhachsanapi\\wwwroot\\images\\avatars\\df180103-586e-45a0-8993-6581ed924748.jpg",
+      "SourceId": "be-quanlikhachsanapi",
+      "SourceType": "Discovered",
+      "ContentRoot": "D:\\PTUDW quản lý khách sạn\\DEV-FE-BE\\backend\\be-quanlikhachsanapi\\wwwroot\\",
+      "BasePath": "_content/be-quanlikhachsanapi",
+      "RelativePath": "images/avatars/df180103-586e-45a0-8993-6581ed924748.jpg",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\images\\avatars\\df180103-586e-45a0-8993-6581ed924748.jpg"
+    }
+  ]
 }

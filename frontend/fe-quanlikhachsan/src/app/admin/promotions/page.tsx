@@ -1,8 +1,9 @@
 'use client';
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import styles from "./PromotionManager.module.css";
 import { getPromotions, getAuthHeaders, getFormDataHeaders, handleResponse } from "../../../lib/api";
 import { API_BASE_URL } from "../../../lib/config";
+import Image from 'next/image';
 
 interface PromotionFE {
   MaKm: string;
@@ -140,7 +141,7 @@ export default function PromotionManager() {
     fetchAndSetPromotions();
   }, []);
 
-  const filtered = promotions.filter(p =>
+  const filtered = promotions.filter((p: PromotionFE) =>
     (p.TenKhuyenMai || '').toLowerCase().includes(search.toLowerCase()) ||
     (p.MaGiamGia || '').toLowerCase().includes(search.toLowerCase())
   );
@@ -185,15 +186,15 @@ export default function PromotionManager() {
     setShowAddModal(true);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setForm(prevForm => ({ 
+    setForm((prevForm: PromotionFormState) => ({ 
         ...prevForm, 
         [name]: (name === 'PhanTramGiam' || name === 'SoTienGiam') ? Number(value) : value 
     }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     
     try {
@@ -303,18 +304,25 @@ export default function PromotionManager() {
     }
   };
 
+  const handleSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <h2>Quản lý chương trình khuyến mãi</h2>
         <div style={{display:'flex', gap:12, alignItems:'center'}}>
-          <input
-            className={styles.search}
-            type="text"
-            placeholder="Tìm kiếm tên, loại, đối tượng..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
+          <div className={styles.searchContainer}>
+            <label className={styles.label}>Tìm kiếm:</label>
+            <input
+              type="text"
+              value={search}
+              onChange={handleSearchChange}
+              placeholder="Tìm theo tên hoặc mã giảm giá"
+              className={styles.searchInput}
+            />
+          </div>
           <button className={styles.addBtn} onClick={openAddModal}>+ Thêm khuyến mãi</button>
         </div>
       </div>
@@ -370,7 +378,17 @@ export default function PromotionManager() {
                   <tr key={promo.MaKm}>
                     <td>{promo.MaKm}</td>
                     <td>
-                      {promo.Thumbnail && <img src={promo.Thumbnail} alt={promo.TenKhuyenMai} className={styles.thumbnail} />}
+                      <Image 
+                        src={promo.Thumbnail || '/placeholder-image.png'} 
+                        alt={promo.TenKhuyenMai} 
+                        width={50}
+                        height={50}
+                        className={styles.thumbnail} 
+                        onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = '/placeholder-image.png';
+                        }}
+                      />
                       {promo.TenKhuyenMai}
                     </td>
                     <td>{promo.MaGiamGia}</td>
@@ -421,8 +439,24 @@ export default function PromotionManager() {
                 <input type="date" id="NgayKetThuc" name="NgayKetThuc" value={form.NgayKetThuc} onChange={handleChange} required />
               </div>
               <div className={styles.formGroup}>
-                <label htmlFor="Thumbnail">URL Hình ảnh thumbnail</label>
-                <input type="text" id="Thumbnail" name="Thumbnail" value={form.Thumbnail || ''} onChange={handleChange} />
+                <label htmlFor="Thumbnail" className={styles.label}>Thumbnail URL:</label>
+                <input
+                  type="text"
+                  name="Thumbnail"
+                  id="Thumbnail"
+                  value={form.Thumbnail || ''}
+                  onChange={handleChange}
+                  className={styles.input}
+                />
+                {form.Thumbnail && 
+                  <Image 
+                      src={form.Thumbnail} 
+                      alt="Preview Thumbnail" 
+                      width={100}
+                      height={100}
+                      style={{maxWidth: '200px', marginTop: '10px'}} 
+                  />
+                }
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="MoTa">Mô tả</label>

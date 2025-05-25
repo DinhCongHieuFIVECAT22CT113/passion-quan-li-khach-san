@@ -1,0 +1,29 @@
+{
+  "Files": [
+    {
+      "Id": "D:\\PTUDW quản lý khách sạn\\DEV-FE-BE\\backend\\be-quanlikhachsanapi\\wwwroot\\images\\avatars\\c2d6b29c-1f63-4142-8c6d-876afde8a13d.jpg",
+      "PackagePath": "staticwebassets\\images\\avatars\\c2d6b29c-1f63-4142-8c6d-876afde8a13d.jpg"
+    },
+    {
+      "Id": "D:\\PTUDW quản lý khách sạn\\DEV-FE-BE\\backend\\be-quanlikhachsanapi\\wwwroot\\images\\avatars\\df180103-586e-45a0-8993-6581ed924748.jpg",
+      "PackagePath": "staticwebassets\\images\\avatars\\df180103-586e-45a0-8993-6581ed924748.jpg"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.be-quanlikhachsanapi.Microsoft.AspNetCore.StaticWebAssets.props",
+      "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.build.be-quanlikhachsanapi.props",
+      "PackagePath": "build\\be-quanlikhachsanapi.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildMultiTargeting.be-quanlikhachsanapi.props",
+      "PackagePath": "buildMultiTargeting\\be-quanlikhachsanapi.props"
+    },
+    {
+      "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.buildTransitive.be-quanlikhachsanapi.props",
+      "PackagePath": "buildTransitive\\be-quanlikhachsanapi.props"
+    }
+  ],
+  "ElementsToRemove": []
+}

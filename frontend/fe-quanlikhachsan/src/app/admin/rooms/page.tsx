@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import styles from "./RoomManager.module.css";
 import { API_BASE_URL } from '@/lib/config';
 import { getAuthHeaders, handleResponse, getFormDataHeaders } from '@/lib/api';
+import Image from 'next/image';
 
 interface PhongBE {
   maPhong: string;
@@ -174,8 +175,6 @@ export default function RoomManager() {
     if (window.confirm('Bạn có chắc chắn muốn xóa phòng này?')) {
       setIsLoading(true);
       try {
-        const formData = new FormData();
-        
         const response = await fetch(`${API_BASE_URL}/Phong/${maPhongToDelete}`, {
           method: 'DELETE',
           headers: getFormDataHeaders(),
@@ -300,7 +299,18 @@ export default function RoomManager() {
             {rooms.map(room => (
               <tr key={room.maPhong}>
                 <td>{room.maPhong}</td>
-                <td>{room.soPhong}</td>
+                <td>
+                  {room.thumbnail && 
+                    <Image 
+                      src={room.thumbnail} 
+                      alt={`Thumbnail ${room.soPhong}`} 
+                      width={50} 
+                      height={50} 
+                      className={styles.thumbnail} 
+                    />
+                  }
+                  {room.soPhong}
+                </td>
                 <td>{room.tenLoaiPhong}</td>
                 <td>
                   {(room.donGia || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")} 
@@ -363,26 +373,36 @@ export default function RoomManager() {
                 />
               </div>
               <div>
-                <label>Thumbnail:</label>
-                {editingRoom && form.Thumbnail && typeof form.Thumbnail === 'string' && 
-                  <img src={`${API_BASE_URL}${form.Thumbnail}`} alt="Thumbnail" style={{maxWidth: '100px', maxHeight: '100px'}}/>
-                }
-                <input 
-                    type="file" 
-                    accept="image/*" 
-                    onChange={(e) => handleFileChange(e, 'thumbnail')} 
-                />
+                <label htmlFor="Thumbnail">Thumbnail:</label>
+                <input type="file" id="Thumbnail" name="Thumbnail" onChange={(e) => handleFileChange(e, 'thumbnail')} />
+                {editingRoom && editingRoom.thumbnail && typeof editingRoom.thumbnail === 'string' && (
+                  <div className={styles.imagePreviewContainer}>
+                    <p>Thumbnail hiện tại:</p>
+                    <Image src={editingRoom.thumbnail} alt="Thumbnail hiện tại" width={100} height={100} className={styles.imagePreview} />
+                  </div>
+                )}
+                {selectedThumbnailFile && (
+                  <div className={styles.imagePreviewContainer}>
+                    <p>Thumbnail mới:</p>
+                    <Image src={URL.createObjectURL(selectedThumbnailFile)} alt="Preview thumbnail" width={100} height={100} className={styles.imagePreview} />
+                  </div>
+                )}
               </div>
-               <div>
-                <label>Hình ảnh:</label>
-                {editingRoom && form.HinhAnh && typeof form.HinhAnh === 'string' && 
-                  <img src={`${API_BASE_URL}${form.HinhAnh}`} alt="Hình ảnh" style={{maxWidth: '100px', maxHeight: '100px'}}/>
-                }
-                <input 
-                    type="file" 
-                    accept="image/*" 
-                    onChange={(e) => handleFileChange(e, 'hinhAnh')} 
-                />
+              <div>
+                <label htmlFor="HinhAnh">Ảnh chi tiết:</label>
+                <input type="file" id="HinhAnh" name="HinhAnh" onChange={(e) => handleFileChange(e, 'hinhAnh')} />
+                {editingRoom && editingRoom.hinhAnh && typeof editingRoom.hinhAnh === 'string' && (
+                  <div className={styles.imagePreviewContainer}>
+                    <p>Ảnh chi tiết hiện tại:</p>
+                    <Image src={editingRoom.hinhAnh} alt="Hình ảnh chi tiết hiện tại" width={100} height={100} className={styles.imagePreview} />
+                  </div>
+                )}
+                {selectedHinhAnhFile && (
+                  <div className={styles.imagePreviewContainer}>
+                    <p>Ảnh chi tiết mới:</p>
+                    <Image src={URL.createObjectURL(selectedHinhAnhFile)} alt="Preview hình ảnh chi tiết" width={100} height={100} className={styles.imagePreview} />
+                  </div>
+                )}
               </div>
 
               <div className={styles.buttonGroup}>

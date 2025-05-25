@@ -148,32 +148,6 @@ interface RoomData {
   [key: string]: string | number | undefined;
 }
 
-interface StaffData {
-  staffId?: string;
-  firstName?: string;
-  lastName?: string;
-  birthDate?: string;
-  gender?: string;
-  address?: string;
-  phone?: string;
-  email?: string;
-  position?: string;
-  [key: string]: string | undefined;
-}
-
-interface ProfileData {
-  customerId?: string;
-  firstName?: string;
-  lastName?: string;
-  birthDate?: string;
-  gender?: string;
-  address?: string;
-  phone?: string;
-  email?: string;
-  idNumber?: string;
-  [key: string]: string | undefined;
-}
-
 // API Đăng nhập - chính xác từ Swagger
 export const loginUser = async (loginData: UserLoginDto): Promise<UserDto> => {
   const formData = new FormData();
@@ -422,24 +396,36 @@ export const updateCustomerProfile = async (profileData: unknown) => {
   }
 };
 
-// API lấy lịch sử đặt phòng của khách hàng (hoặc tất cả nếu customerId rỗng)
-export const getBookingHistory = async (customerId: string) => { // customerId có thể không dùng nếu API endpoint không hỗ trợ
-  console.log(`Đang gọi API lấy lịch sử đặt phòng: ${API_BASE_URL}/DatPhong`);
+// API lấy lịch sử đặt phòng của khách hàng
+export const getBookingHistory = async (_customerId: string) => { // Đổi customerId thành _customerId vì không dùng
+  // Hiện tại, API endpoint có thể không lọc theo customerId, nên customerId có thể không cần thiết
+  // hoặc có thể API lấy tất cả rồi lọc ở client (tùy theo thiết kế API)
+  console.log(`Đang gọi API lấy lịch sử đặt phòng`);
   try {
-    // Hiện tại API backend /DatPhong là lấy tất cả, không có filter theo customerId trực tiếp ở endpoint này
-    const url = `${API_BASE_URL}/DatPhong`; 
-    const response = await fetch(url, {
+    // Nếu API của bạn hỗ trợ lọc theo customerId, hãy thêm nó vào URL
+    // const response = await fetch(`${API_BASE_URL}/DatPhong/khachhang/${customerId}`, {
+    const response = await fetch(`${API_BASE_URL}/DatPhong`, { // Giả sử API này trả về tất cả đặt phòng
       method: 'GET',
       headers: getAuthHeaders('GET'),
       credentials: 'include'
     });
+
     const data = await handleResponse(response);
-    // Trả về dữ liệu gốc từ DatPhongDTO, không map lại tên trường
-    // Ví dụ: data sẽ có MaDatPhong, MaKH, NgayNhanPhong, NgayTraPhong, TrangThai
     if (Array.isArray(data)) {
       return data;
+    } else if (typeof data === 'object' && data !== null) {
+      // Nếu API trả về một object chứa mảng, ví dụ { bookings: [...] }
+      // Hoặc nếu trả về một object đơn lẻ khi chỉ có 1 booking (ít gặp)
+      // Cần điều chỉnh dựa trên cấu trúc thực tế của response
+      // Ví dụ nếu data là { value: [...] }
+      if (data.value && Array.isArray(data.value)) {
+        return data.value;
+      }
+      return [data]; // Gói vào mảng nếu là object đơn lẻ
+    } else {
+      console.warn('Dữ liệu lịch sử đặt phòng không phải mảng hoặc object hợp lệ:', data);
+      return []; // Trả về mảng rỗng nếu không có dữ liệu hoặc định dạng không đúng
     }
-    return [];
   } catch (error) {
     console.error('Lỗi khi gọi API getBookingHistory:', error);
     throw error;

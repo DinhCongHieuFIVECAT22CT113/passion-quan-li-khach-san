@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import styles from "./ServiceManager.module.css";
 import { API_BASE_URL } from '@/lib/config';
 import { getAuthHeaders, getFormDataHeaders, handleResponse } from '@/lib/api';
+import Image from 'next/image';
 
 // Interface cho dữ liệu nhận từ BE (camelCase, khớp với log)
 interface ServiceBE {
@@ -239,7 +240,12 @@ export default function ServiceManager() {
                     <td>{service.moTa || "-"}</td>
                     <td>
                       {service.thumbnail ? (
-                        <img src={service.thumbnail.startsWith('http') || service.thumbnail.startsWith('/') ? service.thumbnail : `${API_BASE_URL}${service.thumbnail}`} alt={service.tenDichVu || 'thumbnail'} width="50" />
+                        <Image 
+                            src={service.thumbnail.startsWith('http') || service.thumbnail.startsWith('/') ? service.thumbnail : `${API_BASE_URL}${service.thumbnail}`} 
+                            alt={service.tenDichVu || 'thumbnail'} 
+                            width={50} 
+                            height={50} 
+                        />
                       ) : (
                         "N/A"
                       )}
@@ -279,17 +285,33 @@ export default function ServiceManager() {
                 <textarea name="MoTa" value={form.MoTa || ''} onChange={handleChange} placeholder="Mô tả dịch vụ" rows={3} />
               </div>
               <div>
-                <label>Thumbnail:</label>
-                {/* form.Thumbnail là PascalCase từ form state, dùng để hiển thị URL/path cũ */}
-                {form.Thumbnail && typeof form.Thumbnail === 'string' && (
-                    <img src={form.Thumbnail.startsWith('http') || form.Thumbnail.startsWith('/') ? form.Thumbnail : `${API_BASE_URL}${form.Thumbnail}`} alt="Thumbnail hiện tại" style={{ maxWidth: '100px', maxHeight: '100px', display: 'block', marginBottom: '10px' }} />
+                <label htmlFor="Thumbnail">Ảnh thumbnail:</label>
+                <input type="file" id="Thumbnail" name="Thumbnail" accept="image/*" onChange={handleFileChange} />
+                {/* Hiển thị thumbnail hiện tại khi sửa hoặc preview khi chọn file mới */} 
+                {(editingService && form.Thumbnail && !selectedThumbnailFile) && (
+                    <div className={styles.imagePreviewContainer}>
+                        <p>Thumbnail hiện tại:</p>
+                        <Image 
+                            src={form.Thumbnail.startsWith('http') || form.Thumbnail.startsWith('/') ? form.Thumbnail : `${API_BASE_URL}${form.Thumbnail}`} 
+                            alt="Thumbnail hiện tại" 
+                            width={100} 
+                            height={100} 
+                            className={styles.imagePreview}
+                        />
+                    </div>
                 )}
-                <input 
-                    type="file" 
-                    accept="image/*" 
-                    onChange={handleFileChange} 
-                />
-                 {!editingService && !selectedThumbnailFile && <p style={{color: 'red'}}>Thumbnail là bắt buộc khi thêm mới.</p>}
+                {selectedThumbnailFile && (
+                    <div className={styles.imagePreviewContainer}>
+                        <p>Thumbnail mới:</p>
+                        <Image 
+                            src={URL.createObjectURL(selectedThumbnailFile)} 
+                            alt="Preview thumbnail" 
+                            width={100} 
+                            height={100} 
+                            className={styles.imagePreview}
+                        />
+                    </div>
+                )}
               </div>
               <div className={styles.buttonGroup}>
                 <button 

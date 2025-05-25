@@ -8,7 +8,6 @@ import styles from './styles.module.css';
 import { useLanguage } from '../../components/profile/LanguageContext';
 import i18n from '../../i18n';
 import { API_BASE_URL } from '@/lib/config';
-import { getAuthHeaders, handleResponse } from '@/lib/api';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 

@@ -67,7 +67,7 @@ const parseHinhAnh = (hinhAnh: string | undefined | null): string[] => {
     if (Array.isArray(parsed)) {
       return parsed.length > 0 ? parsed.map(getValidImageSrc) : ['/images/no-results.png'];
     }
-  } catch (e) {
+  } catch (_) {
     // Continue to other parsing methods
   }
 
@@ -145,7 +145,7 @@ const fetchRooms = async () => {
   useEffect(() => {
     i18n.changeLanguage(selectedLanguage);
     fetchRooms();
-  }, [selectedLanguage, searchParams]);
+  }, [selectedLanguage, searchParams, fetchRooms]);
 
 const renderAmenityIcon = (amenity: string) => {
   // Thay đổi JSX.Element thành React.ReactNode

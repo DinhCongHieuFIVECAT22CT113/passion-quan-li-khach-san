@@ -1467,3 +1467,4 @@ C:\Users\Admin\Desktop\test\passion-quan-li-khach-san\backend\be-quanlikhachsana
 C:\Users\Admin\Desktop\test\passion-quan-li-khach-san\backend\be-quanlikhachsanapi\obj\Debug\net8.0\be-quanlikhachsanapi.pdb
 C:\Users\Admin\Desktop\test\passion-quan-li-khach-san\backend\be-quanlikhachsanapi\obj\Debug\net8.0\be-quanlikhachsanapi.genruntimeconfig.cache
 C:\Users\Admin\Desktop\test\passion-quan-li-khach-san\backend\be-quanlikhachsanapi\obj\Debug\net8.0\ref\be-quanlikhachsanapi.dll
+D:\PTUDW quản lý khách sạn\DEV-FE-BE\backend\be-quanlikhachsanapi\bin\Debug\net8.0\be-quanlikhachsanapi.staticwebassets.runtime.json
