@@ -61,6 +61,20 @@
   gap: 1rem;
 }
 
+.profileLink {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #000; /* Màu đen */
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.profileLink:hover {
+  color: #4b5563; /* Màu xám đậm khi hover (tuỳ chỉnh nếu muốn) */
+}
+
 .profileIconLink {
   display: flex;
   align-items: center;
@@ -79,6 +93,25 @@
 .userIcon {
   color: #333;
   font-size: 1.2rem;
+}
+
+.logoutButton {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: #f87171; /* màu đỏ nhạt */
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+}
+
+.logoutButton:hover {
+  background-color: #ef4444; /* đỏ đậm hơn khi hover */
+  transform: scale(1.02);
 }
 
 /* Responsive styles */
