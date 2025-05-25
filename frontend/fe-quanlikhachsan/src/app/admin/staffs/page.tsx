@@ -1,6 +1,11 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import styles from "./Staffs.module.css";
+import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import Link from 'next/link';
+import styles from "../../admin.module.css"; 
+import { API_BASE_URL } from '@/lib/config'; 
+import { getAuthHeaders, handleResponse, getRoles } from '@/lib/api'; 
+import Image from 'next/image';
+import { withAuth, ROLES, useAuth } from '@/lib/auth'; // Import HOC và ROLES
 import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 import { getStaffs, createStaff, updateStaff, deleteStaff } from "../../../lib/api";
 
@@ -16,313 +21,340 @@ interface Staff {
   luongCoBan?: number;
   maRole?: string;
   trangThai?: string;
+  tenRole?: string;
 }
 
-export default function StaffManager() {
+interface Role {
+  maRole: string;
+  tenRole: string;
+}
+
+interface StaffFormState {
+  maNV?: string;
+  hoNv: string;
+  tenNv: string;
+  userName: string;
+  chucVu: string;
+  soDienThoai: string;
+  email: string;
+  ngayVaoLam: string;
+  luongCoBan: number;
+  maRole: string;
+  trangThai: string;
+}
+
+function StaffPage() {
+  const { user, loading: authLoading } = useAuth();
   const [staffs, setStaffs] = useState<Staff[]>([]);
-  const [showModal, setShowModal] = useState(false);
+  const [roles, setRoles] = useState<Role[]>([]);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [editingStaff, setEditingStaff] = useState<Staff | null>(null);
-  const [form, setForm] = useState<Staff>({ 
-    maNV: "", 
-    hoNv: "", 
-    tenNv: "", 
+  const [formState, setFormState] = useState<StaffFormState>({
+    hoNv: "",
+    tenNv: "",
     userName: "",
-    chucVu: "", 
-    soDienThoai: "", 
-    email: "", 
-    ngayVaoLam: "",
+    chucVu: "",
+    soDienThoai: "",
+    email: "",
+    ngayVaoLam: new Date().toISOString().split('T')[0],
     luongCoBan: 0,
     maRole: "",
-    trangThai: "Hoạt động" 
+    trangThai: "Hoạt động",
   });
-  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  // Lấy danh sách nhân viên từ API
+  const fetchStaffs = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(`${API_BASE_URL}/NhanVien`, { 
+        method: 'GET', 
+        headers: getAuthHeaders('GET'), 
+        credentials: 'include' 
+      });
+      const data = await handleResponse(response);
+      
+      // Lấy tên Role cho từng nhân viên
+      const staffsWithRoles = await Promise.all(data.map(async (staff: Staff) => {
+        if (staff.maRole) {
+          try {
+            const roleResponse = await fetch(`${API_BASE_URL}/Role/${staff.maRole}`, {
+              method: 'GET',
+              headers: getAuthHeaders('GET'),
+              credentials: 'include'
+            });
+            const roleData = await handleResponse(roleResponse);
+            return { ...staff, tenRole: roleData.tenRole };
+          } catch (roleError) {
+            console.error(`Error fetching role ${staff.maRole}:`, roleError);
+            return { ...staff, tenRole: 'N/A' }; // Hoặc giá trị mặc định khác
+          }
+        }
+        return { ...staff, tenRole: 'N/A' }; 
+      }));
+      setStaffs(staffsWithRoles);
+
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchRoles = async () => {
+    try {
+      const rolesData = await getRoles(); 
+      setRoles(rolesData);
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
   useEffect(() => {
-    const fetchStaffs = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const dataFromApi = await getStaffs();
-        // Log dữ liệu gốc từ API
-        console.log("Raw data from getStaffs():", JSON.stringify(dataFromApi, null, 2));
-
-        const processedStaffs = dataFromApi.map((item: any) => ({
-          maNV: item.maNv, // API trả về maNv
-          hoNv: item.hoNv,
-          tenNv: item.tenNv,
-          userName: item.userName,
-          chucVu: item.chucVu,
-          soDienThoai: item.sdt, // API trả về sdt
-          email: item.email,
-          ngayVaoLam: item.ngayVaoLam,
-          luongCoBan: item.luongCoBan,
-          maRole: item.maRole,
-          trangThai: item.trangThai || "Hoạt động", // Giả sử có trường trangThai hoặc mặc định
-        }));
-        
-        // Log dữ liệu đã xử lý
-        console.log("Processed staffs data:", JSON.stringify(processedStaffs, null, 2));
-        setStaffs(processedStaffs);
-      } catch (err) {
-        const error = err as Error;
-        setError(error.message || "Có lỗi xảy ra khi tải dữ liệu nhân viên");
-        console.error("Lỗi khi lấy dữ liệu nhân viên:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchStaffs();
+    fetchRoles();
   }, []);
 
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormState((prev) => ({
+      ...prev,
+      [name]: name === 'luongCoBan' ? parseFloat(value) || 0 : value,
+    }));
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+    try {
+      const url = editingStaff 
+        ? `${API_BASE_URL}/NhanVien/${editingStaff.maNV}` 
+        : `${API_BASE_URL}/NhanVien`;
+      const method = editingStaff ? 'PUT' : 'POST';
+      
+      const payload: any = { ...formState };
+      // Server có thể tự sinh MaNV nếu là POST và không có maNV
+      if (!editingStaff && !payload.maNV) {
+        // Không gửi maNV rỗng nếu đang thêm mới, server sẽ tự tạo nếu cần
+        // Hoặc bạn có thể tạo mã NV ở client nếu logic yêu cầu
+      }
+
+      const response = await fetch(url, {
+        method: method,
+        headers: getAuthHeaders(method),
+        credentials: 'include',
+        body: JSON.stringify(payload),
+      });
+
+      await handleResponse(response);
+      fetchStaffs(); 
+      setShowAddModal(false);
+      setShowEditModal(false);
+      setEditingStaff(null);
+    } catch (err: any) {
+      setError(err.message);
+      console.error("Submit error:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const openAddModal = () => {
-    setForm({ 
-      maNV: "", 
-      hoNv: "", 
-      tenNv: "", 
+    setFormState({
+      hoNv: "",
+      tenNv: "",
       userName: "",
-      chucVu: "", 
-      soDienThoai: "", 
-      email: "", 
-      ngayVaoLam: "",
+      chucVu: "",
+      soDienThoai: "",
+      email: "",
+      ngayVaoLam: new Date().toISOString().split('T')[0],
       luongCoBan: 0,
-      maRole: "",
-      trangThai: "Hoạt động" 
+      maRole: roles.length > 0 ? roles[0].maRole : "", // Chọn role đầu tiên làm mặc định
+      trangThai: "Hoạt động",
     });
+    setError(null);
+    setShowAddModal(true);
+    setShowEditModal(false);
     setEditingStaff(null);
-    setShowModal(true);
   };
 
   const openEditModal = (staff: Staff) => {
-    setForm(staff);
-    setEditingStaff(staff);
-    setShowModal(true);
-  };
-
-  const closeModal = () => {
-    setShowModal(false);
-    setEditingStaff(null);
-    setForm({ 
-      maNV: "", 
-      hoNv: "", 
-      tenNv: "", 
-      userName: "",
-      chucVu: "", 
-      soDienThoai: "", 
-      email: "", 
-      ngayVaoLam: "",
-      luongCoBan: 0,
-      maRole: "",
-      trangThai: "Hoạt động" 
+    setFormState({
+      maNV: staff.maNV, // Cần thiết để PUT đúng đối tượng
+      hoNv: staff.hoNv || "",
+      tenNv: staff.tenNv || "",
+      userName: staff.userName || "",
+      chucVu: staff.chucVu || "",
+      soDienThoai: staff.soDienThoai || "",
+      email: staff.email || "",
+      ngayVaoLam: staff.ngayVaoLam ? new Date(staff.ngayVaoLam).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+      luongCoBan: staff.luongCoBan || 0,
+      maRole: staff.maRole || "",
+      trangThai: staff.trangThai || "Hoạt động",
     });
+    setError(null);
+    setShowAddModal(false);
+    setShowEditModal(true);
+    setEditingStaff(staff);
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
-  };
-
-  const handleDelete = async (maNV: string) => {
+  const handleDelete = async (maNV: string | undefined) => {
+    if (!maNV) return;
     if (window.confirm("Bạn có chắc chắn muốn xóa nhân viên này?")) {
+      setIsLoading(true);
       try {
-        await deleteStaff(maNV);
-        setStaffs(staffs.filter((s) => s.maNV !== maNV));
-      } catch (err) {
-        const error = err as Error;
-        alert(`Lỗi khi xóa nhân viên: ${error.message}`);
-        console.error("Lỗi xóa nhân viên:", error);
+        const response = await fetch(`${API_BASE_URL}/NhanVien/${maNV}`, {
+          method: 'DELETE',
+          headers: getAuthHeaders('DELETE'),
+          credentials: 'include'
+        });
+        await handleResponse(response);
+        fetchStaffs(); 
+      } catch (err: any) {
+        setError(err.message);
+      } finally {
+        setIsLoading(false);
       }
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      if (editingStaff) {
-        // Cập nhật nhân viên
-        await updateStaff(form);
-        setStaffs(staffs.map((s) => (s.maNV === form.maNV ? { ...s, ...form } : s)));
-      } else {
-        // Thêm nhân viên mới
-        const newStaffData = { ...form };
-        // Nếu API createStaff cần một trường hoTen ghép lại, bạn có thể tạo nó ở đây
-        // ví dụ: newStaffData.hoTen = `${form.hoNv} ${form.tenNv}`.trim();
-        const newStaff = await createStaff(newStaffData); 
-        // Giả sử createStaff trả về nhân viên đã được tạo với cấu trúc đầy đủ
-        // Nếu không, bạn cần map lại tương tự như lúc fetchStaffs
-        setStaffs([...staffs, {
-          ...newStaff, // Giả sử newStaff trả về từ API đã có hoNv, tenNv,...
-          hoNv: form.hoNv, // Hoặc lấy từ form nếu API không trả về đầy đủ
-          tenNv: form.tenNv,
-          // ... các trường khác từ form nếu cần
-        }]);
-      }
-      closeModal();
-    } catch (err) {
-      const error = err as Error;
-      alert(`Lỗi: ${error.message}`);
-      console.error("Lỗi khi lưu nhân viên:", error);
-    }
-  };
-
+  const filteredStaffs = staffs.filter(staff => 
+    (`${staff.hoNv || ''} ${staff.tenNv || ''}`.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (staff.userName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (staff.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (staff.soDienThoai || '').toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  
   return (
     <div className={styles.container}>
-      <div className={styles.header}>
-        <h2>Quản lý nhân viên</h2>
-        <button className={styles.addBtn} onClick={openAddModal}>
-          <FaPlus style={{marginRight:8}}/> Thêm nhân viên
-        </button>
+      <h1 className={styles.title}>Quản Lý Nhân Viên</h1>
+
+      {error && <p className={styles.errorText}>Lỗi: {error}</p>}
+      {isLoading && <p>Đang tải dữ liệu...</p>}
+
+      <div className={styles.toolbar}>
+        <input 
+          type="text" 
+          placeholder="Tìm kiếm nhân viên..." 
+          className={styles.searchInput}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        {user && user.permissions.canManageStaff && (
+          <button onClick={openAddModal} className={`${styles.button} ${styles.addButton}`}>Thêm Nhân Viên</button>
+        )}
       </div>
-      
-      {isLoading && <div className={styles.loading}>Đang tải dữ liệu...</div>}
-      {error && <div className={styles.error}>Lỗi: {error}</div>}
-      
-      {!isLoading && !error && (
-        <div className={styles.card}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Mã NV</th><th>Họ tên</th><th>Username</th><th>Chức vụ</th><th>Số điện thoại</th><th>Email</th><th>Trạng thái</th><th>Hành động</th>
+
+      <table className={styles.table}>
+        <thead>
+          <tr>
+            <th>Mã NV</th>
+            <th>Họ tên</th>
+            <th>Username</th>
+            <th>Chức vụ</th>
+            <th>SĐT</th>
+            <th>Email</th>
+            <th>Ngày vào làm</th>
+            <th>Lương cơ bản</th>
+            <th>Vai trò</th>
+            <th>Trạng thái</th>
+            <th>Hành động</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredStaffs.length === 0 ? (
+            <tr>
+              <td colSpan={11} style={{textAlign: 'center', padding: '16px'}}>Không có dữ liệu nhân viên</td>
+            </tr>
+          ) : (
+            filteredStaffs.map((staff) => (
+              <tr key={staff.maNV}>
+                <td>{staff.maNV}</td>
+                <td>{`${staff.hoNv || ''} ${staff.tenNv || ''}`.trim()}</td>
+                <td>{staff.userName || 'N/A'}</td>
+                <td>{staff.chucVu}</td>
+                <td>{staff.soDienThoai}</td>
+                <td>{staff.email}</td>
+                <td>{staff.ngayVaoLam ? new Date(staff.ngayVaoLam).toLocaleDateString() : 'N/A'}</td>
+                <td>{staff.luongCoBan?.toLocaleString()}</td>
+                <td>{staff.tenRole || staff.maRole || 'N/A'}</td> 
+                <td>{staff.trangThai}</td>
+                <td>
+                  <button onClick={() => openEditModal(staff)} className={`${styles.button} ${styles.editButton}`}>Sửa</button>
+                  <button onClick={() => handleDelete(staff.maNV)} className={`${styles.button} ${styles.deleteButton}`}>Xóa</button>
+                </td>
               </tr>
-            </thead>
-            <tbody>
-              {staffs.length === 0 ? (
-                <tr>
-                  <td colSpan={8} style={{textAlign: 'center', padding: '16px'}}>Không có dữ liệu nhân viên</td>
-                </tr>
-              ) : (
-                staffs.map((staff) => (
-                  <tr key={staff.maNV}>
-                    <td>{staff.maNV}</td>
-                    <td>{`${staff.hoNv || ''} ${staff.tenNv || ''}`.trim()}</td>
-                    <td>{staff.userName || "N/A"}</td>
-                    <td>{staff.chucVu}</td>
-                    <td>{staff.soDienThoai}</td>
-                    <td>{staff.email || "N/A"}</td>
-                    <td>{staff.trangThai || "Hoạt động"}</td>
-                    <td>
-                      <button className={styles.editBtn} onClick={() => openEditModal(staff)} title="Sửa">
-                        <FaEdit style={{marginRight:4}}/> Sửa
-                      </button>
-                      <button className={styles.deleteBtn} onClick={() => handleDelete(staff.maNV)} title="Xóa">
-                        <FaTrash style={{marginRight:4}}/> Xóa
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      )}
-      
-      {showModal && (
-        <div className={styles.modal}>
+            ))
+          )}
+        </tbody>
+      </table>
+
+      {(showAddModal || showEditModal) && (
+        <div className={styles.modalBackdrop}>
           <div className={styles.modalContent}>
-            <h3>{editingStaff ? "Sửa nhân viên" : "Thêm nhân viên"}</h3>
-            <form onSubmit={handleSubmit} className={styles.form}>
-              {!editingStaff && (
-                <div className={styles.formGroup}>
-                  <label>Mã nhân viên</label>
-                  <input name="maNV" value={form.maNV} onChange={handleChange} placeholder="Mã nhân viên (NV001)" className={styles.input}/>
-                </div>
-              )}
+            <h2>{editingStaff ? "Sửa Nhân Viên" : "Thêm Nhân Viên"}</h2>
+            <form onSubmit={handleSubmit}>
               <div className={styles.formGroup}>
-                <label>Họ nhân viên</label>
-                <input name="hoNv" value={form.hoNv} onChange={handleChange} required placeholder="Họ nhân viên" className={styles.input}/>
+                <label htmlFor="hoNv">Họ</label>
+                <input type="text" id="hoNv" name="hoNv" value={formState.hoNv} onChange={handleInputChange} required />
               </div>
               <div className={styles.formGroup}>
-                <label>Tên nhân viên</label>
-                <input name="tenNv" value={form.tenNv} onChange={handleChange} required placeholder="Tên nhân viên" className={styles.input}/>
+                <label htmlFor="tenNv">Tên</label>
+                <input type="text" id="tenNv" name="tenNv" value={formState.tenNv} onChange={handleInputChange} required />
               </div>
               <div className={styles.formGroup}>
-                <label>Username</label>
-                <input name="userName" value={form.userName || ''} onChange={handleChange} placeholder="Username" className={styles.input}/>
+                <label htmlFor="userName">Username</label>
+                <input type="text" id="userName" name="userName" value={formState.userName} onChange={handleInputChange} required />
               </div>
               <div className={styles.formGroup}>
-                <label>Chức vụ</label>
-                <select name="chucVu" value={form.chucVu} onChange={handleChange} required className={styles.input}>
-                  <option value="">Chọn chức vụ</option>
-                  <option value="Quản lý">Quản lý</option>
-                  <option value="Lễ tân">Lễ tân</option>
-                  <option value="Buồng phòng">Buồng phòng</option>
-                  <option value="Kế toán">Kế toán</option>
-                  <option value="Bảo vệ">Bảo vệ</option>
-                  <option value="Nhân viên khác">Nhân viên khác</option>
+                <label htmlFor="chucVu">Chức vụ</label>
+                <input type="text" id="chucVu" name="chucVu" value={formState.chucVu} onChange={handleInputChange} required />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="soDienThoai">Số điện thoại</label>
+                <input type="tel" id="soDienThoai" name="soDienThoai" value={formState.soDienThoai} onChange={handleInputChange} required />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="email">Email</label>
+                <input type="email" id="email" name="email" value={formState.email} onChange={handleInputChange} required />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="ngayVaoLam">Ngày vào làm</label>
+                <input type="date" id="ngayVaoLam" name="ngayVaoLam" value={formState.ngayVaoLam} onChange={handleInputChange} required />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="luongCoBan">Lương cơ bản</label>
+                <input type="number" id="luongCoBan" name="luongCoBan" value={formState.luongCoBan} onChange={handleInputChange} required min="0"/>
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="maRole">Vai trò</label>
+                <select id="maRole" name="maRole" value={formState.maRole} onChange={handleInputChange} required>
+                  <option value="" disabled>Chọn vai trò</option>
+                  {roles.map(role => (
+                    <option key={role.maRole} value={role.maRole}>{role.tenRole}</option>
+                  ))}
                 </select>
               </div>
               <div className={styles.formGroup}>
-                <label>Số điện thoại</label>
-                <input 
-                  name="soDienThoai" 
-                  value={form.soDienThoai} 
-                  onChange={handleChange} 
-                  required 
-                  placeholder="Số điện thoại" 
-                  className={styles.input}
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Email</label>
-                <input 
-                  name="email" 
-                  value={form.email || ''} 
-                  onChange={handleChange} 
-                  placeholder="Email" 
-                  className={styles.input}
-                  type="email" 
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Ngày vào làm</label>
-                <input 
-                  name="ngayVaoLam" 
-                  value={form.ngayVaoLam ? new Date(form.ngayVaoLam).toISOString().split('T')[0] : ''} 
-                  onChange={handleChange} 
-                  placeholder="Ngày vào làm" 
-                  className={styles.input}
-                  type="date" 
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Lương cơ bản</label>
-                <input 
-                  name="luongCoBan" 
-                  value={form.luongCoBan || 0} 
-                  onChange={handleChange} 
-                  placeholder="Lương cơ bản" 
-                  className={styles.input}
-                  type="number" 
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Mã Role</label>
-                <input 
-                  name="maRole" 
-                  value={form.maRole || ''} 
-                  onChange={handleChange} 
-                  placeholder="Mã Role (R01, R02,...)" 
-                  className={styles.input}
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label>Trạng thái</label>
-                <select 
-                  name="trangThai" 
-                  value={form.trangThai} 
-                  onChange={handleChange} 
-                  className={styles.input}
-                >
+                <label htmlFor="trangThai">Trạng thái</label>
+                <select id="trangThai" name="trangThai" value={formState.trangThai} onChange={handleInputChange} required>
                   <option value="Hoạt động">Hoạt động</option>
                   <option value="Nghỉ việc">Nghỉ việc</option>
-                  <option value="Tạm nghỉ">Tạm nghỉ</option>
+                  <option value="Tạm ngưng">Tạm ngưng</option>
                 </select>
               </div>
-              <div className={styles.formActions}>
-                <button type="button" onClick={closeModal} className={styles.cancelBtn}>Hủy</button>
-                <button type="submit" className={styles.addBtn}>{editingStaff ? "Lưu" : <><FaPlus style={{marginRight:4}}/>Thêm</>}</button>
+
+              {error && <p className={styles.errorTextModal}>{error}</p>}
+
+              <div className={styles.modalActions}>
+                <button type="submit" className={`${styles.button} ${styles.saveButton}`} disabled={isLoading}>
+                  {isLoading ? (editingStaff ? 'Đang cập nhật...' : 'Đang lưu...') : (editingStaff ? "Lưu thay đổi" : "Thêm mới")}
+                </button>
+                <button type="button" onClick={() => { setShowAddModal(false); setShowEditModal(false); setEditingStaff(null); }} className={`${styles.button} ${styles.cancelButton}`}>Hủy</button>
               </div>
             </form>
           </div>
@@ -331,3 +363,5 @@ export default function StaffManager() {
     </div>
   );
 }
+
+export default withAuth(StaffPage, [ROLES.ADMIN]);
