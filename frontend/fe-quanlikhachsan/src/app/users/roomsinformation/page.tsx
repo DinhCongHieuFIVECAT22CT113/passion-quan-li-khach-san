@@ -10,6 +10,7 @@ import { useAuth } from '@/lib/auth';
 import Header from '../../components/layout/Header';
 import styles from './styles.module.css';
 import Image from 'next/image';
+import Link from 'next/link';
 import { FaWifi, FaSnowflake, FaTv, FaWineBottle, FaLock, FaBath, FaWater, FaPhone, FaDesktop, FaCoffee } from 'react-icons/fa';
 import React from 'react';
 
@@ -239,17 +240,25 @@ const renderAmenityIcon = (amenity: string) => {
               rooms.map((room) => (
                 <div key={room.maPhong} className={styles.roomRow}>
                   <div className={styles.roomRowImage}>
-                    <Image 
-                      src={room.thumbnail}
-                      alt={getValidAltText(room.tenPhong)}
-                      width={250}
-                      height={150}
-                      className={styles.rowImage}
-                      priority={rooms.indexOf(room) < 3}
-                    />
+                    <Link href={`/users/room-detail/${room.maPhong}`} legacyBehavior>
+                      <a aria-label={`Xem chi tiết phòng ${room.tenPhong}`}>
+                        <Image 
+                          src={room.thumbnail}
+                          alt={getValidAltText(room.tenPhong)}
+                          width={250}
+                          height={150}
+                          className={styles.rowImage}
+                          priority={rooms.indexOf(room) < 3}
+                        />
+                      </a>
+                    </Link>
                   </div>
                   <div className={styles.roomRowContent}>
-                    <h3>{room.tenPhong}</h3>
+                    <h3>
+                      <Link href={`/users/room-detail/${room.maPhong}`} legacyBehavior>
+                        <a className={styles.roomNameLink}>{room.tenPhong}</a>
+                      </Link>
+                    </h3>
                     <div className={styles.roomInfo}>
                       <div className={styles.feature}>
                         <span className={styles.featureLabel}>Mã phòng:</span>
@@ -280,12 +289,18 @@ const renderAmenityIcon = (amenity: string) => {
                       </ul>
                     </div>
                     <div className={styles.roomActions}>
-                      <button 
-                        className={styles.detailsButton}
-                        onClick={() => handleViewImages(room.hinhAnh || [room.thumbnail])}
-                      >
-                        Xem chi tiết
-                      </button>
+                      <Link href={`/users/room-detail/${room.maPhong}`} legacyBehavior>
+                        <a className={styles.detailsButton}>Xem chi tiết</a>
+                      </Link>
+                      {room.hinhAnh && room.hinhAnh.length > 1 && (
+                        <button 
+                          className={`${styles.detailsButton} ${styles.viewMoreImagesButton}`}
+                          onClick={() => handleViewImages(room.hinhAnh || [room.thumbnail])}
+                          aria-label={`Xem thêm ảnh cho phòng ${room.tenPhong}`}
+                        >
+                          Xem nhiều ảnh
+                        </button>
+                      )}
                       <button 
                         className={styles.bookButton}
                         onClick={() => handleBookNow(room.maPhong)}

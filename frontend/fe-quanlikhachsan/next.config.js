@@ -1,20 +1,61 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     images: {
-      domains: [
-        'encrypted-tbn0.gstatic.com',
-        'lh3.googleusercontent.com',
-        'firebasestorage.googleapis.com',
-        'res.cloudinary.com',
-        'images.unsplash.com',
-        'cdn.pixabay.com',
-        'i.imgur.com',
-        'avatars.githubusercontent.com',
-        's.gravatar.com',
-        'via.placeholder.com',
-        'raw.githubusercontent.com',
-        'ui-avatars.com',
-        'localhost',
+      remotePatterns: [
+        {
+          protocol: 'http',
+          hostname: 'localhost',
+          port: '5009', // Thêm port của backend
+          pathname: '/api/images/**', // Cho phép tất cả các đường dẫn con trong /api/images/
+        },
+        {
+          protocol: 'https',
+          hostname: 'encrypted-tbn0.gstatic.com',
+        },
+        {
+          protocol: 'https',
+          hostname: 'lh3.googleusercontent.com',
+        },
+        {
+          protocol: 'https',
+          hostname: 'firebasestorage.googleapis.com',
+        },
+        {
+          protocol: 'https',
+          hostname: 'res.cloudinary.com',
+        },
+        {
+          protocol: 'https',
+          hostname: 'images.unsplash.com',
+        },
+        {
+          protocol: 'https',
+          hostname: 'cdn.pixabay.com',
+        },
+        {
+          protocol: 'https',
+          hostname: 'i.imgur.com',
+        },
+        {
+          protocol: 'https',
+          hostname: 'avatars.githubusercontent.com',
+        },
+        {
+          protocol: 'https',
+          hostname: 's.gravatar.com',
+        },
+        {
+          protocol: 'https',
+          hostname: 'via.placeholder.com',
+        },
+        {
+          protocol: 'https',
+          hostname: 'raw.githubusercontent.com',
+        },
+        {
+          protocol: 'https',
+          hostname: 'ui-avatars.com',
+        },
       ],
     },
     // Không sử dụng rewrites vì chúng ta sẽ gọi trực tiếp đến backend API

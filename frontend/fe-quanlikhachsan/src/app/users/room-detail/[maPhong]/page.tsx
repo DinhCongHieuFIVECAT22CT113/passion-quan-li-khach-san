@@ -2,11 +2,11 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getPhongById } from '../../../../lib/api'; // Sẽ cần tạo hàm này trong api.ts
-import { PhongDTO } from '../../../../lib/DTOs'; // Giả sử bạn có định nghĩa này
-import { useAuth } from '../../../../lib/auth'; // Để kiểm tra đăng nhập cho nút Đặt ngay
-import { API_BASE_URL } from '../../../../lib/config';
-import Image from 'next/image';
+import { getPhongById, getLoaiPhongById } from '../../../../lib/api';
+import { PhongDTO, LoaiPhongDTO } from '../../../../lib/DTOs';
+import { useAuth } from '../../../../lib/auth';
+// import { API_BASE_URL } from '../../../../lib/config'; // Commented out as it's mainly for images
+// import Image from 'next/image'; // Commented out as Image component is removed
 import Link from 'next/link';
 
 const RoomDetailPage: React.FC = () => {
@@ -16,66 +16,95 @@ const RoomDetailPage: React.FC = () => {
     const { user, loading: authLoading } = useAuth();
 
     const [room, setRoom] = useState<PhongDTO | null>(null);
+    const [loaiPhongDetails, setLoaiPhongDetails] = useState<LoaiPhongDTO | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    // const [currentImageIndex, setCurrentImageIndex] = useState(0); // Commented out
+    // const [mainImageError, setMainImageError] = useState(false); // Commented out
+    // const [thumbnailErrors, setThumbnailErrors] = useState<boolean[]>([]); // Commented out
 
-    const fetchRoomDetail = useCallback(async () => {
+    const fetchRoomAndLoaiPhongDetails = useCallback(async () => {
         if (!maPhong) return;
         setLoading(true);
+        setError(null);
         try {
-            // Sử dụng fetch trực tiếp vì getPhongById chưa được tạo trong lib/api.ts
-            const response = await fetch(`${API_BASE_URL}/Phong/${maPhong}`);
-            if (!response.ok) {
-                if (response.status === 404) {
-                    setError('Không tìm thấy thông tin phòng.');
-                } else {
-                    const errorData = await response.json();
-                    setError(errorData.message || `Lỗi khi tải chi tiết phòng: ${response.status}`);
+            const roomData = await getPhongById(maPhong);
+            setRoom(roomData);
+
+            if (roomData && roomData.maLoaiPhong) {
+                try {
+                    const loaiPhongData = await getLoaiPhongById(roomData.maLoaiPhong);
+                    setLoaiPhongDetails(loaiPhongData);
+                } catch (loaiPhongError: any) {
+                    console.error("Error fetching loai phong details:", loaiPhongError);
+                    if (loaiPhongError.message === 'LoaiPhongNotFound'){
+                        setError(`Không tìm thấy thông tin cho loại phòng ${roomData.maLoaiPhong}.`);
+                    } else {
+                        setError('Không thể tải thông tin chi tiết loại phòng.'); 
+                    }
                 }
-                setRoom(null);
-                return;
             }
-            const data: PhongDTO = await response.json();
-            setRoom(data);
-            setError(null);
-        } catch (err) {
+        } catch (err: any) {
             console.error("Error fetching room detail:", err);
-            setError('Lỗi kết nối hoặc xử lý dữ liệu.');
+            if (err.message === 'RoomNotFound') {
+                setError('Không tìm thấy thông tin phòng.');
+            } else {
+                setError('Lỗi kết nối hoặc xử lý dữ liệu khi tải thông tin phòng.');
+            }
             setRoom(null);
+            setLoaiPhongDetails(null);
         } finally {
             setLoading(false);
         }
     }, [maPhong]);
 
     useEffect(() => {
-        fetchRoomDetail();
-    }, [fetchRoomDetail]);
+        fetchRoomAndLoaiPhongDetails();
+    }, [fetchRoomAndLoaiPhongDetails]);
+
+    // useEffect(() => {
+    //     // Reset main image error when room or currentImageIndex changes
+    //     setMainImageError(false);
+    // }, [room, currentImageIndex]); // Commented out
+
+    // const roomImages = room?.hinhAnh?.split(',').map((img: string) => img.trim()) || []; // Commented out
+
+    // useEffect(() => {
+    //     // Initialize thumbnailErrors state based on roomImages length
+    //     // Ensure roomImages is defined and has a length property
+    //     if (roomImages && typeof roomImages.length === 'number') {
+    //         setThumbnailErrors(new Array(roomImages.length).fill(false));
+    //     }
+    // }, [roomImages]); // Commented out
+
+    // const mainImageSrcPath = roomImages.length > 0 ? roomImages[currentImageIndex] : room?.thumbnail; // Commented out
+    // const mainImageDisplayUrl = mainImageError ? '/images/default-room.jpg' // Commented out
+    //     : (mainImageSrcPath && mainImageSrcPath.startsWith('http') ? mainImageSrcPath 
+    //     : (mainImageSrcPath ? `${API_BASE_URL}${mainImageSrcPath}` : '/images/default-room.jpg'));
+
+    // const nextImage = () => { // Commented out
+    //     if (roomImages.length > 0) {
+    //         setCurrentImageIndex((prevIndex) => (prevIndex + 1) % roomImages.length);
+    //     }
+    // };
+
+    // const prevImage = () => { // Commented out
+    //     if (roomImages.length > 0) {
+    //         setCurrentImageIndex((prevIndex) => (prevIndex - 1 + roomImages.length) % roomImages.length);
+    //     }
+    // };
 
     const handleBookNow = () => {
         if (!room) return;
         if (!user && !authLoading) {
             router.push(`/login?redirectUrl=/users/booking?maPhong=${room.maPhong}`);
         } else if (user) {
-            // Lưu thông tin phòng vào localStorage để trang booking có thể lấy
-            localStorage.setItem('selectedRoomData', JSON.stringify(room));
+            const bookingRoomData = { 
+                ...room, 
+                loaiPhong: loaiPhongDetails
+            };
+            localStorage.setItem('selectedRoomData', JSON.stringify(bookingRoomData));
             router.push(`/users/booking?maPhong=${room.maPhong}`);
-        }
-        // Nếu authLoading là true, không làm gì cả, đợi auth state được xác định
-    };
-
-    const roomImages = room?.hinhAnh?.split(',').map(img => img.trim()) || [];
-    const mainImage = roomImages.length > 0 ? roomImages[currentImageIndex] : room?.thumbnail || '/images/default-room.jpg';
-
-    const nextImage = () => {
-        if (roomImages.length > 0) {
-            setCurrentImageIndex((prevIndex) => (prevIndex + 1) % roomImages.length);
-        }
-    };
-
-    const prevImage = () => {
-        if (roomImages.length > 0) {
-            setCurrentImageIndex((prevIndex) => (prevIndex - 1 + roomImages.length) % roomImages.length);
         }
     };
 
@@ -83,7 +112,7 @@ const RoomDetailPage: React.FC = () => {
         return <div className="flex justify-center items-center min-h-screen"><p>Đang tải...</p></div>;
     }
 
-    if (error) {
+    if (error && !room) {
         return (
             <div className="container mx-auto px-4 py-8 text-center">
                 <p className="text-red-500 text-xl">{error}</p>
@@ -99,7 +128,7 @@ const RoomDetailPage: React.FC = () => {
     if (!room) {
         return (
             <div className="container mx-auto px-4 py-8 text-center">
-                <p className="text-xl">Không tìm thấy thông tin phòng.</p>
+                <p className="text-xl">Không có dữ liệu phòng để hiển thị.</p>
                 <Link href="/users/home" legacyBehavior>
                     <a className="mt-4 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                         Quay lại trang chủ
@@ -109,102 +138,130 @@ const RoomDetailPage: React.FC = () => {
         );
     }
 
-    // Giả sử PhongDTO có các trường này, bạn cần điều chỉnh cho phù hợp
-    // Ví dụ: moTaChiTiet, tienNghi, giaMoiDem, giaMoiGio từ LoaiPhong liên quan
-    // Hiện tại, API GET /Phong/{maPhong} chỉ trả về thông tin cơ bản của phòng,
-    // chưa có thông tin chi tiết của loại phòng. Cần cải thiện API hoặc gọi thêm API Loại Phòng.
-
     return (
         <div className="container mx-auto px-4 py-8">
+            {error && room && <p className="text-orange-600 bg-orange-100 border-l-4 border-orange-500 p-4 text-center mb-4 rounded-md">Lưu ý: {error}</p>} 
             <div className="bg-white shadow-xl rounded-lg overflow-hidden">
                 <div className="md:flex">
-                    {/* Image Gallery */}
+                    {/* Image Gallery - Commented out
                     <div className="md:w-1/2 p-4">
                         <div className="relative">
                             <Image 
-                                src={mainImage.startsWith('http') ? mainImage : `${API_BASE_URL}${mainImage}`}
+                                src={mainImageDisplayUrl}
                                 alt={room.soPhong || 'Hình ảnh phòng'}
                                 width={600} 
                                 height={400}
                                 className="w-full h-auto object-cover rounded-lg shadow-md aspect-[3/2]" 
-                                onError={(e) => e.currentTarget.src = '/images/default-room.jpg'}/>
+                                onError={() => setMainImageError(true)}/>
                             {roomImages.length > 1 && (
                                 <>
-                                    <button onClick={prevImage} className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full">
+                                    <button onClick={() => setCurrentImageIndex((prev) => (prev - 1 + roomImages.length) % roomImages.length)} className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-opacity">
                                         &#10094;
                                     </button>
-                                    <button onClick={nextImage} className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full">
+                                    <button onClick={() => setCurrentImageIndex((prev) => (prev + 1) % roomImages.length)} className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-opacity">
                                         &#10095;
                                     </button>
                                 </> 
                             )}
                         </div>
                         {roomImages.length > 1 && (
-                             <div className="flex space-x-2 mt-2 overflow-x-auto">
-                                {roomImages.map((img, index) => (
-                                    <Image 
-                                        key={index}
-                                        src={img.startsWith('http') ? img : `${API_BASE_URL}${img}`}
-                                        alt={`Thumbnail ${index + 1}`}
-                                        width={100}
-                                        height={75}
-                                        className={`cursor-pointer rounded object-cover aspect-[4/3] ${index === currentImageIndex ? 'border-2 border-blue-500' : ''}`}
-                                        onClick={() => setCurrentImageIndex(index)}
-                                        onError={(e) => e.currentTarget.src = '/images/default-room.jpg'}
-                                    />
-                                ))}
+                             <div className="flex space-x-2 mt-4 overflow-x-auto p-2 bg-gray-100 rounded">
+                                {roomImages.map((img: string, index: number) => {
+                                    const thumbnailSrcPath = img;
+                                    const thumbnailUrl = thumbnailErrors[index] ? '/images/default-room.jpg'
+                                        : (thumbnailSrcPath.startsWith('http') ? thumbnailSrcPath
+                                        : `${API_BASE_URL}${thumbnailSrcPath}`);
+                                    return (
+                                        <div key={index} className="flex-shrink-0">
+                                            <Image 
+                                                src={thumbnailUrl}
+                                                alt={`Thumbnail ${index + 1}`}
+                                                width={100}
+                                                height={75}
+                                                className={`cursor-pointer rounded object-cover aspect-[4/3] hover:opacity-75 transition-opacity ${index === currentImageIndex ? 'border-2 border-blue-500 ring-2 ring-blue-300' : 'border-2 border-transparent'}`}
+                                                onClick={() => {
+                                                    setCurrentImageIndex(index);
+                                                    setMainImageError(false); // Reset main image error when thumbnail is clicked
+                                                }}
+                                                onError={() => {
+                                                    setThumbnailErrors(prevErrors => {
+                                                        const newErrors = [...prevErrors];
+                                                        newErrors[index] = true;
+                                                        return newErrors;
+                                                    });
+                                                }}
+                                            />
+                                        </div>
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
+                    */}
 
-                    {/* Room Details */}
-                    <div className="md:w-1/2 p-8">
-                        <h1 className="text-3xl font-bold text-gray-800 mb-2">Phòng {room.soPhong}</h1>
-                        <p className="text-gray-600 text-sm mb-4">Mã phòng: {room.maPhong} - Loại: {room.maLoaiPhong}</p>
+                    {/* Room Details - Now takes full width if images are commented out */}
+                    <div className="md:w-full p-8"> {/* Adjusted to md:w-full */}
+                        <h1 className="text-4xl font-bold text-gray-800 mb-3">Phòng {room.soPhong}</h1>
+                        <p className="text-gray-700 text-md mb-1">Loại phòng: <span className="font-semibold">{loaiPhongDetails?.tenLoaiPhong || room.maLoaiPhong}</span></p>
+                        <p className="text-gray-500 text-sm mb-6">Mã phòng: {room.maPhong}</p> {/* Increased mb for separation */}
                         
-                        {/* Thông tin chi tiết phòng - Cần lấy từ LoaiPhongDTO */} 
-                        <div className="mb-6">
-                            <h2 className="text-xl font-semibold text-gray-700 mb-2">Mô tả chi tiết</h2>
-                            <p className="text-gray-600">Thông tin mô tả chi tiết của loại phòng này hiện chưa có. (Cần lấy từ API Loại Phòng)</p>
-                            {/* Ví dụ: <p>{room.loaiPhong?.moTa}</p> */} 
+                        <div className="mb-8 border-t pt-6"> {/* Increased mb and pt */}
+                            <h2 className="text-2xl font-semibold text-gray-700 mb-3">Mô tả chi tiết</h2> {/* Increased size and mb */}
+                            <p className="text-gray-600 leading-relaxed italic">{loaiPhongDetails?.moTa || 'Hiện chưa có mô tả chi tiết cho loại phòng này.'}</p> {/* Added italic */}
                         </div>
 
-                        <div className="mb-6">
-                            <h2 className="text-xl font-semibold text-gray-700 mb-2">Tiện nghi</h2>
-                            <p className="text-gray-600">Danh sách tiện nghi của loại phòng này hiện chưa có. (Cần lấy từ API Loại Phòng)</p>
-                             {/* Ví dụ: <ul>{room.loaiPhong?.tienNghi.map(tn => <li key={tn}>{tn}</li>)}</ul> */}
+                        <div className="mb-8 border-t pt-6"> {/* Increased mb and pt */}
+                            <h2 className="text-2xl font-semibold text-gray-700 mb-3">Tiện nghi</h2> {/* Increased size and mb */}
+                            {loaiPhongDetails?.tienNghi && loaiPhongDetails.tienNghi.length > 0 ? (
+                                <ul className="list-disc list-inside text-gray-600 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1">
+                                    {loaiPhongDetails.tienNghi.map((tn: string, i: number) => <li key={i}>{tn}</li>)}
+                                </ul>
+                            ) : (
+                                <p className="text-gray-500 italic">Không có thông tin tiện nghi.</p>
+                            )}
                         </div>
 
-                        <div className="mb-6">
-                            <h2 className="text-xl font-semibold text-gray-700 mb-2">Giá phòng</h2>
-                            <p className="text-gray-600">Giá mỗi đêm: (Cần lấy từ API Loại Phòng)</p>
-                            <p className="text-gray-600">Giá mỗi giờ: (Cần lấy từ API Loại Phòng)</p>
-                            {/* Ví dụ: 
-                            <p className="text-2xl font-bold text-blue-600">{room.loaiPhong?.giaMoiDem?.toLocaleString()} VNĐ/đêm</p>
-                            <p className="text-lg text-blue-500">{room.loaiPhong?.giaMoiGio?.toLocaleString()} VNĐ/giờ</p> 
-                            */}
+                        <div className="mb-8 bg-gray-50 p-6 rounded-lg shadow"> {/* Increased mb, p */}
+                            <h2 className="text-2xl font-semibold text-gray-700 mb-4">Giá phòng</h2> {/* Increased size and mb */}
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="text-gray-600">Giá mỗi đêm:</span> 
+                                <span className="text-2xl font-bold text-blue-600">
+                                    {loaiPhongDetails?.giaMoiDem ? `${loaiPhongDetails.giaMoiDem.toLocaleString()} VNĐ` : <span className="text-gray-500 text-xl italic">N/A</span>}
+                                </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-gray-600">Giá mỗi giờ:</span>
+                                <span className="text-lg text-blue-500">
+                                    {loaiPhongDetails?.giaMoiGio ? `${loaiPhongDetails.giaMoiGio.toLocaleString()} VNĐ` : <span className="text-gray-500 italic">N/A</span>}
+                                </span> 
+                            </div>
                         </div>
                         
-                        <p className="text-lg font-semibold mb-1">Trạng thái: 
-                            <span className={`${room.trangThai === 'Trống' ? 'text-green-500' : 
-                                            room.trangThai === 'Đã đặt' ? 'text-red-500' : 
-                                            room.trangThai === 'Đang sử dụng' ? 'text-yellow-600' : 
-                                            room.trangThai === 'Đang dọn' ? 'text-blue-500' : 'text-gray-500'}
-                                        `}>
-                                {room.trangThai}
-                            </span>
-                        </p>
-                        <p className="text-gray-600 mb-6">Tầng: {room.tang}</p>
+                        <div className="border-t pt-6 mb-6"> {/* Increased pt */}
+                            <p className="text-lg font-semibold mb-2">Trạng thái: {/* Increased mb */}
+                                <span className={`ml-2 px-3 py-1 rounded-full text-sm font-medium 
+                                    ${room.trangThai === 'Trống' ? 'bg-green-100 text-green-700' : 
+                                      room.trangThai === 'Đã đặt' ? 'bg-red-100 text-red-700' : 
+                                      room.trangThai === 'Đang sử dụng' ? 'bg-yellow-100 text-yellow-700' : 
+                                      room.trangThai === 'Đang dọn' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}
+                                    `}>
+                                    {room.trangThai}
+                                </span>
+                            </p>
+                            <p className="text-gray-600">Tầng: {room.tang}</p>
+                        </div>
 
                         {room.trangThai === 'Trống' ? (
                             <button 
                                 onClick={handleBookNow}
-                                disabled={authLoading} // Disable nút nếu đang kiểm tra auth
-                                className="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-150 ease-in-out disabled:opacity-50">
-                                {authLoading ? 'Đang kiểm tra...' : 'Đặt ngay'}
+                                disabled={authLoading || loading}
+                                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 disabled:opacity-60 disabled:cursor-not-allowed">
+                                {authLoading || loading ? 'Đang xử lý...' : 'Đặt ngay'}
                             </button>
                         ) : (
-                            <p className="text-red-600 font-semibold">Phòng này hiện không có sẵn để đặt.</p>
+                            <div className="mt-6 p-3 bg-yellow-50 border border-yellow-300 rounded-md">
+                                <p className="text-yellow-700 font-semibold text-center">Phòng này hiện không có sẵn để đặt.</p>
+                            </div>
                         )}
                     </div>
                 </div>

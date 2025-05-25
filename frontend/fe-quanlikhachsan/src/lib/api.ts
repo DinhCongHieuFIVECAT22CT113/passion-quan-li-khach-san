@@ -1,5 +1,6 @@
 import { UserLoginDto, UserRegisterDto, UserDto } from '../types/auth';
 import { API_BASE_URL } from './config';
+import { PhongDTO, LoaiPhongDTO } from './DTOs';
 
 // Helper function để lấy token từ localStorage
 const getToken = () => {
@@ -1097,4 +1098,64 @@ export const getBookingDetails = async (maDatPhong: string) => {
     // Quyết định trả về null để vòng lặp có thể tiếp tục thay vì dừng hẳn
     return null; 
   }
-}; 
+};
+
+// API lấy thông tin chi tiết một phòng theo Mã Phòng
+export const getPhongById = async (maPhong: string): Promise<PhongDTO> => {
+  console.log(`Đang gọi API lấy chi tiết phòng: ${API_BASE_URL}/Phong/${maPhong}`);
+  try {
+    const response = await fetch(`${API_BASE_URL}/Phong/${maPhong}`, {
+      method: 'GET',
+      headers: getAuthHeaders('GET'), // API này public, không cần token nhưng vẫn giữ header chung
+    });
+    // Không cần gọi handleResponse ở đây nếu API GET /Phong/{maPhong}
+    // đã được cấu hình để trả về JSON chuẩn (kể cả khi lỗi 404 thì body vẫn là JSON)
+    // Tuy nhiên, để nhất quán, có thể vẫn dùng handleResponse và nó sẽ throw lỗi nếu !response.ok
+    if (!response.ok) {
+        if (response.status === 404) {
+            // Ném lỗi cụ thể để component có thể bắt và hiển thị thông báo
+            throw new Error('RoomNotFound'); 
+        }
+        // Xử lý các lỗi khác nếu có
+        const errorData = await response.json().catch(() => ({ message: response.statusText }));
+        throw new Error(errorData.message || `Lỗi khi tải chi tiết phòng: ${response.status}`);
+    }
+    return response.json(); // parse và trả về PhongDTO
+
+  } catch (error: any) {
+    console.error('Lỗi kết nối API khi lấy chi tiết phòng:', error);
+    if (error.message === 'RoomNotFound') {
+        throw error; // Ném lại lỗi RoomNotFound để component xử lý
+    }
+    // Bạn có thể thêm xử lý lỗi cụ thể hơn ở đây nếu cần
+    throw new Error('Không thể kết nối đến API chi tiết phòng. Vui lòng kiểm tra server backend và kết nối mạng.');
+  }
+};
+
+// API lấy thông tin chi tiết một Loại Phòng theo Mã Loại Phòng
+export const getLoaiPhongById = async (maLoaiPhong: string): Promise<LoaiPhongDTO> => {
+  console.log(`Đang gọi API lấy chi tiết loại phòng: ${API_BASE_URL}/LoaiPhong/${maLoaiPhong}`);
+  try {
+    const response = await fetch(`${API_BASE_URL}/LoaiPhong/${maLoaiPhong}`, {
+      method: 'GET',
+      headers: getAuthHeaders('GET'), // API này public
+    });
+    if (!response.ok) {
+        if (response.status === 404) {
+            throw new Error('LoaiPhongNotFound'); 
+        }
+        const errorData = await response.json().catch(() => ({ message: response.statusText }));
+        throw new Error(errorData.message || `Lỗi khi tải chi tiết loại phòng: ${response.status}`);
+    }
+    return response.json();
+  } catch (error: any) {
+    console.error('Lỗi kết nối API khi lấy chi tiết loại phòng:', error);
+    if (error.message === 'LoaiPhongNotFound') {
+        throw error;
+    }
+    throw new Error('Không thể kết nối đến API chi tiết loại phòng.');
+  }
+};
+
+// API lấy danh sách các phòng (có thể có filter)
+// ... existing code ... 
