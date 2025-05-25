@@ -4,7 +4,12 @@ import { useAuth, ROLES } from '../../../lib/auth'; // Bỏ APP_CONFIG khỏi đ
 import { APP_CONFIG } from '../../../lib/config'; // Import APP_CONFIG từ đúng tệp
 import AuthCheck from '../../components/auth/AuthCheck'; // Thêm AuthCheck
 // import { getUserInfo } from '../../../lib/config'; // Xóa import này
+<<<<<<< HEAD
 // import styles from '../AdminLayout.module.css'; // Không sử dụng
+=======
+import { useAuth } from '../../../lib/auth'; // Thêm import useAuth
+import styles from './Permissions.module.css';
+>>>>>>> origin/FE-Fix
 
 // Định nghĩa danh sách vai trò
 const roleDefinitions = [
@@ -117,6 +122,7 @@ function PermissionsPageContent() { // Đổi tên component để bọc bởi A
   // }
   
   return (
+<<<<<<< HEAD
     <div className="permissions-container" style={{padding: '24px', maxWidth: '1200px', margin: '0 auto'}}>
       <h1>Quản lý phân quyền</h1>
       {/* Phần kiểm tra isAdmin và authLoading sẽ được AuthCheck xử lý */}
@@ -137,6 +143,63 @@ function PermissionsPageContent() { // Đổi tên component để bọc bởi A
                     cursor: 'pointer'
                   }}
                   onClick={() => handleRoleChange(role.id)}
+=======
+    <div className={styles.container}>
+      <h1 className={styles.title}>Quản lý phân quyền</h1>
+      
+      {authLoading ? (
+        <div className={styles.loading}>Đang kiểm tra quyền truy cập...</div>
+      ) : !isAdmin ? (
+        <div className={styles.error}>
+          Bạn không có quyền truy cập trang này. Chỉ Admin mới có thể quản lý phân quyền.
+        </div>
+      ) : (
+        <>
+          <div className={styles.content}>
+            <div className={styles.rolesList}>
+              <h2 className={styles.sectionTitle}>Vai trò</h2>
+              <div>
+                {roleDefinitions.map(role => (
+                  <div 
+                    key={role.id} 
+                    className={selectedRole === role.id ? styles.roleCardSelected : styles.roleCard}
+                    onClick={() => handleRoleChange(role.id)}
+                  >
+                    <h3 className={styles.roleName}>{role.name} ({role.id})</h3>
+                    <p className={styles.roleDescription}>{role.description}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            <div className={styles.permissionsSection}>
+              <h2 className={styles.sectionTitle}>Quyền hạn cho {roleDefinitions.find(r => r.id === selectedRole)?.name}</h2>
+              
+              {Object.entries(modulePermissions).map(([module, perms]) => (
+                <div key={module} className={styles.moduleSection}>
+                  <h3 className={styles.moduleTitle}>{module}</h3>
+                  <div className={styles.permissionsGrid}>
+                    {perms.map(perm => (
+                      <div key={perm.id} className={styles.permissionItem}>
+                        <input 
+                          type="checkbox" 
+                          id={perm.id}
+                          className={styles.checkbox}
+                          checked={rolePerms.includes(perm.id)}
+                          onChange={(e) => handlePermissionChange(perm.id, e.target.checked)}
+                          disabled={!isAdmin || selectedRole === 'R00'} // Admin (R00) luôn có tất cả quyền
+                        />
+                        <label htmlFor={perm.id} className={styles.label}>{perm.name}</label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+              
+              {isAdmin && selectedRole !== 'R00' && (
+                <button className={styles.saveButton}
+                  onClick={() => alert('Đã lưu cấu hình phân quyền!')}
+>>>>>>> origin/FE-Fix
                 >
                   <h3 style={{fontWeight: 'bold'}}>{role.name} ({role.id})</h3>
                   <p style={{fontSize: '14px', color: '#4a5568', marginTop: '4px'}}>{role.description}</p>

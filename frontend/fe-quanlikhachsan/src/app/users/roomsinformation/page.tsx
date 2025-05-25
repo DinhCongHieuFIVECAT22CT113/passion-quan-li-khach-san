@@ -10,9 +10,17 @@ import { useAuth } from '@/lib/auth';
 import Header from '../../components/layout/Header';
 import styles from './styles.module.css';
 import Image from 'next/image';
-import Link from 'next/link';
 import { FaWifi, FaSnowflake, FaTv, FaWineBottle, FaLock, FaBath, FaWater, FaPhone, FaDesktop, FaCoffee } from 'react-icons/fa';
 import React from 'react';
+import { getRoomTypes } from '../../../lib/api';
+import { RoomType } from '../../../types/auth';
+
+interface ExtendedRoomType extends RoomType {
+  giaMoiGio?: number;
+  soPhongTam?: number;
+  giuongDoi?: number;
+  giuongDon?: number;
+}
 
 interface Room {
   maPhong: string;
@@ -27,13 +35,13 @@ interface Room {
 
 interface ApiRoomData {
   maPhong: string;
-  tenPhong?: string; // Có thể optional từ API
+  tenPhong?: string;
   maLoaiPhong: string;
   trangThai: string;
   moTa?: string;
-  thumbnail?: string; // Từ API, có thể là string hoặc undefined
-  hinhAnh?: string; // Từ API, đây là một CHUỖI (có thể là JSON hoặc chuỗi ngăn cách bằng dấu phẩy)
-  amenities?: string; // Tùy thuộc vào cách API trả về tiện nghi, nếu là string, để là string
+  thumbnail?: string;
+  hinhAnh?: string;
+  amenities?: string;
 }
 
 const getValidImageSrc = (imagePath: string | undefined | null): string => {
@@ -98,100 +106,124 @@ export default function RoomsListPage() {
   const searchParams = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   const [rooms, setRooms] = useState<Room[]>([]);
+  const [roomType, setRoomType] = useState<ExtendedRoomType | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedRoomImages, setSelectedRoomImages] = useState<string[] | null>(null);
+  const [currentImageModalIndex, setCurrentImageModalIndex] = useState(0); // Mới
+  const fetchRoomsAndRoomType = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    const maLoaiPhong = searchParams?.get('maLoaiPhong');
 
-const fetchRooms = useCallback(async () => {
-  setLoading(true);
-  setError('');
-  const maLoaiPhong = searchParams?.get('maLoaiPhong');
-
-  if (!maLoaiPhong) {
-    setError('Không có mã loại phòng nào được chọn.');
-    setLoading(false);
-    setRooms([]); // Đảm bảo rooms rỗng nếu không có mã loại phòng
-    return;
-  }
-
-  try {
-    // Gọi API lấy phòng theo mã loại phòng
-    const response = await fetch(`${API_BASE_URL}/Phong/GetPhongByLoai/${maLoaiPhong}`, {
-      method: 'GET',
-      // Không cần gửi token nếu API này là public
-    });
-
-    if (!response.ok) {
-      if (response.status === 404) {
-        setError(`Không tìm thấy phòng nào cho loại phòng ${maLoaiPhong}.`);
-        setRooms([]);
-      } else {
-        throw new Error(`Lỗi khi tải phòng: ${response.status}`);
-      }
-    } else {
-      const data = await response.json();
-      // API có thể trả về một object nếu chỉ có 1 phòng, hoặc array nếu nhiều, hoặc 404 nếu không có
-      // Nếu API luôn trả về array (kể cả rỗng), thì không cần Array.isArray check phức tạp
-      const roomsData: ApiRoomData[] = Array.isArray(data) ? data : (data ? [data] : []);
-
-      const roomsWithDetails: Room[] = roomsData.map((room: ApiRoomData) => ({
-        maPhong: room.maPhong,
-        tenPhong: room.tenPhong || `Phòng ${room.maPhong}`,
-        maLoaiPhong: room.maLoaiPhong, // Giữ lại để kiểm tra nếu cần
-        trangThai: room.trangThai,
-        moTa: room.moTa,
-        thumbnail: getValidImageSrc(room.thumbnail),
-        hinhAnh: parseHinhAnh(room.hinhAnh),
-        amenities: defaultAmenities // Sử dụng default amenities
-      }));
-      setRooms(roomsWithDetails);
-      if (roomsWithDetails.length === 0 && response.ok) { // response.ok nhưng không có phòng
-        setError(`Không có phòng nào thuộc loại ${maLoaiPhong} hiện có sẵn.`);
-      }
+    if (!maLoaiPhong) {
+      setError('Không có mã loại phòng nào được chọn.');
+      setLoading(false);
+      setRooms([]);
+      return;
     }
-  } catch (err: any) {
-    console.error(`Lỗi khi lấy danh sách phòng cho loại ${maLoaiPhong}:`, err);
-    setError(err.message || 'Không thể tải danh sách phòng. Vui lòng thử lại sau.');
-    setRooms([]);
-  } finally {
-    setLoading(false);
-  }
-}, [searchParams, setLoading, setError, setRooms]);
+
+    try {
+      // Fetch Phong data
+      const phongResponse = await fetch(`${API_BASE_URL}/Phong/GetPhongByLoai/${maLoaiPhong}`, {
+        method: 'GET',
+      });
+
+      if (!phongResponse.ok) {
+        if (phongResponse.status === 404) {
+          setError(`Không tìm thấy phòng nào cho loại phòng ${maLoaiPhong}.`);
+          setRooms([]);
+        } else {
+          throw new Error(`Lỗi khi tải phòng: ${phongResponse.status}`);
+        }
+      } else {
+        const data = await phongResponse.json();
+        console.log('Phong API Response:', data);
+        const roomsData: ApiRoomData[] = Array.isArray(data) ? data : (data ? [data] : []);
+
+        const roomsWithDetails: Room[] = roomsData.map((room: ApiRoomData) => ({
+          maPhong: room.maPhong,
+          tenPhong: room.tenPhong || `Phòng ${room.maPhong}`,
+          maLoaiPhong: room.maLoaiPhong,
+          trangThai: room.trangThai,
+          moTa: room.moTa,
+          thumbnail: getValidImageSrc(room.thumbnail),
+          hinhAnh: parseHinhAnh(room.hinhAnh),
+          amenities: defaultAmenities,
+        }));
+        setRooms(roomsWithDetails);
+        if (roomsWithDetails.length === 0 && phongResponse.ok) {
+          setError(`Không có phòng nào thuộc loại ${maLoaiPhong} hiện có sẵn.`);
+        }
+      }
+
+      // Fetch LoaiPhong data using getRoomTypes
+      const roomTypes = await getRoomTypes();
+      const selectedRoomType = roomTypes.find((type: ExtendedRoomType) => type.maLoaiPhong === maLoaiPhong);
+      if (selectedRoomType) {
+        console.log('Selected RoomType:', selectedRoomType);
+        setRoomType(selectedRoomType);
+      } else {
+        console.warn(`Không tìm thấy loại phòng ${maLoaiPhong}`);
+      }
+    } catch (err: any) {
+      console.error(`Lỗi khi lấy dữ liệu:`, err);
+      setError(err.message || 'Không thể tải dữ liệu. Vui lòng thử lại sau.');
+      setRooms([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     i18n.changeLanguage(selectedLanguage);
-    // fetchRooms sẽ được gọi khi searchParams thay đổi (do dependency của fetchRooms)
-    // hoặc khi selectedLanguage thay đổi.
-    // Gọi một lần khi component mount và khi các dependencies này thay đổi.
-    fetchRooms(); 
-  }, [selectedLanguage, fetchRooms]); // fetchRooms đã có searchParams là dependency
+    fetchRoomsAndRoomType();
+  }, [selectedLanguage, fetchRoomsAndRoomType]);
 
-const renderAmenityIcon = (amenity: string) => {
-  // Thay đổi JSX.Element thành React.ReactNode
-  const iconMap: Record<string, React.ReactNode> = {
-    'WiFi': <FaWifi />,
-    'Điều hòa': <FaSnowflake />,
-    'TV': <FaTv />,
-    'Minibar': <FaWineBottle />,
-    'Két': <FaLock />,
-    'Phòng tắm': <FaBath />,
-    'Máy sấy': <FaWater />,
-    'Dịch vụ phòng': <FaPhone />,
-    'Bàn làm việc': <FaDesktop />,
-    'Ấm đun': <FaCoffee />
+  const renderAmenityIcon = (amenity: string) => {
+    const iconMap: Record<string, React.ReactNode> = {
+      'WiFi': <FaWifi />,
+      'Điều hòa': <FaSnowflake />,
+      'TV': <FaTv />,
+      'Minibar': <FaWineBottle />,
+      'Két': <FaLock />,
+      'Phòng tắm': <FaBath />,
+      'Máy sấy': <FaWater />,
+      'Dịch vụ phòng': <FaPhone />,
+      'Bàn làm việc': <FaDesktop />,
+      'Ấm đun': <FaCoffee />
+    };
+
+    for (const [key, icon] of Object.entries(iconMap)) {
+      if (amenity.includes(key)) {
+        return icon;
+      }
+    }
+    return null;
   };
 
-  for (const [key, icon] of Object.entries(iconMap)) {
-    if (amenity.includes(key)) {
-      return icon;
-    }
-  }
-  return null;
+const handleViewImages = (images: string[]) => {
+  setSelectedRoomImages(images);
+  setCurrentImageModalIndex(0); // Đặt lại index về 0 khi mở modal mới
 };
 
-  const handleViewImages = (images: string[]) => {
-    setSelectedRoomImages(images);
-  };
+const handleNextImageModal = () => {
+  if (selectedRoomImages) {
+    setCurrentImageModalIndex((prevIndex) => (prevIndex + 1) % selectedRoomImages.length);
+  }
+};
+
+const handlePrevImageModal = () => {
+  if (selectedRoomImages) {
+    setCurrentImageModalIndex((prevIndex) =>
+      (prevIndex - 1 + selectedRoomImages.length) % selectedRoomImages.length
+    );
+  }
+};
+
+const handleThumbnailModalClick = (index: number) => {
+  setCurrentImageModalIndex(index);
+};
 
   const handleCloseModal = () => {
     setSelectedRoomImages(null);
@@ -233,32 +265,24 @@ const renderAmenityIcon = (amenity: string) => {
       <Header />
       <div className={styles.roomInformationContainer}>
         <div className={styles.container}>
-          <h1 className={styles.roomTitle}>Danh sách phòng {searchParams?.get('maLoaiPhong') ? `(Loại: ${searchParams.get('maLoaiPhong')})` : ''}</h1>
+          <h1 className={styles.roomTitle}>Danh sách phòng {searchParams?.get('maLoaiPhong') ? `(Loại: ${roomType?.tenLoaiPhong || searchParams.get('maLoaiPhong')})` : ''}</h1>
           
           <div className={styles.roomsList}>
             {rooms.length > 0 ? (
               rooms.map((room) => (
                 <div key={room.maPhong} className={styles.roomRow}>
                   <div className={styles.roomRowImage}>
-                    <Link href={`/users/room-detail/${room.maPhong}`} legacyBehavior>
-                      <a aria-label={`Xem chi tiết phòng ${room.tenPhong}`}>
-                        <Image 
-                          src={room.thumbnail}
-                          alt={getValidAltText(room.tenPhong)}
-                          width={250}
-                          height={150}
-                          className={styles.rowImage}
-                          priority={rooms.indexOf(room) < 3}
-                        />
-                      </a>
-                    </Link>
+                    <Image 
+                      src={room.thumbnail}
+                      alt={getValidAltText(room.tenPhong)}
+                      width={250}
+                      height={150}
+                      className={styles.rowImage}
+                      priority={rooms.indexOf(room) < 3}
+                    />
                   </div>
                   <div className={styles.roomRowContent}>
-                    <h3>
-                      <Link href={`/users/room-detail/${room.maPhong}`} legacyBehavior>
-                        <a className={styles.roomNameLink}>{room.tenPhong}</a>
-                      </Link>
-                    </h3>
+                    <h3>{room.tenPhong}</h3>
                     <div className={styles.roomInfo}>
                       <div className={styles.feature}>
                         <span className={styles.featureLabel}>Mã phòng:</span>
@@ -275,7 +299,49 @@ const renderAmenityIcon = (amenity: string) => {
                     </div>
                     <div className={styles.roomDescription}>
                       <h4>Mô tả</h4>
-                      <p>{room.moTa || 'Không có mô tả cho phòng này.'}</p>
+                      <p>{roomType?.moTa || room.moTa || 'Không có mô tả cho phòng này.'}</p>
+                      {roomType && (
+                        <div className={styles.roomSpecifications}>
+                          <div className={styles.specItem}>
+                            <span className={styles.specLabel}>Giá mỗi giờ:</span>
+                            <span className={styles.specValue}>
+                              {roomType.giaMoiGio ? `${roomType.giaMoiGio.toLocaleString()}đ` : 'Không có thông tin'}
+                            </span>
+                          </div>
+                          <div className={styles.specItem}>
+                            <span className={styles.specLabel}>Giá mỗi đêm:</span>
+                            <span className={styles.specValue}>
+                              {roomType.giaMoiDem ? `${roomType.giaMoiDem.toLocaleString()}đ` : 'Không có thông tin'}
+                            </span>
+                          </div>
+                          <div className={styles.specItem}>
+                            <span className={styles.specLabel}>Số phòng tắm:</span>
+                            <span className={styles.specValue}>{roomType.soPhongTam ?? 'Không có thông tin'}</span>
+                          </div>
+                          <div className={styles.specItem}>
+                            <span className={styles.specLabel}>Số giường ngủ:</span>
+                            <span className={styles.specValue}>{roomType.soGiuongNgu ?? 'Không có thông tin'}</span>
+                          </div>
+                          <div className={styles.specItem}>
+                            <span className={styles.specLabel}>Giường đôi:</span>
+                            <span className={styles.specValue}>{roomType.giuongDoi ?? 'Không có thông tin'}</span>
+                          </div>
+                          <div className={styles.specItem}>
+                            <span className={styles.specLabel}>Giường đơn:</span>
+                            <span className={styles.specValue}>{roomType.giuongDon ?? 'Không có thông tin'}</span>
+                          </div>
+                          <div className={styles.specItem}>
+                            <span className={styles.specLabel}>Diện tích phòng:</span>
+                            <span className={styles.specValue}>
+                              {roomType.kichThuocPhong ? `${roomType.kichThuocPhong}m²` : 'Không có thông tin'}
+                            </span>
+                          </div>
+                          <div className={styles.specItem}>
+                            <span className={styles.specLabel}>Sức chứa:</span>
+                            <span className={styles.specValue}>{roomType.sucChua ?? 'Không có thông tin'}</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <div className={styles.amenities}>
                       <h4>Tiện nghi</h4>
@@ -289,16 +355,13 @@ const renderAmenityIcon = (amenity: string) => {
                       </ul>
                     </div>
                     <div className={styles.roomActions}>
-                      <Link href={`/users/room-detail/${room.maPhong}`} legacyBehavior>
-                        <a className={styles.detailsButton}>Xem chi tiết</a>
-                      </Link>
                       {room.hinhAnh && room.hinhAnh.length > 1 && (
                         <button 
-                          className={`${styles.detailsButton} ${styles.viewMoreImagesButton}`}
+                          className={styles.viewImagesButton}
                           onClick={() => handleViewImages(room.hinhAnh || [room.thumbnail])}
                           aria-label={`Xem thêm ảnh cho phòng ${room.tenPhong}`}
                         >
-                          Xem nhiều ảnh
+                          Xem thêm ảnh của phòng
                         </button>
                       )}
                       <button 
@@ -322,30 +385,68 @@ const renderAmenityIcon = (amenity: string) => {
             )}
           </div>
 
-          {selectedRoomImages && (
-            <div className={styles.fullImageModal}>
-              <div className={styles.fullImageContainer}>
-                {selectedRoomImages.map((img, index) => (
-                  <Image
-                    key={index}
-                    src={img}
-                    alt={`Ảnh phòng ${index + 1}`}
-                    width={800}
-                    height={500}
-                    className={styles.fullImage}
-                    priority
-                  />
-                ))}
-                <button
-                  className={styles.closeModalButton}
-                  onClick={handleCloseModal}
-                  aria-label="Đóng ảnh"
-                >
-                  ×
-                </button>
-              </div>
-            </div>
-          )}
+{selectedRoomImages && (
+  <div className={styles.fullImageModal}>
+    <div className={styles.fullImageSliderContainer}> {/* Container mới cho slider */}
+      {/* Ảnh chính */}
+      <Image
+        src={selectedRoomImages[currentImageModalIndex]}
+        alt={`Ảnh phòng ${currentImageModalIndex + 1}`}
+        width={1200} // Kích thước lớn hơn cho ảnh trong modal
+        height={700} // Kích thước lớn hơn
+        className={styles.fullImageMain} // Class mới cho ảnh chính trong modal
+        priority
+      />
+
+      {/* Nút điều hướng (Prev/Next) */}
+      {selectedRoomImages.length > 1 && (
+        <>
+          <button
+            className={`${styles.modalSliderNavButton} ${styles.modalPrevButton}`}
+            onClick={handlePrevImageModal}
+            aria-label="Ảnh trước"
+          >
+            &lt;
+          </button>
+          <button
+            className={`${styles.modalSliderNavButton} ${styles.modalNextButton}`}
+            onClick={handleNextImageModal}
+            aria-label="Ảnh tiếp theo"
+          >
+            &gt;
+          </button>
+        </>
+      )}
+
+      {/* Thanh trượt thumbnail ngang (tùy chọn, nhưng rất nên có) */}
+      {selectedRoomImages.length > 1 && (
+        <div className={styles.modalThumbnailsSlider}>
+          {selectedRoomImages.map((img, index) => (
+            <Image
+              key={index}
+              src={img}
+              alt={`Ảnh nhỏ ${index + 1}`}
+              width={100}
+              height={70}
+              className={`${styles.modalThumbnailImage} ${index === currentImageModalIndex ? styles.activeModalThumbnail : ''}`}
+              onClick={() => handleThumbnailModalClick(index)}
+              priority={false}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Nút đóng modal */}
+      <button
+        className={styles.closeModalButton}
+        onClick={handleCloseModal}
+        aria-label="Đóng ảnh"
+      >
+        ×
+      </button>
+    </div>
+  </div>
+)}
         </div>
       </div>
     </>

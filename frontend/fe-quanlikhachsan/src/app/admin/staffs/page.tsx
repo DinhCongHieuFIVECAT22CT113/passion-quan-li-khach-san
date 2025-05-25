@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 // import Link from 'next/link'; // Xóa import Link không sử dụng
-import styles from '../AdminLayout.module.css'; 
+import styles from './Staffs.module.css';
 import { API_BASE_URL } from '@/lib/config'; 
 import { getAuthHeaders, handleResponse } from '@/lib/api'; 
 // import Image from 'next/image'; // Xóa import Image không sử dụng
@@ -258,7 +258,7 @@ function StaffPage() {
           onChange={(e) => setSearchTerm(e.target.value)}
         />
         {user && user.permissions.canManageStaff && (
-          <button onClick={openAddModal} className={`${styles.button} ${styles.addButton}`}>Thêm Nhân Viên</button>
+          <button onClick={openAddModal} className={styles.addBtn}>Thêm Nhân Viên</button>
         )}
       </div>
       
@@ -297,8 +297,8 @@ function StaffPage() {
                 <td>{staff.tenRole || staff.maRole || 'N/A'}</td> 
                 <td>{staff.trangThai}</td>
                 <td>
-                  <button onClick={() => openEditModal(staff)} className={`${styles.button} ${styles.editButton}`}>Sửa</button>
-                  <button onClick={() => handleDelete(staff.maNV)} className={`${styles.button} ${styles.deleteButton}`}>Xóa</button>
+                  <button onClick={() => openEditModal(staff)} className={styles.editBtn}>Sửa</button>
+                  <button onClick={() => handleDelete(staff.maNV)} className={styles.deleteBtn}>Xóa</button>
                     </td>
                   </tr>
                 ))
@@ -307,41 +307,41 @@ function StaffPage() {
           </table>
       
       {(showAddModal || showEditModal) && (
-        <div className={styles.modalBackdrop}>
+        <div className={styles.modal}>
           <div className={styles.modalContent}>
             <h2>{editingStaff ? "Sửa Nhân Viên" : "Thêm Nhân Viên"}</h2>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className={styles.form}>
               <div className={styles.formGroup}>
                 <label htmlFor="hoNv">Họ</label>
-                <input type="text" id="hoNv" name="hoNv" value={formState.hoNv} onChange={handleInputChange} required />
+                <input type="text" id="hoNv" name="hoNv" value={formState.hoNv} onChange={handleInputChange} required className={styles.input} />
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="tenNv">Tên</label>
-                <input type="text" id="tenNv" name="tenNv" value={formState.tenNv} onChange={handleInputChange} required />
+                <input type="text" id="tenNv" name="tenNv" value={formState.tenNv} onChange={handleInputChange} required className={styles.input} />
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="userName">Username</label>
-                <input type="text" id="userName" name="userName" value={formState.userName} onChange={handleInputChange} required />
+                <input type="text" id="userName" name="userName" value={formState.userName} onChange={handleInputChange} required className={styles.input} />
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="chucVu">Chức vụ</label>
-                <input type="text" id="chucVu" name="chucVu" value={formState.chucVu} onChange={handleInputChange} required />
+                <input type="text" id="chucVu" name="chucVu" value={formState.chucVu} onChange={handleInputChange} required className={styles.input} />
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="soDienThoai">Số điện thoại</label>
-                <input type="tel" id="soDienThoai" name="soDienThoai" value={formState.soDienThoai} onChange={handleInputChange} required />
+                <input type="tel" id="soDienThoai" name="soDienThoai" value={formState.soDienThoai} onChange={handleInputChange} required className={styles.input} />
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="email">Email</label>
-                <input type="email" id="email" name="email" value={formState.email} onChange={handleInputChange} required />
+                <input type="email" id="email" name="email" value={formState.email} onChange={handleInputChange} required className={styles.input} />
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="ngayVaoLam">Ngày vào làm</label>
-                <input type="date" id="ngayVaoLam" name="ngayVaoLam" value={formState.ngayVaoLam} onChange={handleInputChange} required />
+                <input type="date" id="ngayVaoLam" name="ngayVaoLam" value={formState.ngayVaoLam} onChange={handleInputChange} required className={styles.input} />
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="luongCoBan">Lương cơ bản</label>
-                <input type="number" id="luongCoBan" name="luongCoBan" value={formState.luongCoBan} onChange={handleInputChange} required min="0"/>
+                <input type="number" id="luongCoBan" name="luongCoBan" value={formState.luongCoBan} onChange={handleInputChange} required min="0" className={styles.input}/>
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="maRole">Vai trò</label>
@@ -354,7 +354,7 @@ function StaffPage() {
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="trangThai">Trạng thái</label>
-                <select id="trangThai" name="trangThai" value={formState.trangThai} onChange={handleInputChange} required>
+                <select id="trangThai" name="trangThai" value={formState.trangThai} onChange={handleInputChange} required className={styles.input}>
                   <option value="Hoạt động">Hoạt động</option>
                   <option value="Nghỉ việc">Nghỉ việc</option>
                   <option value="Tạm ngưng">Tạm ngưng</option>
@@ -363,11 +363,11 @@ function StaffPage() {
 
               {error && <p className={styles.errorTextModal}>{error}</p>}
 
-              <div className={styles.modalActions}>
-                <button type="submit" className={`${styles.button} ${styles.saveButton}`} disabled={isLoading}>
+              <div className={styles.formActions}>
+                <button type="submit" className={styles.addBtn} disabled={isLoading}>
                   {isLoading ? (editingStaff ? 'Đang cập nhật...' : 'Đang lưu...') : (editingStaff ? "Lưu thay đổi" : "Thêm mới")}
                 </button>
-                <button type="button" onClick={() => { setShowAddModal(false); setShowEditModal(false); setEditingStaff(null); }} className={`${styles.button} ${styles.cancelButton}`}>Hủy</button>
+                <button type="button" onClick={() => { setShowAddModal(false); setShowEditModal(false); setEditingStaff(null); }} className={styles.cancelBtn}>Hủy</button>
               </div>
             </form>
           </div>
