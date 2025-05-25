@@ -601,25 +601,127 @@
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  overflow: hidden; /* Quan trọng để ảnh không tràn ra ngoài modal */
 }
 
-.fullImageContainer {
+.fullImageSliderContainer {
   position: relative;
   width: 90%;
-  height: 90%;
   max-width: 1200px;
+  height: 80vh; /* Đặt chiều cao tương đối để phù hợp với màn hình */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: black; /* Nền đen để ảnh nổi bật */
+  border-radius: 8px;
+  padding: 20px;
+  box-sizing: border-box; /* Đảm bảo padding không làm tăng kích thước */
 }
 
+.fullImageMain {
+  width: 100%;
+  height: calc(100% - 100px); /* Để chừa chỗ cho thumbnail và padding */
+  object-fit: contain; /* Đảm bảo ảnh vừa vặn mà không bị cắt */
+  max-height: 700px; /* Giới hạn chiều cao ảnh chính */
+  transition: opacity 0.3s ease-in-out; /* Hiệu ứng mượt mà khi chuyển ảnh */
+}
+
+/* Nút điều hướng trong modal */
+.modalSliderNavButton {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.8rem;
+  z-index: 10; /* Đảm bảo nằm trên ảnh */
+  transition: background-color 0.3s;
+}
+
+.modalSliderNavButton:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+.modalPrevButton {
+  left: 10px;
+}
+
+.modalNextButton {
+  right: 10px;
+}
+
+/* Thanh trượt thumbnail trong modal */
+.modalThumbnailsSlider {
+  display: flex;
+  overflow-x: auto; /* Cho phép cuộn ngang */
+  gap: 10px;
+  padding: 10px 0;
+  margin-top: 15px;
+  width: 100%;
+  justify-content: center; /* Căn giữa các thumbnail */
+  flex-shrink: 0; /* Ngăn không cho co lại */
+
+  /* Custom scrollbar for Webkit browsers */
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+  }
+}
+
+.modalThumbnailImage {
+  width: 100px; /* Kích thước thumbnail trong modal */
+  height: 70px;
+  object-fit: cover;
+  border-radius: 5px;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.3s, border 0.3s;
+  border: 2px solid transparent;
+  flex-shrink: 0; /* Ngăn không cho co lại */
+}
+
+.modalThumbnailImage:hover {
+  opacity: 0.9;
+}
+
+.activeModalThumbnail {
+  opacity: 1;
+  border-color: #007bff; /* Highlight ảnh đang được chọn */
+}
+
+/* Nút đóng modal (có thể giữ nguyên hoặc điều chỉnh vị trí) */
 .closeModalButton {
   position: absolute;
-  top: -40px;
-  right: 0;
-  background: none;
-  border: none;
+  top: 10px;
+  right: 10px;
+  background-color: rgba(255, 255, 255, 0.2);
   color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
   font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  z-index: 10;
+  z-index: 11; /* Đảm bảo nằm trên mọi thứ */
+  transition: background-color 0.3s;
+}
+
+.closeModalButton:hover {
+  background-color: rgba(255, 255, 255, 0.4);
 }
 
 .fullImage {
@@ -819,6 +921,7 @@
 .roomInformationContainer {
   width: 100%;
   padding: 2rem 0;
+  background-color: white;
 }
 
 .container {
@@ -1299,4 +1402,28 @@
   font-size: 2rem;
   cursor: pointer;
   z-index: 10;
+}
+
+.roomSpecifications {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.specItem {
+  flex: 1 1 45%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee;
+}
+
+.specLabel {
+  font-weight: bold;
+  color: #333;
+}
+
+.specValue {
+  color: #555;
 }
