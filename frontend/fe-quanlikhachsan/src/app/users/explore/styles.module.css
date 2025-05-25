@@ -64,6 +64,8 @@
 
 /* Features Section */
 .features {
+  background-color: #f9f9f9; /* hoặc màu cụ thể */
+  transition: background-color 0.3s ease-in-out;
   padding: 5rem 5%;
 }
 

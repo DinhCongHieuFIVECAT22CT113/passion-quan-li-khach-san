@@ -41,6 +41,8 @@
 
 /* Team Section */
 .teamSection {
+  background-color: #f9f9f9; /* hoặc màu cụ thể */
+  transition: background-color 0.3s ease-in-out;
   padding: 4rem 5%;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
@@ -71,14 +73,14 @@
 
 .memberInfo h2 {
   font-size: 2rem;
-  color: #333;
+  color: black;
   margin-bottom: 1.5rem;
 }
 
 .memberDescription p {
   font-size: 1.1rem;
   line-height: 1.8;
-  color: #666;
+  color: black;
   margin-bottom: 1.5rem;
 }
 
