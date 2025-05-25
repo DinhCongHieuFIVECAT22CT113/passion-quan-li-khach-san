@@ -94,5 +94,33 @@ namespace be_quanlikhachsanapi.Controllers
             }
             return Ok(result);
         }
+
+        // Lấy lịch sử đặt phòng của khách hàng hiện tại
+        [HttpGet("KhachHang")] // Route sẽ là /api/DatPhong/KhachHang
+        [RequireRole("R04")] // Chỉ cho phép Khách hàng (R04) truy cập
+        public async Task<IActionResult> GetDatPhongByKhachHang()
+        {
+            var maKh = User.FindFirstValue(ClaimTypes.NameIdentifier); // Lấy MaKh từ token (đảm bảo token chứa claim này, thường là sub hoặc nameid)
+
+            if (string.IsNullOrEmpty(maKh))
+            {
+                // Điều này không nên xảy ra nếu [Authorize] và [RequireRole("R04")] hoạt động đúng
+                // và token được cấu hình để chứa ID người dùng.
+                return Unauthorized("Không thể xác định người dùng. Vui lòng đăng nhập lại.");
+            }
+
+            // Giả định bạn có một phương thức GetDatPhongByMaKhAsync trong IDatPhongRepository
+            // và đã implement nó.
+            var datPhongs = await _datPhongRepo.GetDatPhongByMaKhAsync(maKh); 
+
+            if (datPhongs == null || !datPhongs.Any())
+            {
+                // Trả về mảng rỗng nếu không có đặt phòng nào, thay vì NotFound,
+                // để frontend dễ xử lý hơn (kiểm tra length của mảng).
+                // Hoặc bạn có thể trả về NotFound tùy theo yêu cầu của frontend.
+                return Ok(new List<object>()); 
+            }
+            return Ok(datPhongs);
+        }
     }
 }

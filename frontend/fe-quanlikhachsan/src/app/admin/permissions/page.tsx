@@ -1,15 +1,9 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import { useAuth, ROLES } from '../../../lib/auth'; // Bỏ APP_CONFIG khỏi đây
-import { APP_CONFIG } from '../../../lib/config'; // Import APP_CONFIG từ đúng tệp
-import AuthCheck from '../../components/auth/AuthCheck'; // Thêm AuthCheck
-// import { getUserInfo } from '../../../lib/config'; // Xóa import này
-<<<<<<< HEAD
-// import styles from '../AdminLayout.module.css'; // Không sử dụng
-=======
-import { useAuth } from '../../../lib/auth'; // Thêm import useAuth
-import styles from './Permissions.module.css';
->>>>>>> origin/FE-Fix
+import { useAuth, ROLES } from '../../../lib/auth'; // Đảm bảo ROLES được import nếu sử dụng
+import { APP_CONFIG } from '../../../lib/config';
+import AuthCheck from '../../components/auth/AuthCheck';
+import styles from './Permissions.module.css'; // Giữ lại từ FE-Fix
 
 // Định nghĩa danh sách vai trò
 const roleDefinitions = [
@@ -49,41 +43,39 @@ const permissions = [
 // Ánh xạ quyền cho mỗi vai trò
 const rolePermissions = {
   'R00': permissions.map(p => p.id), // Admin có tất cả quyền
-  'R01': [ // Quản lý có hầu hết quyền trừ những quyền hệ thống
+  'R01': [ 
     'user_view', 'user_create', 'user_edit',
     'room_view', 'room_create', 'room_edit', 'room_delete',
     'booking_view', 'booking_create', 'booking_edit', 'booking_cancel',
     'invoice_view', 'invoice_create', 'invoice_edit',
     'report_view', 'report_create',
   ],
-  'R02': [ // Nhân viên chỉ có quyền liên quan đến phòng và đặt phòng
+  'R02': [ 
     'room_view',
     'booking_view', 'booking_create', 'booking_edit', 'booking_cancel',
   ],
-  'R03': [ // Kế toán chỉ có quyền liên quan đến hóa đơn và báo cáo
+  'R03': [ 
     'invoice_view', 'invoice_create', 'invoice_edit', 'invoice_delete',
     'report_view', 'report_create',
   ],
-  'R04': [], // Khách hàng không có quyền trong hệ thống quản trị
+  'R04': [],
 };
 
-function PermissionsPageContent() { // Đổi tên component để bọc bởi AuthCheck
+function PermissionsPageContent() {
   const [selectedRole, setSelectedRole] = useState('R00');
   const [rolePerms, setRolePerms] = useState<string[]>([]);
-  // const [isAdmin, setIsAdmin] = useState(false); // Sẽ không cần nữa nếu dùng AuthCheck
-  const { user, loading: authLoading } = useAuth(); 
-  
+  const { user, loading: authLoading } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false); // Thêm state cho isAdmin
+
   useEffect(() => {
-    // if (!authLoading) { 
-    //   if (user) {
-    //     // setIsAdmin(user.role === ROLES.ADMIN); // Sử dụng ROLES.ADMIN
-    //   } else {
-    //     // setIsAdmin(false); 
-    //   }
-    // }
-    
+    if (!authLoading && user) {
+      setIsAdmin(user.role === ROLES.ADMIN);
+    } else if (!authLoading && !user) {
+      setIsAdmin(false);
+    }
+    // Cập nhật rolePerms khi selectedRole hoặc user thay đổi (để disabled checkbox cho admin)
     setRolePerms(rolePermissions[selectedRole as keyof typeof rolePermissions] || []);
-  }, [selectedRole, user, authLoading]); 
+  }, [selectedRole, user, authLoading]);
   
   const modulePermissions = permissions.reduce((acc, perm) => {
     if (!acc[perm.module]) {
@@ -95,65 +87,43 @@ function PermissionsPageContent() { // Đổi tên component để bọc bởi A
   
   const handleRoleChange = (roleId: string) => {
     setSelectedRole(roleId);
-    setRolePerms(rolePermissions[roleId as keyof typeof rolePermissions] || []);
+    // setRolePerms đã được xử lý trong useEffect
   };
   
   const handlePermissionChange = (permId: string, checked: boolean) => {
-    if (checked) {
-      setRolePerms(prev => [...prev, permId]);
-    } else {
-      setRolePerms(prev => prev.filter(id => id !== permId));
+    // Chỉ cho phép thay đổi nếu là admin và không phải đang sửa quyền của Admin
+    if (isAdmin && selectedRole !== ROLES.ADMIN) {
+      setRolePerms(prev => {
+        const newPerms = checked ? [...prev, permId] : prev.filter(id => id !== permId);
+        // Cập nhật rolePermissions (đây là phần quan trọng để lưu thay đổi thực sự)
+        // Tuy nhiên, ví dụ này chỉ cập nhật state, chưa có logic lưu vào backend
+        // rolePermissions[selectedRole as keyof typeof rolePermissions] = newPerms; 
+        console.log(`Cập nhật quyền ${permId} cho vai trò ${selectedRole}: ${checked ? 'Thêm' : 'Xóa'}. RolePerms mới:`, newPerms);
+        return newPerms;
+      });
     }
-    console.log(`Cập nhật quyền ${permId} cho vai trò ${selectedRole}: ${checked ? 'Thêm' : 'Xóa'}`);
   };
   
-  // authLoading đã được AuthCheck xử lý ở trên
-  // if (authLoading) {
-  //   return <div>Đang tải dữ liệu người dùng...</div>;
-  // }
+  // AuthCheck ở ngoài sẽ xử lý việc loading và user không phải admin
+  // Nên không cần hiển thị loading hoặc thông báo lỗi ở đây nữa nếu đã được bọc bởi AuthCheck
+  // Tuy nhiên, logic của FE-Fix có kiểm tra isAdmin, nên ta giữ lại để tương thích với CSS của nó
 
-  // Việc kiểm tra user có phải admin không cũng do AuthCheck xử lý
-  // if (!user || user.role !== ROLES.ADMIN) { // Giả sử chỉ admin được vào
-  //   return (
-  //     <div style={{background: '#f8d7da', color: '#721c24', padding: '12px', borderRadius: '4px', marginBottom: '20px'}}>
-  //       Bạn không có quyền truy cập trang này. Chỉ Admin mới có thể quản lý phân quyền.
-  //     </div>
-  //   );
-  // }
+  if (authLoading) { // Giữ lại từ FE-Fix để styles.loading có tác dụng
+    return <div className={styles.loading}>Đang kiểm tra quyền truy cập...</div>;
+  }
+
+  // AuthCheck đã kiểm tra user.role === APP_CONFIG.roles.admin
+  // Biến isAdmin ở đây là để disable các checkbox nếu người dùng không phải admin (dù đã vào được trang)
+  // hoặc đang xem quyền của chính Admin (R00)
   
   return (
-<<<<<<< HEAD
-    <div className="permissions-container" style={{padding: '24px', maxWidth: '1200px', margin: '0 auto'}}>
-      <h1>Quản lý phân quyền</h1>
-      {/* Phần kiểm tra isAdmin và authLoading sẽ được AuthCheck xử lý */}
-      {/* {authLoading ? ( ... ) : !isAdmin ? ( ... ) : ( ... ) } */}
-      <>
-        <div style={{display: 'flex', gap: '20px', marginTop: '20px'}}>
-          <div style={{width: '300px'}}>
-            <h2 style={{marginBottom: '16px', fontSize: '18px'}}>Vai trò</h2>
-            <div style={{display: 'flex', flexDirection: 'column', gap: '12px'}}>
-              {roleDefinitions.map(role => (
-                <div 
-                  key={role.id} 
-                  style={{
-                    padding: '12px', 
-                    border: `1px solid ${selectedRole === role.id ? '#3182ce' : '#e2e8f0'}`,
-                    borderRadius: '4px',
-                    background: selectedRole === role.id ? '#ebf8ff' : '#fff',
-                    cursor: 'pointer'
-                  }}
-                  onClick={() => handleRoleChange(role.id)}
-=======
     <div className={styles.container}>
       <h1 className={styles.title}>Quản lý phân quyền</h1>
-      
-      {authLoading ? (
-        <div className={styles.loading}>Đang kiểm tra quyền truy cập...</div>
-      ) : !isAdmin ? (
-        <div className={styles.error}>
-          Bạn không có quyền truy cập trang này. Chỉ Admin mới có thể quản lý phân quyền.
-        </div>
-      ) : (
+      {/* 
+        Nếu AuthCheck đã xử lý việc user không phải admin bị redirect, 
+        thì đoạn check !isAdmin ở đây có thể không cần thiết để hiển thị lỗi nữa.
+        Tuy nhiên, nó vẫn dùng để disable các input.
+      */}
         <>
           <div className={styles.content}>
             <div className={styles.rolesList}>
@@ -187,7 +157,9 @@ function PermissionsPageContent() { // Đổi tên component để bọc bởi A
                           className={styles.checkbox}
                           checked={rolePerms.includes(perm.id)}
                           onChange={(e) => handlePermissionChange(perm.id, e.target.checked)}
-                          disabled={!isAdmin || selectedRole === 'R00'} // Admin (R00) luôn có tất cả quyền
+                          // Disable nếu không phải admin, hoặc đang xem quyền của Admin (R00),
+                          // hoặc user không tồn tại (mặc dù AuthCheck nên xử lý trường hợp này)
+                          disabled={!isAdmin || selectedRole === ROLES.ADMIN || !user }
                         />
                         <label htmlFor={perm.id} className={styles.label}>{perm.name}</label>
                       </div>
@@ -196,59 +168,21 @@ function PermissionsPageContent() { // Đổi tên component để bọc bởi A
                 </div>
               ))}
               
-              {isAdmin && selectedRole !== 'R00' && (
+              {/* Nút lưu chỉ hiển thị cho Admin và khi không xem vai trò Admin */}
+              {isAdmin && selectedRole !== ROLES.ADMIN && (
                 <button className={styles.saveButton}
-                  onClick={() => alert('Đã lưu cấu hình phân quyền!')}
->>>>>>> origin/FE-Fix
+                  onClick={() => {
+                    // TODO: Implement logic to save updated rolePermissions to backend
+                    alert('Đã lưu cấu hình phân quyền! (Cần implement lưu vào backend)');
+                    console.log('Cấu hình phân quyền mới cần lưu:', rolePermissions);
+                  }}
                 >
-                  <h3 style={{fontWeight: 'bold'}}>{role.name} ({role.id})</h3>
-                  <p style={{fontSize: '14px', color: '#4a5568', marginTop: '4px'}}>{role.description}</p>
-                </div>
-              ))}
+                  Lưu thay đổi
+                </button>
+              )}
             </div>
           </div>
-          
-          <div style={{flex: 1}}>
-            <h2 style={{marginBottom: '16px', fontSize: '18px'}}>Quyền hạn cho {roleDefinitions.find(r => r.id === selectedRole)?.name}</h2>
-            
-            {Object.entries(modulePermissions).map(([module, perms]) => (
-              <div key={module} style={{marginBottom: '24px'}}>
-                <h3 style={{borderBottom: '1px solid #e2e8f0', paddingBottom: '8px', marginBottom: '12px'}}>{module}</h3>
-                <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '12px'}}>
-                  {perms.map(perm => (
-                    <div key={perm.id} style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-                      <input 
-                        type="checkbox" 
-                        id={perm.id} 
-                        checked={rolePerms.includes(perm.id)}
-                        onChange={(e) => handlePermissionChange(perm.id, e.target.checked)}
-                        disabled={user?.role !== ROLES.ADMIN || selectedRole === ROLES.ADMIN} // Chỉ admin mới sửa được và ko sửa quyền admin
-                      />
-                      <label htmlFor={perm.id}>{perm.name}</label>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
-            
-            {user?.role === ROLES.ADMIN && selectedRole !== ROLES.ADMIN && (
-              <button 
-                style={{
-                  background: '#3182ce', 
-                  color: 'white', 
-                  padding: '10px 16px', 
-                  borderRadius: '4px',
-                  border: 'none',
-                  cursor: 'pointer'
-                }}
-                onClick={() => alert('Đã lưu cấu hình phân quyền!')}
-              >
-                Lưu thay đổi
-              </button>
-            )}
-          </div>
-        </div>
-      </>
+        </>
     </div>
   );
 }
