@@ -34,12 +34,16 @@ export function middleware(request: NextRequest) {
       // Chuyển hướng nếu đã login và vào trang login
       if (request.nextUrl.pathname.startsWith('/login')) {
         if (userRole === 'R00' || userRole === 'R01') {
-            return NextResponse.redirect(new URL('/admin/dashboard', request.url)); 
-        } else if (userRole === 'R04') { // Cập nhật R03 thành R04
-            return NextResponse.redirect(new URL('/users/home', request.url)); // Trang home cho user R04
+            return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+        } else if (userRole === 'R02') { // Nhân viên
+            return NextResponse.redirect(new URL('/employe/bookings', request.url));
+        } else if (userRole === 'R03') { // Kế toán
+            return NextResponse.redirect(new URL('/employe/invoices', request.url));
+        } else if (userRole === 'R04') { // Khách hàng
+            return NextResponse.redirect(new URL('/users/home', request.url));
         } else {
-            // Fallback cho các role khác nếu có
-            return NextResponse.redirect(new URL('/', request.url)); 
+            // Fallback cho các role khác nếu có, hoặc về trang unauthorized nếu không xác định được trang đích
+            return NextResponse.redirect(new URL('/', request.url));
         }
       }
 
@@ -48,15 +52,13 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL('/unauthorized', request.url));
       }
 
-      // Kiểm tra quyền truy cập các route employe (Manager hoặc nhân viên nghiệp vụ khác nếu có)
-      if (request.nextUrl.pathname.startsWith('/employe') && !['R00', 'R01'].includes(userRole)) {
+      // Kiểm tra quyền truy cập các route employe
+      // Cho phép R00, R01, R02, R03 truy cập vào /employe.
+      // Việc kiểm tra quyền chi tiết hơn sẽ do AuthCheck ở từng trang đảm nhiệm.
+      if (request.nextUrl.pathname.startsWith('/employe') && !['R00', 'R01', 'R02', 'R03'].includes(userRole)) {
          return NextResponse.redirect(new URL('/unauthorized', request.url));
       }
       
-      // Logic cho R02 (STAFF) - ví dụ: không được vào /admin nhưng có thể vào các trang nghiệp vụ khác không phải /employe
-      if (request.nextUrl.pathname.startsWith('/admin') && userRole === 'R02') {
-        return NextResponse.redirect(new URL('/unauthorized', request.url));
-      }
       // Logic cho R04 (CUSTOMER) - không được vào /admin, /employe
       if ((request.nextUrl.pathname.startsWith('/admin') || request.nextUrl.pathname.startsWith('/employe')) && userRole === 'R04') {
         return NextResponse.redirect(new URL('/unauthorized', request.url));
