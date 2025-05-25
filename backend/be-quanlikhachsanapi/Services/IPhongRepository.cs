@@ -1,6 +1,9 @@
 using be_quanlikhachsanapi.Data;
 using be_quanlikhachsanapi.DTOs;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace be_quanlikhachsanapi.Services
 {
@@ -8,6 +11,7 @@ namespace be_quanlikhachsanapi.Services
     {
         List<PhongDTO> GetAll();
         JsonResult GetPhongById(string MaPhong);
+        Task<List<PhongDTO>> GetPhongByMaLoaiPhongAsync(string maLoaiPhong);
         JsonResult CreatePhong(CreatePhongDTO createPhong);
         JsonResult UpdatePhong(string MaPhong, UpdatePhongDTO updatePhong);
         JsonResult DeletePhong(string MaPhong);
@@ -39,7 +43,15 @@ namespace be_quanlikhachsanapi.Services
         public JsonResult GetPhongById(string MaPhong)
         {
             var phong = _context.Phongs.FirstOrDefault(p => p.MaPhong == MaPhong);
-            var _phong  = new PhongDTO
+            if (phong == null)
+            {
+                return new JsonResult(new { message = "Không tìm thấy phòng với mã đã cho." })
+                {
+                    StatusCode = StatusCodes.Status404NotFound
+                };
+            }
+            
+            var _phongDto = new PhongDTO
             {
                 MaPhong = phong.MaPhong,
                 MaLoaiPhong = phong.MaLoaiPhong,
@@ -49,7 +61,7 @@ namespace be_quanlikhachsanapi.Services
                 TrangThai = phong.TrangThai,
                 Tang = phong.Tang
             };
-            return new JsonResult(_phong);
+            return new JsonResult(_phongDto) { StatusCode = StatusCodes.Status200OK };
         }
         public JsonResult CreatePhong(CreatePhongDTO createPhong)
         {
@@ -168,5 +180,24 @@ namespace be_quanlikhachsanapi.Services
                 };
             }
         }    
+
+        public async Task<List<PhongDTO>> GetPhongByMaLoaiPhongAsync(string maLoaiPhong)
+        {
+            var phongs = await _context.Phongs
+                .Where(p => p.MaLoaiPhong == maLoaiPhong)
+                .Select(p => new PhongDTO
+                {
+                    MaPhong = p.MaPhong,
+                    MaLoaiPhong = p.MaLoaiPhong,
+                    SoPhong = p.SoPhong,
+                    Thumbnail = p.Thumbnail,
+                    HinhAnh = p.HinhAnh,
+                    TrangThai = p.TrangThai,
+                    Tang = p.Tang
+                })
+                .ToListAsync();
+
+            return phongs;
+        }
     }
 }

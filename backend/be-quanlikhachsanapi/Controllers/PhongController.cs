@@ -4,6 +4,9 @@ using be_quanlikhachsanapi.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using be_quanlikhachsanapi.Authorization;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace be_quanlikhachsanapi.Controllers
 {
@@ -34,12 +37,46 @@ namespace be_quanlikhachsanapi.Controllers
         [AllowAnonymous]
         public IActionResult GetByID(string maPhong)
         {
-            var phong = _phongRepo.GetPhongById(maPhong);
-            if (phong == null)
+            var result = _phongRepo.GetPhongById(maPhong);
+
+            // Kiểm tra StatusCode từ JsonResult trả về bởi repository
+            if (result.StatusCode == StatusCodes.Status404NotFound)
             {
-                return NotFound("Không tìm thấy phòng với ID đã cho.");
+                return NotFound(result.Value); // Trả về 404 với message từ repository
             }
-            return Ok(phong);
+
+            if (result.StatusCode == StatusCodes.Status200OK)
+            {
+                return Ok(result.Value); // Trả về 200 với dữ liệu phòng
+            }
+            
+            // Trường hợp khác (ít khi xảy ra nếu repository được implement đúng)
+            return StatusCode(result.StatusCode ?? 500, result.Value);
+        }
+        // Action mới để lấy phòng theo mã loại phòng
+        [HttpGet("GetPhongByLoai/{maLoaiPhong}")]
+        [AllowAnonymous]
+        public async Task<ActionResult<IEnumerable<PhongDTO>>> GetPhongByMaLoaiPhong(string maLoaiPhong)
+        {
+            if (string.IsNullOrEmpty(maLoaiPhong))
+            {
+                return BadRequest("Mã loại phòng không được để trống.");
+            }
+
+            try
+            {
+                var phongs = await _phongRepo.GetPhongByMaLoaiPhongAsync(maLoaiPhong);
+
+                // Repository đã trả về List<PhongDTO>, có thể rỗng nếu không tìm thấy.
+                // Frontend sẽ xử lý việc hiển thị "Không có phòng nào" nếu danh sách rỗng.
+                return Ok(phongs); 
+            }
+            catch (Exception ex)
+            {
+                // Log lỗi ở đây nếu cần (ví dụ: sử dụng ILogger)
+                // _logger.LogError(ex, $"Lỗi khi lấy phòng theo loại {maLoaiPhong}");
+                return StatusCode(500, $"Lỗi máy chủ nội bộ: {ex.Message}");
+            }
         }
         // Tao phòng mới
         [HttpPost]
