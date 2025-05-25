@@ -182,6 +182,11 @@ export const registerUser = async (registerData: UserRegisterDto): Promise<UserD
   formData.append('UserName', registerData.userName);
   formData.append('Email', registerData.email);
   formData.append('Password', registerData.password);
+  formData.append('ConfirmPassword', registerData.confirmPassword);
+  formData.append('HoKh', registerData.hoKh);
+  formData.append('TenKh', registerData.tenKh);
+  formData.append('SoCccd', registerData.soCccd);
+  formData.append('SoDienThoai', registerData.soDienThoai);
 
   try {
     const response = await fetch(`${API_BASE_URL}/Auth/register`, {
