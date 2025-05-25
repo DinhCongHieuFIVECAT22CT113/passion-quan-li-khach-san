@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
+import { useAuth } from './auth';
 
 /**
  * Hook để xử lý đăng xuất
@@ -9,23 +10,14 @@ import Cookies from 'js-cookie';
  */
 export const useLogout = () => {
   const router = useRouter();
+  const { logout } = useAuth();
 
   const handleLogout = () => {
-    if (typeof window !== 'undefined') {
-      // Xóa tất cả thông tin đăng nhập từ localStorage
-      localStorage.removeItem('token');
-      localStorage.removeItem('userName');
-      localStorage.removeItem('userId');
-      
-      // Các thông tin khác nếu có
-      localStorage.removeItem('staffInfo');
-      
-      // Xóa cookies liên quan đến phiên đăng nhập
-      Cookies.remove('token');
-      
-      // Chuyển hướng về trang chủ người dùng
-      router.push('/users/home');
-    }
+    logout();
+    Cookies.remove('token');
+    
+    // Chuyển hướng về trang chủ người dùng
+    router.push('/users/home');
   };
 
   return handleLogout;

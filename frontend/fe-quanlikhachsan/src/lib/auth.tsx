@@ -103,6 +103,8 @@ export interface AuthUser {
 interface AuthContextType {
   user: AuthUser | null;
   loading: boolean;
+  login: (token: string) => void;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -110,32 +112,58 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
-  // useRouter không dùng trực tiếp ở đây nữa, nhưng nếu cần redirect từ provider thì có thể thêm lại
-  // const router = useRouter(); 
+
+  const loginUser = (token: string) => {
+    try {
+      localStorage.setItem('token', token);
+      const decodedToken = jwtDecode<DecodedToken>(token);
+      const permissions = getUserPermissions(decodedToken.role);
+      const currentUser: AuthUser = {
+        maNguoiDung: decodedToken.nameid,
+        hoTen: decodedToken.unique_name,
+        role: decodedToken.role,
+        permissions,
+      };
+      setUser(currentUser);
+      // Lưu các thông tin khác nếu cần, ví dụ:
+      // localStorage.setItem('userName', decodedToken.unique_name || '');
+      // localStorage.setItem('userId', decodedToken.nameid || '');
+      // Hoặc tốt hơn là chỉ dựa vào user state từ context
+    } catch (err) {
+      // Xử lý lỗi giải mã token hoặc token không hợp lệ
+      localStorage.removeItem('token');
+      // localStorage.removeItem('userName');
+      // localStorage.removeItem('userId');
+      // localStorage.removeItem('userRole'); // Đã bỏ
+      // localStorage.removeItem('staffInfo'); // Nếu có
+      setUser(null);
+      console.error("Failed to login user:", err);
+    }
+  };
+
+  const logoutUser = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('userId');
+    // localStorage.removeItem('userRole'); // Đã bỏ
+    localStorage.removeItem('staffInfo'); 
+    // Quan trọng: Xóa Cookies nếu được sử dụng để xác thực phía server hoặc middleware
+    // Cookies.remove('token'); // Cần import Cookies từ js-cookie nếu dùng ở đây
+
+    setUser(null);
+    // Không cần redirect ở đây, việc redirect sẽ do useLogout hoặc component gọi logout xử lý
+  };
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      try {
-        const decodedToken = jwtDecode<DecodedToken>(token);
-        const permissions = getUserPermissions(decodedToken.role);
-        setUser({
-          maNguoiDung: decodedToken.nameid,
-          hoTen: decodedToken.unique_name,
-          role: decodedToken.role,
-          permissions,
-        });
-      } catch {
-        localStorage.removeItem('token');
-        // Nếu có lỗi token, có thể muốn xóa user và set loading false
-        setUser(null);
-      }
+      loginUser(token); // Sử dụng hàm loginUser nội bộ
     }
     setLoading(false);
-  }, []); // Bỏ router khỏi dependencies nếu không dùng
+  }, []); // Chỉ chạy một lần khi mount
 
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, loading, login: loginUser, logout: logoutUser }}>
       {children}
     </AuthContext.Provider>
   );

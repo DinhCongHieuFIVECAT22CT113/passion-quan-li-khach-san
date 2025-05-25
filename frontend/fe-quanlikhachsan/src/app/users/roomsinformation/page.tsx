@@ -104,38 +104,54 @@ export default function RoomsListPage() {
 const fetchRooms = useCallback(async () => {
   setLoading(true);
   setError('');
+  const maLoaiPhong = searchParams?.get('maLoaiPhong');
+
+  if (!maLoaiPhong) {
+    setError('Không có mã loại phòng nào được chọn.');
+    setLoading(false);
+    setRooms([]); // Đảm bảo rooms rỗng nếu không có mã loại phòng
+    return;
+  }
+
   try {
-    const response = await fetch(`${API_BASE_URL}/Phong`, {
+    // Gọi API lấy phòng theo mã loại phòng
+    const response = await fetch(`${API_BASE_URL}/Phong/GetPhongByLoai/${maLoaiPhong}`, {
       method: 'GET',
+      // Không cần gửi token nếu API này là public
     });
 
     if (!response.ok) {
-      throw new Error(`Lỗi: ${response.status}`);
+      if (response.status === 404) {
+        setError(`Không tìm thấy phòng nào cho loại phòng ${maLoaiPhong}.`);
+        setRooms([]);
+      } else {
+        throw new Error(`Lỗi khi tải phòng: ${response.status}`);
+      }
+    } else {
+      const data = await response.json();
+      // API có thể trả về một object nếu chỉ có 1 phòng, hoặc array nếu nhiều, hoặc 404 nếu không có
+      // Nếu API luôn trả về array (kể cả rỗng), thì không cần Array.isArray check phức tạp
+      const roomsData: ApiRoomData[] = Array.isArray(data) ? data : (data ? [data] : []);
+
+      const roomsWithDetails: Room[] = roomsData.map((room: ApiRoomData) => ({
+        maPhong: room.maPhong,
+        tenPhong: room.tenPhong || `Phòng ${room.maPhong}`,
+        maLoaiPhong: room.maLoaiPhong, // Giữ lại để kiểm tra nếu cần
+        trangThai: room.trangThai,
+        moTa: room.moTa,
+        thumbnail: getValidImageSrc(room.thumbnail),
+        hinhAnh: parseHinhAnh(room.hinhAnh),
+        amenities: defaultAmenities // Sử dụng default amenities
+      }));
+      setRooms(roomsWithDetails);
+      if (roomsWithDetails.length === 0 && response.ok) { // response.ok nhưng không có phòng
+        setError(`Không có phòng nào thuộc loại ${maLoaiPhong} hiện có sẵn.`);
+      }
     }
-
-    const data = await response.json();
-    const roomsData: ApiRoomData[] = Array.isArray(data) ? data : [data];
-    const maLoaiPhong = searchParams?.get('maLoaiPhong');
-
-    const filteredRooms = maLoaiPhong
-      ? roomsData.filter(room => room.maLoaiPhong === maLoaiPhong)
-      : roomsData;
-
-    const roomsWithDetails: Room[] = filteredRooms.map((room: ApiRoomData) => ({
-      maPhong: room.maPhong,
-      tenPhong: room.tenPhong || `Phòng ${room.maPhong}`,
-      maLoaiPhong: room.maLoaiPhong,
-      trangThai: room.trangThai,
-      moTa: room.moTa,
-      thumbnail: getValidImageSrc(room.thumbnail),
-      hinhAnh: parseHinhAnh(room.hinhAnh),
-      amenities: defaultAmenities
-    }));
-
-    setRooms(roomsWithDetails);
   } catch (err: any) {
-    console.error('Lỗi khi lấy danh sách phòng:', err);
+    console.error(`Lỗi khi lấy danh sách phòng cho loại ${maLoaiPhong}:`, err);
     setError(err.message || 'Không thể tải danh sách phòng. Vui lòng thử lại sau.');
+    setRooms([]);
   } finally {
     setLoading(false);
   }
@@ -143,8 +159,11 @@ const fetchRooms = useCallback(async () => {
 
   useEffect(() => {
     i18n.changeLanguage(selectedLanguage);
-    fetchRooms();
-  }, [selectedLanguage, fetchRooms]);
+    // fetchRooms sẽ được gọi khi searchParams thay đổi (do dependency của fetchRooms)
+    // hoặc khi selectedLanguage thay đổi.
+    // Gọi một lần khi component mount và khi các dependencies này thay đổi.
+    fetchRooms(); 
+  }, [selectedLanguage, fetchRooms]); // fetchRooms đã có searchParams là dependency
 
 const renderAmenityIcon = (amenity: string) => {
   // Thay đổi JSX.Element thành React.ReactNode

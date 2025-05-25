@@ -4,9 +4,10 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import './logsign.css';
-import { loginUser } from '../../../lib/api';
+import { loginUser as apiLoginUser } from '../../../lib/api';
 import { API_BASE_URL, getRedirectPathByRole } from '../../../lib/config';
 import Cookies from 'js-cookie';
+import { useAuth } from '../../../lib/auth';
 
 const LoginForm: React.FC = () => {
   const [userName, setUserName] = useState('');
@@ -25,6 +26,7 @@ const LoginForm: React.FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectUrl = searchParams?.get('redirectUrl') || '';
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,36 +47,26 @@ const LoginForm: React.FC = () => {
       setLoginError('');
       
       try {
-        // Gọi API đăng nhập trực tiếp đến backend
         console.log(`Đang thử đăng nhập với tài khoản: ${userName}`);
         console.log(`URL backend: ${API_BASE_URL}/Auth/login`);
         
-        const userData = await loginUser({ userName, password });
+        const userData = await apiLoginUser({ userName, password });
         
         console.log('Đăng nhập thành công, dữ liệu nhận được:', userData);
         
-        // Kiểm tra dữ liệu người dùng
         if (!userData || !userData.token) {
           throw new Error('Dữ liệu đăng nhập không hợp lệ. Vui lòng thử lại.');
         }
         
-        // Lưu token vào localStorage và cookie
-        localStorage.setItem('token', userData.token);
-        localStorage.setItem('userName', userData.userName || '');
-        localStorage.setItem('userId', userData.maNguoiDung || '');
-        Cookies.set('token', userData.token, { expires: 7 });
+        login(userData.token);
+        Cookies.set('token', userData.token, { expires: rememberMe ? 7 : undefined });
         
-        console.log('Đã lưu thông tin người dùng (không lưu userRole riêng lẻ nữa):', {
-          userName: userData.userName,
-          userId: userData.maNguoiDung
-        });
+        console.log('Đã gọi login từ AuthContext và lưu cookie.');
         
-        // Điều hướng người dùng
         if (redirectUrl) {
           console.log('Chuyển hướng đến:', redirectUrl);
           router.push(redirectUrl);
         } else {
-          // Sử dụng hàm getRedirectPathByRole để xác định trang chuyển hướng
           const redirectPath = getRedirectPathByRole(userData.maRole);
           console.log('Chuyển hướng theo role đến:', redirectPath);
           router.push(redirectPath);
@@ -85,8 +77,6 @@ const LoginForm: React.FC = () => {
         
         if (error instanceof Error) {
           errorMessage = error.message;
-          
-          // Kiểm tra lỗi Failed to fetch để hiển thị thông báo cụ thể hơn
           if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
             errorMessage = `Không thể kết nối đến server backend tại ${API_BASE_URL}. Vui lòng kiểm tra:
             1. Server backend đã chạy chưa
@@ -96,12 +86,6 @@ const LoginForm: React.FC = () => {
         } else {
           errorMessage = 'Đăng nhập thất bại. Vui lòng kiểm tra lại thông tin và kết nối đến server.';
         }
-        
-        // Xóa thông tin đăng nhập nếu có lỗi
-        localStorage.removeItem('token');
-        localStorage.removeItem('userName');
-        localStorage.removeItem('userId');
-        Cookies.remove('token');
         
         setLoginError(`Lỗi: ${errorMessage}`);
       } finally {
