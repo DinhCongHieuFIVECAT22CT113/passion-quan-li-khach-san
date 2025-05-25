@@ -6,7 +6,7 @@ import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import './logsign.css';
 import { loginUser } from '../../../lib/api';
 import { API_BASE_URL, getRedirectPathByRole } from '../../../lib/config';
-import * as Cookies from 'js-cookie';
+import Cookies from 'js-cookie';
 
 const LoginForm: React.FC = () => {
   const [userName, setUserName] = useState('');
