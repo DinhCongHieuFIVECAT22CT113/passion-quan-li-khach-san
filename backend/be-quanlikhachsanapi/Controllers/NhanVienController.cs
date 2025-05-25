@@ -2,11 +2,14 @@ using be_quanlikhachsanapi.Data;
 using be_quanlikhachsanapi.DTOs;
 using be_quanlikhachsanapi.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using be_quanlikhachsanapi.Authorization;
 
 namespace be_quanlikhachsanapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class NhanVienController : ControllerBase
     {
         private readonly INhanVienRepository _nhanVienRepo;
@@ -17,7 +20,7 @@ namespace be_quanlikhachsanapi.Controllers
         }
         // Lấy danh sách tất cả nhân viên
         [HttpGet]
-        [Consumes("multipart/form-data")]
+        [RequireRole("R00", "R01", "R02")]
         public IActionResult GetAll()
         {
             var nhanViens = _nhanVienRepo.GetAll();
@@ -29,7 +32,7 @@ namespace be_quanlikhachsanapi.Controllers
         }
         // Lấy nhân viên theo ID
         [HttpGet("{maNv}")]
-        [Consumes("multipart/form-data")]
+        [RequireRole("R00", "R01", "R02")]
         public IActionResult GetByID(string maNv)
         {
             var nhanVien = _nhanVienRepo.GetNhanVienById(maNv);
@@ -42,6 +45,7 @@ namespace be_quanlikhachsanapi.Controllers
         // Tạo nhân viên mới
         [HttpPost]
         [Consumes("multipart/form-data")]
+        [RequireRole("R00")]
         public IActionResult CreateNhanVien([FromForm] CreateNhanVienDTO createNhanVien)
         {
             var nhanVien = _nhanVienRepo.CreateNhanVien(createNhanVien);
@@ -54,6 +58,7 @@ namespace be_quanlikhachsanapi.Controllers
         // Cập nhật nhân viên
         [HttpPut("{maNv}")]
         [Consumes("multipart/form-data")]
+        [RequireRole("R00")]
         public IActionResult UpdateNhanVien(string maNv, [FromForm] UpdateNhanVienDTO updateNhanVien)
         {
             var nhanVien = _nhanVienRepo.UpdateNhanVien(maNv, updateNhanVien);
@@ -65,7 +70,7 @@ namespace be_quanlikhachsanapi.Controllers
         }
         // Xóa nhân viên
         [HttpDelete("{maNv}")]
-        [Consumes("multipart/form-data")]
+        [RequireRole("R00")]
         public IActionResult DeleteNhanVien(string maNv)
         {
             var nhanVien = _nhanVienRepo.DeleteNhanVien(maNv);

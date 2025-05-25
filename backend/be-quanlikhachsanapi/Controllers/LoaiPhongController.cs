@@ -2,6 +2,8 @@ using be_quanlikhachsanapi.Data;
 using be_quanlikhachsanapi.DTOs;
 using be_quanlikhachsanapi.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using be_quanlikhachsanapi.Authorization;
 
 namespace be_quanlikhachsanapi.Controllers
 {
@@ -17,6 +19,7 @@ namespace be_quanlikhachsanapi.Controllers
         }
         // Lấy danh sách tất cả loại phòng
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult GetAll()
         {
             var loaiPhongs = _loaiPhongRepo.GetAll();
@@ -28,6 +31,7 @@ namespace be_quanlikhachsanapi.Controllers
         }
         // Lấy loại phòng theo ID
         [HttpGet("{maLoaiPhong}")]
+        [AllowAnonymous]
         public IActionResult GetByID(string maLoaiPhong)
         {
             var loaiPhong = _loaiPhongRepo.GetLoaiPhongById(maLoaiPhong);
@@ -40,6 +44,8 @@ namespace be_quanlikhachsanapi.Controllers
         // Tạo loại phòng mới
         [HttpPost]
         [Consumes("multipart/form-data")]
+        [Authorize]
+        [RequireRole("R00", "R01")]
         public IActionResult CreateLoaiPhong([FromForm] CreateLoaiPhongDTO createLoaiPhong)
         {
             var loaiPhong = _loaiPhongRepo.CreateLoaiPhong(createLoaiPhong);
@@ -52,6 +58,8 @@ namespace be_quanlikhachsanapi.Controllers
         // Cập nhật loại phòng
         [HttpPut("{maLoaiPhong}")]
         [Consumes("multipart/form-data")]
+        [Authorize]
+        [RequireRole("R00", "R01")]
         public IActionResult UpdateLoaiPhong(string maLoaiPhong, [FromForm] UpdateLoaiPhongDTO updateLoaiPhong)
         {
             var loaiPhong = _loaiPhongRepo.UpdateLoaiPhong(maLoaiPhong, updateLoaiPhong);
@@ -63,13 +71,14 @@ namespace be_quanlikhachsanapi.Controllers
         }
         // Xóa loại phòng
         [HttpDelete("{maLoaiPhong}")]
-        [Consumes("multipart/form-data")]
+        [Authorize]
+        [RequireRole("R00")]
         public IActionResult DeleteLoaiPhong(string maLoaiPhong)
         {
             var result = _loaiPhongRepo.DeleteLoaiPhong(maLoaiPhong);
             if (result == null)
             {
-                return NotFound("Không tìm thấy loại phòng với ID đã cho.");
+                return NotFound("Không tìm thấy loại phòng với ID đã cho hoặc không thể xóa.");
             }   
             return Ok(result);
         }

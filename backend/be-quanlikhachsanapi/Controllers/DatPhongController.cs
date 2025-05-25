@@ -2,11 +2,15 @@ using be_quanlikhachsanapi.Data;
 using be_quanlikhachsanapi.DTOs;
 using be_quanlikhachsanapi.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using be_quanlikhachsanapi.Authorization;
+using System.Security.Claims;
 
 namespace be_quanlikhachsanapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class DatPhongController : ControllerBase
     {
         private readonly IDatPhongRepository _datPhongRepo;
@@ -18,7 +22,7 @@ namespace be_quanlikhachsanapi.Controllers
 
         // Lấy tất cả danh sách đặt phòng
         [HttpGet]
-        [Consumes("multipart/form-data")]
+        [RequireRole("R00", "R01", "R02")]
         public IActionResult GetAll()
         {
             var datPhongs = _datPhongRepo.GetAll();
@@ -30,7 +34,7 @@ namespace be_quanlikhachsanapi.Controllers
         }
         // Tìm đặt phòng theo ID
         [HttpGet("{maDatPhong}")]
-        [Consumes("multipart/form-data")]
+        [RequireRole("R00", "R01", "R02", "R03")]
         public IActionResult GetByID(string maDatPhong)
         {
             var datPhong = _datPhongRepo.GetDatPhongById(maDatPhong);
@@ -43,6 +47,7 @@ namespace be_quanlikhachsanapi.Controllers
         // Tạo đặt phòng mới
         [HttpPost]
         [Consumes("multipart/form-data")]
+        [RequireRole("R00", "R01", "R02", "R03")]
         public IActionResult CreateDatPhong([FromForm] CreateDatPhongDTO createDatPhong)
         {
             var datPhong = _datPhongRepo.CreateDatPhong(createDatPhong);
@@ -55,6 +60,7 @@ namespace be_quanlikhachsanapi.Controllers
         // Cập nhật đặt phòng
         [HttpPut("{maDatPhong}")]
         [Consumes("multipart/form-data")]
+        [RequireRole("R00", "R01", "R02")]
         public IActionResult UpdateDatPhong(string maDatPhong, [FromForm] UpdateDatPhongDTO updateDatPhong)
         {
             var datPhong = _datPhongRepo.UpdateDatPhong(maDatPhong, updateDatPhong);
@@ -66,7 +72,7 @@ namespace be_quanlikhachsanapi.Controllers
         }
         // Xóa đặt phòng
         [HttpDelete("{maDatPhong}")]
-        [Consumes("multipart/form-data")]
+        [RequireRole("R00", "R01")]
         public IActionResult DeleteDatPhong(string maDatPhong)
         {
             var result = _datPhongRepo.DeleteDatPhong(maDatPhong);
@@ -78,10 +84,10 @@ namespace be_quanlikhachsanapi.Controllers
         }
         // Cập nhật trạng thái đặt phòng
         [HttpPut("{maDatPhong}/trangthai")]
-        [Consumes("multipart/form-data")]
-        public IActionResult UpdateTrangThai(string maDatPhong, string trangThai)
+        [RequireRole("R00", "R01", "R02")]
+        public IActionResult UpdateTrangThai(string maDatPhong, [FromBody] UpdateTrangThaiDTO trangThaiDto)
         {
-            var result = _datPhongRepo.UpdateTrangThai(maDatPhong, trangThai);
+            var result = _datPhongRepo.UpdateTrangThai(maDatPhong, trangThaiDto.TrangThai);
             if (result == null)
             {
                 return NotFound("Không tìm thấy thông tin đặt phòng với ID đã cho.");

@@ -2,11 +2,18 @@ using be_quanlikhachsanapi.Data;
 using be_quanlikhachsanapi.DTOs;
 using be_quanlikhachsanapi.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using be_quanlikhachsanapi.Authorization;
+using System.Linq;
+using System.Threading.Tasks;
+using System;
+using System.Security.Claims;
 
 namespace be_quanlikhachsanapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ApDungKMController : ControllerBase
     {
         private readonly IApDungKMRepository _apDungKMRepo;
@@ -20,6 +27,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// Lấy danh sách tất cả áp dụng khuyến mãi
         /// </summary>
         [HttpGet]
+        [RequireRole("R00", "R01", "R02")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetAll()
@@ -36,6 +44,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// Lấy thông tin áp dụng khuyến mãi theo mã
         /// </summary>
         [HttpGet("{maApDung}")]
+        [RequireRole("R00", "R01", "R02")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(string maApDung)
@@ -52,6 +61,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// Lấy danh sách áp dụng khuyến mãi theo mã đặt phòng
         /// </summary>
         [HttpGet("theo-dat-phong/{maDatPhong}")]
+        [RequireRole("R00", "R01", "R02", "R03")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetByDatPhong(string maDatPhong)
@@ -69,6 +79,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// </summary>
         [HttpPost]
         [Consumes("multipart/form-data")]
+        [RequireRole("R00", "R01", "R02", "R03")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create([FromForm] CreateApDungKMDTO createDto)
@@ -89,6 +100,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// </summary>
         [HttpPut("{maApDung}")]
         [Consumes("multipart/form-data")]
+        [RequireRole("R00", "R01", "R02")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -113,6 +125,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// Xóa thông tin áp dụng khuyến mãi
         /// </summary>
         [HttpDelete("{maApDung}")]
+        [RequireRole("R00", "R01")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(string maApDung)

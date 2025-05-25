@@ -2,11 +2,14 @@ using be_quanlikhachsanapi.Data;
 using be_quanlikhachsanapi.DTOs;
 using be_quanlikhachsanapi.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using be_quanlikhachsanapi.Authorization;
 
 namespace be_quanlikhachsanapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class LoaiKhachHangController : ControllerBase
     {
         private readonly ILoaiKhachHangRepository _loaiKhachHangRepo;
@@ -17,7 +20,7 @@ namespace be_quanlikhachsanapi.Controllers
         }
         // Lấy danh sách tất cả loại khách hàng
         [HttpGet]
-        [Consumes("multipart/form-data")]
+        [RequireRole("R00", "R01", "R02")]
         public IActionResult GetAll()
         {
             var loaiKhachHangs = _loaiKhachHangRepo.GetAll();
@@ -29,7 +32,7 @@ namespace be_quanlikhachsanapi.Controllers
         }
         // Lấy loại khách hàng theo ID
         [HttpGet("{maLoaiKh}")]
-        [Consumes("multipart/form-data")]
+        [RequireRole("R00", "R01", "R02")]
         public IActionResult GetByID(string maLoaiKh)
         {
             var loaiKhachHang = _loaiKhachHangRepo.GetLoaiKhachHangById(maLoaiKh);
@@ -42,6 +45,7 @@ namespace be_quanlikhachsanapi.Controllers
         // Tạo loại khách hàng mới
         [HttpPost]
         [Consumes("multipart/form-data")]
+        [RequireRole("R00")]
         public IActionResult CreateLoaiKhachHang([FromForm] CreateLoaiKhachHangDto createLoaiKhachHang)
         {
             var loaiKhachHang = _loaiKhachHangRepo.CreateLoaiKhachHang(createLoaiKhachHang);
@@ -54,6 +58,7 @@ namespace be_quanlikhachsanapi.Controllers
         // Cập nhật loại khách hàng
         [HttpPut("{maLoaiKh}")]
         [Consumes("multipart/form-data")]
+        [RequireRole("R00")]
         public IActionResult UpdateLoaiKhachHang(string maLoaiKh, [FromForm] UpdateLoaiKhachHangDto updateLoaiKhachHang)
         {
             var loaiKhachHang = _loaiKhachHangRepo.UpdateLoaiKhachHang(maLoaiKh, updateLoaiKhachHang);
@@ -65,7 +70,7 @@ namespace be_quanlikhachsanapi.Controllers
         }
         // Xóa loại khách hàng
         [HttpDelete("{maLoaiKh}")]
-        [Consumes("multipart/form-data")]
+        [RequireRole("R00")]
         public IActionResult DeleteLoaiKhachHang(string maLoaiKh)
         {
             var loaiKhachHang = _loaiKhachHangRepo.DeleteLoaiKhachHang(maLoaiKh);

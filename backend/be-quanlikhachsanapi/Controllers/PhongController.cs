@@ -2,6 +2,8 @@ using be_quanlikhachsanapi.Data;
 using be_quanlikhachsanapi.DTOs;
 using be_quanlikhachsanapi.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using be_quanlikhachsanapi.Authorization;
 
 namespace be_quanlikhachsanapi.Controllers
 {
@@ -17,6 +19,7 @@ namespace be_quanlikhachsanapi.Controllers
         }
         // Lấy danh sách tất cả phòng
         [HttpGet]
+        [AllowAnonymous]
         public IActionResult GetAll()
         {
             var phongs = _phongRepo.GetAll();
@@ -28,6 +31,7 @@ namespace be_quanlikhachsanapi.Controllers
         }
         // Lấy phòng theo ID
         [HttpGet("{maPhong}")]
+        [AllowAnonymous]
         public IActionResult GetByID(string maPhong)
         {
             var phong = _phongRepo.GetPhongById(maPhong);
@@ -40,6 +44,8 @@ namespace be_quanlikhachsanapi.Controllers
         // Tao phòng mới
         [HttpPost]
         [Consumes("multipart/form-data")]
+        [Authorize]
+        [RequireRole("R00", "R01")]
         public IActionResult CreatePhong([FromForm] CreatePhongDTO createPhong)
         {
             var phong = _phongRepo.CreatePhong(createPhong);
@@ -52,6 +58,8 @@ namespace be_quanlikhachsanapi.Controllers
         // Cập nhật phòng
         [HttpPut("{maPhong}")]
         [Consumes("multipart/form-data")]
+        [Authorize]
+        [RequireRole("R00", "R01")]
         public IActionResult UpdatePhong(string maPhong, [FromForm] UpdatePhongDTO updatePhong)
         {
             var phong = _phongRepo.UpdatePhong(maPhong, updatePhong);
@@ -63,10 +71,11 @@ namespace be_quanlikhachsanapi.Controllers
         }
         // Cập nhật trạng thái phòng
         [HttpPut("{maPhong}/trangThai")]
-        [Consumes("multipart/form-data")]
-        public IActionResult UpdateTrangThai(string maPhong, string trangThai)
+        [Authorize]
+        [RequireRole("R00", "R01", "R02")]
+        public IActionResult UpdateTrangThai(string maPhong, [FromBody] UpdateTrangThaiPhongDTO dto)
         {
-            var phong = _phongRepo.UpdateTrangThai(maPhong, trangThai);
+            var phong = _phongRepo.UpdateTrangThai(maPhong, dto.TrangThai);
             if (phong == null)
             {
                 return NotFound("Không tìm thấy phòng để cập nhật trạng thái.");
@@ -75,7 +84,8 @@ namespace be_quanlikhachsanapi.Controllers
         }
         // Xóa phòng
         [HttpDelete("{maPhong}")]
-        [Consumes("multipart/form-data")]
+        [Authorize]
+        [RequireRole("R00")]
         public IActionResult DeletePhong(string maPhong)
         {
             var phong = _phongRepo.DeletePhong(maPhong);

@@ -7,12 +7,10 @@ using Microsoft.EntityFrameworkCore;
 using be_quanlikhachsanapi.ViewModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Google.Apis.Gmail.v1.Data;
 using be_quanlikhachsanapi.ViewModel;
 using be_quanlikhachsanapi.Helpers;
-using System.Net.WebSockets;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using Microsoft.AspNetCore.Authorization;
+using be_quanlikhachsanapi.Authorization;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -42,6 +40,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("register")]
+    [AllowAnonymous]
     [Consumes("multipart/form-data")]
     public async Task<ActionResult<UserDto>> Register([FromForm] RegisterDto registerDto)
     {
@@ -136,6 +135,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
+    [AllowAnonymous]
     [Consumes("multipart/form-data")]
     public async Task<ActionResult<UserDto>> Login([FromForm] LoginDto loginDto)
     {
@@ -185,6 +185,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPut("change-password")]
+    [Authorize]
     [Consumes("multipart/form-data")]
     public async Task<ActionResult<UserDto>> ChangePassword([FromForm] ChangePassDto changePassDto)
     {
@@ -249,6 +250,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("reset-password")]
+    [AllowAnonymous]
     [Consumes("multipart/form-data")]
     public async Task<ActionResult<UserDto>> ResetPassword([FromForm] ResetPassDto resetPassDto)
     {

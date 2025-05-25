@@ -2,6 +2,8 @@ using be_quanlikhachsanapi.Data;
 using be_quanlikhachsanapi.DTOs;
 using be_quanlikhachsanapi.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using be_quanlikhachsanapi.Authorization;
 
 namespace be_quanlikhachsanapi.Controllers
 {
@@ -17,7 +19,7 @@ namespace be_quanlikhachsanapi.Controllers
         }
         // Lấy danh sách tất cả đánh giá
         [HttpGet]
-        [Consumes("multipart/form-data")]
+        [AllowAnonymous]
         public IActionResult GetAll()
         {
             var reviews = _reviewRepo.GetAll();
@@ -29,7 +31,7 @@ namespace be_quanlikhachsanapi.Controllers
         }
         // Lấy đánh giá theo ID
         [HttpGet("{maReview}")]
-        [Consumes("multipart/form-data")]
+        [AllowAnonymous]
         public IActionResult GetByID(string MaReview)
         {
             var review = _reviewRepo.GetReviewById(MaReview);
@@ -42,6 +44,7 @@ namespace be_quanlikhachsanapi.Controllers
         // Tạo đánh giá mới
         [HttpPost]
         [Consumes("multipart/form-data")]
+        [Authorize]
         public IActionResult CreateReview([FromForm] CreateReviewDto createReview)
         {
             var review = _reviewRepo.CreateReview(createReview);
@@ -54,6 +57,8 @@ namespace be_quanlikhachsanapi.Controllers
         // Cập nhật đánh giá
         [HttpPut("{maReview}")]
         [Consumes("multipart/form-data")]
+        [Authorize]
+        [RequireRole("R00")]
         public IActionResult UpdateReview(string MaReview, [FromForm] UpdateReviewDto updateReview)
         {
             var review = _reviewRepo.UpdateReview(MaReview, updateReview);
@@ -65,7 +70,8 @@ namespace be_quanlikhachsanapi.Controllers
         }   
         // Xóa đánh giá
         [HttpDelete("{maReview}")]
-        [Consumes("multipart/form-data")]
+        [Authorize]
+        [RequireRole("R00")]
         public IActionResult DeleteReview(string MaReview)
         {
             var review = _reviewRepo.DeleteReview(MaReview);

@@ -2,6 +2,8 @@ using be_quanlikhachsanapi.Data;
 using be_quanlikhachsanapi.DTOs;
 using be_quanlikhachsanapi.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using be_quanlikhachsanapi.Authorization;
 
 namespace be_quanlikhachsanapi.Controllers
 {
@@ -18,7 +20,7 @@ namespace be_quanlikhachsanapi.Controllers
 
         // Lấy danh sách tất cả khuyến mãi
         [HttpGet]
-        [Consumes("multipart/form-data")]
+        [AllowAnonymous]
         public IActionResult GetAll()
         {
             var khuyenMais = _khuyenMaiRepo.GetAll();
@@ -30,7 +32,7 @@ namespace be_quanlikhachsanapi.Controllers
         }
         // Lấy khuyến mãi theo ID
         [HttpGet("{maKhuyenMai}")]
-        [Consumes("multipart/form-data")]   
+        [AllowAnonymous]
         public IActionResult GetByID(string maKhuyenMai)
         {
             var khuyenMai = _khuyenMaiRepo.GetKhuyenMaiById(maKhuyenMai);
@@ -43,6 +45,8 @@ namespace be_quanlikhachsanapi.Controllers
         // Tạo mã khuyến mãi mới
         [HttpPost]
         [Consumes("multipart/form-data")]
+        [Authorize]
+        [RequireRole("R00", "R01")]
         public IActionResult CreateKhuyenMai([FromForm] CreateKhuyenMaiDTO createKhuyenMai)
         {
             var khuyenMai = _khuyenMaiRepo.CreateKhuyenMai(createKhuyenMai);
@@ -55,6 +59,8 @@ namespace be_quanlikhachsanapi.Controllers
         // Cập nhật mã khuyến mãi
         [HttpPut("{maKhuyenMai}")]
         [Consumes("multipart/form-data")]
+        [Authorize]
+        [RequireRole("R00", "R01")]
         public IActionResult UpdateKhuyenMai(string maKhuyenMai, [FromForm] UpdateKhuyenMaiDTO updateKhuyenMai)
         {
             var khuyenMai = _khuyenMaiRepo.UpdateKhuyenMai(maKhuyenMai, updateKhuyenMai);
@@ -66,10 +72,11 @@ namespace be_quanlikhachsanapi.Controllers
         }
         // Cập nhật trạng thái mã khuyến mãi
         [HttpPut("{maKhuyenMai}/trangthai")]
-        [Consumes("multipart/form-data")]
-        public IActionResult UpdateTrangThai(string maKhuyenMai, string trangThai)
+        [Authorize]
+        [RequireRole("R00", "R01")]
+        public IActionResult UpdateTrangThai(string maKhuyenMai, [FromBody] UpdateTrangThaiDTO trangThaiDto)
         {
-            var khuyenMai = _khuyenMaiRepo.UpdateTrangThai(maKhuyenMai, trangThai);
+            var khuyenMai = _khuyenMaiRepo.UpdateTrangThai(maKhuyenMai, trangThaiDto.TrangThai);
             if (khuyenMai == null)
             {
                 return NotFound("Không tìm thấy khuyến mãi để cập nhật.");
@@ -78,7 +85,8 @@ namespace be_quanlikhachsanapi.Controllers
         }
         // Xóa mã khuyến mãi
         [HttpDelete("{maKhuyenMai}")]
-        [Consumes("multipart/form-data")]
+        [Authorize]
+        [RequireRole("R00")]
         public IActionResult DeleteKhuyenMai(string maKhuyenMai)
         {
             var khuyenMai = _khuyenMaiRepo.DeleteKhuyenMai(maKhuyenMai);

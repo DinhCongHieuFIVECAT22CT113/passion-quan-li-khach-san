@@ -1,11 +1,16 @@
 using be_quanlikhachsanapi.DTOs;
 using be_quanlikhachsanapi.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using be_quanlikhachsanapi.Authorization;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace be_quanlikhachsanapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class SuDungDichVuController : ControllerBase
     {
         private readonly ISuDungDichVuRepository _suDungDichVuRepo;
@@ -19,6 +24,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// Lấy danh sách tất cả dịch vụ đã sử dụng
         /// </summary>
         [HttpGet]
+        [RequireRole("R00", "R01", "R02")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetAll()
@@ -35,6 +41,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// Lấy thông tin sử dụng dịch vụ theo mã
         /// </summary>
         [HttpGet("{maSuDung}")]
+        [RequireRole("R00", "R01", "R02")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(string maSuDung)
@@ -51,6 +58,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// Lấy danh sách dịch vụ đã sử dụng theo mã đặt phòng
         /// </summary>
         [HttpGet("theo-dat-phong/{maDatPhong}")]
+        [RequireRole("R00", "R01", "R02")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetByDatPhong(string maDatPhong)
@@ -68,6 +76,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// </summary>
         [HttpPost]
         [Consumes("multipart/form-data")]
+        [RequireRole("R00", "R01", "R02")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create([FromForm] CreateSuDungDichVuDTO createDto)
@@ -88,6 +97,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// </summary>
         [HttpPut("{maSuDung}")]
         [Consumes("multipart/form-data")]
+        [RequireRole("R00", "R01", "R02")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -112,6 +122,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// Xóa thông tin sử dụng dịch vụ
         /// </summary>
         [HttpDelete("{maSuDung}")]
+        [RequireRole("R00", "R01")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(string maSuDung)
@@ -128,10 +139,11 @@ namespace be_quanlikhachsanapi.Controllers
         /// Update trạng thái sử dụng dịch vụ
         /// </summary>
         [HttpPut("update-trang-thai/{maSuDung}")]
+        [RequireRole("R00", "R01", "R02")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> UpdateTrangThai(string maSuDung, string trangThai)
+        public async Task<IActionResult> UpdateTrangThai(string maSuDung, [FromBody] string trangThai)
         {
             var result = await _suDungDichVuRepo.UpdateTrangThaiAsync(maSuDung, trangThai);
             if (!result)

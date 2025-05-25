@@ -2,11 +2,16 @@ using be_quanlikhachsanapi.Data;
 using be_quanlikhachsanapi.DTOs;
 using be_quanlikhachsanapi.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using be_quanlikhachsanapi.Authorization;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace be_quanlikhachsanapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class KhachHangController : ControllerBase
     {
         private readonly IKhachHangRepository _khachHangRepo;
@@ -18,7 +23,7 @@ namespace be_quanlikhachsanapi.Controllers
 
         // Lấy danh sách tất cả khách hàng
         [HttpGet]
-        [Consumes("multipart/form-data")]
+        [RequireRole("R00", "R01", "R02")]
         public IActionResult GetAll()
         {
             var khachHangs = _khachHangRepo.GetAll();
@@ -30,9 +35,17 @@ namespace be_quanlikhachsanapi.Controllers
         }
         // Tìm khách hàng theo ID
         [HttpGet("{maKh}")]
-        [Consumes("multipart/form-data")]
+        [RequireRole("R00", "R01", "R02", "R03")]
         public IActionResult GetByID(string maKh)
         {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
+
+            if (currentUserRole == "R03" && currentUserId != maKh)
+            {
+                return Forbid("Bạn chỉ có thể xem thông tin của chính mình.");
+            }
+
             var khachHang = _khachHangRepo.GetKhachHangById(maKh);
             if (khachHang == null)
             {
@@ -43,6 +56,7 @@ namespace be_quanlikhachsanapi.Controllers
         //Tao khách hàng mới
         [HttpPost]
         [Consumes("multipart/form-data")]
+        [RequireRole("R00", "R01", "R02")]
         public IActionResult CreateKhachHang([FromForm] CreateKhachHangDto createKhachHang)
         {
             var khachHang = _khachHangRepo.CreateKhachHang(createKhachHang);
@@ -55,8 +69,17 @@ namespace be_quanlikhachsanapi.Controllers
         // Cập nhật khách hàng
         [HttpPut("{maKh}")]
         [Consumes("multipart/form-data")]
+        [RequireRole("R00", "R01", "R02", "R03")]
         public IActionResult UpdateKhachHang(string maKh, [FromForm] UpdateKhachHangDto updateKhachHang)
         {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var currentUserRole = User.FindFirstValue(ClaimTypes.Role);
+
+            if (currentUserRole == "R03" && currentUserId != maKh)
+            {
+                return Forbid("Bạn chỉ có thể cập nhật thông tin của chính mình.");
+            }
+
             var khachHang = _khachHangRepo.UpdateKhachHang(maKh, updateKhachHang);
             if (khachHang == null)
             {
@@ -66,7 +89,7 @@ namespace be_quanlikhachsanapi.Controllers
         }
         // Xóa khách hàng
         [HttpDelete("{maKh}")]
-        [Consumes("multipart/form-data")]
+        [RequireRole("R00")]
         public IActionResult DeleteKhachHang(string maKh)
         {
             var khachHang = _khachHangRepo.DeleteKhachHang(maKh);
@@ -78,7 +101,7 @@ namespace be_quanlikhachsanapi.Controllers
         }
         // Cập nhật loại khách hàng
         [HttpPut("{maKh}/loaiKhachHang/{maLoaiKh}")]
-        [Consumes("multipart/form-data")]
+        [RequireRole("R00", "R01")]
         public IActionResult UpdateLoaiKhachHang(string maKh, string maLoaiKh)
         {
             var khachHang = _khachHangRepo.UpdateLoaiKhachHang(maKh, maLoaiKh);
@@ -91,6 +114,7 @@ namespace be_quanlikhachsanapi.Controllers
 
         [HttpPost("{username}/upload-avatar")]
         [Consumes("multipart/form-data")]
+        [RequireRole("R00", "R01", "R02", "R03")]
         public async Task<IActionResult> UploadAvatar(string username, [FromForm] UploadAvatarDTO dto)
         {
             var result = await _khachHangRepo.UploadAvatarAsync(username, dto);

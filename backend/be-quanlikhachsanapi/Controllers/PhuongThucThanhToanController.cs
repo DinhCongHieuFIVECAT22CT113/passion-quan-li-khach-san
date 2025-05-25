@@ -1,11 +1,17 @@
 using be_quanlikhachsanapi.DTOs;
 using be_quanlikhachsanapi.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using be_quanlikhachsanapi.Authorization;
+using System.Linq;
+using System.Threading.Tasks;
+using System;
 
 namespace be_quanlikhachsanapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class PhuongThucThanhToanController : ControllerBase
     {
         private readonly IPhuongThucThanhToanRepository _phuongThucRepo;
@@ -19,7 +25,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// Lấy danh sách tất cả phương thức thanh toán
         /// </summary>
         [HttpGet]
-        [Consumes("multipart/form-data")]
+        [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -49,7 +55,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// Lấy thông tin phương thức thanh toán theo mã
         /// </summary>
         [HttpGet("{maPhuongThucThanhToan}")]
-        [Consumes("multipart/form-data")]
+        [AllowAnonymous]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(string maPhuongThucThanhToan)
@@ -66,7 +72,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// Lấy danh sách phương thức thanh toán theo mã hóa đơn
         /// </summary>
         [HttpGet("HoaDon/{maHoaDon}")]
-        [Consumes("multipart/form-data")]
+        [RequireRole("R00", "R01", "R02")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetByHoaDon(string maHoaDon)
@@ -84,6 +90,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// </summary>
         [HttpPost]
         [Consumes("multipart/form-data")]
+        [RequireRole("R00")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create([FromForm] CreatePhuongThucThanhToanDTO createDto)
@@ -105,6 +112,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// </summary>
         [HttpPut("{maPhuongThucThanhToan}")]
         [Consumes("multipart/form-data")]
+        [RequireRole("R00")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -130,12 +138,12 @@ namespace be_quanlikhachsanapi.Controllers
         /// Cập nhật trạng thái phương thức thanh toán
         /// </summary>
         [HttpPut("{maPhuongThucThanhToan}/trangThai")]
-        [Consumes("multipart/form-data")]
+        [RequireRole("R00")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> UpdateTrangThai(string maPhuongThucThanhToan, string trangThai)
+        public async Task<IActionResult> UpdateTrangThai(string maPhuongThucThanhToan, [FromBody] UpdateTrangThaiDTO trangThaiDto)
         {
-            var result = await _phuongThucRepo.UpdateTrangThaiAsync(maPhuongThucThanhToan, trangThai);
+            var result = await _phuongThucRepo.UpdateTrangThaiAsync(maPhuongThucThanhToan, trangThaiDto.TrangThai);
             if (!result)
             {
                 return NotFound($"Không tìm thấy phương thức thanh toán với mã {maPhuongThucThanhToan}");
@@ -148,7 +156,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// Xóa phương thức thanh toán
         /// </summary>
         [HttpDelete("{maPhuongThucThanhToan}")]
-        [Consumes("multipart/form-data")]
+        [RequireRole("R00")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete(string maPhuongThucThanhToan)

@@ -2,11 +2,14 @@ using be_quanlikhachsanapi.Data;
 using be_quanlikhachsanapi.DTOs;
 using be_quanlikhachsanapi.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using be_quanlikhachsanapi.Authorization;
 
 namespace be_quanlikhachsanapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CaLamViecController : ControllerBase
     {
         private readonly ICaLamViecRepository _caLamViecRepo;
@@ -18,7 +21,7 @@ namespace be_quanlikhachsanapi.Controllers
 
         // Lấy danh sách tất cả ca làm việc
         [HttpGet()]
-        [Consumes("multipart/form-data")]
+        [RequireRole("R00", "R01", "R02")]
         public IActionResult GetAll()
         {
             var caLamViecs = _caLamViecRepo.GetAll();
@@ -30,7 +33,7 @@ namespace be_quanlikhachsanapi.Controllers
         }
         // Tìm ca làm việc theo ID
         [HttpGet("{maCaLam}")]
-        [Consumes("multipart/form-data")]
+        [RequireRole("R00", "R01", "R02")]
         public IActionResult GetByID(string maCaLam)
         {
             var caLamViec = _caLamViecRepo.GetCaLamViecById(maCaLam);
@@ -43,6 +46,7 @@ namespace be_quanlikhachsanapi.Controllers
         //Tao ca làm việc mới
         [HttpPost]
         [Consumes("multipart/form-data")]
+        [RequireRole("R00", "R01")]
         public IActionResult CreateCaLamViec([FromForm] CreateCaLamViecDTO createCaLamViec)
         {
             var caLamViec = _caLamViecRepo.CreateCaLamViec(createCaLamViec);
@@ -55,6 +59,7 @@ namespace be_quanlikhachsanapi.Controllers
         // Cập nhật ca làm việc
         [HttpPut("{maCaLam}")]
         [Consumes("multipart/form-data")]
+        [RequireRole("R00", "R01")]
         public IActionResult UpdateCaLamViec(string maCaLam, [FromForm] UpdateCaLamViecDTO updateCaLamViec)
         {
             var caLamViec = _caLamViecRepo.UpdateCaLamViec(maCaLam, updateCaLamViec);
@@ -66,7 +71,7 @@ namespace be_quanlikhachsanapi.Controllers
         }
         // Xóa ca làm việc
         [HttpDelete("{maCaLam}")]
-        [Consumes("multipart/form-data")]
+        [RequireRole("R00")]
         public IActionResult DeleteCaLamViec(string maCaLam)
         {
             var caLamViec = _caLamViecRepo.DeleteCaLamViec(maCaLam);
