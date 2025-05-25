@@ -184,19 +184,20 @@ export default function StaffManager() {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Mã NV</th><th>Họ tên</th><th>Chức vụ</th><th>Số điện thoại</th><th>Email</th><th>Trạng thái</th><th>Hành động</th>
+                <th>Mã NV</th><th>Họ tên</th><th>Username</th><th>Chức vụ</th><th>Số điện thoại</th><th>Email</th><th>Trạng thái</th><th>Hành động</th>
               </tr>
             </thead>
             <tbody>
               {staffs.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{textAlign: 'center', padding: '16px'}}>Không có dữ liệu nhân viên</td>
+                  <td colSpan={8} style={{textAlign: 'center', padding: '16px'}}>Không có dữ liệu nhân viên</td>
                 </tr>
               ) : (
                 staffs.map((staff) => (
                   <tr key={staff.maNV}>
                     <td>{staff.maNV}</td>
                     <td>{`${staff.hoNv || ''} ${staff.tenNv || ''}`.trim()}</td>
+                    <td>{staff.userName || "N/A"}</td>
                     <td>{staff.chucVu}</td>
                     <td>{staff.soDienThoai}</td>
                     <td>{staff.email || "N/A"}</td>

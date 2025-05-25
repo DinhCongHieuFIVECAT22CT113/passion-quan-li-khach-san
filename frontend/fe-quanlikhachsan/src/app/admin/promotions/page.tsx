@@ -477,8 +477,8 @@ export default function PromotionManager() {
             <h3>Xác nhận xóa</h3>
             <p>Bạn có chắc chắn muốn xóa khuyến mãi này?</p>
             <div style={{marginTop: 20, display:'flex', gap:8}}>
-              <button onClick={() => handleDelete(showDeleteConfirm)} className={styles.deleteBtn}>Xóa</button>
-              <button onClick={() => setShowDeleteConfirm(null)} className={styles.addBtn}>Hủy</button>
+              <button onClick={() => handleDelete(showDeleteConfirm)} className={styles.deleteBtn}><span>Xóa</span></button>
+              <button onClick={() => setShowDeleteConfirm(null)} className={styles.addBtn}><span>Hủy</span></button>
             </div>
           </div>
         </div>
