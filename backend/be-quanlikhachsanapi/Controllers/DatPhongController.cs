@@ -111,7 +111,7 @@ namespace be_quanlikhachsanapi.Controllers
 
             // Giả định bạn có một phương thức GetDatPhongByMaKhAsync trong IDatPhongRepository
             // và đã implement nó.
-            var datPhongs = await _datPhongRepo.GetDatPhongByMaKhAsync(maKh); 
+            var datPhongs = await _datPhongRepo.GetDatPhongByKhachHang(maKh); 
 
             if (datPhongs == null || !datPhongs.Any())
             {
