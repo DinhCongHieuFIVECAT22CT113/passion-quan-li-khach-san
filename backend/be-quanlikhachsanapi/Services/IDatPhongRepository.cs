@@ -13,6 +13,7 @@ namespace be_quanlikhachsanapi.Services
         JsonResult UpdateDatPhong(string MaDatPhong, UpdateDatPhongDTO updateDatPhong);
         JsonResult UpdateTrangThai(string MaDatPhong, string TrangThai);
         JsonResult DeleteDatPhong(string MaDatPhong);
+        Task<IEnumerable<DatPhong>> GetDatPhongByKhachHang(string maKhachHang);
     }
 
     public class DatPhongRepository : IDatPhongRepository
@@ -61,7 +62,7 @@ namespace be_quanlikhachsanapi.Services
                 MaPhong = _context.ChiTietDatPhongs
                     .Where(ct => ct.MaDatPhong == datPhong.MaDatPhong)
                     .Select(ct => ct.MaPhong)
-                    .FirstOrDefault(),  
+                    .FirstOrDefault(),
                 TreEm = datPhong.TreEm,
                 NguoiLon = datPhong.NguoiLon,
                 GhiChu = datPhong.GhiChu,
@@ -236,6 +237,13 @@ namespace be_quanlikhachsanapi.Services
             {
                 StatusCode = StatusCodes.Status200OK
             };
+        }
+
+        public async Task<IEnumerable<DatPhong>> GetDatPhongByKhachHang(string maKhachHang)
+        {
+            return await _context.DatPhongs
+                .Where(dp => dp.MaKh == maKhachHang)
+                .ToListAsync();
         }
     }
 }

@@ -96,7 +96,7 @@ namespace be_quanlikhachsanapi.Controllers
         }
 
         // Lấy lịch sử đặt phòng của khách hàng hiện tại
-        [HttpGet("KhachHang")] // Route sẽ là /api/DatPhong/KhachHang
+        [HttpGet("{maKhachHang}}")] // Route sẽ là /api/DatPhong/KhachHang
         [RequireRole("R04")] // Chỉ cho phép Khách hàng (R04) truy cập
         public async Task<IActionResult> GetDatPhongByKhachHang()
         {
