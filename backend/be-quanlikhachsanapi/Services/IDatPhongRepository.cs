@@ -2,6 +2,8 @@ using be_quanlikhachsanapi.Data;
 using be_quanlikhachsanapi.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http; // Thêm namespace này
+using Microsoft.EntityFrameworkCore;
+
 
 namespace be_quanlikhachsanapi.Services
 {
