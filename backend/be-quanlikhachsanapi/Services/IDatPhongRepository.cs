@@ -171,7 +171,8 @@ namespace be_quanlikhachsanapi.Services
                     StatusCode = StatusCodes.Status404NotFound
                 };
             }
-            // Cập nhật thông tin đặt phòng
+
+            // Cập nhật thông tin đặt phòng với các trường không null
             datPhong.TreEm = updateDatPhong.TreEm ?? datPhong.TreEm;
             datPhong.NguoiLon = updateDatPhong.NguoiLon ?? datPhong.NguoiLon;
             datPhong.GhiChu = updateDatPhong.GhiChu ?? datPhong.GhiChu;
@@ -183,6 +184,34 @@ namespace be_quanlikhachsanapi.Services
 
             _context.DatPhongs.Update(datPhong);
             _context.SaveChanges();
+
+            // Nếu cần, cập nhật chi tiết đặt phòng (ChiTietDatPhong)
+            if (!string.IsNullOrEmpty(updateDatPhong.MaPhong))
+            {
+                var chiTietDatPhong = _context.ChiTietDatPhongs.FirstOrDefault(ctdp => ctdp.MaDatPhong == MaDatPhong);
+                if (chiTietDatPhong != null)
+                {
+                    // Tìm loại phòng mới theo mã phòng cập nhật
+                    var loaiPhong = _context.Phongs
+                        .Where(p => p.MaPhong == updateDatPhong.MaPhong)
+                        .Select(p => p.MaLoaiPhong)
+                        .FirstOrDefault();
+
+                    if (loaiPhong == null)
+                    {
+                        return new JsonResult("Không tìm thấy loại phòng với mã đã cho.")
+                        {
+                            StatusCode = StatusCodes.Status404NotFound
+                        };
+                    }
+
+                    chiTietDatPhong.MaPhong = updateDatPhong.MaPhong;
+                    chiTietDatPhong.MaLoaiPhong = loaiPhong;
+
+                    _context.ChiTietDatPhongs.Update(chiTietDatPhong);
+                    _context.SaveChanges();
+                }
+            }
 
             return new JsonResult(new
             {
@@ -205,6 +234,14 @@ namespace be_quanlikhachsanapi.Services
                 };
             }
 
+            // Xóa chi tiết đặt phòng liên quan trước nếu có
+            var chiTietDatPhongs = _context.ChiTietDatPhongs.Where(ctdp => ctdp.MaDatPhong == MaDatPhong).ToList();
+            if (chiTietDatPhongs.Any())
+            {
+                _context.ChiTietDatPhongs.RemoveRange(chiTietDatPhongs);
+            }
+
+            // Xóa bản ghi đặt phòng
             _context.DatPhongs.Remove(datPhong);
             _context.SaveChanges();
 

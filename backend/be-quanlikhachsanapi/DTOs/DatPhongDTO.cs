@@ -31,6 +31,7 @@ namespace be_quanlikhachsanapi.DTOs
 
     public class UpdateDatPhongDTO
     {   
+        public string MaPhong { get; set; }
         public int? TreEm { get; set; }
         public int? NguoiLon { get; set; }
         public string GhiChu { get; set; }

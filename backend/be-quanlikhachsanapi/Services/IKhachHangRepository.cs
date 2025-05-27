@@ -268,6 +268,5 @@ namespace be_quanlikhachsanapi.Services
                 return new JsonResult($"Lỗi: {ex.Message}") { StatusCode = 500 };
             }
         }
-
     }
 }
