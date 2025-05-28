@@ -9,6 +9,12 @@ const nextConfig = {
           pathname: '/api/images/**', // Cho phép tất cả các đường dẫn con trong /api/images/
         },
         {
+          protocol: 'http',
+          hostname: 'localhost',
+          port: '5009',
+          pathname: '/**', // Cho phép tất cả các đường dẫn ảnh từ localhost:5009
+        },
+        {
           protocol: 'https',
           hostname: 'encrypted-tbn0.gstatic.com',
         },
@@ -77,4 +83,3 @@ const nextConfig = {
   };
   
   module.exports = nextConfig;
-  
