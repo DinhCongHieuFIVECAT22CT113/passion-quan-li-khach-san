@@ -97,7 +97,7 @@ namespace be_quanlikhachsanapi.Controllers
 
         // Lấy lịch sử đặt phòng của khách hàng hiện tại
         [HttpGet("KhachHang")] // Route sẽ là /api/DatPhong/KhachHang
-        [RequireRole("R04")] // Chỉ cho phép Khách hàng (R04) truy cập
+        [RequireRole("R00", "R01", "R02", "R04")] // Cho phép Admin, Quản lý, Nhân viên, Khách hàng truy cập
         public async Task<IActionResult> GetDatPhongByKhachHang()
         {
             var maKh = User.FindFirstValue(ClaimTypes.NameIdentifier); // Lấy MaKh từ token (đảm bảo token chứa claim này, thường là sub hoặc nameid)
