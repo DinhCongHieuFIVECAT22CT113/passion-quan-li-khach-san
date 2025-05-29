@@ -1,23 +1,27 @@
 .form-section {
   width: 100%;
-  max-width: 600px; /* Mở rộng gấp 1.5 lần từ 400px */
-  padding: 2.5rem;
+  max-width: 650px;
+  padding: 3rem;
   position: relative;
   background: rgba(255, 255, 255, 0.95);
-  border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
-  animation: fadeIn 0.5s ease-out;
+  border-radius: 24px;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.15),
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  animation: fadeIn 0.6s ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(30px) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -47,11 +51,15 @@
 
 .form-section h2 {
   text-align: center;
-  color: #102c3e;
-  margin-bottom: 2.5rem;
-  font-size: 2rem;
-  font-weight: 600;
-  letter-spacing: -0.5px;
+  color: #1e293b;
+  margin-bottom: 3rem;
+  font-size: 2.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #1e293b, #475569);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .form-section form {
@@ -68,31 +76,67 @@
 }
 
 .form-section input[type="text"],
+.form-section input[type="email"],
 .form-section input[type="password"],
 .form-section input[type="tel"] {
   width: 100%;
-  padding: 0.9rem;
-  border: 2px solid #e9ecef;
-  border-radius: 12px;
-  font-size: 1rem;
-  transition: all 0.3s ease;
-  background: #f8f9fa;
-  color: #102c3e; /* Màu chữ rõ hơn */
+  padding: 1.2rem 1.5rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  font-size: 1.1rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(255, 255, 255, 0.9);
+  color: #1e293b;
+  font-weight: 500;
+  box-sizing: border-box;
 }
 
 .form-section input[type="text"]::placeholder,
+.form-section input[type="email"]::placeholder,
 .form-section input[type="password"]::placeholder,
 .form-section input[type="tel"]::placeholder {
-  color: #a0a0a0; /* Màu placeholder nhẹ nhàng */
+  color: #94a3b8;
+  font-weight: 400;
 }
 
 .form-section input[type="text"]:focus,
+.form-section input[type="email"]:focus,
 .form-section input[type="password"]:focus,
 .form-section input[type="tel"]:focus {
-  border-color: #8B7355;
-  background: #fff;
-  box-shadow: 0 0 0 4px rgba(139, 115, 85, 0.1);
+  border-color: #3b82f6;
+  background: rgba(255, 255, 255, 1);
+  box-shadow:
+    0 0 0 4px rgba(59, 130, 246, 0.1),
+    0 4px 12px rgba(0, 0, 0, 0.05);
   outline: none;
+  transform: translateY(-1px);
+}
+
+/* Hover effect cho inputs */
+.form-section input[type="text"]:hover,
+.form-section input[type="email"]:hover,
+.form-section input[type="password"]:hover,
+.form-section input[type="tel"]:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Đảm bảo input email không bị auto-fill làm đen */
+.form-section input[type="email"]:-webkit-autofill,
+.form-section input[type="text"]:-webkit-autofill,
+.form-section input[type="password"]:-webkit-autofill,
+.form-section input[type="tel"]:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px rgba(255, 255, 255, 0.9) inset !important;
+  -webkit-text-fill-color: #1e293b !important;
+  background-color: rgba(255, 255, 255, 0.9) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.form-section input[type="email"]:-webkit-autofill:focus,
+.form-section input[type="text"]:-webkit-autofill:focus,
+.form-section input[type="password"]:-webkit-autofill:focus,
+.form-section input[type="tel"]:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px rgba(255, 255, 255, 1) inset !important;
 }
 
 .password-wrapper {
@@ -153,25 +197,48 @@
 
 .main-btn {
   width: 100%;
-  padding: 1rem;
-  background: linear-gradient(135deg, #8B7355, #6F5B3E);
+  padding: 1.3rem 2rem;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
   color: white;
   border: none;
-  border-radius: 12px;
-  font-size: 1rem;
-  font-weight: 600;
+  border-radius: 16px;
+  font-size: 1.1rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
-  margin-top: 0.5rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-top: 1rem;
+  box-shadow:
+    0 4px 14px rgba(59, 130, 246, 0.3),
+    0 2px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.main-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.main-btn:hover::before {
+  left: 100%;
 }
 
 .main-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(139, 115, 85, 0.3);
+  transform: translateY(-3px);
+  box-shadow:
+    0 8px 25px rgba(59, 130, 246, 0.4),
+    0 4px 12px rgba(0, 0, 0, 0.15);
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
 }
 
 .main-btn:active {
-  transform: translateY(0);
+  transform: translateY(-1px);
 }
 
 .main-btn:disabled {
@@ -405,11 +472,58 @@ footer {
   }
 }
 
+@media (max-width: 768px) {
+  .form-section {
+    max-width: 90%;
+    padding: 2.5rem 2rem;
+    border-radius: 20px;
+  }
+
+  .form-section h2 {
+    font-size: 2.2rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .form-section input[type="text"],
+  .form-section input[type="email"],
+  .form-section input[type="password"],
+  .form-section input[type="tel"] {
+    padding: 1.1rem 1.3rem;
+    font-size: 1rem;
+  }
+
+  .main-btn {
+    padding: 1.2rem 1.8rem;
+    font-size: 1rem;
+  }
+}
+
 @media (max-width: 480px) {
   .form-section {
-    padding: 2rem;
+    padding: 2rem 1.5rem;
     margin: 1rem;
-    border-radius: 16px;
+    border-radius: 18px;
+    max-width: 95%;
+  }
+
+  .form-section h2 {
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+  }
+
+  .form-section input[type="text"],
+  .form-section input[type="email"],
+  .form-section input[type="password"],
+  .form-section input[type="tel"] {
+    padding: 1rem 1.2rem;
+    font-size: 0.95rem;
+    border-radius: 14px;
+  }
+
+  .main-btn {
+    padding: 1.1rem 1.5rem;
+    font-size: 0.95rem;
+    border-radius: 14px;
   }
 
   .options {
@@ -421,5 +535,13 @@ footer {
   .modal-box {
     margin: 1rem;
     padding: 1.5rem;
+    border-radius: 18px;
+  }
+
+  .google-btn,
+  .facebook-btn {
+    padding: 0.8rem;
+    font-size: 0.95rem;
+    border-radius: 14px;
   }
 }
