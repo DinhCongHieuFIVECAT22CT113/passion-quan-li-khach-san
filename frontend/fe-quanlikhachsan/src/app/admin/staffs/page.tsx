@@ -2,8 +2,8 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 // import Link from 'next/link'; // Xóa import Link không sử dụng
 import styles from './Staffs.module.css';
-import { API_BASE_URL } from '@/lib/config'; 
-import { getAuthHeaders, handleResponse } from '@/lib/api'; 
+import { API_BASE_URL } from '@/lib/config';
+import { getAuthHeaders, getFormDataHeaders, handleResponse } from '@/lib/api';
 // import Image from 'next/image'; // Xóa import Image không sử dụng
 import { withAuth, ROLES, useAuth } from '@/lib/auth'; // Import HOC và ROLES
 // import { FaPlus, FaEdit, FaTrash } from "react-icons/fa"; // Xóa import icons không sử dụng
@@ -33,6 +33,7 @@ interface StaffFormState {
   hoNv: string;
   tenNv: string;
   userName: string;
+  password?: string;
   chucVu: string;
   soDienThoai: string;
   email: string;
@@ -50,12 +51,12 @@ function StaffPage() {
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingStaff, setEditingStaff] = useState<Staff | null>(null);
   const [formState, setFormState] = useState<StaffFormState>({
-    hoNv: "", 
-    tenNv: "", 
+    hoNv: "",
+    tenNv: "",
     userName: "",
-    chucVu: "", 
-    soDienThoai: "", 
-    email: "", 
+    chucVu: "",
+    soDienThoai: "",
+    email: "",
     ngayVaoLam: new Date().toISOString().split('T')[0],
     luongCoBan: 0,
     maRole: "",
@@ -69,31 +70,50 @@ function StaffPage() {
       setIsLoading(true);
       setError(null);
       try {
-      const response = await fetch(`${API_BASE_URL}/NhanVien`, { 
-        method: 'GET', 
-        headers: getAuthHeaders('GET'), 
-        credentials: 'include' 
+      const response = await fetch(`${API_BASE_URL}/NhanVien`, {
+        method: 'GET',
+        headers: getAuthHeaders('GET'),
+        credentials: 'include'
       });
       const data = await handleResponse(response);
-      
-      // Lấy tên Role cho từng nhân viên
-      const staffsWithRoles = await Promise.all(data.map(async (staff: Staff) => {
-        if (staff.maRole) {
+      console.log('Raw staff data from API:', data);
+
+      // Normalize data và lấy tên Role cho từng nhân viên
+      const staffsWithRoles = await Promise.all(data.map(async (apiStaff: any) => {
+        // Normalize field names (handle both PascalCase and camelCase)
+        const normalizedStaff: Staff = {
+          maNV: apiStaff.MaNv || apiStaff.maNV || apiStaff.MaNV || apiStaff.maNv || '',
+          hoNv: apiStaff.HoNv || apiStaff.hoNv || '',
+          tenNv: apiStaff.TenNv || apiStaff.tenNv || '',
+          userName: apiStaff.UserName || apiStaff.userName || '',
+          chucVu: apiStaff.ChucVu || apiStaff.chucVu || '',
+          soDienThoai: apiStaff.Sdt || apiStaff.sdt || apiStaff.soDienThoai || apiStaff.SoDienThoai || '',
+          email: apiStaff.Email || apiStaff.email || '',
+          ngayVaoLam: apiStaff.NgayVaoLam || apiStaff.ngayVaoLam || '',
+          luongCoBan: apiStaff.LuongCoBan || apiStaff.luongCoBan || 0,
+          maRole: apiStaff.MaRole || apiStaff.maRole || '',
+          trangThai: apiStaff.TrangThai || apiStaff.trangThai || 'Hoạt động',
+        };
+
+        // Lấy tên Role nếu có maRole
+        if (normalizedStaff.maRole) {
           try {
-            const roleResponse = await fetch(`${API_BASE_URL}/Role/${staff.maRole}`, {
+            const roleResponse = await fetch(`${API_BASE_URL}/Role/${normalizedStaff.maRole}`, {
               method: 'GET',
               headers: getAuthHeaders('GET'),
               credentials: 'include'
             });
             const roleData = await handleResponse(roleResponse);
-            return { ...staff, tenRole: roleData.tenRole };
+            return { ...normalizedStaff, tenRole: roleData.tenRole || roleData.TenRole || 'N/A' };
           } catch (roleError) {
-            console.error(`Error fetching role ${staff.maRole}:`, roleError);
-            return { ...staff, tenRole: 'N/A' }; // Hoặc giá trị mặc định khác
+            console.error(`Error fetching role ${normalizedStaff.maRole}:`, roleError);
+            return { ...normalizedStaff, tenRole: 'N/A' };
           }
         }
-        return { ...staff, tenRole: 'N/A' }; 
+        return { ...normalizedStaff, tenRole: 'N/A' };
       }));
+
+      console.log('Processed staffs with roles:', staffsWithRoles);
       setStaffs(staffsWithRoles);
 
     } catch (err: any) {
@@ -115,7 +135,7 @@ function StaffPage() {
         setRoles(rolesData.map((r: any) => ({ maRole: r.maRole, tenRole: r.tenRole })));
       } else {
         console.error("Lỗi: Dữ liệu Role không hợp lệ", rolesData);
-        setRoles([]); 
+        setRoles([]);
       }
     } catch (error) {
       console.error("Lỗi khi lấy danh sách Role:", error);
@@ -140,33 +160,87 @@ function StaffPage() {
     e.preventDefault();
     setIsLoading(true);
     setError(null);
+
+    // Validation
+    if (!editingStaff) {
+      if (!formState.password || formState.password.length < 6) {
+        setError('Mật khẩu phải có ít nhất 6 ký tự');
+        setIsLoading(false);
+        return;
+      }
+    }
+
+    if (!formState.email.includes('@')) {
+      setError('Email không hợp lệ');
+      setIsLoading(false);
+      return;
+    }
+
+    if (formState.luongCoBan <= 0) {
+      setError('Lương cơ bản phải lớn hơn 0');
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const url = editingStaff 
-        ? `${API_BASE_URL}/NhanVien/${editingStaff.maNV}` 
+      const url = editingStaff
+        ? `${API_BASE_URL}/NhanVien/${editingStaff.maNV}`
         : `${API_BASE_URL}/NhanVien`;
       const method = editingStaff ? 'PUT' : 'POST';
-      
-      const payload: any = { ...formState };
-      // Server có thể tự sinh MaNV nếu là POST và không có maNV
-      if (!editingStaff && !payload.maNV) {
-        // Không gửi maNV rỗng nếu đang thêm mới, server sẽ tự tạo nếu cần
-        // Hoặc bạn có thể tạo mã NV ở client nếu logic yêu cầu
+
+      // Tạo FormData để gửi multipart/form-data như backend expect
+      const formData = new FormData();
+
+      // Map frontend field names to backend field names
+      if (editingStaff) {
+        // For update, only send fields that can be updated
+        formData.append('ChucVu', formState.chucVu);
+        formData.append('Email', formState.email);
+        formData.append('Sdt', formState.soDienThoai);
+        formData.append('LuongCoBan', formState.luongCoBan.toString());
+        formData.append('MaRole', formState.maRole);
+      } else {
+        // For create, send all required fields
+        formData.append('UserName', formState.userName);
+        formData.append('Password', formState.password || 'defaultPassword123');
+        formData.append('HoNv', formState.hoNv);
+        formData.append('TenNv', formState.tenNv);
+        formData.append('ChucVu', formState.chucVu);
+        formData.append('Email', formState.email);
+        formData.append('Sdt', formState.soDienThoai);
+        formData.append('LuongCoBan', formState.luongCoBan.toString());
+        formData.append('MaRole', formState.maRole);
+        formData.append('NgayVaoLam', formState.ngayVaoLam);
       }
+
+      console.log('Sending form data:', Object.fromEntries(formData.entries()));
 
       const response = await fetch(url, {
         method: method,
-        headers: getAuthHeaders(method),
+        headers: getFormDataHeaders(), // Use form data headers instead
         credentials: 'include',
-        body: JSON.stringify(payload),
+        body: formData,
       });
 
       await handleResponse(response);
-      fetchStaffs(); 
+      fetchStaffs();
       setShowAddModal(false);
       setShowEditModal(false);
       setEditingStaff(null);
+      alert(editingStaff ? 'Cập nhật nhân viên thành công!' : 'Thêm nhân viên thành công!');
     } catch (err: any) {
-      setError(err.message);
+      let errorMessage = err.message;
+
+      // Handle specific error cases
+      if (err.message.includes('400')) {
+        errorMessage = 'Dữ liệu không hợp lệ. Vui lòng kiểm tra lại thông tin.';
+      } else if (err.message.includes('409')) {
+        errorMessage = 'Username hoặc email đã tồn tại. Vui lòng chọn username/email khác.';
+      } else if (err.message.includes('403')) {
+        errorMessage = 'Bạn không có quyền thực hiện hành động này.';
+      }
+
+      setError(errorMessage);
       console.error("Submit error:", err);
     } finally {
       setIsLoading(false);
@@ -175,12 +249,13 @@ function StaffPage() {
 
   const openAddModal = () => {
     setFormState({
-      hoNv: "", 
-      tenNv: "", 
+      hoNv: "",
+      tenNv: "",
       userName: "",
-      chucVu: "", 
-      soDienThoai: "", 
-      email: "", 
+      password: "",
+      chucVu: "",
+      soDienThoai: "",
+      email: "",
       ngayVaoLam: new Date().toISOString().split('T')[0],
       luongCoBan: 0,
       maRole: roles.length > 0 ? roles[0].maRole : "", // Chọn role đầu tiên làm mặc định
@@ -216,23 +291,44 @@ function StaffPage() {
     if (!maNV) return;
     if (window.confirm("Bạn có chắc chắn muốn xóa nhân viên này?")) {
       setIsLoading(true);
+      setError(null);
       try {
         const response = await fetch(`${API_BASE_URL}/NhanVien/${maNV}`, {
           method: 'DELETE',
           headers: getAuthHeaders('DELETE'),
           credentials: 'include'
         });
+
+        if (!response.ok) {
+          // Handle specific error cases
+          if (response.status === 500) {
+            throw new Error('Không thể xóa nhân viên này. Nhân viên có thể đang được tham chiếu trong hệ thống (báo cáo, hóa đơn, v.v.)');
+          } else if (response.status === 400) {
+            const errorData = await response.json().catch(() => ({ message: response.statusText }));
+            throw new Error(errorData.message || 'Không thể xóa nhân viên này. Nhân viên đang được tham chiếu trong hệ thống.');
+          } else if (response.status === 404) {
+            throw new Error('Không tìm thấy nhân viên với mã đã cho');
+          } else if (response.status === 403) {
+            throw new Error('Bạn không có quyền xóa nhân viên này');
+          } else {
+            const errorData = await response.json().catch(() => ({ message: response.statusText }));
+            throw new Error(errorData.message || `Lỗi khi xóa nhân viên: ${response.status}`);
+          }
+        }
+
         await handleResponse(response);
-        fetchStaffs(); 
+        fetchStaffs();
+        alert('Xóa nhân viên thành công!');
       } catch (err: any) {
         setError(err.message);
+        console.error('Delete error:', err);
       } finally {
         setIsLoading(false);
       }
     }
   };
 
-  const filteredStaffs = staffs.filter(staff => 
+  const filteredStaffs = staffs.filter(staff =>
     (`${staff.hoNv || ''} ${staff.tenNv || ''}`.toLowerCase().includes(searchTerm.toLowerCase())) ||
     (staff.userName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
     (staff.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -250,9 +346,9 @@ function StaffPage() {
       {error && <p className={styles.errorText}>Lỗi: {error}</p>}
 
       <div className={styles.toolbar}>
-        <input 
-          type="text" 
-          placeholder="Tìm kiếm nhân viên..." 
+        <input
+          type="text"
+          placeholder="Tìm kiếm nhân viên..."
           className={styles.searchInput}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -261,7 +357,7 @@ function StaffPage() {
           <button onClick={openAddModal} className={styles.addBtn}>Thêm Nhân Viên</button>
         )}
       </div>
-      
+
           <table className={styles.table}>
             <thead>
               <tr>
@@ -284,18 +380,18 @@ function StaffPage() {
               <td colSpan={11} style={{textAlign: 'center', padding: '16px'}}>Không có dữ liệu nhân viên</td>
                 </tr>
               ) : (
-            filteredStaffs.map((staff) => (
-                  <tr key={staff.maNV}>
-                    <td>{staff.maNV}</td>
-                    <td>{`${staff.hoNv || ''} ${staff.tenNv || ''}`.trim()}</td>
+            filteredStaffs.map((staff, index) => (
+                  <tr key={staff.maNV || `staff-${index}`}>
+                    <td>{staff.maNV || 'N/A'}</td>
+                    <td>{`${staff.hoNv || ''} ${staff.tenNv || ''}`.trim() || 'N/A'}</td>
                 <td>{staff.userName || 'N/A'}</td>
-                    <td>{staff.chucVu}</td>
-                    <td>{staff.soDienThoai}</td>
-                <td>{staff.email}</td>
+                    <td>{staff.chucVu || 'N/A'}</td>
+                    <td>{staff.soDienThoai || 'N/A'}</td>
+                <td>{staff.email || 'N/A'}</td>
                 <td>{staff.ngayVaoLam ? new Date(staff.ngayVaoLam).toLocaleDateString() : 'N/A'}</td>
-                <td>{staff.luongCoBan?.toLocaleString()}</td>
-                <td>{staff.tenRole || staff.maRole || 'N/A'}</td> 
-                <td>{staff.trangThai}</td>
+                <td>{staff.luongCoBan?.toLocaleString() || '0'}</td>
+                <td>{staff.tenRole || staff.maRole || 'N/A'}</td>
+                <td>{staff.trangThai || 'N/A'}</td>
                 <td>
                   <button onClick={() => openEditModal(staff)} className={styles.editBtn}>Sửa</button>
                   <button onClick={() => handleDelete(staff.maNV)} className={styles.deleteBtn}>Xóa</button>
@@ -305,7 +401,7 @@ function StaffPage() {
               )}
             </tbody>
           </table>
-      
+
       {(showAddModal || showEditModal) && (
         <div className={styles.modal}>
           <div className={styles.modalContent}>
@@ -323,6 +419,12 @@ function StaffPage() {
                 <label htmlFor="userName">Username</label>
                 <input type="text" id="userName" name="userName" value={formState.userName} onChange={handleInputChange} required className={styles.input} />
               </div>
+              {!editingStaff && (
+                <div className={styles.formGroup}>
+                  <label htmlFor="password">Mật khẩu</label>
+                  <input type="password" id="password" name="password" value={formState.password || ''} onChange={handleInputChange} required className={styles.input} placeholder="Nhập mật khẩu" />
+                </div>
+              )}
               <div className={styles.formGroup}>
                 <label htmlFor="chucVu">Chức vụ</label>
                 <input type="text" id="chucVu" name="chucVu" value={formState.chucVu} onChange={handleInputChange} required className={styles.input} />
@@ -345,19 +447,19 @@ function StaffPage() {
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="maRole">Vai trò</label>
-                {/* <select id="maRole" name="maRole" value={formState.maRole} onChange={handleInputChange} required> */}
-                {/* <option value="" disabled>Chọn vai trò</option> */}
-                {/* {roles.map(role => ( */}
-                {/* <option key={role.maRole} value={role.maRole}>{role.tenRole}</option> */}
-                {/* ))} */}
-                {/* </select> */}
+                <select id="maRole" name="maRole" value={formState.maRole} onChange={handleInputChange} required className={styles.input}>
+                  <option value="" disabled>Chọn vai trò</option>
+                  {roles.map(role => (
+                    <option key={role.maRole} value={role.maRole}>{role.tenRole}</option>
+                  ))}
+                </select>
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="trangThai">Trạng thái</label>
                 <select id="trangThai" name="trangThai" value={formState.trangThai} onChange={handleInputChange} required className={styles.input}>
-                  <option value="Hoạt động">Hoạt động</option>
-                  <option value="Nghỉ việc">Nghỉ việc</option>
-                  <option value="Tạm ngưng">Tạm ngưng</option>
+                  <option key="hoat-dong" value="Hoạt động">Hoạt động</option>
+                  <option key="nghi-viec" value="Nghỉ việc">Nghỉ việc</option>
+                  <option key="tam-ngung" value="Tạm ngưng">Tạm ngưng</option>
                 </select>
               </div>
 

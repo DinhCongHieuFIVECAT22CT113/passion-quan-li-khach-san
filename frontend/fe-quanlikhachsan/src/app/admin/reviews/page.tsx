@@ -41,72 +41,75 @@ export default function ReviewManager() {
           let tenKhachHangDisplay = 'Khách hàng không xác định';
           let maKhachHangFromBooking: string | undefined = apiReview.maKH; // Ưu tiên maKH trực tiếp từ review nếu có
 
-          if (apiReview.maDatPhong) {
-            console.log(`[Review ${apiReview.maReview}] Fetching booking details for MaDatPhong: ${apiReview.maDatPhong}`);
-            const bookingData: any = await getBookingDetails(apiReview.maDatPhong);
-            console.log(`[Review ${apiReview.maReview}] Booking data for ${apiReview.maDatPhong}:`, JSON.stringify(bookingData, null, 2));
+          const reviewId = apiReview.MaReview || apiReview.maReview;
+          const datPhongId = apiReview.MaDatPhong || apiReview.maDatPhong;
+
+          if (datPhongId) {
+            console.log(`[Review ${reviewId}] Fetching booking details for MaDatPhong: ${datPhongId}`);
+            const bookingData: any = await getBookingDetails(datPhongId);
+            console.log(`[Review ${reviewId}] Booking data for ${datPhongId}:`, JSON.stringify(bookingData, null, 2));
 
             if (bookingData) {
               // Ưu tiên tên khách hàng trực tiếp từ bookingData nếu có
               const directTenKH = bookingData.tenKhachHang || bookingData.TenKhachHang;
               if (directTenKH && typeof directTenKH === 'string' && directTenKH.trim() !== "") {
                 tenKhachHangDisplay = directTenKH;
-                console.log(`[Review ${apiReview.maReview}] Found directTenKH from booking: ${directTenKH}`);
+                console.log(`[Review ${reviewId}] Found directTenKH from booking: ${directTenKH}`);
               } else {
                  // Nếu không có tên trực tiếp, lấy maKH từ bookingData
                 maKhachHangFromBooking = bookingData.maKH || bookingData.MaKH || bookingData.maKhachHang || bookingData.MaKhachHang;
-                console.log(`[Review ${apiReview.maReview}] maKhachHangFromBooking from booking: ${maKhachHangFromBooking}`);
+                console.log(`[Review ${reviewId}] maKhachHangFromBooking from booking: ${maKhachHangFromBooking}`);
               }
             } else {
-              console.log(`[Review ${apiReview.maReview}] No bookingData returned or bookingData is null for MaDatPhong: ${apiReview.maDatPhong}`);
+              console.log(`[Review ${reviewId}] No bookingData returned or bookingData is null for MaDatPhong: ${datPhongId}`);
             }
           }
-          
+
           // Nếu đã có tên khách hàng từ bookingData, hoặc không có maKhachHangFromBooking, thì không cần fetch customer profile nữa
-          if (tenKhachHangDisplay !== 'Khách hàng không xác định' && tenKhachHangDisplay !== `Khách hàng (DP: ${apiReview.maDatPhong})` ) {
+          if (tenKhachHangDisplay !== 'Khách hàng không xác định' && tenKhachHangDisplay !== `Khách hàng (DP: ${datPhongId})` ) {
             // Đã có tên từ booking, không làm gì thêm
           } else if (maKhachHangFromBooking) {
-            console.log(`[Review ${apiReview.maReview}] Fetching customer profile for MaKH: ${maKhachHangFromBooking}`);
+            console.log(`[Review ${reviewId}] Fetching customer profile for MaKH: ${maKhachHangFromBooking}`);
             const customerDataWrapper: any = await getCustomerProfile(maKhachHangFromBooking);
-            console.log(`[Review ${apiReview.maReview}] Customer data wrapper for ${maKhachHangFromBooking}:`, JSON.stringify(customerDataWrapper, null, 2));
+            console.log(`[Review ${reviewId}] Customer data wrapper for ${maKhachHangFromBooking}:`, JSON.stringify(customerDataWrapper, null, 2));
             const customerData = customerDataWrapper?.value || customerDataWrapper;
 
             if (customerData) {
               // Ưu tiên PascalCase theo comment trong lib/api.ts cho getCustomerProfile
-              const hoKh = customerData.HoKh || customerData.hoKh || ''; 
+              const hoKh = customerData.HoKh || customerData.hoKh || '';
               const tenKh = customerData.TenKh || customerData.tenKh || '';
               if (hoKh || tenKh) {
                 tenKhachHangDisplay = `${hoKh} ${tenKh}`.trim();
-                console.log(`[Review ${apiReview.maReview}] Constructed customer name: ${tenKhachHangDisplay}`);
+                console.log(`[Review ${reviewId}] Constructed customer name: ${tenKhachHangDisplay}`);
               } else if (maKhachHangFromBooking) {
                 tenKhachHangDisplay = `Khách hàng (${maKhachHangFromBooking})`; // Fallback nếu không có họ tên
               }
             } else if (maKhachHangFromBooking) {
                  tenKhachHangDisplay = `Khách hàng (${maKhachHangFromBooking})`;
-                 console.log(`[Review ${apiReview.maReview}] No customerData found for MaKH: ${maKhachHangFromBooking}, using fallback with MaKH.`);
+                 console.log(`[Review ${reviewId}] No customerData found for MaKH: ${maKhachHangFromBooking}, using fallback with MaKH.`);
             } else {
-              console.log(`[Review ${apiReview.maReview}] No customerData and no maKhachHangFromBooking to construct name from MaKH.`);
+              console.log(`[Review ${reviewId}] No customerData and no maKhachHangFromBooking to construct name from MaKH.`);
             }
-          } else if (apiReview.maDatPhong) {
+          } else if (datPhongId) {
             // Fallback nếu không lấy được booking hoặc customer
-            tenKhachHangDisplay = `Khách hàng (DP: ${apiReview.maDatPhong})`;
+            tenKhachHangDisplay = `Khách hàng (DP: ${datPhongId})`;
           } else {
-            console.log(`[Review ${apiReview.maReview}] No MaDatPhong in review and no initial MaKH. Cannot determine customer.`);
+            console.log(`[Review ${reviewId}] No MaDatPhong in review and no initial MaKH. Cannot determine customer.`);
           }
 
           return {
-            maDG: apiReview.maReview,
-            maDatPhong: apiReview.maDatPhong,
+            maDG: apiReview.MaReview || apiReview.maReview,
+            maDatPhong: apiReview.MaDatPhong || apiReview.maDatPhong,
             maKH: maKhachHangFromBooking, // Lưu lại maKH lấy được (nếu có)
-            danhGia: apiReview.danhGia,
-            noiDung: apiReview.binhLuan,
-            ngayTao: apiReview.ngayTao || null,
-            trangThai: apiReview.trangThai || 'Chưa duyệt',
-            anHien: apiReview.anHien || false,
+            danhGia: apiReview.DanhGia || apiReview.danhGia,
+            noiDung: apiReview.BinhLuan || apiReview.binhLuan,
+            ngayTao: apiReview.NgayTao || apiReview.ngayTao || null,
+            trangThai: apiReview.TrangThai || apiReview.trangThai || 'Chưa duyệt',
+            anHien: apiReview.AnHien || apiReview.anHien || false,
             tenKhachHang: tenKhachHangDisplay,
           };
         })); // Kết thúc Promise.all(rawReviewsFromApi.map
-        
+
         console.log("Processed reviews with customer names:", JSON.stringify(processedReviews, null, 2));
         setReviews(processedReviews as Review[]);
 
@@ -124,10 +127,15 @@ export default function ReviewManager() {
 
   const handleApprove = async (maDG: string) => {
     try {
-      await approveReview(maDG, true);
-      setReviews(reviews.map(review => 
+      // Tạm thời comment out API call vì backend chưa có endpoint này
+      // await approveReview(maDG, true);
+
+      // Cập nhật state trực tiếp (mock approval)
+      setReviews(reviews.map(review =>
         review.maDG === maDG ? { ...review, trangThai: 'Đã duyệt' } : review
       ));
+
+      console.log(`Mock approved review ${maDG}`);
     } catch (err) {
       const error = err as Error;
       alert(`Lỗi khi duyệt đánh giá: ${error.message}`);
@@ -142,15 +150,16 @@ export default function ReviewManager() {
         ...review,
         anHien: !review.anHien
       };
-      
-      // Gọi API cập nhật đánh giá (tùy thuộc vào backend)
-      // Điều này sẽ phụ thuộc vào cách API của bạn xử lý việc ẩn/hiện đánh giá
+
+      // Tạm thời comment out API call vì backend chưa có endpoint này
       // await updateReview(updatedReview);
-      
-      // Cập nhật state
-      setReviews(reviews.map(r => 
+
+      // Cập nhật state trực tiếp (mock hide/show)
+      setReviews(reviews.map(r =>
         r.maDG === review.maDG ? updatedReview : r
       ));
+
+      console.log(`Mock ${updatedReview.anHien ? 'hidden' : 'shown'} review ${review.maDG}`);
     } catch (err) {
       const error = err as Error;
       alert(`Lỗi khi thay đổi trạng thái hiển thị: ${error.message}`);
@@ -167,11 +176,12 @@ export default function ReviewManager() {
   const handleDelete = async (maDG: string) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa đánh giá này?')) {
       try {
-        // API xóa đánh giá (cần thêm vào API.ts)
+        // Tạm thời comment out API call vì backend chưa có endpoint này
         // await deleteReview(maDG);
-        
-        // Cập nhật state
+
+        // Cập nhật state trực tiếp (mock delete)
         setReviews(reviews.filter(review => review.maDG !== maDG));
+        console.log(`Mock deleted review ${maDG}`);
       } catch (err) {
         const error = err as Error;
         alert(`Lỗi khi xóa đánh giá: ${error.message}`);
@@ -184,12 +194,14 @@ export default function ReviewManager() {
     e.preventDefault();
     try {
       if (editingReview) {
-        // Cập nhật đánh giá
+        // Tạm thời comment out API call vì backend chưa có endpoint này
         // await updateReview(formData);
-        
-        setReviews(reviews.map(review => 
+
+        // Cập nhật state trực tiếp (mock update)
+        setReviews(reviews.map(review =>
           review.maDG === editingReview.maDG ? { ...review, ...formData } : review
         ));
+        console.log(`Mock updated review ${editingReview.maDG}`, formData);
       } else {
         // Thêm đánh giá mới (thường không cần thiết vì đánh giá do khách hàng tạo)
         alert("Chức năng thêm đánh giá không được hỗ trợ. Đánh giá thường do khách hàng tạo.");
@@ -226,7 +238,7 @@ export default function ReviewManager() {
 
       {isLoading && <div className={styles.loading}>Đang tải dữ liệu đánh giá...</div>}
       {error && <div className={styles.error}>Lỗi: {error}</div>}
-      
+
       {!isLoading && !error && (
         <div style={{ overflowX: 'auto' }}>
           <table className={styles.table}>
@@ -386,4 +398,4 @@ export default function ReviewManager() {
       )}
     </div>
   );
-} 
+}

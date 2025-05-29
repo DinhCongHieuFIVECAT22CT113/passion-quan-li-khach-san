@@ -2,6 +2,7 @@ using be_quanlikhachsanapi.Data;
 using be_quanlikhachsanapi.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace be_quanlikhachsanapi.Services
 {
@@ -69,80 +70,131 @@ namespace be_quanlikhachsanapi.Services
 
         public JsonResult CreateNhanVien(CreateNhanVienDTO createNhanVien)
         {
-            var lastNhanVien = _context.NhanViens
-                .OrderByDescending(nv => nv.MaNv)
-                .FirstOrDefault();
-
-            string newMaNv;
-
-            if (lastNhanVien == null || string.IsNullOrEmpty(lastNhanVien.MaNv))
+            try
             {
-                newMaNv = "NV01";
-            }
-            else
-            {
-                int lastNumber = int.Parse(lastNhanVien.MaNv.Substring(2));
-                newMaNv = "NV" + (lastNumber + 1).ToString("D2");
-            }
+                // Kiểm tra username đã tồn tại
+                var existingUser = _context.NhanViens.FirstOrDefault(nv => nv.UserName == createNhanVien.UserName);
+                if (existingUser != null)
+                {
+                    return new JsonResult("Username đã tồn tại.")
+                    {
+                        StatusCode = StatusCodes.Status409Conflict
+                    };
+                }
 
-            var nhanVien = new NhanVien
-            {
-                MaNv = newMaNv,
-                UserName = createNhanVien.UserName,
-                HoNv = createNhanVien.HoNv,
-                TenNv = createNhanVien.TenNv,
-                ChucVu = createNhanVien.ChucVu,
-                Email = createNhanVien.Email,
-                Sdt = createNhanVien.Sdt,
-                LuongCoBan = createNhanVien.LuongCoBan,
-                NgayVaoLam = createNhanVien.NgayVaoLam,
-                MaRole = createNhanVien.MaRole,
-                NgayTao = DateTime.Now
-            };
+                // Kiểm tra email đã tồn tại
+                var existingEmail = _context.NhanViens.FirstOrDefault(nv => nv.Email == createNhanVien.Email);
+                if (existingEmail != null)
+                {
+                    return new JsonResult("Email đã tồn tại.")
+                    {
+                        StatusCode = StatusCodes.Status409Conflict
+                    };
+                }
+
+                var lastNhanVien = _context.NhanViens
+                    .OrderByDescending(nv => nv.MaNv)
+                    .FirstOrDefault();
+
+                string newMaNv;
+
+                if (lastNhanVien == null || string.IsNullOrEmpty(lastNhanVien.MaNv))
+                {
+                    newMaNv = "NV01";
+                }
+                else
+                {
+                    int lastNumber = int.Parse(lastNhanVien.MaNv.Substring(2));
+                    newMaNv = "NV" + (lastNumber + 1).ToString("D2");
+                }
+
+                var nhanVien = new NhanVien
+                {
+                    MaNv = newMaNv,
+                    UserName = createNhanVien.UserName,
+                    HoNv = createNhanVien.HoNv,
+                    TenNv = createNhanVien.TenNv,
+                    ChucVu = createNhanVien.ChucVu,
+                    Email = createNhanVien.Email,
+                    Sdt = createNhanVien.Sdt,
+                    LuongCoBan = createNhanVien.LuongCoBan,
+                    NgayVaoLam = createNhanVien.NgayVaoLam,
+                    MaRole = createNhanVien.MaRole,
+                    NgayTao = DateTime.Now
+                };
                 #pragma warning disable CS8601
                 nhanVien.PasswordHash = _passwordHasher.HashPassword(nhanVien, createNhanVien.Password);
                 #pragma warning restore CS8601
 
-            _context.NhanViens.Add(nhanVien);
-            _context.SaveChanges();
+                _context.NhanViens.Add(nhanVien);
+                _context.SaveChanges();
 
-            return new JsonResult(new
+                return new JsonResult(new
+                {
+                    message = "Thêm nhân viên thành công.",
+                    nhanVien = newMaNv
+                })
+                {
+                    StatusCode = StatusCodes.Status201Created
+                };
+            }
+            catch (Exception ex)
             {
-                message = "Thêm nhân viên thành công.",
-                nhanVien = newMaNv
-            })
-            {
-                StatusCode = StatusCodes.Status201Created
-            };
+                return new JsonResult($"Lỗi khi tạo nhân viên: {ex.Message}")
+                {
+                    StatusCode = StatusCodes.Status500InternalServerError
+                };
+            }
         }
 
         public JsonResult UpdateNhanVien(string MaNv, UpdateNhanVienDTO updateNhanVien)
         {
-            var nhanVien = _context.NhanViens.FirstOrDefault(nv => nv.MaNv == MaNv);
-            if (nhanVien == null)
+            try
             {
-                return new JsonResult("Không tìm thấy nhân viên với mã đã cho.")
+                var nhanVien = _context.NhanViens.FirstOrDefault(nv => nv.MaNv == MaNv);
+                if (nhanVien == null)
                 {
-                    StatusCode = StatusCodes.Status404NotFound
+                    return new JsonResult("Không tìm thấy nhân viên với mã đã cho.")
+                    {
+                        StatusCode = StatusCodes.Status404NotFound
+                    };
+                }
+
+                // Kiểm tra email đã tồn tại (ngoại trừ nhân viên hiện tại)
+                var existingEmail = _context.NhanViens.FirstOrDefault(nv => nv.Email == updateNhanVien.Email && nv.MaNv != MaNv);
+                if (existingEmail != null)
+                {
+                    return new JsonResult("Email đã tồn tại.")
+                    {
+                        StatusCode = StatusCodes.Status409Conflict
+                    };
+                }
+
+                nhanVien.ChucVu = updateNhanVien.ChucVu;
+                nhanVien.Email = updateNhanVien.Email;
+                nhanVien.Sdt = updateNhanVien.Sdt;
+                nhanVien.LuongCoBan = updateNhanVien.LuongCoBan;
+                nhanVien.MaRole = updateNhanVien.MaRole;
+                nhanVien.NgaySua = DateTime.Now;
+
+                _context.SaveChanges();
+
+                return new JsonResult(new
+                {
+                    message = "Cập nhật nhân viên thành công.",
+                    nhanVien = MaNv
+                })
+                {
+                    StatusCode = StatusCodes.Status200OK
                 };
             }
-            nhanVien.ChucVu = updateNhanVien.ChucVu;
-            nhanVien.Email = updateNhanVien.Email;
-            nhanVien.Sdt = updateNhanVien.Sdt;
-            nhanVien.LuongCoBan = updateNhanVien.LuongCoBan;
-            nhanVien.MaRole = updateNhanVien.MaRole;
-            nhanVien.NgaySua = DateTime.Now;
-
-            _context.SaveChanges();
-
-            return new JsonResult(new
+            catch (Exception ex)
             {
-                message = "Cập nhật nhân viên thành công.",
-                nhanVien = MaNv
-            })
-            {
-                StatusCode = StatusCodes.Status200OK
-            };
+                return new JsonResult($"Lỗi khi cập nhật nhân viên: {ex.Message}")
+                {
+                    StatusCode = StatusCodes.Status500InternalServerError
+                };
+            }
         }
 
         public JsonResult DeleteNhanVien(string MaNv)
@@ -155,16 +207,40 @@ namespace be_quanlikhachsanapi.Services
                     StatusCode = StatusCodes.Status404NotFound
                 };
             }
-            _context.NhanViens.Remove(nhanVien);
-            _context.SaveChanges();
-            return new JsonResult(new
+
+            try
             {
-                message = "Xóa nhân viên thành công.",
-                nhanVien = MaNv
-            })
+                // Kiểm tra xem nhân viên có đang được tham chiếu không
+                var hasBaoCao = _context.BaoCaoDoanhThus.Any(bc => bc.MaNv == MaNv);
+                var hasPhanCong = _context.PhanCongs.Any(pc => pc.MaNv == MaNv);
+
+                if (hasBaoCao || hasPhanCong)
+                {
+                    return new JsonResult("Không thể xóa nhân viên này. Nhân viên đang được tham chiếu trong hệ thống (báo cáo doanh thu hoặc phân công).")
+                    {
+                        StatusCode = StatusCodes.Status400BadRequest
+                    };
+                }
+
+                _context.NhanViens.Remove(nhanVien);
+                _context.SaveChanges();
+
+                return new JsonResult(new
+                {
+                    message = "Xóa nhân viên thành công.",
+                    nhanVien = MaNv
+                })
+                {
+                    StatusCode = StatusCodes.Status200OK
+                };
+            }
+            catch (Exception ex)
             {
-                StatusCode = StatusCodes.Status200OK
-            };
+                return new JsonResult($"Lỗi khi xóa nhân viên: {ex.Message}")
+                {
+                    StatusCode = StatusCodes.Status500InternalServerError
+                };
+            }
         }
     }
 }
