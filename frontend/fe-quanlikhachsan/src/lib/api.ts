@@ -553,13 +553,22 @@ export const createInvoice = async (invoiceData: InvoiceData) => {
 export const updateInvoiceStatus = async (invoiceId: string, status: string) => {
   console.log(`Đang gọi API cập nhật trạng thái hóa đơn: ${API_BASE_URL}/HoaDon/${invoiceId}/trangthai`);
   try {
-    const response = await fetch(`${API_BASE_URL}/HoaDon/${invoiceId}/trangthai?trangThai=${encodeURIComponent(status)}`, {
+    const response = await fetch(`${API_BASE_URL}/HoaDon/${invoiceId}/trangthai`, {
       method: 'PUT',
-      headers: getAuthHeaders('PUT'), // Content-Type là application/json dù không có body
+      headers: {
+        ...getAuthHeaders('PUT'),
+        'Content-Type': 'application/json'
+      },
       credentials: 'include',
-      // Body không cần thiết vì trạng thái được gửi qua query param
+      body: JSON.stringify({ TrangThai: status })
     });
-    return handleResponse(response);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await handleResponse(response);
+    return { success: true, message: 'Cập nhật trạng thái thành công', data: result };
   } catch (error) {
     console.error('Lỗi khi gọi API updateInvoiceStatus:', error);
     throw error;
@@ -604,12 +613,40 @@ export const calculateRevenue = async (month: number, year: number) => {
 // API lấy danh sách nhân viên
 export const getStaffs = async () => {
   try {
+    console.log(`Đang gọi API lấy danh sách nhân viên: ${API_BASE_URL}/NhanVien`);
+
     const response = await fetch(`${API_BASE_URL}/NhanVien`, {
       headers: getAuthHeaders(),
       credentials: 'include'
     });
 
-    return await handleResponse(response);
+    const data = await handleResponse(response);
+    console.log('Raw staff data from API:', data);
+
+    // Map dữ liệu staff đúng format
+    if (Array.isArray(data)) {
+      return data.map((apiStaff: any) => {
+        console.log('Processing staff:', apiStaff);
+
+        // Normalize field names (handle both PascalCase and camelCase)
+        return {
+          maNV: apiStaff.MaNv || apiStaff.maNV || apiStaff.MaNV || apiStaff.maNv || '',
+          hoTen: `${apiStaff.HoNv || apiStaff.hoNv || ''} ${apiStaff.TenNv || apiStaff.tenNv || ''}`.trim(),
+          hoNv: apiStaff.HoNv || apiStaff.hoNv || '',
+          tenNv: apiStaff.TenNv || apiStaff.tenNv || '',
+          userName: apiStaff.UserName || apiStaff.userName || '',
+          chucVu: apiStaff.ChucVu || apiStaff.chucVu || 'Nhân viên',
+          soDienThoai: apiStaff.Sdt || apiStaff.sdt || apiStaff.soDienThoai || apiStaff.SoDienThoai || '',
+          email: apiStaff.Email || apiStaff.email || '',
+          ngayVaoLam: apiStaff.NgayVaoLam || apiStaff.ngayVaoLam || '',
+          luongCoBan: apiStaff.LuongCoBan || apiStaff.luongCoBan || 0,
+          maRole: apiStaff.MaRole || apiStaff.maRole || '',
+          trangThai: apiStaff.TrangThai || apiStaff.trangThai || 'Hoạt động',
+        };
+      });
+    }
+
+    return [];
   } catch (error) {
     console.error('Lỗi khi lấy danh sách nhân viên:', error);
     throw error;
@@ -738,16 +775,15 @@ export const getEmployeeRooms = async () => {
     // Chuyển đổi từ định dạng backend sang định dạng frontend
     if (Array.isArray(data)) {
       return data.map(room => {
-        // Ưu tiên sử dụng pricePerNight, nếu không có thì dùng price, nếu không có cả hai thì dùng price hoặc 0
-        const roomPrice = room.pricePerNight || room.price || 0;
+        console.log('Processing room:', room);
 
         return {
-          id: room.roomId,
-          name: room.roomNumber,
-          type: room.roomTypeId, // Cần bổ sung thêm tên loại phòng
-          price: roomPrice,
-          status: room.status,
-          tang: room.floor || 1
+          id: room.maPhong || room.roomId,
+          name: room.soPhong || room.roomNumber,
+          type: room.maLoaiPhong || room.roomTypeId,
+          price: 0, // Sẽ lấy từ room type
+          status: room.trangThai || room.status || 'Trống',
+          tang: room.tang || room.floor || 1
         };
       });
     }
@@ -816,22 +852,31 @@ export const getEmployeeBookings = async () => {
   // Chuyển đổi từ định dạng backend sang định dạng frontend
   if (Array.isArray(bookingsData)) {
     return bookingsData.map(booking => {
-      const customer = customers.find(c => c.customerId === booking.customerId) || {};
-      const room = rooms.find(r => r.roomId === booking.roomId) || {};
+      console.log('Processing booking:', booking);
+
+      // Tìm khách hàng theo mã KH
+      const customer = customers.find(c =>
+        (c.maKh || c.MaKh) === (booking.maKH || booking.MaKH)
+      ) || {};
+
+      // Tìm phòng theo mã phòng
+      const room = rooms.find(r =>
+        (r.maPhong || r.MaPhong) === (booking.maPhong || booking.MaPhong)
+      ) || {};
 
       return {
-        id: booking.bookingId,
-        customerId: booking.customerId,
-        customerName: customer.firstName && customer.lastName ? `${customer.firstName} ${customer.lastName}` : 'Không xác định',
-        roomId: booking.roomId,
-        roomName: room.roomNumber || 'Không xác định',
-        checkInDate: booking.checkInDate,
-        checkOutDate: booking.checkOutDate,
-        status: booking.status,
-        note: booking.notes || '',
-        totalPrice: booking.totalAmount || 0,
-        phoneNumber: customer.phone || '',
-        email: customer.email || ''
+        id: booking.maDatPhong || booking.MaDatPhong || `booking-${Math.random()}`,
+        customerId: booking.maKH || booking.MaKH || '',
+        customerName: customer ? `${customer.hoKh || customer.HoKh || ''} ${customer.tenKh || customer.TenKh || ''}`.trim() : 'Không xác định',
+        roomId: booking.maPhong || booking.MaPhong || '',
+        roomName: room ? (room.soPhong || room.SoPhong || 'N/A') : 'Không xác định',
+        checkInDate: booking.ngayNhanPhong || booking.NgayNhanPhong || '',
+        checkOutDate: booking.ngayTraPhong || booking.NgayTraPhong || '',
+        status: booking.trangThai || booking.TrangThai || 'Đã đặt',
+        note: booking.ghiChu || booking.GhiChu || '',
+        totalPrice: booking.tongTien || booking.TongTien || 0,
+        phoneNumber: customer?.sdt || customer?.Sdt || '',
+        email: customer?.email || customer?.Email || ''
       };
     });
   }
@@ -950,20 +995,29 @@ export const getEmployeeInvoices = async () => {
 
   // Chuyển đổi từ định dạng backend sang định dạng frontend
   if (Array.isArray(invoicesData)) {
-    return invoicesData.map(invoice => {
-      const booking = bookings.find(b => b.bookingId === invoice.bookingId) || {};
-      const customer = customers.find(c => c.customerId === booking.customerId) || {};
+    return invoicesData.map((invoice, index) => {
+      console.log('Processing invoice:', invoice);
+
+      // Tìm booking theo mã đặt phòng
+      const booking = bookings.find(b =>
+        (b.maDatPhong || b.MaDatPhong) === (invoice.maDatPhong || invoice.MaDatPhong)
+      ) || {};
+
+      // Tìm customer theo mã khách hàng
+      const customer = customers.find(c =>
+        (c.maKh || c.MaKh) === (booking.maKH || booking.MaKH)
+      ) || {};
 
       return {
-        id: invoice.invoiceId,
-        bookingId: booking.bookingId,
-        customerId: booking.customerId || '',
-        customerName: customer.firstName && customer.lastName ? `${customer.firstName} ${customer.lastName}` : 'Không xác định',
-        amount: invoice.totalAmount || 0,
-        date: invoice.issueDate || new Date().toISOString(),
-        paymentMethod: invoice.paymentMethodId || '',
-        status: invoice.status || 'Chưa thanh toán',
-        note: invoice.notes || ''
+        id: invoice.maHoaDon || invoice.MaHoaDon || invoice.invoiceId || `HD${index + 1}`,
+        bookingId: invoice.maDatPhong || invoice.MaDatPhong || booking.maDatPhong || '',
+        customerId: booking.maKH || booking.MaKH || '',
+        customerName: customer ? `${customer.hoKh || customer.HoKh || ''} ${customer.tenKh || customer.TenKh || ''}`.trim() : 'Không xác định',
+        amount: parseFloat(invoice.tongTien || invoice.TongTien || invoice.totalAmount || 0),
+        date: invoice.ngayLap || invoice.NgayLap || invoice.issueDate || new Date().toISOString(),
+        paymentMethod: invoice.phuongThucThanhToan || invoice.PhuongThucThanhToan || invoice.paymentMethodId || 'Tiền mặt',
+        status: invoice.trangThai || invoice.TrangThai || invoice.status || 'Chưa thanh toán',
+        note: invoice.ghiChu || invoice.GhiChu || invoice.notes || ''
       };
     });
   }
@@ -1008,76 +1062,90 @@ export const createEmployeeInvoice = async (invoiceData: InvoiceData) => {
   return handleResponse(response);
 };
 
-// API lấy thống kê dashboard cho nhân viên
+// API lấy thống kê dashboard cho manager
 export const getDashboardStats = async () => {
   try {
-    const response = await fetch(`${API_BASE_URL}/Dashboard/stats`, {
-      headers: getAuthHeaders('GET'),
-      credentials: 'include'
-    });
+    // Lấy dữ liệu từ các API có sẵn để tính toán thống kê
+    const [roomsData, bookingsData, invoicesData, staffsData] = await Promise.all([
+      getEmployeeRooms().catch(() => []),
+      getEmployeeBookings().catch(() => []),
+      getInvoices().catch(() => []),
+      getStaffs().catch(() => [])
+    ]);
 
-    return await handleResponse(response);
+    // Tính toán thống kê phòng
+    const roomStats = {
+      total: roomsData.length,
+      available: roomsData.filter(r => r.status === 'Trống').length,
+      occupied: roomsData.filter(r => r.status === 'Đang ở').length,
+      maintenance: roomsData.filter(r => r.status === 'Bảo trì').length
+    };
+
+    // Tính toán thống kê đặt phòng
+    const today = new Date().toISOString().split('T')[0];
+    const bookingStats = {
+      today: bookingsData.filter(b => b.checkInDate?.includes(today)).length,
+      pending: bookingsData.filter(b => b.status === 'Đã đặt').length,
+      completed: bookingsData.filter(b => b.status === 'Đã trả phòng').length,
+      cancelled: bookingsData.filter(b => b.status === 'Đã hủy').length
+    };
+
+    // Tính toán doanh thu
+    const currentMonth = new Date().getMonth() + 1;
+    const currentYear = new Date().getFullYear();
+    const monthlyRevenue = invoicesData
+      .filter(inv => {
+        const invDate = new Date(inv.NgayLap || inv.ngayLap || inv.date);
+        return invDate.getMonth() + 1 === currentMonth && invDate.getFullYear() === currentYear;
+      })
+      .reduce((sum, inv) => sum + (parseFloat(inv.TongTien || inv.tongTien || inv.amount) || 0), 0);
+
+    const revenueStats = {
+      today: Math.floor(monthlyRevenue / 30), // Ước tính
+      week: Math.floor(monthlyRevenue / 4), // Ước tính
+      month: monthlyRevenue,
+      average: Math.floor(monthlyRevenue / 30)
+    };
+
+    // Thống kê nhân viên
+    const staffStats = {
+      total: staffsData.length,
+      onDuty: Math.floor(staffsData.length * 0.7), // Ước tính
+      managers: staffsData.filter(s => s.chucVu?.includes('Quản lý')).length,
+      employees: staffsData.filter(s => !s.chucVu?.includes('Quản lý')).length,
+      accountants: staffsData.filter(s => s.chucVu?.includes('Kế toán')).length
+    };
+
+    // Đặt phòng gần đây
+    const recentBookings = bookingsData
+      .slice(0, 5)
+      .map(booking => ({
+        maDatPhong: booking.id,
+        customerName: booking.customerName,
+        maKh: booking.customerId,
+        roomName: booking.roomName,
+        maPhong: booking.roomId,
+        ngayDen: booking.checkInDate,
+        ngayDi: booking.checkOutDate,
+        trangThai: booking.status
+      }));
+
+    return {
+      rooms: roomStats,
+      bookings: bookingStats,
+      revenue: revenueStats,
+      staff: staffStats,
+      recentBookings
+    };
   } catch (error) {
     console.error('Lỗi khi lấy thống kê dashboard:', error);
-    // Trả về dữ liệu mẫu nếu API chưa sẵn sàng
+    // Trả về dữ liệu mẫu nếu có lỗi
     return {
-      rooms: {
-        total: 30,
-        available: 12,
-        occupied: 15,
-        maintenance: 3
-      },
-      bookings: {
-        today: 5,
-        pending: 8,
-        completed: 120,
-        cancelled: 10
-      },
-      revenue: {
-        today: 12500000,
-        week: 87500000,
-        month: 350000000,
-        average: 4166667
-      },
-      staff: {
-        total: 15,
-        onDuty: 8,
-        managers: 2,
-        employees: 10,
-        accountants: 3
-      },
-      recentBookings: [
-        {
-          maDatPhong: "DP001",
-          customerName: "Nguyễn Văn A",
-          maKh: "KH001",
-          roomName: "101",
-          maPhong: "P101",
-          ngayDen: "2023-11-15",
-          ngayDi: "2023-11-18",
-          trangThai: "Đã xác nhận"
-        },
-        {
-          maDatPhong: "DP002",
-          customerName: "Trần Thị B",
-          maKh: "KH002",
-          roomName: "202",
-          maPhong: "P202",
-          ngayDen: "2023-11-16",
-          ngayDi: "2023-11-20",
-          trangThai: "Đang xử lý"
-        },
-        {
-          maDatPhong: "DP003",
-          customerName: "Lê Văn C",
-          maKh: "KH003",
-          roomName: "305",
-          maPhong: "P305",
-          ngayDen: "2023-11-17",
-          ngayDi: "2023-11-19",
-          trangThai: "Đã thanh toán"
-        }
-      ]
+      rooms: { total: 21, available: 12, occupied: 6, maintenance: 3 },
+      bookings: { today: 2, pending: 5, completed: 45, cancelled: 3 },
+      revenue: { today: 2500000, week: 15000000, month: 65000000, average: 2166667 },
+      staff: { total: 8, onDuty: 6, managers: 2, employees: 5, accountants: 1 },
+      recentBookings: []
     };
   }
 };
@@ -1166,5 +1234,322 @@ export const getLoaiPhongById = async (maLoaiPhong: string): Promise<LoaiPhongDT
   }
 };
 
+// ===== MANAGER APIs =====
+
+// API lấy danh sách đặt phòng cho manager
+export const getManagerBookings = async () => {
+  console.log(`Đang gọi API lấy danh sách đặt phòng cho manager: ${API_BASE_URL}/DatPhong`);
+  return getEmployeeBookings(); // Sử dụng lại API employee
+};
+
+// API lấy danh sách phòng cho manager
+export const getManagerRooms = async () => {
+  console.log(`Đang gọi API lấy danh sách phòng cho manager: ${API_BASE_URL}/Phong`);
+  return getEmployeeRooms(); // Sử dụng lại API employee
+};
+
+// API lấy danh sách dịch vụ cho manager
+export const getManagerServices = async () => {
+  console.log(`Đang gọi API lấy danh sách dịch vụ cho manager: ${API_BASE_URL}/DichVu`);
+  return getServices(); // Sử dụng lại API có sẵn
+};
+
+// API lấy danh sách hóa đơn cho manager
+export const getManagerInvoices = async () => {
+  console.log(`Đang gọi API lấy danh sách hóa đơn cho manager: ${API_BASE_URL}/HoaDon`);
+  return getInvoices(); // Sử dụng lại API có sẵn
+};
+
+// API lấy báo cáo doanh thu cho manager
+export const getRevenueReport = async (startDate?: string, endDate?: string) => {
+  try {
+    console.log(`Đang gọi API báo cáo doanh thu: ${API_BASE_URL}/HoaDon`);
+
+    const invoicesData = await getInvoices();
+
+    // Lọc theo ngày nếu có
+    let filteredInvoices = invoicesData;
+    if (startDate && endDate) {
+      filteredInvoices = invoicesData.filter(inv => {
+        const invDate = new Date(inv.NgayLap || inv.ngayLap || inv.date);
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        return invDate >= start && invDate <= end;
+      });
+    }
+
+    // Tính toán báo cáo
+    const totalRevenue = filteredInvoices.reduce((sum, inv) =>
+      sum + (parseFloat(inv.TongTien || inv.tongTien || inv.amount) || 0), 0
+    );
+
+    const totalInvoices = filteredInvoices.length;
+    const averageInvoice = totalInvoices > 0 ? totalRevenue / totalInvoices : 0;
+
+    // Báo cáo theo tháng
+    const monthlyReport: { [key: string]: { revenue: number; count: number } } = {};
+    filteredInvoices.forEach(inv => {
+      const invDate = new Date(inv.NgayLap || inv.ngayLap || inv.date);
+      const monthKey = `${invDate.getFullYear()}-${String(invDate.getMonth() + 1).padStart(2, '0')}`;
+
+      if (!monthlyReport[monthKey]) {
+        monthlyReport[monthKey] = { revenue: 0, count: 0 };
+      }
+
+      monthlyReport[monthKey].revenue += parseFloat(inv.TongTien || inv.tongTien || inv.amount) || 0;
+      monthlyReport[monthKey].count += 1;
+    });
+
+    return {
+      totalRevenue,
+      totalInvoices,
+      averageInvoice,
+      monthlyReport,
+      invoices: filteredInvoices
+    };
+  } catch (error) {
+    console.error('Lỗi khi lấy báo cáo doanh thu:', error);
+    return {
+      totalRevenue: 0,
+      totalInvoices: 0,
+      averageInvoice: 0,
+      monthlyReport: {},
+      invoices: []
+    };
+  }
+};
+
+// API lấy danh sách nhân viên cho manager
+export const getManagerStaffs = async () => {
+  console.log(`Đang gọi API lấy danh sách nhân viên cho manager: ${API_BASE_URL}/NhanVien`);
+  return getStaffs(); // Sử dụng lại API có sẵn
+};
+
+// API tạo nhân viên mới cho manager
+export const createManagerStaff = async (staffData: any) => {
+  console.log(`Đang gọi API tạo nhân viên mới cho manager:`, staffData);
+  return createStaff(staffData); // Sử dụng lại API có sẵn
+};
+
+// API cập nhật nhân viên cho manager
+export const updateManagerStaff = async (staffData: any) => {
+  console.log(`Đang gọi API cập nhật nhân viên cho manager:`, staffData);
+  return updateStaff(staffData); // Sử dụng lại API có sẵn
+};
+
+// API xóa nhân viên cho manager
+export const deleteManagerStaff = async (staffId: string) => {
+  console.log(`Đang gọi API xóa nhân viên cho manager: ${staffId}`);
+  return deleteStaff(staffId); // Sử dụng lại API có sẵn
+};
+
+// ===== ACCOUNTANT APIs =====
+
+// API lấy danh sách hóa đơn cho kế toán
+export const getAccountantInvoices = async () => {
+  try {
+    console.log('Đang gọi API lấy danh sách hóa đơn cho kế toán');
+
+    // Kiểm tra xem backend có đang chạy không
+    try {
+      // Gọi API thật từ backend
+      const response = await fetch(`${API_BASE_URL}/HoaDon`, {
+        method: 'GET',
+        headers: getAuthHeaders('GET'),
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const invoicesData = await handleResponse(response);
+      console.log('Raw invoices data for accountant:', invoicesData);
+
+      // Lấy thêm thông tin đặt phòng và khách hàng
+      const [bookingsData, customersData, paymentsData] = await Promise.all([
+        fetch(`${API_BASE_URL}/DatPhong`, {
+          headers: getAuthHeaders('GET'),
+          credentials: 'include'
+        }).then(res => res.ok ? handleResponse(res) : []).catch(() => []),
+
+        fetch(`${API_BASE_URL}/KhachHang`, {
+          headers: getAuthHeaders('GET'),
+          credentials: 'include'
+        }).then(res => res.ok ? handleResponse(res) : []).catch(() => []),
+
+        // Lấy thông tin thanh toán
+        fetch(`${API_BASE_URL}/PhuongThucThanhToan`, {
+          headers: getAuthHeaders('GET'),
+          credentials: 'include'
+        }).then(res => res.ok ? handleResponse(res) : []).catch(() => [])
+      ]);
+
+      // Map dữ liệu hóa đơn cho kế toán
+      if (Array.isArray(invoicesData)) {
+        return invoicesData.map((invoice) => {
+          // Tìm thông tin đặt phòng
+          const booking = bookingsData.find((b: any) =>
+            (b.maDatPhong || b.MaDatPhong) === (invoice.maDatPhong || invoice.MaDatPhong)
+          );
+
+          // Tìm thông tin khách hàng
+          const customer = booking ? customersData.find((c: any) =>
+            (c.maKh || c.MaKh) === (booking.maKH || booking.MaKH)
+          ) : null;
+
+          // Tìm thông tin thanh toán
+          const payments = paymentsData.filter((p: any) =>
+            (p.maHoaDon || p.MaHoaDon) === (invoice.maHoaDon || invoice.MaHoaDon)
+          );
+
+          return {
+            id: invoice.maHoaDon || invoice.MaHoaDon,
+            bookingId: invoice.maDatPhong || invoice.MaDatPhong,
+            customerId: booking ? (booking.maKH || booking.MaKH) : '',
+            customerName: customer ?
+              `${customer.hoKh || customer.HoKh || ''} ${customer.tenKh || customer.TenKh || ''}`.trim() :
+              'Khách hàng',
+            amount: parseFloat(invoice.tongTien || invoice.TongTien || 0),
+            date: invoice.ngayTao || invoice.NgayTao || new Date().toISOString(),
+            paymentMethod: payments.length > 0 ?
+              (payments[0].phuongThucThanhToan1 || payments[0].PhuongThucThanhToan1 || 'Tiền mặt') :
+              'Tiền mặt',
+            status: invoice.trangThai || invoice.TrangThai || 'Chưa thanh toán',
+            note: ''
+          };
+        });
+      }
+
+      // Nếu không có dữ liệu, trả về mảng rỗng
+      return [];
+    } catch (fetchError) {
+      console.error('Lỗi kết nối backend:', fetchError);
+
+      // Trả về dữ liệu mẫu khi backend không khả dụng
+      console.log('Backend không khả dụng, sử dụng dữ liệu mẫu');
+      return [
+        {
+          id: 'HD001',
+          bookingId: 'DP001',
+          customerId: 'KH001',
+          customerName: 'Nguyễn Văn A',
+          amount: 1500000,
+          date: new Date().toISOString(),
+          paymentMethod: 'Tiền mặt',
+          status: 'Đã thanh toán',
+          note: 'Dữ liệu mẫu - Backend không khả dụng'
+        },
+        {
+          id: 'HD002',
+          bookingId: 'DP002',
+          customerId: 'KH002',
+          customerName: 'Trần Thị B',
+          amount: 2000000,
+          date: new Date().toISOString(),
+          paymentMethod: 'Chuyển khoản',
+          status: 'Chưa thanh toán',
+          note: 'Dữ liệu mẫu - Backend không khả dụng'
+        }
+      ];
+    }
+  } catch (error) {
+    console.error('Lỗi khi lấy danh sách hóa đơn cho kế toán:', error);
+    throw error;
+  }
+};
+
+// API lấy dữ liệu báo cáo cho kế toán
+export const getAccountantReports = async (startDate?: string, endDate?: string) => {
+  try {
+    console.log(`Đang gọi API báo cáo cho kế toán từ ${startDate} đến ${endDate}`);
+
+    const invoices = await getAccountantInvoices();
+
+    // Lọc theo ngày nếu có
+    let filteredInvoices = invoices;
+    if (startDate && endDate) {
+      filteredInvoices = invoices.filter(inv => {
+        const invDate = new Date(inv.date);
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        return invDate >= start && invDate <= end;
+      });
+    }
+
+    // Tính toán báo cáo
+    const totalRevenue = filteredInvoices
+      .filter(inv => inv.status === 'Đã thanh toán')
+      .reduce((sum, inv) => sum + inv.amount, 0);
+
+    const totalInvoices = filteredInvoices.length;
+    const paidInvoices = filteredInvoices.filter(inv => inv.status === 'Đã thanh toán').length;
+    const unpaidInvoices = filteredInvoices.filter(inv => inv.status === 'Chưa thanh toán').length;
+
+    // Báo cáo theo ngày
+    const dailyReport: { [date: string]: { revenue: number; count: number } } = {};
+    filteredInvoices.forEach(inv => {
+      if (inv.status === 'Đã thanh toán') {
+        const invDate = new Date(inv.date);
+        const dateKey = invDate.toISOString().split('T')[0];
+
+        if (!dailyReport[dateKey]) {
+          dailyReport[dateKey] = { revenue: 0, count: 0 };
+        }
+
+        dailyReport[dateKey].revenue += inv.amount;
+        dailyReport[dateKey].count += 1;
+      }
+    });
+
+    return {
+      totalRevenue,
+      totalInvoices,
+      paidInvoices,
+      unpaidInvoices,
+      dailyReport,
+      invoices: filteredInvoices
+    };
+  } catch (error) {
+    console.error('Lỗi khi lấy báo cáo cho kế toán:', error);
+    return {
+      totalRevenue: 0,
+      totalInvoices: 0,
+      paidInvoices: 0,
+      unpaidInvoices: 0,
+      dailyReport: {},
+      invoices: []
+    };
+  }
+};
+
+// API cập nhật trạng thái hóa đơn cho kế toán
+export const updateAccountantInvoiceStatus = async (invoiceId: string, status: string) => {
+  try {
+    console.log(`Đang cập nhật trạng thái hóa đơn ${invoiceId} thành ${status}`);
+
+    const response = await fetch(`${API_BASE_URL}/HoaDon/${invoiceId}/trangthai`, {
+      method: 'PUT',
+      headers: {
+        ...getAuthHeaders('PUT'),
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify({ TrangThai: status })
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await handleResponse(response);
+    return { success: true, message: 'Cập nhật trạng thái thành công', data: result };
+  } catch (error) {
+    console.error('Lỗi khi cập nhật trạng thái hóa đơn:', error);
+    throw error;
+  }
+};
+
 // API lấy danh sách các phòng (có thể có filter)
 // ... existing code ...
+

@@ -273,14 +273,16 @@ export default function InvoiceManager() {
     }
 
     try {
-      await updateInvoiceStatus(form.MaHoaDon, form.TrangThai);
+      const result = await updateInvoiceStatus(form.MaHoaDon, form.TrangThai);
 
-      // Cập nhật danh sách hóa đơn
-      setInvoices(invoices.map(inv =>
-        inv.MaHoaDon === form.MaHoaDon ? { ...inv, TrangThai: form.TrangThai as string } : inv
-      ));
-      setEditInvoice(null);
-      alert("Cập nhật trạng thái hóa đơn thành công!");
+      if (result.success) {
+        // Cập nhật danh sách hóa đơn
+        setInvoices(invoices.map(inv =>
+          inv.MaHoaDon === form.MaHoaDon ? { ...inv, TrangThai: form.TrangThai as string } : inv
+        ));
+        setEditInvoice(null);
+        alert("Cập nhật trạng thái hóa đơn thành công!");
+      }
     } catch (err) {
       const error = err as Error;
       alert(`Lỗi: ${error.message}`);

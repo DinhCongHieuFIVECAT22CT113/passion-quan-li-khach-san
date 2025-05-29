@@ -82,11 +82,18 @@ export function getUserPermissions(role: Role | string | undefined): UserPermiss
         canManageBookings: true,
         canManageServices: true,
       };
-    case ROLES.ACCOUNTANT: // R03
+    case ROLES.ACCOUNTANT: // R03 - Kế toán
       return {
         ...defaultPermissions,
-        canManageInvoices: true,
-        canViewReports: true,
+        // Quyền chính của Kế toán
+        canManageInvoices: true,     // Quản lý hóa đơn
+        canViewReports: true,        // Xem báo cáo doanh thu
+
+        // Quyền hỗ trợ (chỉ đọc) để làm việc hiệu quả
+        canViewUserProfile: true,    // Xem profile cá nhân
+
+        // Không cần các quyền khác như quản lý phòng, đặt phòng, dịch vụ
+        // Kế toán chỉ cần truy cập dữ liệu để tạo hóa đơn và báo cáo
       };
     case ROLES.CUSTOMER: // R04
       return {
@@ -180,7 +187,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     localStorage.removeItem('userName');
     localStorage.removeItem('userId');
     // localStorage.removeItem('userRole'); // Đã bỏ
-    localStorage.removeItem('staffInfo'); 
+    localStorage.removeItem('staffInfo');
     // Quan trọng: Xóa Cookies nếu được sử dụng để xác thực phía server hoặc middleware
     // Cookies.remove('token'); // Cần import Cookies từ js-cookie nếu dùng ở đây
 
@@ -238,7 +245,7 @@ export function withAuth<P extends object>(
         router.push('/unauthorized');
         return;
       }
-      
+
       setIsAuthorized(true); // Nếu mọi thứ ổn, set authorized
     }, [user, loading, router]); // Bỏ requiredRoles khỏi dependencies
 
@@ -250,7 +257,7 @@ export function withAuth<P extends object>(
         // Redirect đã được xử lý trong useEffect, ở đây có thể return null hoặc loading state
         return React.createElement('div', null, 'Checking authorization or redirecting...');
     }
-    
+
     if(!user && !loading){ // Nếu không có user và không loading -> đã bị redirect hoặc là trang công khai
         // Nếu bị redirect, ComponentWithAuth không nên render gì
         // Nếu là trang công khai mà HOC này vẫn bọc, thì logic HOC cần xem lại
@@ -260,14 +267,14 @@ export function withAuth<P extends object>(
          if (currentPath !== '/login' && currentPath !== '/unauthorized') {
             // Có thể đang ở trang lỗi sau khi redirect, không render gì thêm.
          }
-         return null; 
+         return null;
     }
 
     if (!isAuthorized) { // If still not authorized after checks (e.g. no user and not loading)
-        return React.createElement('div', null, 'Checking authorization or redirecting...'); 
+        return React.createElement('div', null, 'Checking authorization or redirecting...');
     }
 
     const Component = WrappedComponent as React.ComponentType<P>;
     return React.createElement(Component, props);
   };
-} 
+}

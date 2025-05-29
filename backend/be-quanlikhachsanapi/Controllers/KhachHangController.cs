@@ -19,11 +19,9 @@ namespace be_quanlikhachsanapi.Controllers
         public KhachHangController(IKhachHangRepository khachHangRepo)
         {
             _khachHangRepo = khachHangRepo;
-        }
-
-        // Lấy danh sách tất cả khách hàng
+        }        // Lấy danh sách tất cả khách hàng        
         [HttpGet]
-        [RequireRole("R00", "R01", "R02")]
+        [RequireRole("R00", "R01", "R02", "R03")]  // Thêm R03 cho kế toán để xem thông tin khách hàng
         public IActionResult GetAll()
         {
             var khachHangs = _khachHangRepo.GetAll();

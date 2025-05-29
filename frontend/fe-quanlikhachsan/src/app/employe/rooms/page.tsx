@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { getEmployeeRooms, updateRoomStatus } from '../../../lib/api';
+import { getEmployeeRooms, updateRoomStatus, getRoomTypes } from '../../../lib/api';
 import { formatCurrency } from '../../../lib/utils';
+import styles from './RoomManager.module.css';
 
 interface Room {
   id: string;
@@ -10,6 +11,13 @@ interface Room {
   price: number;
   status: string;
   tang: number;
+}
+
+interface RoomType {
+  maLoaiPhong: string;
+  tenLoaiPhong: string;
+  giaMoiDem: number;
+  giaMoiGio: number;
 }
 
 const statusColors: Record<string, string> = {
@@ -33,28 +41,47 @@ const statusOptions = ["Trống", "Đang ở", "Đang dọn", "Bảo trì"];
 
 export default function RoomManager() {
   const [rooms, setRooms] = useState<Room[]>([]);
+  const [roomTypes, setRoomTypes] = useState<RoomType[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Lấy danh sách phòng từ API
+  // Lấy danh sách phòng và loại phòng từ API
   useEffect(() => {
-    const fetchRooms = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const data = await getEmployeeRooms();
-        console.log("Dữ liệu phòng nhận được:", data);
-        setRooms(data);
+
+        // Lấy cả rooms và room types
+        const [roomsData, roomTypesData] = await Promise.all([
+          getEmployeeRooms(),
+          getRoomTypes()
+        ]);
+
+        console.log("Dữ liệu phòng nhận được:", roomsData);
+        console.log("Dữ liệu loại phòng nhận được:", roomTypesData);
+
+        // Kết hợp giá từ room types vào rooms
+        const roomsWithPrices = roomsData.map(room => {
+          const roomType = roomTypesData.find(rt => rt.maLoaiPhong === room.type);
+          return {
+            ...room,
+            price: roomType ? roomType.giaMoiDem : 0
+          };
+        });
+
+        setRooms(roomsWithPrices);
+        setRoomTypes(roomTypesData);
         setError(null);
       } catch (err: unknown) {
         const error = err as Error;
-        console.error("Lỗi khi lấy danh sách phòng:", error);
-        setError(error.message || "Không thể lấy danh sách phòng");
+        console.error("Lỗi khi lấy dữ liệu:", error);
+        setError(error.message || "Không thể lấy dữ liệu");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchRooms();
+    fetchData();
   }, []);
 
   // Cập nhật trạng thái phòng
@@ -62,7 +89,7 @@ export default function RoomManager() {
     try {
       setLoading(true);
       await updateRoomStatus(id, status);
-      
+
       // Cập nhật trạng thái trong state
       setRooms(rooms.map(r => r.id === id ? { ...r, status } : r));
       setError(null);
@@ -75,55 +102,69 @@ export default function RoomManager() {
     }
   };
 
+  // Get status class
+  const getStatusClass = (status: string) => {
+    switch (status) {
+      case 'Trống':
+        return `${styles.status} ${styles.statusEmpty}`;
+      case 'Đang ở':
+        return `${styles.status} ${styles.statusOccupied}`;
+      case 'Đã đặt':
+        return `${styles.status} ${styles.statusBooked}`;
+      case 'Đang dọn':
+        return `${styles.status} ${styles.statusCleaning}`;
+      case 'Bảo trì':
+        return `${styles.status} ${styles.statusMaintenance}`;
+      default:
+        return styles.status;
+    }
+  };
+
   if (loading && rooms.length === 0) {
-    return <div style={{padding:'24px', textAlign:'center'}}>Đang tải dữ liệu phòng...</div>;
+    return <div className={styles.loading}>Đang tải dữ liệu phòng...</div>;
   }
 
   if (error && rooms.length === 0) {
-    return <div style={{padding:'24px', color:'red', textAlign:'center'}}>Lỗi: {error}</div>;
+    return <div className={styles.error}>Lỗi: {error}</div>;
   }
 
   return (
-    <div style={{maxWidth:1100, margin:'32px auto', background:'#fff', borderRadius:16, boxShadow:'0 2px 16px #0001', padding:'32px 18px 32px 18px'}}>
-      <h2 style={{fontSize:'1.7rem', fontWeight:'bold', color:'#232a35', marginBottom:18}}>Quản lý phòng</h2>
-      {error && <div style={{color:'red', marginBottom:'16px'}}>Lỗi: {error}</div>}
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h2>Quản lý phòng</h2>
+      </div>
+      {error && <div className={styles.error}>Lỗi: {error}</div>}
       <div style={{overflowX:'auto'}}>
-        <table style={{width:'100%', borderCollapse:'collapse', background:'#fff', fontSize:'1rem', minWidth:700}}>
+        <table className={styles.table}>
           <thead>
             <tr>
-              <th style={{padding:'12px 10px', background:'#f3f4f6', fontWeight:600}}>ID</th>
-              <th style={{padding:'12px 10px', background:'#f3f4f6', fontWeight:600}}>Tên phòng</th>
-              <th style={{padding:'12px 10px', background:'#f3f4f6', fontWeight:600}}>Loại</th>
-              <th style={{padding:'12px 10px', background:'#f3f4f6', fontWeight:600}}>Giá (VNĐ)</th>
-              <th style={{padding:'12px 10px', background:'#f3f4f6', fontWeight:600}}>Tầng</th>
-              <th style={{padding:'12px 10px', background:'#f3f4f6', fontWeight:600}}>Trạng thái</th>
-              <th style={{padding:'12px 10px', background:'#f3f4f6', fontWeight:600}}>Cập nhật trạng thái</th>
+              <th>ID</th>
+              <th>Tên phòng</th>
+              <th>Loại</th>
+              <th>Giá (VNĐ)</th>
+              <th>Tầng</th>
+              <th>Trạng thái</th>
+              <th>Cập nhật trạng thái</th>
             </tr>
           </thead>
           <tbody>
             {rooms.map(room => (
-              <tr key={room.id} style={{borderBottom:'1px solid #e5e7eb'}}>
-                <td style={{padding:'12px 10px'}}>{room.id}</td>
-                <td style={{padding:'12px 10px'}}>{room.name}</td>
-                <td style={{padding:'12px 10px'}}>{room.type}</td>
-                <td style={{padding:'12px 10px'}}>{formatCurrency(room.price)}</td>
-                <td style={{padding:'12px 10px'}}>{room.tang}</td>
-                <td style={{padding:'12px 10px'}}>
-                  <span style={{
-                    background: statusColors[room.status] || "#e5e7eb", 
-                    color: statusTextColors[room.status] || "#374151", 
-                    fontWeight:600, 
-                    borderRadius:6, 
-                    padding:'4px 10px'
-                  }}>
+              <tr key={room.id}>
+                <td className={styles.roomId}>{room.id}</td>
+                <td>{room.name}</td>
+                <td className={styles.roomType}>{room.type}</td>
+                <td className={styles.price}>{formatCurrency(room.price)}</td>
+                <td>{room.tang}</td>
+                <td>
+                  <span className={getStatusClass(room.status)}>
                     {room.status}
                   </span>
                 </td>
-                <td style={{padding:'12px 10px'}}>
+                <td>
                   <select
                     value={room.status}
                     onChange={e => handleStatusChange(room.id, e.target.value)}
-                    style={{padding:'7px 12px', borderRadius:6, border:'1.5px solid #e5e7eb', fontWeight:500, fontSize:'1rem', background:'#f7fafc'}}
+                    className={styles.select}
                     disabled={loading}
                   >
                     {statusOptions.map(option => (
@@ -138,4 +179,4 @@ export default function RoomManager() {
       </div>
     </div>
   );
-} 
+}

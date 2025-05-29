@@ -26,7 +26,7 @@ namespace be_quanlikhachsanapi.Controllers
         /// Lấy danh sách tất cả hóa đơn
         /// </summary>
         [HttpGet]
-        [RequireRole("R00", "R01", "R02")]
+        [RequireRole("R00", "R01", "R02", "R03")]  // Thêm R03 cho kế toán
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetAll()
@@ -41,9 +41,8 @@ namespace be_quanlikhachsanapi.Controllers
 
         /// <summary>
         /// Lấy thông tin hóa đơn theo mã
-        /// </summary>
-        [HttpGet("{maHoaDon}")]
-        [RequireRole("R00", "R01", "R02", "R04")]
+        /// </summary>        [HttpGet("{maHoaDon}")]
+        [RequireRole("R00", "R01", "R02", "R03", "R04")]  // Thêm R03 cho kế toán
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetById(string maHoaDon)
@@ -74,11 +73,10 @@ namespace be_quanlikhachsanapi.Controllers
         }
 
         /// <summary>
-        /// Tạo mới hóa đơn
-        /// </summary>
+        /// Tạo mới hóa đơn        /// </summary>
         [HttpPost]
         [Consumes("multipart/form-data")]
-        [RequireRole("R00", "R01", "R02")]
+        [RequireRole("R00", "R01", "R02", "R03")]  // Thêm R03 cho kế toán
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create([FromForm] CreateHoaDonDTO createDto)
@@ -96,11 +94,10 @@ namespace be_quanlikhachsanapi.Controllers
         }
 
         /// <summary>
-        /// Cập nhật thông tin hóa đơn
-        /// </summary>
+        /// Cập nhật thông tin hóa đơn        /// </summary>
         [HttpPut("{maHoaDon}")]
         [Consumes("multipart/form-data")]
-        [RequireRole("R00", "R01", "R02")]
+        [RequireRole("R00", "R01", "R02", "R03")]  // Thêm R03 cho kế toán
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -124,9 +121,8 @@ namespace be_quanlikhachsanapi.Controllers
 
         /// <summary>
         /// Cập nhật trạng thái hóa đơn
-        /// </summary>
-        [HttpPut("{maHoaDon}/trangthai")]
-        [RequireRole("R00", "R01", "R02")]
+        /// </summary>        [HttpPut("{maHoaDon}/trangthai")]
+        [RequireRole("R00", "R01", "R02", "R03")]  // Thêm R03 cho kế toán
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> UpdateTrangThai(string maHoaDon, [FromBody] UpdateTrangThaiDTO trangThaiDto)

@@ -42,7 +42,7 @@
         <member name="M:be_quanlikhachsanapi.Controllers.HoaDonController.GetById(System.String)">
             <summary>
             Lấy thông tin hóa đơn theo mã
-            </summary>
+            </summary>        [HttpGet("{maHoaDon}")]
         </member>
         <member name="M:be_quanlikhachsanapi.Controllers.HoaDonController.GetByDatPhong(System.String)">
             <summary>
@@ -51,18 +51,16 @@
         </member>
         <member name="M:be_quanlikhachsanapi.Controllers.HoaDonController.Create(be_quanlikhachsanapi.DTOs.CreateHoaDonDTO)">
             <summary>
-            Tạo mới hóa đơn
-            </summary>
+            Tạo mới hóa đơn        /// </summary>
         </member>
         <member name="M:be_quanlikhachsanapi.Controllers.HoaDonController.Update(System.String,be_quanlikhachsanapi.DTOs.UpdateHoaDonDTO)">
             <summary>
-            Cập nhật thông tin hóa đơn
-            </summary>
+            Cập nhật thông tin hóa đơn        /// </summary>
         </member>
         <member name="M:be_quanlikhachsanapi.Controllers.HoaDonController.UpdateTrangThai(System.String,be_quanlikhachsanapi.DTOs.UpdateTrangThaiDTO)">
             <summary>
             Cập nhật trạng thái hóa đơn
-            </summary>
+            </summary>        [HttpPut("{maHoaDon}/trangthai")]
         </member>
         <member name="M:be_quanlikhachsanapi.Controllers.HoaDonController.Delete(System.String)">
             <summary>
@@ -87,7 +85,7 @@
         <member name="M:be_quanlikhachsanapi.Controllers.PhuongThucThanhToanController.GetByHoaDon(System.String)">
             <summary>
             Lấy danh sách phương thức thanh toán theo mã hóa đơn
-            </summary>
+            </summary>        [HttpGet("HoaDon/{maHoaDon}")]
         </member>
         <member name="M:be_quanlikhachsanapi.Controllers.PhuongThucThanhToanController.Create(be_quanlikhachsanapi.DTOs.CreatePhuongThucThanhToanDTO)">
             <summary>

@@ -22,7 +22,7 @@ namespace be_quanlikhachsanapi.Controllers
 
         // Lấy tất cả danh sách đặt phòng
         [HttpGet]
-        [RequireRole("R00", "R01", "R02")]
+        [RequireRole("R00", "R01", "R02", "R03")]  // Thêm quyền R03 cho Kế toán
         public IActionResult GetAll()
         {
             var datPhongs = _datPhongRepo.GetAll();

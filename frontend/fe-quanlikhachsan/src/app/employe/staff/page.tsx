@@ -1,8 +1,8 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { getStaffs } from '../../../lib/api';
-// import { getUserInfo } from '../../../lib/config'; // Xóa getUserInfo
-import { useAuth } from '../../../lib/auth'; // Thêm useAuth
+import { useAuth } from '../../../lib/auth';
+import styles from './StaffDirectory.module.css';
 
 interface Staff {
   maNV: string;
@@ -28,25 +28,25 @@ export default function StaffDirectory() {
       try {
         // Lấy danh sách nhân viên
         const staffData = await getStaffs();
-        
+
         // Lọc nhân viên đang hoạt động
-        const activeStaffs = staffData.filter((staff: Staff) => 
+        const activeStaffs = staffData.filter((staff: Staff) =>
           staff.trangThai === 'Hoạt động' || !staff.trangThai
         );
-        
+
         setStaffs(activeStaffs);
-        
+
         // Lấy thông tin người dùng từ useAuth
         if (!authLoading && user) { // Kiểm tra authLoading và user
           // Tìm thông tin nhân viên tương ứng với người dùng hiện tại
-          const currentUserStaff = staffData.find((staff: Staff) => 
+          const currentUserStaff = staffData.find((staff: Staff) =>
             staff.hoTen?.toLowerCase().includes(user.hoTen?.toLowerCase() || '') // Sử dụng user.hoTen
           );
-          
+
           setProfile(currentUserStaff || {
             hoTen: user.hoTen || 'Unknown User', // Sử dụng user.hoTen
-            chucVu: user.role === 'R01' ? 'Quản lý' : 
-                   user.role === 'R02' ? 'Nhân viên' : 
+            chucVu: user.role === 'R01' ? 'Quản lý' :
+                   user.role === 'R02' ? 'Nhân viên' :
                    'Nhân viên', // Mặc định là Nhân viên
             maNV: user.maNguoiDung || 'N/A', // Sử dụng user.maNguoiDung nếu có
             email: 'N/A', // Cần xem xét lại cách lấy email nếu cần
@@ -66,136 +66,95 @@ export default function StaffDirectory() {
     fetchData();
   }, [user, authLoading]); // Thêm user, authLoading vào dependencies
 
-  // Dùng màu khác nhau cho các vai trò
-  const getRoleBadgeStyle = (role: string) => {
+  // Dùng CSS class cho các vai trò
+  const getRoleBadgeClass = (role: string) => {
     switch(role) {
       case 'Quản lý':
-        return {
-          background: '#c6f6d5',
-          color: '#22543d'
-        };
+        return `${styles.roleBadge} ${styles.roleManager}`;
       case 'Lễ tân':
-        return {
-          background: '#bee3f8',
-          color: '#2a4365'
-        };
+        return `${styles.roleBadge} ${styles.roleReceptionist}`;
       case 'Buồng phòng':
-        return {
-          background: '#fed7d7',
-          color: '#742a2a'
-        };
+        return `${styles.roleBadge} ${styles.roleHousekeeping}`;
       case 'Kế toán':
-        return {
-          background: '#feebc8',
-          color: '#7b341e'
-        };
+        return `${styles.roleBadge} ${styles.roleAccountant}`;
       default:
-        return {
-          background: '#e9d8fd',
-          color: '#44337a'
-        };
+        return `${styles.roleBadge} ${styles.roleEmployee}`;
     }
   };
 
   if (isLoading) {
-    return <div style={{padding:'24px', textAlign:'center'}}>Đang tải dữ liệu nhân viên...</div>;
+    return <div className={styles.loading}>Đang tải dữ liệu nhân viên...</div>;
   }
 
   if (error) {
-    return <div style={{padding:'24px', color:'red', textAlign:'center'}}>Lỗi: {error}</div>;
+    return <div className={styles.error}>Lỗi: {error}</div>;
   }
 
   return (
-    <div style={{maxWidth:1100, margin:'32px auto', background:'#fff', borderRadius:16, boxShadow:'0 2px 16px #0001', padding:'32px 24px'}}>
-      <h2 style={{fontSize:'1.7rem', fontWeight:'bold', color:'#232a35', marginBottom:16}}>Danh mục nhân viên</h2>
-      
-      <div style={{marginBottom:32}}>
-        <h3 style={{fontSize:'1.2rem', fontWeight:600, marginBottom:16}}>Hồ sơ của bạn</h3>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <h2>Danh mục nhân viên</h2>
+      </div>
+
+      <div>
+        <h3 className={styles.sectionTitle}>Hồ sơ của bạn</h3>
         {profile ? (
-          <div style={{
-            display:'flex', 
-            flexDirection:'column', 
-            gap:8, 
-            background:'#f7fafc', 
-            padding:16, 
-            borderRadius:8, 
-            boxShadow:'0 1px 3px rgba(0,0,0,0.05)'
-          }}>
-            <div style={{display:'flex', gap:12}}>
-              <div style={{
-                background:'#4a5568', 
-                color:'white', 
-                borderRadius:'50%', 
-                width:64, 
-                height:64, 
-                display:'flex', 
-                alignItems:'center', 
-                justifyContent:'center', 
-                fontWeight:700, 
-                fontSize:'1.5rem'
-              }}>
+          <div className={styles.profileCard}>
+            <div className={styles.profileHeader}>
+              <div className={styles.avatar}>
                 {profile.hoTen?.charAt(0) || 'N'}
               </div>
-              <div>
-                <div style={{fontSize:'1.25rem', fontWeight:700}}>{profile.hoTen}</div>
-                <div style={{
-                  display:'inline-block',
-                  margin:'6px 0',
-                  padding:'4px 8px',
-                  borderRadius:4,
-                  fontSize:'0.875rem',
-                  fontWeight:500,
-                  ...getRoleBadgeStyle(profile.chucVu || 'Nhân viên')
-                }}>
+              <div className={styles.profileInfo}>
+                <div className={styles.profileName}>{profile.hoTen}</div>
+                <div className={getRoleBadgeClass(profile.chucVu || 'Nhân viên')}>
                   {profile.chucVu || 'Nhân viên'}
                 </div>
               </div>
             </div>
-            <div style={{marginTop:6}}>
-              <div><strong>Mã nhân viên:</strong> {profile.maNV}</div>
-              <div><strong>Email:</strong> {profile.email || 'Chưa cập nhật'}</div>
-              <div><strong>Số điện thoại:</strong> {profile.soDienThoai || 'Chưa cập nhật'}</div>
+            <div className={styles.profileDetails}>
+              <div className={styles.profileDetail}>
+                <strong>Mã nhân viên:</strong> {profile.maNV}
+              </div>
+              <div className={styles.profileDetail}>
+                <strong>Email:</strong> {profile.email || 'Chưa cập nhật'}
+              </div>
+              <div className={styles.profileDetail}>
+                <strong>Số điện thoại:</strong> {profile.soDienThoai || 'Chưa cập nhật'}
+              </div>
             </div>
           </div>
         ) : (
-          <div style={{color:'#718096', fontStyle:'italic'}}>Không có thông tin hồ sơ</div>
+          <div className={styles.noProfile}>Không có thông tin hồ sơ</div>
         )}
       </div>
-      
-      <h3 style={{fontSize:'1.2rem', fontWeight:600, marginBottom:16}}>Danh sách nhân viên</h3>
+
+      <h3 className={styles.sectionTitle}>Danh sách nhân viên</h3>
       <div style={{overflowX:'auto'}}>
-        <table style={{width:'100%', borderCollapse:'collapse', background:'#fff', fontSize:'1rem'}}>
+        <table className={styles.table}>
           <thead>
             <tr>
-              <th style={{padding:'12px 10px', background:'#f3f4f6', fontWeight:600, textAlign:'left'}}>Họ tên</th>
-              <th style={{padding:'12px 10px', background:'#f3f4f6', fontWeight:600, textAlign:'left'}}>Chức vụ</th>
-              <th style={{padding:'12px 10px', background:'#f3f4f6', fontWeight:600, textAlign:'left'}}>Số điện thoại</th>
-              <th style={{padding:'12px 10px', background:'#f3f4f6', fontWeight:600, textAlign:'left'}}>Email</th>
+              <th>Họ tên</th>
+              <th>Chức vụ</th>
+              <th>Số điện thoại</th>
+              <th>Email</th>
             </tr>
           </thead>
           <tbody>
             {staffs.map((staff) => (
-              <tr key={staff.maNV} style={{borderBottom:'1px solid #e5e7eb'}}>
-                <td style={{padding:'12px 10px'}}>{staff.hoTen}</td>
-                <td style={{padding:'12px 10px'}}>
-                  <span style={{
-                    display:'inline-block',
-                    padding:'4px 8px',
-                    borderRadius:4,
-                    fontSize:'0.875rem',
-                    fontWeight:500,
-                    ...getRoleBadgeStyle(staff.chucVu)
-                  }}>
+              <tr key={staff.maNV}>
+                <td className={styles.staffName}>{staff.hoTen}</td>
+                <td>
+                  <span className={getRoleBadgeClass(staff.chucVu)}>
                     {staff.chucVu}
                   </span>
                 </td>
-                <td style={{padding:'12px 10px'}}>{staff.soDienThoai}</td>
-                <td style={{padding:'12px 10px'}}>{staff.email || 'Chưa cập nhật'}</td>
+                <td className={styles.contactInfo}>{staff.soDienThoai || 'Chưa cập nhật'}</td>
+                <td className={styles.contactInfo}>{staff.email || 'Chưa cập nhật'}</td>
               </tr>
             ))}
             {staffs.length === 0 && (
               <tr key="no-data">
-                <td colSpan={4} style={{textAlign:'center', padding:'20px', color:'#6b7280'}}>
+                <td colSpan={4} className={styles.emptyState}>
                   Không có dữ liệu nhân viên
                 </td>
               </tr>
@@ -205,4 +164,4 @@ export default function StaffDirectory() {
       </div>
     </div>
   );
-} 
+}

@@ -13,7 +13,8 @@ import {
   Legend,
   ChartOptions
 } from 'chart.js';
-import { getInvoices } from '../../../lib/api';
+import { getEmployeeInvoices, getAccountantReports } from '../../../lib/api';
+import { useAuth } from '../../../lib/auth';
 
 // Đăng ký các components của ChartJS
 ChartJS.register(
@@ -41,6 +42,7 @@ interface RevenueData {
 }
 
 export default function EmployeeReportPage() {
+  const { user, loading: authLoading } = useAuth();
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
   const [revenueData, setRevenueData] = useState<RevenueData[]>([]);
@@ -52,7 +54,7 @@ export default function EmployeeReportPage() {
     const today = new Date();
     const lastWeek = new Date();
     lastWeek.setDate(today.getDate() - 7);
-    
+
     setStartDate(lastWeek.toISOString().split('T')[0]);
     setEndDate(today.toISOString().split('T')[0]);
   }, []);
@@ -62,18 +64,44 @@ export default function EmployeeReportPage() {
     setIsLoading(true);
     setError(null);
     try {
-      // Lấy tất cả hóa đơn và tính toán
-      const invoices: InvoiceFromApi[] = await getInvoices(); // Sử dụng InvoiceFromApi
-      
+      // Lấy dữ liệu báo cáo - sử dụng API phù hợp với role
+      if (user?.role === 'R03') {
+        // Kế toán sử dụng API riêng
+        const reportData = await getAccountantReports(startDate, endDate);
+
+        // Chuyển đổi dữ liệu báo cáo thành format cho biểu đồ
+        const dateArray: RevenueData[] = [];
+        const startDateObj = new Date(startDate);
+        const endDateObj = new Date(endDate);
+        const currentDate = new Date(startDateObj);
+
+        while (currentDate <= endDateObj) {
+          const dateKey = currentDate.toISOString().split('T')[0];
+          const dayData = reportData.dailyReport[dateKey];
+
+          dateArray.push({
+            date: dateKey,
+            amount: dayData ? dayData.revenue : 0
+          });
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        setRevenueData(dateArray);
+        return;
+      }
+
+      // Các role khác sử dụng logic cũ
+      const invoices = await getEmployeeInvoices();
+
       // Lọc hóa đơn trong khoảng thời gian đã chọn
       const startDateObj = new Date(startDate);
       const endDateObj = new Date(endDate);
       endDateObj.setHours(23, 59, 59); // Đặt thời gian cuối ngày
-      
+
       // Tạo mảng các ngày trong khoảng
       const dateArray: RevenueData[] = [];
       const currentDate = new Date(startDateObj);
-      
+
       while (currentDate <= endDateObj) {
         dateArray.push({
           date: currentDate.toISOString().split('T')[0],
@@ -81,28 +109,28 @@ export default function EmployeeReportPage() {
         });
         currentDate.setDate(currentDate.getDate() + 1);
       }
-      
+
       // Tính tổng doanh thu cho từng ngày
-      invoices.forEach((invoice: InvoiceFromApi) => { // Sử dụng InvoiceFromApi
+      invoices.forEach((invoice: any) => {
         if (
-          invoice.ngayTao && 
-          invoice.trangThai === "Đã thanh toán" &&
-          invoice.tongTien
+          invoice.date &&
+          invoice.status === "Đã thanh toán" &&
+          invoice.amount
         ) {
-          const invoiceDate = new Date(invoice.ngayTao);
+          const invoiceDate = new Date(invoice.date);
           const dateString = invoiceDate.toISOString().split('T')[0];
-          
+
           // Kiểm tra nếu ngày nằm trong khoảng đã chọn
           if (invoiceDate >= startDateObj && invoiceDate <= endDateObj) {
             // Tìm ngày trong mảng và cộng dồn doanh thu
             const dateIndex = dateArray.findIndex(item => item.date === dateString);
             if (dateIndex !== -1) {
-              dateArray[dateIndex].amount += invoice.tongTien;
+              dateArray[dateIndex].amount += invoice.amount;
             }
           }
         }
       });
-      
+
       setRevenueData(dateArray);
     } catch (err) { // Bỏ : any, err sẽ là unknown
       const error = err as Error; // Ép kiểu sang Error
@@ -111,7 +139,7 @@ export default function EmployeeReportPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [startDate, endDate]);
+  }, [startDate, endDate, user]);
 
   // Lấy dữ liệu doanh thu khi thay đổi khoảng thời gian
   useEffect(() => {
@@ -166,6 +194,16 @@ export default function EmployeeReportPage() {
   const averageRevenue = totalRevenue / (revenueData.length || 1);
   const maxRevenue = Math.max(...(revenueData.map(item => item.amount).length ? revenueData.map(item => item.amount) : [0]));
 
+  // Kiểm tra quyền truy cập
+  if (authLoading) {
+    return <div style={{padding:'24px', textAlign:'center'}}>Đang tải...</div>;
+  }
+
+  // Cho phép cả Kế toán và các role khác có quyền
+  if (!user?.permissions.canViewReports && user?.role !== 'R03') {
+    return <div style={{padding:'24px', textAlign:'center', color: 'red'}}>Bạn không có quyền truy cập báo cáo.</div>;
+  }
+
   return (
     <div style={{maxWidth:1100, margin:'32px auto', background:'#fff', borderRadius:16, boxShadow:'0 2px 16px #0001', padding:'32px 24px'}}>
       <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:24}}>
@@ -194,9 +232,9 @@ export default function EmployeeReportPage() {
       ) : (
         <>
           <div style={{marginBottom:24, maxHeight:400, padding:'16px 0'}}>
-            <Line 
-              options={options} 
-              data={chartData} 
+            <Line
+              options={options}
+              data={chartData}
             />
           </div>
 
@@ -207,14 +245,14 @@ export default function EmployeeReportPage() {
                 {totalRevenue.toLocaleString('vi-VN')}đ
               </div>
             </div>
-            
+
             <div style={{background:'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', padding:20, borderRadius:8, color:'white', boxShadow:'0 4px 6px rgba(0, 0, 0, 0.1)'}}>
               <h3 style={{margin:'0 0 10px 0', fontSize:'1rem'}}>Doanh thu trung bình/ngày</h3>
               <div style={{fontSize:'1.6rem', fontWeight:'bold'}}>
                 {Math.round(averageRevenue).toLocaleString('vi-VN')}đ
               </div>
             </div>
-            
+
             <div style={{background:'linear-gradient(135deg, #f6ad55 0%, #ed8936 100%)', padding:20, borderRadius:8, color:'white', boxShadow:'0 4px 6px rgba(0, 0, 0, 0.1)'}}>
               <h3 style={{margin:'0 0 10px 0', fontSize:'1rem'}}>Doanh thu cao nhất</h3>
               <div style={{fontSize:'1.6rem', fontWeight:'bold'}}>
@@ -222,7 +260,7 @@ export default function EmployeeReportPage() {
               </div>
             </div>
           </div>
-          
+
           <div style={{marginTop:32}}>
             <h3 style={{margin:'0 0 16px 0', fontSize:'1.2rem', fontWeight:600}}>Chi tiết doanh thu</h3>
             <div style={{overflowX:'auto'}}>
@@ -248,4 +286,4 @@ export default function EmployeeReportPage() {
       )}
     </div>
   );
-} 
+}
