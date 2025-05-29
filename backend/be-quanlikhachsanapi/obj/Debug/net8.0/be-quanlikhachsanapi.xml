@@ -60,7 +60,7 @@
         <member name="M:be_quanlikhachsanapi.Controllers.HoaDonController.UpdateTrangThai(System.String,be_quanlikhachsanapi.DTOs.UpdateTrangThaiDTO)">
             <summary>
             Cập nhật trạng thái hóa đơn
-            </summary>        [HttpPut("{maHoaDon}/trangthai")]
+            </summary>
         </member>
         <member name="M:be_quanlikhachsanapi.Controllers.HoaDonController.Delete(System.String)">
             <summary>

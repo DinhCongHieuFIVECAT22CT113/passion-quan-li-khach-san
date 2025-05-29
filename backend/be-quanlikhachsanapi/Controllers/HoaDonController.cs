@@ -121,7 +121,8 @@ namespace be_quanlikhachsanapi.Controllers
 
         /// <summary>
         /// Cập nhật trạng thái hóa đơn
-        /// </summary>        [HttpPut("{maHoaDon}/trangthai")]
+        /// </summary>
+        [HttpPut("trangthai/{maHoaDon}")]
         [RequireRole("R00", "R01", "R02", "R03")]  // Thêm R03 cho kế toán
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

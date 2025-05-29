@@ -1349,110 +1349,54 @@ export const deleteManagerStaff = async (staffId: string) => {
 export const getAccountantInvoices = async () => {
   try {
     console.log('Đang gọi API lấy danh sách hóa đơn cho kế toán');
-
-    // Kiểm tra xem backend có đang chạy không
-    try {
-      // Gọi API thật từ backend
-      const response = await fetch(`${API_BASE_URL}/HoaDon`, {
-        method: 'GET',
+    // Gọi API thật từ backend
+    const response = await fetch(`${API_BASE_URL}/HoaDon`, {
+      method: 'GET',
+      headers: getAuthHeaders('GET'),
+      credentials: 'include'
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const invoicesData = await handleResponse(response);
+    console.log('Raw invoices data for accountant:', invoicesData);
+    // Lấy thêm thông tin đặt phòng và khách hàng
+    const [bookingsData, customersData, paymentsData] = await Promise.all([
+      fetch(`${API_BASE_URL}/DatPhong`, {
         headers: getAuthHeaders('GET'),
         credentials: 'include'
+      }).then(res => res.ok ? handleResponse(res) : []).catch(() => []),
+      fetch(`${API_BASE_URL}/KhachHang`, {
+        headers: getAuthHeaders('GET'),
+        credentials: 'include'
+      }).then(res => res.ok ? handleResponse(res) : []).catch(() => []),
+      fetch(`${API_BASE_URL}/PhuongThucThanhToan`, {
+        headers: getAuthHeaders('GET'),
+        credentials: 'include'
+      }).then(res => res.ok ? handleResponse(res) : []).catch(() => [])
+    ]);
+    // Map dữ liệu hóa đơn cho kế toán
+    if (Array.isArray(invoicesData)) {
+      return invoicesData.map((invoice) => {
+        const booking = bookingsData.find((b: any) => (b.maDatPhong || b.MaDatPhong) === (invoice.maDatPhong || invoice.MaDatPhong));
+        const customer = booking ? customersData.find((c: any) => (c.maKh || c.MaKh) === (booking.maKH || booking.MaKH)) : null;
+        // Tìm thông tin thanh toán
+        const payments = paymentsData.filter((p: any) => (p.maHoaDon || p.MaHoaDon) === (invoice.maHoaDon || invoice.MaHoaDon));
+        return {
+          id: invoice.maHoaDon || invoice.MaHoaDon,
+          bookingId: invoice.maDatPhong || invoice.MaDatPhong,
+          customerId: booking ? (booking.maKH || booking.MaKH) : '',
+          customerName: customer ? `${customer.hoKh || customer.HoKh || ''} ${customer.tenKh || customer.TenKh || ''}`.trim() : 'Khách hàng',
+          amount: parseFloat(invoice.tongTien || invoice.TongTien || 0),
+          date: invoice.ngayTao || invoice.NgayTao || new Date().toISOString(),
+          paymentMethod: payments.length > 0 ? (payments[0].phuongThucThanhToan1 || payments[0].PhuongThucThanhToan1 || 'Tiền mặt') : 'Tiền mặt',
+          status: invoice.trangThai || invoice.TrangThai || 'Chưa thanh toán',
+          note: ''
+        };
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const invoicesData = await handleResponse(response);
-      console.log('Raw invoices data for accountant:', invoicesData);
-
-      // Lấy thêm thông tin đặt phòng và khách hàng
-      const [bookingsData, customersData, paymentsData] = await Promise.all([
-        fetch(`${API_BASE_URL}/DatPhong`, {
-          headers: getAuthHeaders('GET'),
-          credentials: 'include'
-        }).then(res => res.ok ? handleResponse(res) : []).catch(() => []),
-
-        fetch(`${API_BASE_URL}/KhachHang`, {
-          headers: getAuthHeaders('GET'),
-          credentials: 'include'
-        }).then(res => res.ok ? handleResponse(res) : []).catch(() => []),
-
-        // Lấy thông tin thanh toán
-        fetch(`${API_BASE_URL}/PhuongThucThanhToan`, {
-          headers: getAuthHeaders('GET'),
-          credentials: 'include'
-        }).then(res => res.ok ? handleResponse(res) : []).catch(() => [])
-      ]);
-
-      // Map dữ liệu hóa đơn cho kế toán
-      if (Array.isArray(invoicesData)) {
-        return invoicesData.map((invoice) => {
-          // Tìm thông tin đặt phòng
-          const booking = bookingsData.find((b: any) =>
-            (b.maDatPhong || b.MaDatPhong) === (invoice.maDatPhong || invoice.MaDatPhong)
-          );
-
-          // Tìm thông tin khách hàng
-          const customer = booking ? customersData.find((c: any) =>
-            (c.maKh || c.MaKh) === (booking.maKH || booking.MaKH)
-          ) : null;
-
-          // Tìm thông tin thanh toán
-          const payments = paymentsData.filter((p: any) =>
-            (p.maHoaDon || p.MaHoaDon) === (invoice.maHoaDon || invoice.MaHoaDon)
-          );
-
-          return {
-            id: invoice.maHoaDon || invoice.MaHoaDon,
-            bookingId: invoice.maDatPhong || invoice.MaDatPhong,
-            customerId: booking ? (booking.maKH || booking.MaKH) : '',
-            customerName: customer ?
-              `${customer.hoKh || customer.HoKh || ''} ${customer.tenKh || customer.TenKh || ''}`.trim() :
-              'Khách hàng',
-            amount: parseFloat(invoice.tongTien || invoice.TongTien || 0),
-            date: invoice.ngayTao || invoice.NgayTao || new Date().toISOString(),
-            paymentMethod: payments.length > 0 ?
-              (payments[0].phuongThucThanhToan1 || payments[0].PhuongThucThanhToan1 || 'Tiền mặt') :
-              'Tiền mặt',
-            status: invoice.trangThai || invoice.TrangThai || 'Chưa thanh toán',
-            note: ''
-          };
-        });
-      }
-
-      // Nếu không có dữ liệu, trả về mảng rỗng
-      return [];
-    } catch (fetchError) {
-      console.error('Lỗi kết nối backend:', fetchError);
-
-      // Trả về dữ liệu mẫu khi backend không khả dụng
-      console.log('Backend không khả dụng, sử dụng dữ liệu mẫu');
-      return [
-        {
-          id: 'HD001',
-          bookingId: 'DP001',
-          customerId: 'KH001',
-          customerName: 'Nguyễn Văn A',
-          amount: 1500000,
-          date: new Date().toISOString(),
-          paymentMethod: 'Tiền mặt',
-          status: 'Đã thanh toán',
-          note: 'Dữ liệu mẫu - Backend không khả dụng'
-        },
-        {
-          id: 'HD002',
-          bookingId: 'DP002',
-          customerId: 'KH002',
-          customerName: 'Trần Thị B',
-          amount: 2000000,
-          date: new Date().toISOString(),
-          paymentMethod: 'Chuyển khoản',
-          status: 'Chưa thanh toán',
-          note: 'Dữ liệu mẫu - Backend không khả dụng'
-        }
-      ];
     }
+    // Nếu không có dữ liệu, trả về mảng rỗng
+    return [];
   } catch (error) {
     console.error('Lỗi khi lấy danh sách hóa đơn cho kế toán:', error);
     throw error;
@@ -1549,7 +1493,4 @@ export const updateAccountantInvoiceStatus = async (invoiceId: string, status: s
     throw error;
   }
 };
-
-// API lấy danh sách các phòng (có thể có filter)
-// ... existing code ...
 
