@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using be_quanlikhachsanapi.ViewModel;
 using System.Linq;
 using System.Threading.Tasks;
-using be_quanlikhachsanapi.ViewModel;
 using be_quanlikhachsanapi.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using be_quanlikhachsanapi.Authorization;

@@ -79,86 +79,130 @@ namespace be_quanlikhachsanapi.Services
 
         public JsonResult CreateDatPhong(CreateDatPhongDTO createDatPhong)
         {
-            var lastDatPhong = _context.DatPhongs
-                .OrderByDescending(dp => dp.MaDatPhong)
-                .FirstOrDefault();
-
-            string newMaDatPhong;
-
-            if (lastDatPhong == null || string.IsNullOrEmpty(lastDatPhong.MaDatPhong))
+            try
             {
-                newMaDatPhong = "DP001";
-            }
-            else
-            {
-                var soHienTai = int.Parse(lastDatPhong.MaDatPhong.Substring(2));
-                newMaDatPhong = "DP" + (soHienTai + 1).ToString("D3");
-            }
-
-            var datPhong = new DatPhong
-            {
-                MaDatPhong = newMaDatPhong,
-                MaKh = createDatPhong.MaKH,
-                TreEm = createDatPhong.TreEm,
-                NguoiLon = createDatPhong.NguoiLon,
-                GhiChu = createDatPhong.GhiChu,
-                SoLuongPhong = createDatPhong.SoLuongPhong,
-                ThoiGianDen = createDatPhong.ThoiGianDen,
-                NgayNhanPhong = createDatPhong.NgayNhanPhong,
-                NgayTraPhong = createDatPhong.NgayTraPhong,
-                TrangThai = "Chưa xác nhận",
-                NgayTao = DateTime.Now,
-                NgaySua = DateTime.Now,
-            };
-
-            _context.DatPhongs.Add(datPhong);
-            _context.SaveChanges();
-
-            var loaiPhong = _context.Phongs
-                .Where(p => p.MaPhong == createDatPhong.MaPhong)
-                .Select(p => p.MaLoaiPhong)
-                .FirstOrDefault();
-
-            if (loaiPhong == null)
-            {
-                return new JsonResult("Không tìm thấy loại phòng với mã đã cho.")
+                // Validation cơ bản
+                if (string.IsNullOrWhiteSpace(createDatPhong.MaKH))
                 {
-                    StatusCode = StatusCodes.Status404NotFound
+                    return new JsonResult(new { message = "Mã khách hàng không được để trống." })
+                    {
+                        StatusCode = StatusCodes.Status400BadRequest
+                    };
+                }
+
+                if (string.IsNullOrWhiteSpace(createDatPhong.MaPhong))
+                {
+                    return new JsonResult(new { message = "Mã phòng không được để trống." })
+                    {
+                        StatusCode = StatusCodes.Status400BadRequest
+                    };
+                }
+
+                // Kiểm tra khách hàng có tồn tại không
+                var khachHang = _context.KhachHangs.FirstOrDefault(kh => kh.MaKh == createDatPhong.MaKH);
+                if (khachHang == null)
+                {
+                    return new JsonResult(new { message = $"Không tìm thấy khách hàng với mã {createDatPhong.MaKH}." })
+                    {
+                        StatusCode = StatusCodes.Status404NotFound
+                    };
+                }
+
+                // Kiểm tra phòng có tồn tại không
+                var phong = _context.Phongs.FirstOrDefault(p => p.MaPhong == createDatPhong.MaPhong);
+                if (phong == null)
+                {
+                    return new JsonResult(new { message = $"Không tìm thấy phòng với mã {createDatPhong.MaPhong}." })
+                    {
+                        StatusCode = StatusCodes.Status404NotFound
+                    };
+                }
+
+                // Kiểm tra ngày hợp lệ
+                if (createDatPhong.NgayNhanPhong >= createDatPhong.NgayTraPhong)
+                {
+                    return new JsonResult(new { message = "Ngày trả phòng phải sau ngày nhận phòng." })
+                    {
+                        StatusCode = StatusCodes.Status400BadRequest
+                    };
+                }
+
+                var lastDatPhong = _context.DatPhongs
+                    .OrderByDescending(dp => dp.MaDatPhong)
+                    .FirstOrDefault();
+
+                string newMaDatPhong;
+
+                if (lastDatPhong == null || string.IsNullOrEmpty(lastDatPhong.MaDatPhong))
+                {
+                    newMaDatPhong = "DP001";
+                }
+                else
+                {
+                    var soHienTai = int.Parse(lastDatPhong.MaDatPhong.Substring(2));
+                    newMaDatPhong = "DP" + (soHienTai + 1).ToString("D3");
+                }
+
+                var datPhong = new DatPhong
+                {
+                    MaDatPhong = newMaDatPhong,
+                    MaKh = createDatPhong.MaKH,
+                    TreEm = createDatPhong.TreEm,
+                    NguoiLon = createDatPhong.NguoiLon,
+                    GhiChu = createDatPhong.GhiChu,
+                    SoLuongPhong = createDatPhong.SoLuongPhong,
+                    ThoiGianDen = createDatPhong.ThoiGianDen,
+                    NgayNhanPhong = createDatPhong.NgayNhanPhong,
+                    NgayTraPhong = createDatPhong.NgayTraPhong,
+                    TrangThai = "Chưa xác nhận",
+                    NgayTao = DateTime.Now,
+                    NgaySua = DateTime.Now,
+                };
+
+                _context.DatPhongs.Add(datPhong);
+                _context.SaveChanges();
+
+                var lastChiTietDatPhong = _context.ChiTietDatPhongs
+                    .OrderByDescending(ctdp => ctdp.MaChiTietDatPhong)
+                    .FirstOrDefault();
+
+                string newMaChiTietDatPhong;
+                if (lastChiTietDatPhong == null)
+                {
+                    newMaChiTietDatPhong = "CTDP001";
+                }
+                else
+                {
+                    int lastNumber = int.Parse(lastChiTietDatPhong.MaChiTietDatPhong.Substring(4));
+                    newMaChiTietDatPhong = "CTDP" + (lastNumber + 1).ToString("D3");
+                }
+
+                var chiTietDatPhong = new ChiTietDatPhong
+                {
+                    MaChiTietDatPhong = newMaChiTietDatPhong,
+                    MaDatPhong = newMaDatPhong,
+                    MaPhong = createDatPhong.MaPhong,
+                    MaLoaiPhong = phong.MaLoaiPhong
+                };
+                _context.ChiTietDatPhongs.Add(chiTietDatPhong);
+                _context.SaveChanges();
+
+                return new JsonResult(new
+                {
+                    message = "Đặt phòng thành công.",
+                    datPhong = newMaDatPhong
+                })
+                {
+                    StatusCode = StatusCodes.Status201Created
                 };
             }
-            var lastChiTietDatPhong = _context.ChiTietDatPhongs
-                .OrderByDescending(ctdp => ctdp.MaChiTietDatPhong)
-                .FirstOrDefault();
-
-            string newMaChiTietDatPhong;
-            if (lastChiTietDatPhong == null)
+            catch (Exception ex)
             {
-                newMaChiTietDatPhong = "CTDP001";
+                return new JsonResult(new { message = $"Lỗi khi tạo đặt phòng: {ex.Message}" })
+                {
+                    StatusCode = StatusCodes.Status500InternalServerError
+                };
             }
-            else
-            {
-                int lastNumber = int.Parse(lastChiTietDatPhong.MaChiTietDatPhong.Substring(4));
-                newMaChiTietDatPhong = "CTDP" + (lastNumber + 1).ToString("D3");
-            }
-
-            var chiTietDatPhong = new ChiTietDatPhong
-            {
-                MaChiTietDatPhong = newMaChiTietDatPhong,
-                MaDatPhong = newMaDatPhong,
-                MaPhong = createDatPhong.MaPhong,
-                MaLoaiPhong = loaiPhong
-            };
-            _context.ChiTietDatPhongs.Add(chiTietDatPhong);
-            _context.SaveChanges();
-
-            return new JsonResult(new
-            {
-                message = "Đặt phòng thành công.",
-                datPhong = newMaDatPhong
-            })
-            {
-                StatusCode = StatusCodes.Status201Created
-            };
         }
 
         public JsonResult UpdateDatPhong(string MaDatPhong, UpdateDatPhongDTO updateDatPhong)

@@ -154,8 +154,13 @@
     padding: 12px;
   }
   .modalContent {
-    padding: 18px 8px 12px 8px;
+    padding: 18px 12px 12px 12px;
     min-width: 90vw;
+    max-height: 85vh;
+    margin: 10px;
+  }
+  .modal {
+    padding: 10px;
   }
 }
 .loading {
@@ -237,6 +242,9 @@
   display: flex;
   gap: 8px;
   margin-top: 12px;
+}
+.formGroup {
+  margin-bottom: 16px;
 }
 .modal form div {
   margin-bottom: 10px;

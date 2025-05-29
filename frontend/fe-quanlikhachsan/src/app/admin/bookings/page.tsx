@@ -22,8 +22,8 @@ interface BookingBE {
 // Interface để hiển thị trong bảng, có thể kết hợp thêm thông tin
 interface BookingDisplay extends BookingBE {
   tenKhachHang?: string;
-  tenPhongDisplay?: string; 
-  tongTienDisplay?: string; 
+  tenPhongDisplay?: string;
+  tongTienDisplay?: string;
 }
 
 // Interface cho Loại phòng từ BE
@@ -45,7 +45,7 @@ interface RoomInfoBE {
 
 // Interface cho state của form (camelCase, để nhất quán với dữ liệu hiển thị)
 interface BookingFormState {
-  maKH: string; 
+  maKH: string;
   maPhong: string; // Thêm maPhong
   ngayNhanPhong: string;
   ngayTraPhong: string;
@@ -63,7 +63,7 @@ const statusMap: Record<string, { label: string; className: string }> = {
   "Đã trả phòng": { label: "Đã trả phòng", className: styles["status"] + " " + styles["status-checkedout"] },
   "Đã hủy": { label: "Đã hủy", className: styles["status"] + " " + styles["status-cancelled"] },
   "Chờ thanh toán": { label: "Chờ thanh toán", className: styles["status"] + " " + styles["status-pending"] },
-  "Hoàn thành": { label: "Hoàn thành", className: styles["status"] + " " + styles["status-completed"] }, 
+  "Hoàn thành": { label: "Hoàn thành", className: styles["status"] + " " + styles["status-completed"] },
   "Đã xác nhận": { label: "Đã xác nhận", className: styles["status"] + " " + styles["status-confirmed"] },
   "Chờ xác nhận": { label: "Chờ xác nhận", className: styles["status"] + " " + styles["status-waiting"] },
   "Chưa xác nhận": { label: "Chưa xác nhận", className: styles["status"] + " " + styles["status-unconfirmed"] },
@@ -120,7 +120,7 @@ export default function BookingManager() {
 
       const timeDiffMs = checkOutDate.getTime() - checkInDate.getTime();
       const totalHours = timeDiffMs / (1000 * 60 * 60);
-      
+
       const nights = Math.floor(totalHours / 24);
       const remainingHours = totalHours % 24;
 
@@ -185,37 +185,37 @@ export default function BookingManager() {
         const roomTypesApiArray: any[] = Array.isArray(roomTypesDataFromApi) ? roomTypesDataFromApi : []; // Mảng Loại Phòng từ API
 
         // Process customers data
-        const processedCustomers = customersApiArray.map(c => ({ 
-          maKh: c.maKh || c.MaKh, 
-          hoKh: c.hoKh || c.HoKh || "", 
-          tenKh: c.tenKh || c.TenKh || "" 
+        const processedCustomers = customersApiArray.map(c => ({
+          maKh: c.maKh || c.MaKh,
+          hoKh: c.hoKh || c.HoKh || "",
+          tenKh: c.tenKh || c.TenKh || ""
         }));
         setCustomers(processedCustomers);
 
         // Process rooms data, ensure maLoaiPhong is included
-        const processedRooms = roomsApiArray.map((r): RoomInfoBE => ({ 
-          maPhong: r.maPhong || r.MaPhong, 
+        const processedRooms = roomsApiArray.map((r): RoomInfoBE => ({
+          maPhong: r.maPhong || r.MaPhong,
           soPhong: r.soPhong || r.SoPhong || "N/A",
           maLoaiPhong: r.maLoaiPhong || r.MaLoaiPhong // Quan trọng: Lấy maLoaiPhong
         }));
         setRooms(processedRooms);
 
         // Process room types data
-        const processedRoomTypes = roomTypesApiArray.map((rt): RoomTypeBE => ({ 
+        const processedRoomTypes = roomTypesApiArray.map((rt): RoomTypeBE => ({
           maLoaiPhong: rt.maLoaiPhong || rt.MaLoaiPhong,
           tenLoaiPhong: rt.tenLoaiPhong || rt.TenLoaiPhong,
           giaMoiGio: parseFloat(rt.giaMoiGio) || 0,
           giaMoiDem: parseFloat(rt.giaMoiDem) || 0,
         }));
         setRoomTypes(processedRoomTypes);
-        
+
         const bookingsWithDetails = bookingsArray.map((apiBooking): BookingDisplay => {
           const currentMaKH = apiBooking.maKH;
           const currentMaPhong = apiBooking.maPhong;
 
           const customer = processedCustomers.find(c => c.maKh === currentMaKH);
           const room = processedRooms.find(r => r.maPhong === currentMaPhong);
-          
+
           let roomType: RoomTypeBE | undefined = undefined;
           if (room && room.maLoaiPhong) {
             roomType = processedRoomTypes.find(rt => rt.maLoaiPhong === room.maLoaiPhong);
@@ -233,16 +233,16 @@ export default function BookingManager() {
             );
             calculatedTotalCost = totalCost;
           }
-          
+
           return {
-            ...apiBooking, 
+            ...apiBooking,
             tenKhachHang: customer ? `${customer.hoKh} ${customer.tenKh}`.trim() : 'Không xác định',
             tenPhongDisplay: room ? room.soPhong : (currentMaPhong ? `P:${currentMaPhong} (không tìm thấy)` : 'N/A'),
-            tongTienDisplay: formatCurrency(calculatedTotalCost), 
+            tongTienDisplay: formatCurrency(calculatedTotalCost),
           };
         });
         console.log("Final bookingsWithDetails:", JSON.stringify(bookingsWithDetails, null, 2));
-        
+
         setBookings(bookingsWithDetails);
       } catch (err) {
         const error = err as Error;
@@ -260,7 +260,7 @@ export default function BookingManager() {
     try {
       if (!dateString) return '';
       const date = new Date(dateString);
-      if (isNaN(date.getTime())) return dateString; 
+      if (isNaN(date.getTime())) return dateString;
       return date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
     } catch {
       return dateString;
@@ -275,11 +275,11 @@ export default function BookingManager() {
         const parts = dateString.split('/');
         if (parts.length === 3) {
           const day = parseInt(parts[0], 10);
-          const month = parseInt(parts[1], 10) - 1; 
+          const month = parseInt(parts[1], 10) - 1;
           const year = parseInt(parts[2], 10);
           date = new Date(year, month, day);
         }
-        if (isNaN(date.getTime())) return ''; 
+        if (isNaN(date.getTime())) return '';
       }
       return date.toISOString().split('T')[0];
     } catch (error) {
@@ -293,7 +293,7 @@ export default function BookingManager() {
       maKH: "",
       maPhong: "", // Thêm maPhong
       ngayNhanPhong: formatDateForInput(new Date().toISOString()),
-      ngayTraPhong: formatDateForInput(new Date(Date.now() + 86400000).toISOString()), 
+      ngayTraPhong: formatDateForInput(new Date(Date.now() + 86400000).toISOString()),
       ghiChu: "",
       treEm: 0,
       nguoiLon: 1,
@@ -311,7 +311,7 @@ export default function BookingManager() {
       maPhong: booking.maPhong, // Thêm maPhong
       ngayNhanPhong: formatDateForInput(booking.ngayNhanPhong),
       ngayTraPhong: formatDateForInput(booking.ngayTraPhong),
-      trangThai: booking.trangThai, 
+      trangThai: booking.trangThai,
       ghiChu: booking.ghiChu || "",
       treEm: booking.treEm !== undefined ? booking.treEm : 0,
       nguoiLon: booking.nguoiLon !== undefined ? booking.nguoiLon : 1,
@@ -333,12 +333,34 @@ export default function BookingManager() {
     e.preventDefault();
     setIsLoading(true);
 
+    // Validation
+    if (!form.maKH.trim()) {
+      alert('Vui lòng nhập mã khách hàng');
+      setIsLoading(false);
+      return;
+    }
+    if (!form.maPhong.trim()) {
+      alert('Vui lòng chọn phòng');
+      setIsLoading(false);
+      return;
+    }
+    if (!form.ngayNhanPhong) {
+      alert('Vui lòng chọn ngày nhận phòng');
+      setIsLoading(false);
+      return;
+    }
+    if (!form.ngayTraPhong) {
+      alert('Vui lòng chọn ngày trả phòng');
+      setIsLoading(false);
+      return;
+    }
+
     const formData = new FormData();
-    
+
     // API BE DatPhongController CreateDatPhongAsync nhận các trường PascalCase
     if (!editBooking) { // Trường hợp thêm mới
-      formData.append('MaKH', form.maKH);
-      formData.append('MaPhong', form.maPhong); 
+      formData.append('MaKH', form.maKH.trim());
+      formData.append('MaPhong', form.maPhong.trim());
       formData.append('NgayNhanPhong', form.ngayNhanPhong);
       formData.append('NgayTraPhong', form.ngayTraPhong);
       if (form.ghiChu) formData.append('GhiChu', form.ghiChu);
@@ -346,9 +368,19 @@ export default function BookingManager() {
       formData.append('NguoiLon', String(form.nguoiLon || 1));
       formData.append('SoLuongPhong', String(form.soLuongPhong || 1));
       if (form.thoiGianDen) formData.append('ThoiGianDen', form.thoiGianDen);
-      // TrangThai thường do BE tự set khi tạo mới, hoặc có giá trị mặc định.
-      // Nếu BE yêu cầu gửi TrangThai khi POST, thêm dòng sau:
-      // if (form.trangThai) formData.append('TrangThai', form.trangThai);
+
+      // Debug: Log dữ liệu được gửi
+      console.log('Dữ liệu gửi đi:', {
+        MaKH: form.maKH.trim(),
+        MaPhong: form.maPhong.trim(),
+        NgayNhanPhong: form.ngayNhanPhong,
+        NgayTraPhong: form.ngayTraPhong,
+        GhiChu: form.ghiChu,
+        TreEm: String(form.treEm || 0),
+        NguoiLon: String(form.nguoiLon || 1),
+        SoLuongPhong: String(form.soLuongPhong || 1),
+        ThoiGianDen: form.thoiGianDen
+      });
 
     } else { // Trường hợp cập nhật
       // Đối với PUT, chỉ gửi các trường có thể thay đổi và BE cho phép
@@ -365,20 +397,34 @@ export default function BookingManager() {
     }
 
     try {
-      const endpoint = editBooking 
+      const endpoint = editBooking
         ? `${API_BASE_URL}/DatPhong/${editBooking.maDatPhong}`
         : `${API_BASE_URL}/DatPhong`;
       const method = editBooking ? 'PUT' : 'POST';
 
+      console.log('Gửi request đến:', endpoint);
+      console.log('Method:', method);
+
       const response = await fetch(endpoint, {
         method: method,
-        headers: getFormDataHeaders(), 
+        headers: getFormDataHeaders(),
         body: formData,
         credentials: 'include'
       });
-      
-      await handleResponse(response);
-      
+
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+
+      // Kiểm tra response trước khi gọi handleResponse
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error response body:', errorText);
+        throw new Error(`API Error ${response.status}: ${errorText || response.statusText}`);
+      }
+
+      const result = await handleResponse(response);
+      console.log('API response success:', result);
+
       const bookingsResponse = await fetch(`${API_BASE_URL}/DatPhong`, { headers: getAuthHeaders('GET'), credentials: 'include' });
       const bookingsData = await handleResponse(bookingsResponse);
       const customersResponse = await fetch(`${API_BASE_URL}/KhachHang`, { headers: getAuthHeaders('GET'), credentials: 'include' });
@@ -389,23 +435,23 @@ export default function BookingManager() {
       const bookingsArray: BookingBE[] = Array.isArray(bookingsData) ? bookingsData : [];
       const customersArray: any[] = Array.isArray(customersData) ? customersData : [];
       const roomsApiArray: any[] = Array.isArray(roomsData) ? roomsData : [];
-      
+
       // Process customers data immediately
-      const processedCustomersAfterSubmit = customersArray.map(c => ({ 
-        maKh: c.maKh || c.MaKh, 
-        hoKh: c.hoKh || c.HoKh || "", 
-        tenKh: c.tenKh || c.TenKh || "" 
+      const processedCustomersAfterSubmit = customersArray.map(c => ({
+        maKh: c.maKh || c.MaKh,
+        hoKh: c.hoKh || c.HoKh || "",
+        tenKh: c.tenKh || c.TenKh || ""
       }));
       setCustomers(processedCustomersAfterSubmit);
 
       // Process rooms data immediately
-      const processedRoomsAfterSubmit = roomsApiArray.map((r): RoomInfoBE => ({ 
-        maPhong: r.maPhong || r.MaPhong, 
+      const processedRoomsAfterSubmit = roomsApiArray.map((r): RoomInfoBE => ({
+        maPhong: r.maPhong || r.MaPhong,
         soPhong: r.soPhong || r.SoPhong || "N/A",
         maLoaiPhong: r.maLoaiPhong || r.MaLoaiPhong
       }));
       setRooms(processedRoomsAfterSubmit);
-      
+
       const bookingsWithDetails = bookingsArray.map((apiBooking): BookingDisplay => {
         const currentMaKH = apiBooking.maKH;
         const currentMaPhong = apiBooking.maPhong;
@@ -415,7 +461,7 @@ export default function BookingManager() {
           ...apiBooking,
           tenKhachHang: customer ? `${customer.hoKh} ${customer.tenKh}`.trim() : 'Không xác định',
           tenPhongDisplay: room ? room.soPhong : (currentMaPhong ? `P:${currentMaPhong} (không tìm thấy)` : 'N/A'),
-          tongTienDisplay: 'N/A', 
+          tongTienDisplay: 'N/A',
         };
       });
       setBookings(bookingsWithDetails);
@@ -461,10 +507,10 @@ export default function BookingManager() {
           <button className={styles.addBtn} onClick={openAddModal}>+ Thêm đặt phòng</button>
         </div>
       </div>
-      
+
       {isLoading && <div className={styles.loading}>Đang tải dữ liệu...</div>}
       {error && <div className={styles.error}>Lỗi: {error}</div>}
-      
+
       {!isLoading && !error && (
       <div style={{overflowX:'auto'}}>
       <table className={styles.table}>
@@ -521,13 +567,16 @@ export default function BookingManager() {
             <h3>Thêm đặt phòng</h3>
             <form onSubmit={handleSubmit} autoComplete="off">
               <div className={styles.formGroup}>
-                <label htmlFor="maKH">Khách hàng</label>
-                <select id="maKH" name="maKH" value={form.maKH} onChange={handleChange} required>
-                  <option value="">Chọn khách hàng</option>
-                  {customers.map(customer => (
-                    <option key={customer.maKh} value={customer.maKh}>{customer.hoKh} {customer.tenKh} ({customer.maKh})</option>
-                  ))}
-                </select>
+                <label htmlFor="maKH">Mã khách hàng</label>
+                <input
+                  type="text"
+                  id="maKH"
+                  name="maKH"
+                  value={form.maKH}
+                  onChange={handleChange}
+                  placeholder="Nhập mã khách hàng (VD: KH001)"
+                  required
+                />
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="maPhong">Mã Phòng</label>

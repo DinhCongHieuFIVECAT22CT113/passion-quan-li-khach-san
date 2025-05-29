@@ -18,7 +18,7 @@ namespace be_quanlikhachsanapi.Controllers
         public DatPhongController(IDatPhongRepository datPhongRepo)
         {
             _datPhongRepo = datPhongRepo;
-        }   
+        }
 
         // Lấy tất cả danh sách đặt phòng
         [HttpGet]
@@ -50,12 +50,33 @@ namespace be_quanlikhachsanapi.Controllers
         [RequireRole("R00", "R01", "R02", "R04")]
         public IActionResult CreateDatPhong([FromForm] CreateDatPhongDTO createDatPhong)
         {
-            var datPhong = _datPhongRepo.CreateDatPhong(createDatPhong);
-            if (datPhong == null)
+            try
             {
-                return BadRequest("Không thể tạo thông tin đặt phòng mới.");
+                // Kiểm tra ModelState validation
+                if (!ModelState.IsValid)
+                {
+                    var errors = ModelState
+                        .Where(x => x.Value.Errors.Count > 0)
+                        .Select(x => new { Field = x.Key, Errors = x.Value.Errors.Select(e => e.ErrorMessage) })
+                        .ToList();
+
+                    return BadRequest(new {
+                        message = "Dữ liệu không hợp lệ",
+                        errors = errors
+                    });
+                }
+
+                var datPhong = _datPhongRepo.CreateDatPhong(createDatPhong);
+                if (datPhong == null)
+                {
+                    return BadRequest(new { message = "Không thể tạo thông tin đặt phòng mới." });
+                }
+                return Ok(datPhong);
             }
-            return Ok(datPhong);
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
         // Cập nhật đặt phòng
         [HttpPut("{maDatPhong}")]
@@ -111,14 +132,14 @@ namespace be_quanlikhachsanapi.Controllers
 
             // Giả định bạn có một phương thức GetDatPhongByMaKhAsync trong IDatPhongRepository
             // và đã implement nó.
-            var datPhongs = await _datPhongRepo.GetDatPhongByKhachHang(maKh); 
+            var datPhongs = await _datPhongRepo.GetDatPhongByKhachHang(maKh);
 
             if (datPhongs == null || !datPhongs.Any())
             {
                 // Trả về mảng rỗng nếu không có đặt phòng nào, thay vì NotFound,
                 // để frontend dễ xử lý hơn (kiểm tra length của mảng).
                 // Hoặc bạn có thể trả về NotFound tùy theo yêu cầu của frontend.
-                return Ok(new List<object>()); 
+                return Ok(new List<object>());
             }
             return Ok(datPhongs);
         }
