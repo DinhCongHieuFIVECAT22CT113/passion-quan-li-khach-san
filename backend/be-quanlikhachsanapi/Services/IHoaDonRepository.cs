@@ -140,7 +140,7 @@ namespace be_quanlikhachsanapi.Services
                 var khuyenMai = await _context.KhuyenMais.FindAsync(updateDto.MaKM);
                 if (khuyenMai == null)
                     throw new Exception("Khuyến mãi không tồn tại");
-                
+
                 hoaDon.MaKm = updateDto.MaKM;
             }
 
@@ -185,12 +185,43 @@ namespace be_quanlikhachsanapi.Services
 
         public async Task<decimal> TinhTongDoanhThuAsync(int thang, int nam)
         {
-            return await _context.HoaDons
-                .Where(h => h.NgayTao.HasValue && 
-                       h.NgayTao.Value.Month == thang && 
+            // Debug: Đếm tổng số hóa đơn
+            var totalInvoices = await _context.HoaDons.CountAsync();
+            Console.WriteLine($"[DEBUG] Tổng số hóa đơn trong database: {totalInvoices}");
+
+            // Debug: Đếm hóa đơn theo tháng/năm (không quan tâm trạng thái)
+            var invoicesInMonth = await _context.HoaDons
+                .Where(h => h.NgayTao.HasValue &&
+                       h.NgayTao.Value.Month == thang &&
+                       h.NgayTao.Value.Year == nam)
+                .CountAsync();
+            Console.WriteLine($"[DEBUG] Số hóa đơn trong tháng {thang}/{nam}: {invoicesInMonth}");
+
+            // Debug: Đếm hóa đơn đã thanh toán trong tháng
+            var paidInvoicesInMonth = await _context.HoaDons
+                .Where(h => h.NgayTao.HasValue &&
+                       h.NgayTao.Value.Month == thang &&
+                       h.NgayTao.Value.Year == nam &&
+                       h.TrangThai == "Đã thanh toán")
+                .CountAsync();
+            Console.WriteLine($"[DEBUG] Số hóa đơn đã thanh toán trong tháng {thang}/{nam}: {paidInvoicesInMonth}");
+
+            // Debug: Liệt kê các trạng thái hóa đơn có trong database
+            var statuses = await _context.HoaDons
+                .Select(h => h.TrangThai)
+                .Distinct()
+                .ToListAsync();
+            Console.WriteLine($"[DEBUG] Các trạng thái hóa đơn trong database: {string.Join(", ", statuses)}");
+
+            var result = await _context.HoaDons
+                .Where(h => h.NgayTao.HasValue &&
+                       h.NgayTao.Value.Month == thang &&
                        h.NgayTao.Value.Year == nam &&
                        h.TrangThai == "Đã thanh toán")
                 .SumAsync(h => h.TongTien);
+
+            Console.WriteLine($"[DEBUG] Tổng doanh thu tháng {thang}/{nam}: {result}");
+            return result;
         }
 
         private async Task<string> GenerateNewMaHoaDonAsync()

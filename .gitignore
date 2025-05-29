@@ -1,1 +1,11 @@
 *.dll
+backend/be-quanlikhachsanapi/bin/Debug/net8.0/be-quanlikhachsanapi.exe
+backend/be-quanlikhachsanapi/bin/Debug/net8.0/be-quanlikhachsanapi.pdb
+backend/be-quanlikhachsanapi/obj/Debug/net8.0/apphost.exe
+backend/be-quanlikhachsanapi/obj/Debug/net8.0/be-quanlikhachsanapi.AssemblyInfo.cs
+backend/be-quanlikhachsanapi/obj/Debug/net8.0/be-quanlikhachsanapi.AssemblyInfoInputs.cache
+backend/be-quanlikhachsanapi/obj/Debug/net8.0/be-quanlikhachsanapi.dll
+backend/be-quanlikhachsanapi/obj/Debug/net8.0/be-quanlikhachsanapi.pdb
+backend/be-quanlikhachsanapi/obj/Debug/net8.0/be-quanlikhachsanapi.sourcelink.json
+backend/be-quanlikhachsanapi/obj/Debug/net8.0/ref/be-quanlikhachsanapi.dll
+backend/be-quanlikhachsanapi/obj/Debug/net8.0/refint/be-quanlikhachsanapi.dll

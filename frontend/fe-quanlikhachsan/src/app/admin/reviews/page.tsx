@@ -97,6 +97,13 @@ export default function ReviewManager() {
             console.log(`[Review ${reviewId}] No MaDatPhong in review and no initial MaKH. Cannot determine customer.`);
           }
 
+          // Nếu backend đã trả về TenKhachHang, sử dụng nó trực tiếp
+          const backendTenKhachHang = apiReview.TenKhachHang || apiReview.tenKhachHang;
+          if (backendTenKhachHang && backendTenKhachHang.trim() !== '') {
+            tenKhachHangDisplay = backendTenKhachHang;
+            console.log(`[Review ${reviewId}] Using TenKhachHang from backend: ${backendTenKhachHang}`);
+          }
+
           return {
             maDG: apiReview.MaReview || apiReview.maReview,
             maDatPhong: apiReview.MaDatPhong || apiReview.maDatPhong,

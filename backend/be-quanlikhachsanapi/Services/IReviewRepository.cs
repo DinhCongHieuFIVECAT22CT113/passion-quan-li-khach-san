@@ -25,13 +25,21 @@ namespace be_quanlikhachsanapi.Services
 
         public List<ReviewDto> GetAll()
         {
-            var reviews = _context.Reviews.ToList();
+            var reviews = _context.Reviews
+                .Join(_context.DatPhongs, r => r.MaDatPhong, dp => dp.MaDatPhong, (r, dp) => new { Review = r, DatPhong = dp })
+                .Join(_context.KhachHangs, rdp => rdp.DatPhong.MaKh, kh => kh.MaKh, (rdp, kh) => new { rdp.Review, rdp.DatPhong, KhachHang = kh })
+                .ToList();
+
             return reviews.Select(r => new ReviewDto
             {
-                MaReview = r.MaReview,
-                MaDatPhong = r.MaDatPhong,
-                DanhGia = r.DanhGia,
-                BinhLuan = r.BinhLuan
+                MaReview = r.Review.MaReview,
+                MaDatPhong = r.Review.MaDatPhong,
+                DanhGia = r.Review.DanhGia,
+                BinhLuan = r.Review.BinhLuan,
+                TenKhachHang = $"{r.KhachHang.HoKh} {r.KhachHang.TenKh}".Trim(),
+                NgayTao = r.Review.NgayTao,
+                TrangThai = "Chưa duyệt", // Mock value since field doesn't exist in DB
+                AnHien = false // Mock value since field doesn't exist in DB
             }).ToList();
         }
 
