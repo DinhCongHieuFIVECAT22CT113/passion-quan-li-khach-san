@@ -108,9 +108,11 @@
   top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(30,41,59,0.18);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   z-index: 1000;
+  overflow-y: auto;
+  padding: 20px 0;
 }
 .modalContent {
   background: #fff;
@@ -119,6 +121,9 @@
   padding: 32px 28px 24px 28px;
   min-width: 340px;
   max-width: 95vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  margin: auto;
   animation: fadeIn 0.2s;
 }
 @keyframes fadeIn {
@@ -255,4 +260,4 @@
 .modal form textarea:focus {
   outline: none;
   border-color: #2563eb;
-} 
+}
