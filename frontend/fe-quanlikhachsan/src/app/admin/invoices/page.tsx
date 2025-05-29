@@ -1,8 +1,8 @@
 'use client';
 import React, { useState, useEffect } from "react";
 import styles from "./InvoiceManager.module.css";
-import { getInvoices, getBookingHistory, getCustomerProfile, deleteInvoice, updateInvoiceStatus } from "../../../lib/api";
-// import { API_BASE_URL } from '../../../lib/config'; // Không sử dụng
+import { getInvoices, getBookingHistory, getCustomerProfile, deleteInvoice, updateInvoiceStatus, getAuthHeaders, handleResponse } from "../../../lib/api";
+import { API_BASE_URL } from '../../../lib/config';
 
 interface Invoice {
   MaHoaDon: string;
@@ -32,11 +32,11 @@ export default function InvoiceManager() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [editInvoice, setEditInvoice] = useState<Invoice | null>(null);
   const [viewInvoice, setViewInvoice] = useState<Invoice | null>(null);
-  const [form, setForm] = useState<Partial<Invoice>>({ 
-    MaHoaDon: "", 
-    MaDatPhong: "", 
-    TongTien: 0, 
-    TrangThai: "" 
+  const [form, setForm] = useState<Partial<Invoice>>({
+    MaHoaDon: "",
+    MaDatPhong: "",
+    TongTien: 0,
+    TrangThai: ""
   });
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
@@ -52,93 +52,140 @@ export default function InvoiceManager() {
     const fetchData = async () => {
       setIsLoading(true);
       setError(null);
-      
+
       try {
         // Lấy danh sách hóa đơn
         const invoicesDataFromApi = await getInvoices(); // Assume this returns raw API data (camelCase or PascalCase)
-        
-        // Lấy danh sách đặt phòng
-        const bookingsDataFromApi: any[] = await getBookingHistory(); // Type as any for flexible property access
-                
-        const customerMap = new Map<string, Customer>(); // Customer interface uses PascalCase
-        
-        const uniqueCustomerIds: string[] = [];
-        bookingsDataFromApi.forEach((apiBooking: any) => {
-          const currentBookingMaKh = apiBooking.maKH || apiBooking.MaKH; // Safely get customer ID
-          if (currentBookingMaKh && !uniqueCustomerIds.includes(currentBookingMaKh)) {
-            uniqueCustomerIds.push(currentBookingMaKh);
-          }
+
+        // Lấy danh sách đặt phòng - Sử dụng API admin để lấy tất cả đặt phòng
+        console.log('[DEBUG] Calling admin bookings API...');
+        const bookingsResponse = await fetch(`${API_BASE_URL}/DatPhong`, {
+          method: 'GET',
+          headers: getAuthHeaders('GET'),
+          credentials: 'include'
         });
-        
-        for (const maKh of uniqueCustomerIds) {
-          try {
-            const customerDataWrapper: any = await getCustomerProfile(maKh); // API returns a wrapper object
-            // console.log(`Raw customerDataWrapper for MaKH ${maKh}:`, JSON.stringify(customerDataWrapper, null, 2)); // DEBUG
+        const bookingsDataFromApi: any[] = await handleResponse(bookingsResponse);
+        console.log('[DEBUG] Admin bookings API result:', {
+          isArray: Array.isArray(bookingsDataFromApi),
+          length: bookingsDataFromApi?.length || 0,
+          data: bookingsDataFromApi
+        });
 
-            // Check if customerDataWrapper and customerDataWrapper.value exist
-            const customerDataFromApi = customerDataWrapper && customerDataWrapper.value ? customerDataWrapper.value : null;
-            console.log(`Extracted customerDataFromApi for MaKH ${maKh}:`, JSON.stringify(customerDataFromApi, null, 2)); // DEBUG
+        // Lấy tất cả khách hàng trước
+        console.log('[DEBUG] Fetching all customers...');
+        const customersResponse = await fetch(`${API_BASE_URL}/KhachHang`, {
+          method: 'GET',
+          headers: getAuthHeaders('GET'),
+          credentials: 'include'
+        });
+        const customersDataFromApi: any[] = await handleResponse(customersResponse);
+        console.log('[DEBUG] All customers result:', {
+          isArray: Array.isArray(customersDataFromApi),
+          length: customersDataFromApi?.length || 0,
+          sample: customersDataFromApi?.slice(0, 2)
+        });
 
-            if (customerDataFromApi) {
-              // Normalize to the local Customer interface (PascalCase)
-              const normalizedCustomer: Customer = {
-                MaKh: customerDataFromApi.maKh || customerDataFromApi.MaKh || maKh, 
-                HoKh: customerDataFromApi.hoKh || customerDataFromApi.HoKh || "",
-                TenKh: customerDataFromApi.tenKh || customerDataFromApi.TenKh || "",
-              };
-              // console.log(`Normalized customer for MaKH ${maKh}:`, JSON.stringify(normalizedCustomer, null, 2)); // DEBUG
+        const customerMap = new Map<string, Customer>(); // Customer interface uses PascalCase
 
-              if (normalizedCustomer.MaKh) { 
-                  customerMap.set(normalizedCustomer.MaKh, normalizedCustomer);
-              }
-            } else {
-              console.warn(`Customer data is null, undefined, or not in expected wrapper for MaKH ${maKh}. Original wrapper:`, JSON.stringify(customerDataWrapper, null, 2)); // DEBUG
+        // Xử lý tất cả khách hàng vào map
+        if (Array.isArray(customersDataFromApi)) {
+          customersDataFromApi.forEach((customer: any) => {
+            const normalizedCustomer: Customer = {
+              MaKh: customer.maKh || customer.MaKh || customer.customerId,
+              HoKh: customer.hoKh || customer.HoKh || customer.firstName || "",
+              TenKh: customer.tenKh || customer.TenKh || customer.lastName || "",
+            };
+
+            if (normalizedCustomer.MaKh) {
+              customerMap.set(normalizedCustomer.MaKh, normalizedCustomer);
+              console.log(`[DEBUG] Added customer to map: ${normalizedCustomer.MaKh} -> ${normalizedCustomer.HoKh} ${normalizedCustomer.TenKh}`);
             }
-          } catch (err) {
-            console.error(`Không thể lấy thông tin khách hàng ${maKh}:`, err);
-          }
+          });
         }
+
+        console.log('[DEBUG] Final customer map size:', customerMap.size);
         // console.log("Final customerMap:", Array.from(customerMap.entries())); // DEBUG: Log map entries
 
         // Kết hợp thông tin khách hàng vào hóa đơn
         const enhancedInvoices = invoicesDataFromApi.map((apiInvoice: any) => {
           // Safely get invoice fields (camelCase or PascalCase)
           const invoiceMaDatPhong = apiInvoice.maDatPhong || apiInvoice.MaDatPhong;
-          
-          const bookingMatch = bookingsDataFromApi.find((apiBooking: any) => 
+
+          console.log(`[DEBUG] Processing invoice ${apiInvoice.maHoaDon || apiInvoice.MaHoaDon} with MaDatPhong: ${invoiceMaDatPhong}`);
+          console.log(`[DEBUG] Available bookings:`, bookingsDataFromApi.map(b => ({
+            maDatPhong: b.maDatPhong || b.MaDatPhong,
+            tenKhachHang: b.tenKhachHang || b.TenKhachHang,
+            maKH: b.maKH || b.MaKH
+          })));
+
+          const bookingMatch = bookingsDataFromApi.find((apiBooking: any) =>
             (apiBooking.maDatPhong || apiBooking.MaDatPhong) === invoiceMaDatPhong
           );
-          
+
+          console.log(`[DEBUG] Found booking match:`, bookingMatch);
+
           let tenKhachHangDisplay = "Không xác định";
           if (bookingMatch) {
-            // Ưu tiên lấy tên trực tiếp từ bookingMatch nếu có (kiểm tra cả camelCase và PascalCase)
+            // Ưu tiên lấy tên trực tiếp từ bookingMatch nếu có
             const directTenKhachHang = bookingMatch.tenKhachHang || bookingMatch.TenKhachHang;
-            if (directTenKhachHang && typeof directTenKhachHang === 'string' && directTenKhachHang.trim() !== "") {
+            console.log(`[DEBUG] Direct tenKhachHang from booking:`, directTenKhachHang);
+
+            if (directTenKhachHang && typeof directTenKhachHang === 'string' && directTenKhachHang.trim() !== "" && !directTenKhachHang.includes("Khách hàng (")) {
               tenKhachHangDisplay = directTenKhachHang.trim();
+              console.log(`[DEBUG] Using direct name: ${tenKhachHangDisplay}`);
             } else {
-              // Fallback: sử dụng customerMap nếu tên trực tiếp không có hoặc không hợp lệ
+              // Fallback: sử dụng customerMap
               const bookingMaKh = bookingMatch.maKH || bookingMatch.MaKH;
+              console.log(`[DEBUG] Booking MaKH: ${bookingMaKh}`);
+              console.log(`[DEBUG] Available customers in map:`, Array.from(customerMap.entries()));
+
               if (bookingMaKh) {
                 const customer = customerMap.get(bookingMaKh);
-                // Kiểm tra customer tồn tại và HoKh, TenKh có giá trị (không phải chuỗi rỗng sau khi trim)
-                if (customer && customer.HoKh && customer.TenKh && (customer.HoKh.trim() !== "" || customer.TenKh.trim() !== "")) {
-                  tenKhachHangDisplay = `${customer.HoKh} ${customer.TenKh}`.trim();
-                  // Nếu sau khi ghép, tên vẫn rỗng (ví dụ HoKh và TenKh chỉ là khoảng trắng)
-                  if (tenKhachHangDisplay === "") {
-                      tenKhachHangDisplay = `Khách hàng (${customer.MaKh})`;
+                console.log(`[DEBUG] Customer from map:`, customer);
+
+                if (customer) {
+                  // Thử nhiều cách khác nhau để lấy tên
+                  const hoKh = customer.HoKh || customer.hoKh || "";
+                  const tenKh = customer.TenKh || customer.tenKh || "";
+
+                  if (hoKh.trim() !== "" || tenKh.trim() !== "") {
+                    tenKhachHangDisplay = `${hoKh} ${tenKh}`.trim();
+                    if (tenKhachHangDisplay === "") {
+                        tenKhachHangDisplay = `Khách hàng (${customer.MaKh || customer.maKh})`;
+                    }
+                    console.log(`[DEBUG] Using customer map name: ${tenKhachHangDisplay}`);
+                  } else {
+                    tenKhachHangDisplay = `Khách hàng (${customer.MaKh || customer.maKh})`;
+                    console.log(`[DEBUG] Using customer ID: ${tenKhachHangDisplay}`);
                   }
-                } else if (customer && customer.MaKh) {
-                  // customer tồn tại trong map, nhưng HoKh/TenKh rỗng hoặc thiếu -> hiển thị Mã KH
-                  tenKhachHangDisplay = `Khách hàng (${customer.MaKh})`;
-                } else if (!customer && bookingMaKh) {
-                    // customer không có trong map nhưng có MaKH từ booking -> hiển thị ID tạm
+                } else {
+                  // Thử tìm trực tiếp trong customersDataFromApi
+                  const directCustomer = customersDataFromApi.find((c: any) =>
+                    (c.maKh || c.MaKh) === bookingMaKh
+                  );
+                  console.log(`[DEBUG] Direct customer search result:`, directCustomer);
+
+                  if (directCustomer) {
+                    const hoKh = directCustomer.HoKh || directCustomer.hoKh || "";
+                    const tenKh = directCustomer.TenKh || directCustomer.tenKh || "";
+                    tenKhachHangDisplay = `${hoKh} ${tenKh}`.trim();
+                    if (tenKhachHangDisplay === "") {
+                      tenKhachHangDisplay = `Khách hàng (${directCustomer.MaKh || directCustomer.maKh})`;
+                    }
+                    console.log(`[DEBUG] Using direct customer name: ${tenKhachHangDisplay}`);
+                  } else {
                     tenKhachHangDisplay = `Khách hàng (ID: ${bookingMaKh})`;
+                    console.log(`[DEBUG] Using booking ID: ${tenKhachHangDisplay}`);
+                  }
                 }
-                // Nếu không có bookingMaKh, tenKhachHangDisplay vẫn là "Không xác định"
               }
             }
+          } else {
+            console.log(`[DEBUG] No booking found for MaDatPhong: ${invoiceMaDatPhong}`);
           }
-          
+
+          console.log(`[DEBUG] Final tenKhachHangDisplay: ${tenKhachHangDisplay}`);
+
           const finalTongTien = apiInvoice.tongTien || apiInvoice.TongTien || 0;
           const finalTrangThai = apiInvoice.trangThai || apiInvoice.TrangThai || "Chưa thanh toán";
           const finalDaThanhToan = finalTrangThai === "Đã thanh toán" ? finalTongTien : 0;
@@ -161,7 +208,7 @@ export default function InvoiceManager() {
             soTienConThieu: finalConThieu,
           } as Invoice; // Assert as Invoice type
         });
-        
+
         setInvoices(enhancedInvoices);
       } catch (err) {
         const error = err as Error;
@@ -178,7 +225,7 @@ export default function InvoiceManager() {
   // Khi mở modal Thêm mới
   const openAddModal = () => {
     // Chuyển hướng trực tiếp vì form thêm hóa đơn phức tạp hơn
-    window.location.href = `/admin/invoices/create`; 
+    window.location.href = `/admin/invoices/create`;
   };
 
   // Khi mở modal Sửa
@@ -207,15 +254,15 @@ export default function InvoiceManager() {
   // Xử lý thay đổi input
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setForm(prevForm => ({ 
-      ...prevForm, 
-      [name]: (name === 'TongTien' || name === 'GiamGiaLoaiKM' || name === 'GiamGiaLoaiKH' || name === 'soTienDaThanhToan') ? 
-        Number(value) : value 
+    setForm(prevForm => ({
+      ...prevForm,
+      [name]: (name === 'TongTien' || name === 'GiamGiaLoaiKM' || name === 'GiamGiaLoaiKH' || name === 'soTienDaThanhToan') ?
+        Number(value) : value
     }));
   };
 
   // Xử lý submit Thêm mới - đã chuyển hướng
-  // const handleAdd = (e: React.FormEvent) => { ... }; 
+  // const handleAdd = (e: React.FormEvent) => { ... };
 
   // Xử lý submit Sửa (chỉ trạng thái)
   const handleEdit = async (e: React.FormEvent) => {
@@ -224,12 +271,12 @@ export default function InvoiceManager() {
       alert("Thông tin không hợp lệ để cập nhật trạng thái.");
       return;
     }
-    
+
     try {
       await updateInvoiceStatus(form.MaHoaDon, form.TrangThai);
-      
+
       // Cập nhật danh sách hóa đơn
-      setInvoices(invoices.map(inv => 
+      setInvoices(invoices.map(inv =>
         inv.MaHoaDon === form.MaHoaDon ? { ...inv, TrangThai: form.TrangThai as string } : inv
       ));
       setEditInvoice(null);
@@ -279,19 +326,26 @@ export default function InvoiceManager() {
         <h2>Quản lý hóa đơn</h2>
         <div style={{display:'flex', gap:12, alignItems:'center'}}>
           <input
+            className={styles.search}
             type="text"
             placeholder="Tìm kiếm khách hàng, mã hóa đơn..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            style={{padding:'8px 14px', borderRadius:8, border:'1px solid #e5e7eb', fontSize:'1rem', background:'#f9fafb', minWidth:220}}
           />
+          <button
+            className={styles.viewBtn}
+            onClick={() => window.location.reload()}
+            title="Làm mới dữ liệu"
+          >
+            🔄 Làm mới
+          </button>
           <button className={styles.addBtn} onClick={openAddModal}>+ Thêm hóa đơn</button>
         </div>
       </div>
-      
+
       {isLoading && <div className={styles.loading}>Đang tải dữ liệu hóa đơn...</div>}
       {error && <div className={styles.error}>Lỗi: {error}</div>}
-      
+
       {!isLoading && !error && (
       <div style={{overflowX:'auto'}}>
       <table className={styles.table}>
@@ -313,12 +367,12 @@ export default function InvoiceManager() {
                 <tr><td colSpan={9} className={styles.noData}>Không có dữ liệu hóa đơn</td></tr>
           ) : filtered.map(invoice => (
                 <tr key={invoice.MaHoaDon}>
-                  <td>{invoice.MaHoaDon}</td>
-                  <td>{invoice.MaDatPhong}</td>
+                  <td style={{fontWeight: '600', color: '#2563eb'}}>{invoice.MaHoaDon}</td>
+                  <td style={{fontWeight: '600', color: '#7c3aed'}}>{invoice.MaDatPhong}</td>
                   <td>{invoice.tenKhachHang}</td>
-                  <td>{formatCurrency(invoice.TongTien)}</td>
-                  <td>{formatCurrency(invoice.soTienDaThanhToan || 0)}</td>
-                  <td>{formatCurrency(invoice.soTienConThieu || 0)}</td>
+                  <td><span className={styles.amount}>{formatCurrency(invoice.TongTien)}</span></td>
+                  <td><span className={styles['amount-paid']}>{formatCurrency(invoice.soTienDaThanhToan || 0)}</span></td>
+                  <td><span className={styles['amount-remaining']}>{formatCurrency(invoice.soTienConThieu || 0)}</span></td>
                   <td>
                     <span className={`${styles.status} ${styles[`status-${invoice.TrangThai?.toLowerCase().replace(/\s+/g, '-')}`]}`}>
                       {invoice.TrangThai}
@@ -381,10 +435,10 @@ export default function InvoiceManager() {
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="TrangThai">Trạng thái:</label>
-                <select 
-                  id="TrangThai" 
-                  name="TrangThai" 
-                  value={form.TrangThai || ""} 
+                <select
+                  id="TrangThai"
+                  name="TrangThai"
+                  value={form.TrangThai || ""}
                   onChange={handleChange}
                 >
                   <option value="Chưa thanh toán">Chưa thanh toán</option>
@@ -447,9 +501,9 @@ export default function InvoiceManager() {
               )}
               <div className={styles.detailRow}>
                 <strong>Trạng thái:</strong>
-                <span 
+                <span
                   className={`${styles.status} ${
-                    viewInvoice.TrangThai === "Đã thanh toán" ? styles["status-paid"] : 
+                    viewInvoice.TrangThai === "Đã thanh toán" ? styles["status-paid"] :
                     viewInvoice.TrangThai === "Chưa thanh toán" ? styles["status-unpaid"] : styles["status"]
                   }`}
                 >
@@ -467,7 +521,7 @@ export default function InvoiceManager() {
                 </div>
               )}
             </div>
-            
+
             <div style={{marginTop: 20, display:'flex', gap:8}}>
               <button onClick={() => handleExportPDF(viewInvoice)} className={styles.pdfBtn}>Xuất PDF</button>
               <button onClick={() => setViewInvoice(null)} className={styles.viewBtn}>Đóng</button>
@@ -477,4 +531,4 @@ export default function InvoiceManager() {
       )}
     </div>
   );
-} 
+}

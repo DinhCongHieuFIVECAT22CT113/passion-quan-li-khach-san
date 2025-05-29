@@ -11,15 +11,22 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 18px;
+  margin-bottom: 24px;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 16px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #f1f5f9;
 }
 
 .header h2 {
-  font-size: 1.7rem;
-  font-weight: bold;
-  color: #232a35;
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .loading {
@@ -41,18 +48,28 @@
 }
 
 .addBtn {
-  background: #2563eb;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
   color: #fff;
   border: none;
-  border-radius: 8px;
-  padding: 8px 18px;
+  border-radius: 10px;
+  padding: 12px 24px;
   font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  position: relative;
+  overflow: hidden;
 }
 
 .addBtn:hover {
-  background: #1d4ed8;
+  background: linear-gradient(135deg, #1d4ed8, #2563eb);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+}
+
+.addBtn:active {
+  transform: translateY(0);
 }
 
 .table {
@@ -61,17 +78,28 @@
   background: #fff;
   font-size: 1rem;
   min-width: 700px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .table th, .table td {
-  padding: 12px 10px;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 16px 12px;
+  border-bottom: 1px solid #e2e8f0;
   text-align: left;
+  vertical-align: middle;
 }
 
 .table th {
-  background: #f3f4f6;
-  font-weight: 600;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  font-size: 0.875rem;
+  letter-spacing: 0.05em;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .table tr:last-child td {
@@ -79,7 +107,9 @@
 }
 
 .table tr:hover {
-  background: #f8fafc;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  transform: scale(1.001);
+  transition: all 0.2s ease;
 }
 
 .status {
@@ -102,34 +132,42 @@
 }
 
 .editBtn {
-  background: #fbbf24;
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
   color: #fff;
   border: none;
-  border-radius: 6px;
-  padding: 6px 12px;
-  margin-right: 4px;
+  border-radius: 8px;
+  padding: 8px 16px;
+  margin-right: 8px;
   cursor: pointer;
-  font-size: 0.97em;
-  transition: background 0.2s;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
 }
 
 .editBtn:hover {
-  background: #f59e42;
+  background: linear-gradient(135deg, #d97706, #f59e0b);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
 }
 
 .deleteBtn {
-  background: #f87171;
+  background: linear-gradient(135deg, #ef4444, #f87171);
   color: #fff;
   border: none;
-  border-radius: 6px;
-  padding: 6px 12px;
+  border-radius: 8px;
+  padding: 8px 16px;
   cursor: pointer;
-  font-size: 0.97em;
-  transition: background 0.2s;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
 }
 
 .deleteBtn:hover {
-  background: #dc2626;
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
 .modal {
@@ -173,17 +211,28 @@
 }
 
 .modalContent input, .modalContent select {
-  padding: 8px 12px;
-  border-radius: 6px;
-  border: 1px solid #e5e7eb;
-  font-size: 1em;
-  background: #f9fafb;
-  transition: border-color 0.2s;
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 2px solid #e2e8f0;
+  font-size: 1rem;
+  background: #f8fafc;
+  transition: all 0.3s ease;
+  font-weight: 500;
 }
 
 .modalContent input:focus, .modalContent select:focus {
   outline: none;
-  border-color: #2563eb;
+  border-color: #3b82f6;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  transform: translateY(-1px);
+}
+
+.modalContent label {
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+  display: block;
 }
 
 .modalContent .buttonGroup {
@@ -192,16 +241,59 @@
   margin-top: 12px;
 }
 
+/* Image preview styles */
+.imagePreviewContainer {
+  margin-top: 12px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+  border: 2px dashed #cbd5e1;
+}
+
+.imagePreview {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 2px solid #e2e8f0;
+}
+
+.thumbnail {
+  border-radius: 6px;
+  margin-right: 8px;
+  vertical-align: middle;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.autoImageNote {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  color: #1e40af;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: 1px solid #93c5fd;
+}
+
 @media (max-width: 700px) {
   .container {
-    padding: 10px 2vw 18px 2vw;
+    padding: 16px;
+    margin: 16px;
+    border-radius: 12px;
   }
   .table {
-    font-size: 0.97em;
+    font-size: 0.875rem;
     min-width: 500px;
   }
   .modalContent {
-    padding: 18px 6vw 14px 6vw;
+    padding: 24px 16px;
     min-width: 0;
+    margin: 16px;
   }
-} 
+  .header h2 {
+    font-size: 1.5rem;
+  }
+  .addBtn {
+    padding: 10px 20px;
+    font-size: 0.875rem;
+  }
+}

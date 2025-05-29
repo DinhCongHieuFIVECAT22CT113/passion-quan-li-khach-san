@@ -50,9 +50,9 @@ export default function RoomManager() {
   const [roomTypes, setRoomTypes] = useState<LoaiPhongBE[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [editingRoom, setEditingRoom] = useState<RoomDisplay | null>(null);
-  const [form, setForm] = useState<RoomFormState>({ 
-    SoPhong: "", 
-    MaLoaiPhong: "", 
+  const [form, setForm] = useState<RoomFormState>({
+    SoPhong: "",
+    MaLoaiPhong: "",
     Tang: 1,
   });
   const [isLoading, setIsLoading] = useState(true);
@@ -74,7 +74,7 @@ export default function RoomManager() {
           credentials: 'include'
         });
         const roomsData: PhongBE[] = await handleResponse(roomsResponse);
-        
+
         const roomTypesResponse = await fetch(`${API_BASE_URL}/LoaiPhong`, {
           method: 'GET',
           headers: getAuthHeaders('GET'),
@@ -83,10 +83,10 @@ export default function RoomManager() {
         const roomTypesData: LoaiPhongBE[] = await handleResponse(roomTypesResponse);
         console.log("DEBUG: Fetched roomTypesData:", JSON.parse(JSON.stringify(roomTypesData)));
         setRoomTypes(roomTypesData);
-        
+
         const roomsWithDetails = roomsData.map((phong): RoomDisplay => {
           const loaiPhong = roomTypesData.find(lp => lp.maLoaiPhong === phong.maLoaiPhong);
-          
+
           if (phong.maPhong === 'P001' || phong.maPhong === 'P002') {
             console.log(`DEBUG: Processing phong ${phong.maPhong} with maLoaiPhong ${phong.maLoaiPhong}`);
             console.log("DEBUG: Found loaiPhong object:", JSON.parse(JSON.stringify(loaiPhong)));
@@ -101,7 +101,7 @@ export default function RoomManager() {
           };
           return roomDetail;
         });
-        
+
         setRooms(roomsWithDetails);
       } catch (err) {
         const e = err as Error;
@@ -116,8 +116,8 @@ export default function RoomManager() {
   }, []);
 
   const openAddModal = () => {
-    setForm({ 
-      SoPhong: "", 
+    setForm({
+      SoPhong: "",
       MaLoaiPhong: roomTypes.length > 0 ? roomTypes[0].maLoaiPhong : "",
       Tang: 1,
       Thumbnail: undefined,
@@ -135,7 +135,7 @@ export default function RoomManager() {
       SoPhong: room.soPhong,
       MaLoaiPhong: room.maLoaiPhong,
       Tang: room.tang,
-      Thumbnail: room.thumbnail, 
+      Thumbnail: room.thumbnail,
       HinhAnh: room.hinhAnh,
     });
     setSelectedThumbnailFile(null);
@@ -165,9 +165,26 @@ export default function RoomManager() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setForm(prevForm => ({ 
-      ...prevForm, 
-      [name]: (name === 'Tang') ? (value === '' ? undefined : Number(value)) : value 
+
+    // Nếu thay đổi loại phòng, tự động cập nhật hình ảnh từ loại phòng
+    if (name === 'MaLoaiPhong') {
+      const selectedRoomType = roomTypes.find(rt => rt.maLoaiPhong === value);
+      if (selectedRoomType && selectedRoomType.thumbnail) {
+        // Chỉ cập nhật hình ảnh nếu người dùng chưa chọn file mới
+        if (!selectedThumbnailFile) {
+          setForm(prevForm => ({
+            ...prevForm,
+            [name]: value,
+            Thumbnail: selectedRoomType.thumbnail
+          }));
+          return;
+        }
+      }
+    }
+
+    setForm(prevForm => ({
+      ...prevForm,
+      [name]: (name === 'Tang') ? (value === '' ? undefined : Number(value)) : value
     }));
   };
 
@@ -180,9 +197,9 @@ export default function RoomManager() {
           headers: getFormDataHeaders(),
           credentials: 'include',
         });
-        
+
         await handleResponse(response);
-        
+
         setRooms(rooms.filter(room => room.maPhong !== maPhongToDelete));
         alert('Xóa phòng thành công');
       } catch (err) {
@@ -197,11 +214,11 @@ export default function RoomManager() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       const token = localStorage.getItem('token');
       if (!token) throw new Error("Bạn cần đăng nhập để thực hiện hành động này");
-      
+
       const formData = new FormData();
       formData.append('SoPhong', form.SoPhong);
       formData.append('MaLoaiPhong', form.MaLoaiPhong);
@@ -215,10 +232,10 @@ export default function RoomManager() {
       if (selectedHinhAnhFile) {
         formData.append('HinhAnhFile', selectedHinhAnhFile);
       }
-      
+
       let response;
       const maPhongBeingEdited = editingRoom?.maPhong;
-      
+
       if (maPhongBeingEdited) {
         response = await fetch(`${API_BASE_URL}/Phong/${maPhongBeingEdited}`, {
           method: 'PUT',
@@ -234,9 +251,9 @@ export default function RoomManager() {
           credentials: 'include',
         });
       }
-      
+
       await handleResponse(response);
-      
+
       const roomsResponse = await fetch(`${API_BASE_URL}/Phong`, {
         method: 'GET',
         headers: getAuthHeaders('GET'),
@@ -253,7 +270,7 @@ export default function RoomManager() {
         };
       });
       setRooms(roomsWithDetails);
-            
+
       closeModal();
       alert(editingRoom ? "Cập nhật phòng thành công!" : "Thêm phòng thành công!");
 
@@ -277,10 +294,10 @@ export default function RoomManager() {
         <h2>Quản lý phòng</h2>
         <button className={styles.addBtn} onClick={openAddModal}>+ Thêm phòng</button>
       </div>
-      
+
       {isLoading && <div className={styles.loading}>Đang tải dữ liệu...</div>}
       {error && <div className={styles.error}>Lỗi: {error}</div>}
-      
+
       {!isLoading && !error && (
       <div style={{ overflowX: 'auto' }}>
         <table className={styles.table}>
@@ -300,20 +317,20 @@ export default function RoomManager() {
               <tr key={room.maPhong}>
                 <td>{room.maPhong}</td>
                 <td>
-                  {room.thumbnail && 
-                    <Image 
-                      src={room.thumbnail} 
-                      alt={`Thumbnail ${room.soPhong}`} 
-                      width={50} 
-                      height={50} 
-                      className={styles.thumbnail} 
+                  {room.thumbnail &&
+                    <Image
+                      src={room.thumbnail}
+                      alt={`Thumbnail ${room.soPhong}`}
+                      width={50}
+                      height={50}
+                      className={styles.thumbnail}
                     />
                   }
                   {room.soPhong}
                 </td>
                 <td>{room.tenLoaiPhong}</td>
                 <td>
-                  {(room.donGia || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")} 
+                  {(room.donGia || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
                   / {(room.giaGio || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}
                 </td>
                 <td>{room.tang || "-"}</td>
@@ -328,7 +345,7 @@ export default function RoomManager() {
         </table>
       </div>
       )}
-      
+
       {showModal && (
         <div className={styles.modal}>
           <div className={styles.modalContent}>
@@ -336,20 +353,20 @@ export default function RoomManager() {
             <form onSubmit={handleSubmit}>
               <div>
                 <label>Số phòng:</label>
-                <input 
+                <input
                   name="SoPhong"
-                  value={form.SoPhong} 
-                  onChange={handleChange} 
-                  placeholder="Số phòng" 
-                  required 
+                  value={form.SoPhong}
+                  onChange={handleChange}
+                  placeholder="Số phòng"
+                  required
                 />
               </div>
               <div>
                 <label>Loại phòng:</label>
-                <select 
+                <select
                   name="MaLoaiPhong"
-                  value={form.MaLoaiPhong} 
-                  onChange={handleChange} 
+                  value={form.MaLoaiPhong}
+                  onChange={handleChange}
                   required
                 >
                   <option value="">Chọn loại phòng</option>
@@ -375,17 +392,26 @@ export default function RoomManager() {
               <div>
                 <label htmlFor="Thumbnail">Thumbnail:</label>
                 <input type="file" id="Thumbnail" name="Thumbnail" onChange={(e) => handleFileChange(e, 'thumbnail')} />
-                {editingRoom && editingRoom.thumbnail && typeof editingRoom.thumbnail === 'string' && (
+
+                {/* Hiển thị thumbnail hiện tại hoặc từ loại phòng */}
+                {!selectedThumbnailFile && form.Thumbnail && typeof form.Thumbnail === 'string' && (
                   <div className={styles.imagePreviewContainer}>
                     <p>Thumbnail hiện tại:</p>
-                    <Image src={editingRoom.thumbnail} alt="Thumbnail hiện tại" width={100} height={100} className={styles.imagePreview} />
+                    <Image src={form.Thumbnail} alt="Thumbnail hiện tại" width={100} height={100} className={styles.imagePreview} />
                   </div>
                 )}
+
+                {/* Hiển thị thumbnail mới được chọn */}
                 {selectedThumbnailFile && (
                   <div className={styles.imagePreviewContainer}>
                     <p>Thumbnail mới:</p>
                     <Image src={URL.createObjectURL(selectedThumbnailFile)} alt="Preview thumbnail" width={100} height={100} className={styles.imagePreview} />
                   </div>
+                )}
+
+                {/* Thông báo khi tự động lấy từ loại phòng */}
+                {!editingRoom && !selectedThumbnailFile && form.Thumbnail && typeof form.Thumbnail === 'string' && (
+                  <p className={styles.autoImageNote}>📷 Tự động sử dụng hình ảnh từ loại phòng</p>
                 )}
               </div>
               <div>
@@ -415,4 +441,4 @@ export default function RoomManager() {
       )}
     </div>
   );
-} 
+}

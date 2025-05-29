@@ -288,6 +288,94 @@ export default function BookingManager() {
     }
   };
 
+  const refreshData = async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // Fetch all data concurrently
+      const [bookingsResponse, customersResponse, roomsResponse, roomTypesResponse] = await Promise.all([
+        fetch(`${API_BASE_URL}/DatPhong`, { method: 'GET', headers: getAuthHeaders('GET'), credentials: 'include' }),
+        fetch(`${API_BASE_URL}/KhachHang`, { method: 'GET', headers: getAuthHeaders('GET'), credentials: 'include' }),
+        fetch(`${API_BASE_URL}/Phong`, { method: 'GET', headers: getAuthHeaders('GET'), credentials: 'include' }),
+        fetch(`${API_BASE_URL}/LoaiPhong`, { method: 'GET', headers: getAuthHeaders('GET'), credentials: 'include' })
+      ]);
+
+      // Handle responses and parse data
+      const bookingsData = await handleResponse(bookingsResponse);
+      const customersData = await handleResponse(customersResponse);
+      const roomsDataFromApi = await handleResponse(roomsResponse);
+      const roomTypesDataFromApi = await handleResponse(roomTypesResponse);
+
+      const bookingsArray: BookingBE[] = Array.isArray(bookingsData) ? bookingsData : [];
+      const customersApiArray: any[] = Array.isArray(customersData) ? customersData : [];
+      const roomsApiArray: any[] = Array.isArray(roomsDataFromApi) ? roomsDataFromApi : [];
+      const roomTypesApiArray: any[] = Array.isArray(roomTypesDataFromApi) ? roomTypesDataFromApi : [];
+
+      // Process data
+      const processedCustomers = customersApiArray.map(c => ({
+        maKh: c.maKh || c.MaKh,
+        hoKh: c.hoKh || c.HoKh || "",
+        tenKh: c.tenKh || c.TenKh || ""
+      }));
+      setCustomers(processedCustomers);
+
+      const processedRooms = roomsApiArray.map((r): RoomInfoBE => ({
+        maPhong: r.maPhong || r.MaPhong,
+        soPhong: r.soPhong || r.SoPhong || "N/A",
+        maLoaiPhong: r.maLoaiPhong || r.MaLoaiPhong
+      }));
+      setRooms(processedRooms);
+
+      const processedRoomTypes = roomTypesApiArray.map((rt): RoomTypeBE => ({
+        maLoaiPhong: rt.maLoaiPhong || rt.MaLoaiPhong,
+        tenLoaiPhong: rt.tenLoaiPhong || rt.TenLoaiPhong,
+        giaMoiGio: parseFloat(rt.giaMoiGio) || 0,
+        giaMoiDem: parseFloat(rt.giaMoiDem) || 0,
+      }));
+      setRoomTypes(processedRoomTypes);
+
+      const bookingsWithDetails = bookingsArray.map((apiBooking): BookingDisplay => {
+        const currentMaKH = apiBooking.maKH;
+        const currentMaPhong = apiBooking.maPhong;
+
+        const customer = processedCustomers.find(c => c.maKh === currentMaKH);
+        const room = processedRooms.find(r => r.maPhong === currentMaPhong);
+
+        let roomType: RoomTypeBE | undefined = undefined;
+        if (room && room.maLoaiPhong) {
+          roomType = processedRoomTypes.find(rt => rt.maLoaiPhong === room.maLoaiPhong);
+        }
+
+        let calculatedTotalCost = 0;
+        if (roomType) {
+          const { totalCost } = calculateStayDurationAndCost(
+            apiBooking.ngayNhanPhong,
+            apiBooking.ngayTraPhong,
+            roomType.giaMoiDem,
+            roomType.giaMoiGio
+          );
+          calculatedTotalCost = totalCost;
+        }
+
+        return {
+          ...apiBooking,
+          tenKhachHang: customer ? `${customer.hoKh} ${customer.tenKh}`.trim() : 'Không xác định',
+          tenPhongDisplay: room ? room.soPhong : (currentMaPhong ? `P:${currentMaPhong} (không tìm thấy)` : 'N/A'),
+          tongTienDisplay: formatCurrency(calculatedTotalCost),
+        };
+      });
+
+      setBookings(bookingsWithDetails);
+    } catch (err) {
+      const error = err as Error;
+      setError(error.message || "Có lỗi xảy ra khi tải dữ liệu");
+      console.error("Error refreshing data:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const openAddModal = () => {
     setForm({
       maKH: "",
@@ -302,6 +390,7 @@ export default function BookingManager() {
       trangThai: "Đã đặt"
     });
     setEditBooking(null);
+    setError(null);
     setShowAddModal(true);
   };
 
@@ -332,25 +421,60 @@ export default function BookingManager() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
 
-    // Validation
+    // Enhanced Validation
     if (!form.maKH.trim()) {
-      alert('Vui lòng nhập mã khách hàng');
+      setError('Vui lòng nhập mã khách hàng');
       setIsLoading(false);
       return;
     }
     if (!form.maPhong.trim()) {
-      alert('Vui lòng chọn phòng');
+      setError('Vui lòng chọn phòng');
       setIsLoading(false);
       return;
     }
     if (!form.ngayNhanPhong) {
-      alert('Vui lòng chọn ngày nhận phòng');
+      setError('Vui lòng chọn ngày nhận phòng');
       setIsLoading(false);
       return;
     }
     if (!form.ngayTraPhong) {
-      alert('Vui lòng chọn ngày trả phòng');
+      setError('Vui lòng chọn ngày trả phòng');
+      setIsLoading(false);
+      return;
+    }
+
+    // Validate dates
+    const checkInDate = new Date(form.ngayNhanPhong);
+    const checkOutDate = new Date(form.ngayTraPhong);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (checkInDate < today) {
+      setError('Ngày nhận phòng không thể là ngày trong quá khứ');
+      setIsLoading(false);
+      return;
+    }
+
+    if (checkOutDate <= checkInDate) {
+      setError('Ngày trả phòng phải sau ngày nhận phòng');
+      setIsLoading(false);
+      return;
+    }
+
+    // Validate customer exists
+    const customerExists = customers.find(c => c.maKh === form.maKH.trim());
+    if (!customerExists) {
+      setError(`Không tìm thấy khách hàng với mã: ${form.maKH.trim()}`);
+      setIsLoading(false);
+      return;
+    }
+
+    // Validate room exists
+    const roomExists = rooms.find(r => r.maPhong === form.maPhong.trim());
+    if (!roomExists) {
+      setError(`Không tìm thấy phòng với mã: ${form.maPhong.trim()}`);
       setIsLoading(false);
       return;
     }
@@ -471,12 +595,38 @@ export default function BookingManager() {
       } else {
         setShowAddModal(false);
       }
-      alert(editBooking ? "Cập nhật đặt phòng thành công!" : "Thêm đặt phòng thành công!");
+
+      // Clear form after successful submission
+      setForm({
+        maKH: "",
+        maPhong: "",
+        ngayNhanPhong: "",
+        ngayTraPhong: "",
+        trangThai: "Đã đặt",
+        ghiChu: "",
+        treEm: 0,
+        nguoiLon: 1,
+        soLuongPhong: 1,
+        thoiGianDen: "14:00"
+      });
+
+      setError(null);
+      alert(editBooking ? "✅ Cập nhật đặt phòng thành công!" : "✅ Thêm đặt phòng thành công!");
 
     } catch (err) {
       const error = err as Error;
-      alert(`Lỗi: ${error.message}`);
       console.error(`Error ${editBooking ? 'updating' : 'adding'} booking:`, error);
+
+      // Set error message for display
+      if (error.message.includes('400')) {
+        setError('Dữ liệu không hợp lệ. Vui lòng kiểm tra lại thông tin.');
+      } else if (error.message.includes('404')) {
+        setError('Không tìm thấy tài nguyên. Vui lòng thử lại.');
+      } else if (error.message.includes('500')) {
+        setError('Lỗi server. Vui lòng thử lại sau.');
+      } else {
+        setError(`Lỗi: ${error.message}`);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -504,6 +654,14 @@ export default function BookingManager() {
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
+          <button
+            className={styles.historyBtn}
+            onClick={refreshData}
+            disabled={isLoading}
+            title="Làm mới dữ liệu"
+          >
+            🔄 Làm mới
+          </button>
           <button className={styles.addBtn} onClick={openAddModal}>+ Thêm đặt phòng</button>
         </div>
       </div>
@@ -539,14 +697,21 @@ export default function BookingManager() {
               const tongTienDisplay = booking.tongTienDisplay;
               const trangThaiDisplay = booking.trangThai;
 
+              console.log(`[DEBUG] Rendering booking row:`, {
+                maDatPhongDisplay,
+                tenKhachHangDisplay,
+                tenPhongDisplay,
+                booking: booking
+              });
+
               return (
-                <tr key={maDatPhongDisplay}>
-                  <td>{maDatPhongDisplay}</td>
+                <tr key={maDatPhongDisplay || `booking-${Math.random()}`}>
+                  <td style={{fontWeight: '600', color: '#2563eb'}}>{maDatPhongDisplay || 'N/A'}</td>
                   <td>{tenKhachHangDisplay}</td>
                   <td>{tenPhongDisplay}</td>
                   <td>{ngayNhanPhongDisplay}</td>
                   <td>{ngayTraPhongDisplay}</td>
-                  <td>{tongTienDisplay}</td>
+                  <td style={{fontWeight: '600', color: '#059669'}}>{tongTienDisplay}</td>
                   <td><span className={statusMap[trangThaiDisplay]?.className || styles.status}>{statusMap[trangThaiDisplay]?.label || trangThaiDisplay}</span></td>
                   <td style={{whiteSpace:'nowrap'}}>
                     <button className={styles.editBtn} onClick={() => openEditModal(booking)}>Sửa</button>
