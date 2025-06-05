@@ -175,42 +175,44 @@ const ProfilePageContent: FC = () => {
   };
 
   // Handle Save Profile
-  const handleSaveProfile = async (data: any) => {
-    try {
-      const response = await fetch('/api/profile', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'updateProfile',
-          hokh: data.hokh,
-          tenkh: data.tenkh,
-          email: data.email,
-          soDienThoai: data.soDienThoai,
-          soCccd: data.soCccd,
-        }),
-      });
+const handleSaveProfile = async (data: any) => {
+  try {
+    const response = await fetch('/api/profile', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'updatePersonalInfo', // Sửa từ 'updateProfile' thành 'updatePersonalInfo'
+        hokh: data.hokh,
+        tenkh: data.tenkh,
+        email: data.email,
+        soDienThoai: data.soDienThoai,
+        soCccd: data.soCccd,
+        diaChi: data.diaChi || '',
+      }),
+    });
 
-      if (response.ok) {
-        setUserInfo((prev) => ({
-          ...prev,
-          name: `${data.hokh} ${data.tenkh}`,
-          hokh: data.hokh,
-          tenkh: data.tenkh,
-          email: data.email,
-          phone: data.soDienThoai,
-          idNumber: data.soCccd
-        }));
-        setIsEditing(false);
-      } else {
-        const errorData = await response.json();
-        console.error('Error updating profile:', errorData.message);
-        window.alert(errorData.message || t('profile.updateProfileFailed'));
-      }
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      window.alert(t('profile.updateProfileError'));
+    if (response.ok) {
+      setUserInfo((prev) => ({
+        ...prev,
+        name: `${data.hokh} ${data.tenkh}`,
+        hokh: data.hokh,
+        tenkh: data.tenkh,
+        email: data.email,
+        phone: data.soDienThoai,
+        idNumber: data.soCccd,
+        address: data.diaChi || '',
+      }));
+      setIsEditing(false);
+    } else {
+      const errorData = await response.json();
+      console.error('Error response from server:', errorData);
+      window.alert(errorData.message || t('profile.updateProfileFailed'));
     }
-  };
+  } catch (error) {
+    console.error('Error updating profile:', error);
+    window.alert(t('profile.updateProfileError'));
+  }
+};
 
   // Hàm cập nhật avatar
   const handleAvatarUpdated = (newAvatarUrl: string) => {
@@ -285,17 +287,18 @@ const ProfilePageContent: FC = () => {
 
             <div className={styles.infoSection}>
               {isEditing ? (
-                <PersonalInfoForm
-                  initialValues={{
-                    hokh: user.hoKh || '',
-                    tenkh: user.tenKh || '',
-                    email: user.email || '',
-                    soDienThoai: user.soDienThoai || '',
-                    soCccd: user.soCccd || '',
-                  }}
-                  onSave={handleSaveProfile} 
-                  onCancel={() => setIsEditing(false)} 
-                />
+<PersonalInfoForm
+    initialValues={{
+      hokh: user.hoKh || '',
+      tenkh: user.tenKh || '',
+      email: user.email || '',
+      soDienThoai: user.soDienThoai || '',
+      soCccd: user.soCccd || '',
+      diaChi: user.diaChi || '', // Thêm địa chỉ
+    }}
+    onSave={handleSaveProfile}
+    onCancel={() => setIsEditing(false)}
+  />
               ) : (
                 <div className={styles.infoDisplay}>
                   <h2>{user.hoTen || t('profile.noName')}</h2>
