@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 // Mock user data (replace with real database in production)
 const mockUserProfile = {
   userName: 'exampleUser',
-  password: 'string', // Mock password (in production, this should be hashed)
+  password: 'string',
   hokh: 'Nguyễn',
   tenkh: 'Văn A',
   email: 'user@example.com',
@@ -12,6 +12,7 @@ const mockUserProfile = {
   paymentMethod: null as string | null,
   avatarSrc: null as string | null,
   coverPhotoSrc: null as string | null,
+  diaChi: '' as string, // Thêm trường địa chỉ
 };
 
 export async function GET() {
@@ -52,55 +53,61 @@ export async function PATCH(req: Request) {
       );
     }
 
-    if (action === 'updatePersonalInfo') {
-      const { hokh, tenkh, email, soCccd, soDienThoai } = data;
+if (action === 'updatePersonalInfo') {
+  const { hokh, tenkh, email, soCccd, soDienThoai, diaChi } = data; // Thêm diaChi
 
-      // Validation
-      const errors: Record<string, string> = {};
-      if (!hokh || hokh.trim() === '') errors.hokh = 'Họ không được để trống.';
-      if (!tenkh || tenkh.trim() === '') errors.tenkh = 'Tên không được để trống.';
-      if (!email || email.trim() === '') {
-        errors.email = 'Email không được để trống.';
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        errors.email = 'Email không đúng định dạng.';
-      }
-      if (!soDienThoai || soDienThoai.trim() === '') {
-        errors.soDienThoai = 'Số điện thoại không được để trống.';
-      } else if (!/^\d+$/.test(soDienThoai)) {
-        errors.soDienThoai = 'Số điện thoại không hợp lệ.';
-      }
-      if (!soCccd || soCccd.trim() === '') {
-        errors.soCccd = 'Số CCCD/CMND không được để trống.';
-      } else if (!/^\d{12}$/.test(soCccd)) {
-        errors.soCccd = 'Số CCCD/CMND phải có đúng 12 chữ số.';
-      }
+  // Validation
+  const errors: Record<string, string> = {};
+  if (!hokh || hokh.trim() === '') errors.hokh = 'Họ không được để trống.';
+  if (!tenkh || tenkh.trim() === '') errors.tenkh = 'Tên không được để trống.';
+  if (!email || email.trim() === '') {
+    errors.email = 'Email không được để trống.';
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    errors.email = 'Email không đúng định dạng.';
+  }
+  if (!soDienThoai || soDienThoai.trim() === '') {
+    errors.soDienThoai = 'Số điện thoại không được để trống.';
+  } else if (!/^\d+$/.test(soDienThoai)) {
+    errors.soDienThoai = 'Số điện thoại không hợp lệ.';
+  }
+  if (!soCccd || soCccd.trim() === '') {
+    errors.soCccd = 'Số CCCD/CMND không được để trống.';
+  } else if (!/^\d{12}$/.test(soCccd)) {
+    errors.soCccd = 'Số CCCD/CMND phải có đúng 12 chữ số.';
+  }
+  // Validation cho diaChi (tùy chọn)
+  if (diaChi && typeof diaChi !== 'string') {
+    errors.diaChi = 'Địa chỉ không hợp lệ.';
+  }
 
-      if (Object.keys(errors).length > 0) {
-        return NextResponse.json(
-          { success: false, errors },
-          { status: 400 }
-        );
-      }
+  if (Object.keys(errors).length > 0) {
+    return NextResponse.json(
+      { success: false, errors },
+      { status: 400 }
+    );
+  }
 
-      // Update mock data (replace with database update in production)
-      mockUserProfile.hokh = hokh;
-      mockUserProfile.tenkh = tenkh;
-      mockUserProfile.email = email;
-      mockUserProfile.soCccd = soCccd;
-      mockUserProfile.soDienThoai = soDienThoai;
+  // Update mock data
+  mockUserProfile.hokh = hokh;
+  mockUserProfile.tenkh = tenkh;
+  mockUserProfile.email = email;
+  mockUserProfile.soCccd = soCccd;
+  mockUserProfile.soDienThoai = soDienThoai;
+  mockUserProfile.diaChi = diaChi || ''; // Lưu địa chỉ
 
-      return NextResponse.json({
-        success: true,
-        message: 'Cập nhật thông tin thành công!',
-        data: {
-          hokh: mockUserProfile.hokh,
-          tenkh: mockUserProfile.tenkh,
-          email: mockUserProfile.email,
-          soCccd: mockUserProfile.soCccd,
-          soDienThoai: mockUserProfile.soDienThoai,
-        },
-      });
-    }
+  return NextResponse.json({
+    success: true,
+    message: 'Cập nhật thông tin thành công!',
+    data: {
+      hokh: mockUserProfile.hokh,
+      tenkh: mockUserProfile.tenkh,
+      email: mockUserProfile.email,
+      soCccd: mockUserProfile.soCccd,
+      soDienThoai: mockUserProfile.soDienThoai,
+      diaChi: mockUserProfile.diaChi, // Trả về địa chỉ
+    },
+  });
+}
 
     if (action === 'updatePaymentMethod') {
       const { paymentMethod, selectedCard } = data;
