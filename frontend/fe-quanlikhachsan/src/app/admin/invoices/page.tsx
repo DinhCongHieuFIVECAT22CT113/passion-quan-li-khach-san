@@ -145,17 +145,17 @@ export default function InvoiceManager() {
 
                 if (customer) {
                   // Thử nhiều cách khác nhau để lấy tên
-                  const hoKh = customer.HoKh || customer.hoKh || "";
-                  const tenKh = customer.TenKh || customer.tenKh || "";
+                  const hoKh = customer.HoKh || customer.HoKh || "";
+                  const tenKh = customer.TenKh || customer.TenKh || "";
 
                   if (hoKh.trim() !== "" || tenKh.trim() !== "") {
                     tenKhachHangDisplay = `${hoKh} ${tenKh}`.trim();
                     if (tenKhachHangDisplay === "") {
-                        tenKhachHangDisplay = `Khách hàng (${customer.MaKh || customer.maKh})`;
+                        tenKhachHangDisplay = `Khách hàng (${customer.MaKh || customer.MaKh})`;
                     }
                     console.log(`[DEBUG] Using customer map name: ${tenKhachHangDisplay}`);
                   } else {
-                    tenKhachHangDisplay = `Khách hàng (${customer.MaKh || customer.maKh})`;
+                    tenKhachHangDisplay = `Khách hàng (${customer.MaKh || customer.MaKh})`;
                     console.log(`[DEBUG] Using customer ID: ${tenKhachHangDisplay}`);
                   }
                 } else {
