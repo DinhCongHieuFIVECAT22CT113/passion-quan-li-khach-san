@@ -44,6 +44,9 @@
 .mainNav a.active {
   color: #f59e0b;
 }
+.authLink {
+  color: #f59e0b;
+}
 
 .mainNav a.active::after {
   content: '';

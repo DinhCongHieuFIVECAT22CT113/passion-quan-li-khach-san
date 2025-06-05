@@ -36,18 +36,16 @@ export default function Header() {
         <div className={styles.headerContent}>
           <div className={styles.logoContainer}>
             <Link href="/">
-              <Image src="/images/logo.png" alt="Hotel Logo" width={120} height={40} />
+              <Image src="/images/logo.png" alt="Hotel Logo" width={100} height={100} />
             </Link>
           </div>
-          <nav className={styles.mainNav}>
-          </nav>
-          <div className={styles.userActions}>
-          </div>
+          <nav className={styles.mainNav}></nav>
+          <div className={styles.userActions}></div>
         </div>
       </header>
     );
   }
-  
+
   if (!isReady) return null;
 
   return (
@@ -55,7 +53,7 @@ export default function Header() {
       <div className={styles.headerContent}>
         <div className={styles.logoContainer}>
           <Link href="/">
-            <Image src="/images/logo.png" alt="Hotel Logo" width={120} height={40} />
+            <Image src="/images/h_logo.png" alt="Hotel Logo" width={70} height={70} />
           </Link>
         </div>
         <nav className={styles.mainNav}>
@@ -103,4 +101,4 @@ export default function Header() {
       </div>
     </header>
   );
-} 
+}

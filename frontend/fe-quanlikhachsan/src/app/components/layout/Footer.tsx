@@ -25,7 +25,7 @@ export default function Footer() {
     <footer className={styles.footer}>
       <div className={styles.footerContent}>
         <div className={styles.footerLogo}>
-          <Image src="/images/logo.png" alt="Logo" width={150} height={50} />
+          <Image src="/images/f_logo.png" alt="Logo" width={150} height={150} />
           <p>{t('footer.tagline')}</p>
         </div>
 
