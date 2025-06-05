@@ -42,7 +42,7 @@
         <member name="M:be_quanlikhachsanapi.Controllers.HoaDonController.GetById(System.String)">
             <summary>
             Lấy thông tin hóa đơn theo mã
-            </summary>        [HttpGet("{maHoaDon}")]
+            </summary>
         </member>
         <member name="M:be_quanlikhachsanapi.Controllers.HoaDonController.GetByDatPhong(System.String)">
             <summary>
@@ -51,11 +51,13 @@
         </member>
         <member name="M:be_quanlikhachsanapi.Controllers.HoaDonController.Create(be_quanlikhachsanapi.DTOs.CreateHoaDonDTO)">
             <summary>
-            Tạo mới hóa đơn        /// </summary>
+            Tạo mới hóa đơn
+            </summary>
         </member>
         <member name="M:be_quanlikhachsanapi.Controllers.HoaDonController.Update(System.String,be_quanlikhachsanapi.DTOs.UpdateHoaDonDTO)">
             <summary>
-            Cập nhật thông tin hóa đơn        /// </summary>
+            Cập nhật thông tin hóa đơn
+            </summary>
         </member>
         <member name="M:be_quanlikhachsanapi.Controllers.HoaDonController.UpdateTrangThai(System.String,be_quanlikhachsanapi.DTOs.UpdateTrangThaiDTO)">
             <summary>

@@ -41,7 +41,8 @@ namespace be_quanlikhachsanapi.Controllers
 
         /// <summary>
         /// Lấy thông tin hóa đơn theo mã
-        /// </summary>        [HttpGet("{maHoaDon}")]
+        /// </summary>
+        [HttpGet("{maHoaDon}")]
         [RequireRole("R00", "R01", "R02", "R03", "R04")]  // Thêm R03 cho kế toán
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -73,7 +74,8 @@ namespace be_quanlikhachsanapi.Controllers
         }
 
         /// <summary>
-        /// Tạo mới hóa đơn        /// </summary>
+        /// Tạo mới hóa đơn
+        /// </summary>
         [HttpPost]
         [Consumes("multipart/form-data")]
         [RequireRole("R00", "R01", "R02", "R03")]  // Thêm R03 cho kế toán
@@ -94,7 +96,8 @@ namespace be_quanlikhachsanapi.Controllers
         }
 
         /// <summary>
-        /// Cập nhật thông tin hóa đơn        /// </summary>
+        /// Cập nhật thông tin hóa đơn
+        /// </summary>
         [HttpPut("{maHoaDon}")]
         [Consumes("multipart/form-data")]
         [RequireRole("R00", "R01", "R02", "R03")]  // Thêm R03 cho kế toán
