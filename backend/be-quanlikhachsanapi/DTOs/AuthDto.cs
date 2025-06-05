@@ -42,7 +42,6 @@ namespace be_quanlikhachsanapi.DTOs
     }
     public class ChangePassDto
     {   
-        public string UserName { get; set; } = default!;
         [Required]
         public required string Password { get; set; }
 

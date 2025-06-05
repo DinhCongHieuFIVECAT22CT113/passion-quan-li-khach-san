@@ -188,7 +188,16 @@ public class AuthController : ControllerBase
     [Consumes("multipart/form-data")]
     public async Task<ActionResult<UserDto>> ChangePassword([FromForm] ChangePassDto changePassDto)
     {
-        var userName = changePassDto.UserName;
+        // Lấy username từ token
+        var userName = User.FindFirst("username")?.Value;
+
+        if (string.IsNullOrEmpty(userName))
+        {
+            return new JsonResult("Không xác định được username từ token.")
+            {
+                StatusCode = StatusCodes.Status401Unauthorized
+            };
+        }
 
         var khachHang = _context.KhachHangs.FirstOrDefault(kh => kh.UserName == userName);
         var nhanVien = _context.NhanViens.FirstOrDefault(nv => nv.UserName == userName);
@@ -298,4 +307,4 @@ public class AuthController : ControllerBase
     }
 }
 
-    
+

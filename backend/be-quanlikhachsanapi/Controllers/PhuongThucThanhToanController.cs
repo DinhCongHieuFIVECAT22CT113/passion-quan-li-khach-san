@@ -70,7 +70,8 @@ namespace be_quanlikhachsanapi.Controllers
 
         /// <summary>
         /// Lấy danh sách phương thức thanh toán theo mã hóa đơn
-        /// </summary>        [HttpGet("HoaDon/{maHoaDon}")]
+        /// </summary>        
+        [HttpGet("HoaDon/{maHoaDon}")]
         [RequireRole("R00", "R01", "R02", "R03")]  // Thêm R03 cho kế toán
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]

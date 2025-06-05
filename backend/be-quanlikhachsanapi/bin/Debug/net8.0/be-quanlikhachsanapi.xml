@@ -87,7 +87,7 @@
         <member name="M:be_quanlikhachsanapi.Controllers.PhuongThucThanhToanController.GetByHoaDon(System.String)">
             <summary>
             Lấy danh sách phương thức thanh toán theo mã hóa đơn
-            </summary>        [HttpGet("HoaDon/{maHoaDon}")]
+            </summary>        
         </member>
         <member name="M:be_quanlikhachsanapi.Controllers.PhuongThucThanhToanController.Create(be_quanlikhachsanapi.DTOs.CreatePhuongThucThanhToanDTO)">
             <summary>

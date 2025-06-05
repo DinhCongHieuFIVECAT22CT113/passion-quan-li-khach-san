@@ -31,8 +31,12 @@ namespace be_quanlikhachsanapi.Services
             {
                 new Claim(JwtRegisteredClaimNames.NameId, khachHang.MaKh),
                 new Claim(JwtRegisteredClaimNames.Email, khachHang.Email),
-                new Claim(ClaimTypes.Name, khachHang.HoKh + " " + khachHang.TenKh),
-                new Claim(ClaimTypes.Role, khachHang.MaRole ?? "CTM") // Gán "CTM" mặc định nếu không có role
+                new Claim("name", khachHang.HoKh + " " + khachHang.TenKh),
+                new Claim("role", khachHang.MaRole ?? "CTM"),
+                new Claim("mobilephone", khachHang.Sdt ?? string.Empty),
+                new Claim("username", khachHang.UserName ?? string.Empty),
+                new Claim("cccd", khachHang.SoCccd ?? string.Empty),
+                new Claim("address", khachHang.DiaChi ?? string.Empty)
             };
 
             var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
@@ -40,7 +44,7 @@ namespace be_quanlikhachsanapi.Services
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddDays(7),
+                Expires = DateTime.Now.AddMinutes(10),
                 SigningCredentials = creds
             };
 
@@ -56,8 +60,11 @@ namespace be_quanlikhachsanapi.Services
             {
                 new Claim(JwtRegisteredClaimNames.NameId, nhanVien.MaNv),
                 new Claim(JwtRegisteredClaimNames.Email, nhanVien.Email),
-                new Claim(ClaimTypes.Name, nhanVien.HoNv + " " + nhanVien.TenNv),
-                new Claim(ClaimTypes.Role, nhanVien.MaRole ?? "CRW")
+                new Claim("name", nhanVien.HoNv + " " + nhanVien.TenNv),
+                new Claim("role", nhanVien.MaRole ?? "CRW"),
+                new Claim("mobilephone", nhanVien.Sdt ?? string.Empty),
+                new Claim("username", nhanVien.UserName ?? string.Empty),
+                new Claim("chucvu", nhanVien.ChucVu ?? string.Empty)
             };
 
             var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
@@ -65,7 +72,7 @@ namespace be_quanlikhachsanapi.Services
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddDays(7),
+                Expires = DateTime.Now.AddMinutes(10),
                 SigningCredentials = creds
             };
 
