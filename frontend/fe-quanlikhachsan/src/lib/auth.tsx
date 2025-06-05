@@ -109,15 +109,19 @@ export function getUserPermissions(role: Role | string | undefined): UserPermiss
 interface DecodedToken {
   role: Role;
   nameid?: string; // maNguoiDung
+  name?: string; // hoTen
+  email?: string;
+  mobilephone?: string; // Số điện thoại
+  address?: string;
+  cccd?: string; // Số CCCD
+  picture?: string; // Avatar nếu có
+  username?: string; // Nếu cần
   unique_name?: string; // hoTen
   // Thêm các trường khác nếu có trong token
-  email?: string;
   phone_number?: string; // Giả sử token dùng key này cho số điện thoại
-  address?: string;
   family_name?: string; // Giả sử token dùng key này cho họ
   given_name?: string;  // Giả sử token dùng key này cho tên
   identity_number?: string; // Giả sử token dùng key này cho số CCCD
-  picture?: string; // Giả sử token dùng key này cho avatarUrl
 }
 
 export interface AuthUser {
@@ -147,40 +151,38 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const loginUser = (token: string) => {
-    try {
-      localStorage.setItem('token', token);
-      const decodedToken = jwtDecode<DecodedToken>(token);
-      const permissions = getUserPermissions(decodedToken.role);
-      const currentUser: AuthUser = {
-        maNguoiDung: decodedToken.nameid,
-        hoTen: decodedToken.unique_name,
-        role: decodedToken.role,
-        permissions,
-        email: decodedToken.email,
-        soDienThoai: decodedToken.phone_number,
-        diaChi: decodedToken.address,
-        hoKh: decodedToken.family_name,
-        tenKh: decodedToken.given_name,
-        soCccd: decodedToken.identity_number,
-        avatarUrl: decodedToken.picture,
-      };
-      setUser(currentUser);
-      // Lưu các thông tin khác nếu cần, ví dụ:
-      // localStorage.setItem('userName', decodedToken.unique_name || '');
-      // localStorage.setItem('userId', decodedToken.nameid || '');
-      // Hoặc tốt hơn là chỉ dựa vào user state từ context
-    } catch (err) {
-      // Xử lý lỗi giải mã token hoặc token không hợp lệ
-      localStorage.removeItem('token');
-      // localStorage.removeItem('userName');
-      // localStorage.removeItem('userId');
-      // localStorage.removeItem('userRole'); // Đã bỏ
-      // localStorage.removeItem('staffInfo'); // Nếu có
-      setUser(null);
-      console.error("Failed to login user:", err);
-    }
-  };
+const loginUser = (token: string) => {
+  try {
+    localStorage.setItem('token', token);
+    const decodedToken = jwtDecode<DecodedToken>(token);
+    const permissions = getUserPermissions(decodedToken.role);
+
+    // Tách họ và tên từ fullName
+    const fullName = decodedToken.name || '';
+    const nameParts = fullName.trim().split(' ');
+    const tenKh = nameParts.length > 0 ? nameParts[nameParts.length - 1] : ''; // "Tín"
+    const hoKh = nameParts.length > 1 ? nameParts.slice(0, -1).join(' ') : ''; // "Trương Trung"
+
+    const currentUser: AuthUser = {
+      maNguoiDung: decodedToken.nameid, // "KH023"
+      hoTen: decodedToken.name, // "Trương Trung Tín"
+      role: decodedToken.role, // "R04"
+      permissions,
+      email: decodedToken.email, // "tint08771@gmail.com"
+      soDienThoai: decodedToken.mobilephone, // "0866684277"
+      diaChi: decodedToken.address, // ""
+      hoKh, // "Trương Trung"
+      tenKh, // "Tín"
+      soCccd: decodedToken.cccd, // "122001042210"
+      avatarUrl: decodedToken.picture, // undefined
+    };
+    setUser(currentUser);
+  } catch (err) {
+    localStorage.removeItem('token');
+    setUser(null);
+    console.error("Failed to login user:", err);
+  }
+};
 
   const logoutUser = () => {
     localStorage.removeItem('token');
