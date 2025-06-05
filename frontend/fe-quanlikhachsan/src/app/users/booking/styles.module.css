@@ -12,13 +12,32 @@
   top: 100px;
   left: 50%;
   transform: translateX(-50%);
-  background: #4CAF50;
-  color: white;
   padding: 1rem 2rem;
   border-radius: 5px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   z-index: 1000;
   animation: slideDown 0.5s ease-out;
+}
+
+.notificationSuccess {
+  background: #4CAF50; /* Màu xanh lá cho thông báo thành công */
+  color: white;
+}
+
+.notificationError {
+  background: #dc3545; /* Màu đỏ cho thông báo lỗi */
+  color: white;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translate(-50%, -100%);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
 }
 
 @keyframes slideDown {
@@ -86,7 +105,7 @@
 
 /* Booking Form Section */
 .bookingSection {
-  padding: 4rem;
+  padding: 2rem;
   background: #f9f9f9;
 }
 
@@ -95,9 +114,9 @@
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 4rem;
+  gap: 2rem;
   background: white;
-  padding: 2rem;
+  padding: 1.5rem;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
@@ -110,7 +129,7 @@
 .mainImage {
   position: relative;
   width: 100%;
-  height: 400px;
+  height: 300px;
   border-radius: 10px;
   overflow: hidden;
   margin-bottom: 1rem;
@@ -155,7 +174,7 @@
 
 .formGroup label {
   font-weight: 500;
-  color: #333;
+  color: #6F5B3E; /* Dùng màu chủ đạo để đồng bộ */
 }
 
 .formGroup input,
@@ -223,8 +242,9 @@
 
 .error {
   color: #dc3545;
-  font-size: 0.9rem;
-  margin-top: 0.5rem;
+  font-size: 0.85rem; /* Giảm một chút để gọn hơn */
+  margin-top: 0.3rem;
+  font-weight: 500; /* Tăng độ đậm để dễ đọc hơn */
 }
 
 .bookNowBtn {
@@ -329,30 +349,36 @@
 @media (max-width: 1024px) {
   .formContainer {
     grid-template-columns: 1fr;
-    gap: 2rem;
+    gap: 1.5rem; /* Giảm gap trên màn hình nhỏ */
   }
 
-  .footerContent {
-    grid-template-columns: 1fr;
-    gap: 2rem;
+  .imageGallery {
+    max-width: 100%;
+  }
+
+  .bookingForm {
+    gap: 1rem; /* Giảm gap trong form */
   }
 }
 
 @media (max-width: 768px) {
+  .mainImage {
+    height: 200px; /* Giảm thêm trên màn hình nhỏ */
+  }
   .heroContent h1 {
-    font-size: 2.5rem;
+    font-size: 2rem;
   }
 
   .bookingSection {
-    padding: 2rem;
+    padding: 1rem;
   }
 
   .mapSection {
-    padding: 2rem;
+    padding: 1rem;
   }
 
   .footer {
-    padding: 2rem;
+    padding: 1rem;
   }
 
   .footerLinks {
@@ -361,5 +387,11 @@
 
   .subscribeForm {
     flex-direction: column;
+  }
+  .formGroup input,
+  .formGroup textarea,
+  .formGroup select {
+    font-size: 0.9rem; /* Giảm kích thước chữ trong input */
+    padding: 0.6rem; /* Giảm padding trong input */
   }
 }

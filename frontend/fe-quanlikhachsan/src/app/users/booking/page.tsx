@@ -91,40 +91,44 @@ export default function BookingPage() {
     }
   }, [user, authLoading, router, searchParams]);
 
-  useEffect(() => {
-    if (user) {
-      const maPhongFromUrl = searchParams?.get('maPhong');
-      
-      const data = JSON.parse(localStorage.getItem('selectedRoomData') || '{}');
-      
-      if (data.name) {
-        setSelectedRoomData({
-          name: data.name || 'Unknown Room',
-          image: data.image || '/images/default-room.jpg',
-          price: data.price || '0đ',
-          checkInDate: data.checkInDate || '',
-          checkOutDate: data.checkOutDate || '',
-          adults: data.adults || 1,
-          children: data.children || 0,
-        });
-        setMainImage(data.image || '/images/default-room.jpg');
-        setFormData((prev) => ({
-          ...prev,
-          name: user.hoTen || '',
-          email: prev.email,
-          message: data.name
-            ? `${t('booking.bookingFor')} ${data.name} ${data.checkInDate ? t('booking.from') + ' ' + data.checkInDate : ''} ${data.checkOutDate ? t('booking.to') + ' ' + data.checkOutDate : ''}`
-            : t('booking.noRoomSelected'),
-          checkInDate: data.checkInDate || '',
-          checkOutDate: data.checkOutDate || '',
-          adults: data.adults || 1,
-          children: data.children || 0,
-        }));
-      } else if (maPhongFromUrl) {
-        console.log("Cần fetch chi tiết phòng cho: ", maPhongFromUrl)
-      }
+useEffect(() => {
+  if (user) {
+    const maPhongFromUrl = searchParams?.get('maPhong');
+    
+    const data = JSON.parse(localStorage.getItem('selectedRoomData') || '{}');
+    
+    if (data.name) {
+      setSelectedRoomData({
+        name: data.name || 'Unknown Room',
+        image: data.image || '/images/default-room.jpg',
+        price: data.price || '0đ',
+        checkInDate: data.checkInDate || '',
+        checkOutDate: data.checkOutDate || '',
+        adults: data.adults || 1,
+        children: data.children || 0,
+      });
+      setMainImage(data.image || '/images/default-room.jpg');
+      setFormData((prev) => ({
+        ...prev,
+        name: user.hoTen || '', // Đã có
+        email: user.email || prev.email, // Thêm email từ token
+        phone: user.soDienThoai || prev.phone, // Thêm số điện thoại từ token
+        idNumber: user.soCccd || prev.idNumber, // Thêm số CCCD từ token
+        message: data.name
+          ? `${t('booking.bookingFor')} ${data.name} ${data.checkInDate ? t('booking.from') + ' ' + data.checkInDate : ''} ${data.checkOutDate ? t('booking.to') + ' ' + data.checkOutDate : ''}`
+          : t('booking.noRoomSelected'),
+        checkInDate: data.checkInDate || '',
+        checkOutDate: data.checkOutDate || '',
+        adults: data.adults || 1,
+        children: data.children || 0,
+        paymentMethod: prev.paymentMethod, // Giữ nguyên nếu đã chọn
+        cardType: prev.cardType, // Giữ nguyên nếu đã chọn
+      }));
+    } else if (maPhongFromUrl) {
+      console.log("Cần fetch chi tiết phòng cho: ", maPhongFromUrl);
     }
-  }, [user, t, searchParams]);
+  }
+}, [user, t, searchParams]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -517,8 +521,8 @@ export default function BookingPage() {
                   )}
 
                   <div className={styles.formActions}>
-                    <button type="submit" className={styles.submitButton} disabled={isSubmitting}>
-                      {isSubmitting ? t('booking.submitting') : t('booking.submitBooking')}
+                    <button type="submit" className={styles.bookNowBtn} disabled={isSubmitting}>
+                      {isSubmitting ? t('booking.submitting') : t('booking.bookNow')}
                     </button>
                   </div>
                 </form>
