@@ -492,6 +492,7 @@
 
 .formGroup {
   margin-bottom: 1.5rem;
+  background-color: white;
 }
 
 .formGroup label {
@@ -522,6 +523,7 @@
   padding: 1.5rem;
   border-radius: 8px;
   margin-bottom: 1.5rem;
+  color: blue;
 }
 
 .bookingSummary h3 {
