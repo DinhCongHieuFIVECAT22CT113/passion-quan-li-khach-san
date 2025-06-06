@@ -99,7 +99,11 @@ builder.Services.AddCors(options =>
         });
 });
 
+// Add Memory Cache
+builder.Services.AddMemoryCache();
+
 // Add custom services
+builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<ISendEmailServices, SendEmailServices>();
 builder.Services.AddScoped<IWriteFileRepository, WriteFileRepository>();

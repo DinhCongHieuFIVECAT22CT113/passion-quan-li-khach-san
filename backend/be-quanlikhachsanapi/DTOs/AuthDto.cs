@@ -62,6 +62,19 @@ namespace be_quanlikhachsanapi.DTOs
         public string UserName { get; set; } = default!;
         public string HoTen { get; set; } = default!;
         public string Token { get; set; } = default!;
+        public string RefreshToken { get; set; } = default!;
         public string MaRole { get; set; } = default!;
+    }
+
+    public class RefreshTokenDto
+    {
+        [Required(ErrorMessage = "Refresh token là bắt buộc")]
+        public string RefreshToken { get; set; } = default!;
+        
+        [Required(ErrorMessage = "User ID là bắt buộc")]
+        public string UserId { get; set; } = default!;
+        
+        [Required(ErrorMessage = "User type là bắt buộc")]
+        public string UserType { get; set; } = default!; // "KhachHang" hoặc "NhanVien"
     }
 }

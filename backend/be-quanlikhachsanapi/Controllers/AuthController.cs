@@ -150,14 +150,7 @@ public class AuthController : ControllerBase
             if (result == PasswordVerificationResult.Failed)
                 return Unauthorized("Mật khẩu không đúng.");
 
-            return new UserDto
-            {
-                MaNguoiDung = khachHang.MaKh,
-                UserName = khachHang.UserName,
-                HoTen = khachHang.HoKh + " " + khachHang.TenKh,
-                MaRole = khachHang.MaRole ?? "CTM", // Nếu rỗng thì gán mặc định là CTM
-                Token = _tokenService.CreateToken(khachHang)
-            };
+            return _tokenService.CreateTokenWithRefresh(khachHang);
         }
 
         // Nếu không phải KhachHang, tìm trong bảng NhanVien
@@ -173,14 +166,7 @@ public class AuthController : ControllerBase
         if (resultNv == PasswordVerificationResult.Failed)
             return Unauthorized("Mật khẩu không đúng.");
 
-        return new UserDto
-        {
-            MaNguoiDung = nhanVien.MaNv,
-            UserName = nhanVien.UserName,
-            HoTen = nhanVien.HoNv + " " + nhanVien.TenNv,
-            MaRole = nhanVien.MaRole ?? "CRW", // Nếu rỗng thì gán mặc định là CRW
-            Token = _tokenService.CreateToken(nhanVien)
-        };
+        return _tokenService.CreateTokenWithRefresh(nhanVien);
     }
 
     [HttpPut("change-password")]
@@ -304,6 +290,26 @@ public class AuthController : ControllerBase
         {
             StatusCode = StatusCodes.Status200OK
         };
+    }
+
+    [HttpPost("refresh-token")]
+    [AllowAnonymous]
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<UserDto>> RefreshToken([FromForm] RefreshTokenDto refreshTokenDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var result = _tokenService.RefreshToken(refreshTokenDto);
+        
+        if (result == null)
+        {
+            return Unauthorized("Refresh token không hợp lệ hoặc đã hết hạn.");
+        }
+
+        return Ok(result);
     }
 }
 
