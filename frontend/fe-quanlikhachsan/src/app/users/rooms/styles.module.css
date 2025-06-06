@@ -160,6 +160,7 @@
   font-size: 1rem;
   padding: 0.5rem 0;
   background-color: white;
+  color: black;
 }
 
 .filterToggle {
@@ -226,6 +227,7 @@
   outline: none;
   transition: all 0.3s ease;
   background-color: #f8f9fa;
+  color: black;
 }
 
 .filterSelect:focus {
