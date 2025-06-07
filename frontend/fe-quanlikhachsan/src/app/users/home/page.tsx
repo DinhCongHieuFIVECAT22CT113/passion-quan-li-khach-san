@@ -3,14 +3,18 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { FaStar } from 'react-icons/fa';
+import { useRouter } from 'next/navigation';
+import { FaStar, FaCalendarAlt, FaUsers, FaSearch } from 'react-icons/fa';
 import styles from './styles.module.css';
 import { useTranslation } from 'react-i18next';
-import { useLanguage } from '../../../app/components/profile/LanguageContext';
-import i18n from '../../../app/i18n';
+import { useLanguage } from '../../components/profile/LanguageContext';
+import i18n from '../../i18n';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
-import { getPromotions } from '../../../lib/api';
+import SearchBar from '../../components/search/SearchBar';
+import { getPromotions, getRoomTypes } from '../../../lib/api';
+import { RoomType } from '../../../types/auth';
+import BookingModal from '../../components/booking/BookingModal';
 
 // Định nghĩa interface cho Promotion
 interface Promotion {
@@ -29,12 +33,23 @@ interface Promotion {
 export default function Home() {
   const { t } = useTranslation();
   const { selectedLanguage } = useLanguage();
+  const router = useRouter();
   const [isReady, setIsReady] = useState(false);
   
   // Thêm state cho dữ liệu từ API với kiểu dữ liệu đã định nghĩa
   const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [roomTypes, setRoomTypes] = useState<RoomType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [selectedRoomType, setSelectedRoomType] = useState<RoomType | null>(null);
+
+  // State cho form tìm kiếm
+  const [searchForm, setSearchForm] = useState({
+    checkInDate: '',
+    checkOutDate: '',
+    guests: 2,
+  });
 
   useEffect(() => {
     i18n.changeLanguage(selectedLanguage).then(() => {
@@ -43,19 +58,34 @@ export default function Home() {
     
     // Lấy dữ liệu từ API
     fetchData();
+
+    // Thiết lập ngày mặc định
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    setSearchForm({
+      checkInDate: today.toISOString().split('T')[0],
+      checkOutDate: tomorrow.toISOString().split('T')[0],
+      guests: 2,
+    });
   }, [selectedLanguage]);
 
   // Hàm lấy dữ liệu từ API
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Lấy danh sách khuyến mãi
-      const promotionsData = await getPromotions();
-      console.log('Dữ liệu promotions:', promotionsData);
+      // Lấy danh sách khuyến mãi và phòng song song
+      const [promotionsData, roomTypesData] = await Promise.all([
+        getPromotions(),
+        getRoomTypes()
+      ]);
       
-      // Đảm bảo dữ liệu là mảng hợp lệ
+      console.log('Dữ liệu promotions:', promotionsData);
+      console.log('Dữ liệu roomTypes:', roomTypesData);
+      
+      // Xử lý dữ liệu khuyến mãi
       if (Array.isArray(promotionsData)) {
-        // Lọc chỉ lấy những khuyến mãi còn hiệu lực
         const activePromotions = promotionsData.filter((promo: Promotion) => {
           try {
             const now = new Date();
@@ -67,11 +97,16 @@ export default function Home() {
             return false;
           }
         });
-        // Chỉ lấy 3 khuyến mãi đầu tiên để hiển thị
         setPromotions(activePromotions.slice(0, 3));
       } else {
         console.error('Dữ liệu promotions không phải dạng mảng:', promotionsData);
-        setError('Dữ liệu khuyến mãi không hợp lệ.');
+      }
+
+      // Xử lý dữ liệu phòng
+      if (Array.isArray(roomTypesData)) {
+        setRoomTypes(roomTypesData.slice(0, 6)); // Lấy 6 phòng đầu tiên
+      } else {
+        console.error('Dữ liệu roomTypes không phải dạng mảng:', roomTypesData);
       }
     } catch (err) {
       console.error('Lỗi khi lấy dữ liệu:', err);
@@ -79,6 +114,51 @@ export default function Home() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Hàm xử lý thay đổi form tìm kiếm
+  const handleSearchFormChange = (field: string, value: string | number) => {
+    setSearchForm(prev => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  // Hàm xử lý tìm kiếm
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate form
+    if (!searchForm.checkInDate || !searchForm.checkOutDate) {
+      alert('Vui lòng chọn ngày nhận và trả phòng');
+      return;
+    }
+
+    const checkIn = new Date(searchForm.checkInDate);
+    const checkOut = new Date(searchForm.checkOutDate);
+    
+    if (checkOut <= checkIn) {
+      alert('Ngày trả phòng phải sau ngày nhận phòng');
+      return;
+    }
+
+    // Lưu thông tin tìm kiếm vào localStorage
+    const searchData = {
+      checkInDate: searchForm.checkInDate,
+      checkOutDate: searchForm.checkOutDate,
+      guests: searchForm.guests,
+      searchTimestamp: new Date().toISOString(),
+    };
+    localStorage.setItem('roomSearchData', JSON.stringify(searchData));
+
+    // Chuyển đến trang rooms với tham số tìm kiếm
+    const searchParams = new URLSearchParams({
+      checkIn: searchForm.checkInDate,
+      checkOut: searchForm.checkOutDate,
+      guests: searchForm.guests.toString(),
+    });
+    
+    router.push(`/users/rooms?${searchParams.toString()}`);
   };
 
   // Hàm lấy đường dẫn hình ảnh hợp lệ
@@ -108,9 +188,15 @@ export default function Home() {
         <div className={styles.heroContent}>
           <h1>{t('home.title')}</h1>
           <p>{t('home.description')}</p>
-          <Link href="/users/rooms" className={styles.heroButton}>
-            {t('home.viewRooms')}
-          </Link>
+          
+          {/* Search Form */}
+          <SearchBar variant="hero" showRoomCount={true} />
+          
+          <div className={styles.heroActions}>
+            <Link href="/users/rooms" className={styles.heroButton}>
+              {t('home.viewRooms')}
+            </Link>
+          </div>
         </div>
       </section>
 

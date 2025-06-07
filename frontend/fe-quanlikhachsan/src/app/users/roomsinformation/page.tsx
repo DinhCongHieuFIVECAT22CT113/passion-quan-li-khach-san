@@ -232,11 +232,26 @@ const handleThumbnailModalClick = (index: number) => {
   const handleBookNow = (maPhong: string) => {
     if (authLoading) return;
 
-    if (!user) {
-      router.push(`/login?redirect=/users/booking?maPhong=${maPhong}`);
-    } else {
-      router.push(`/users/booking?maPhong=${maPhong}`);
+    // Lưu thông tin phòng vào localStorage để sử dụng trong các bước tiếp theo
+    const selectedRoom = rooms.find(room => room.maPhong === maPhong);
+    if (selectedRoom && roomType) {
+      const roomData = {
+        maPhong: selectedRoom.maPhong,
+        tenPhong: selectedRoom.tenPhong,
+        maLoaiPhong: selectedRoom.maLoaiPhong,
+        tenLoaiPhong: roomType.tenLoaiPhong,
+        giaMoiDem: roomType.giaMoiDem,
+        giaMoiGio: roomType.giaMoiGio,
+        thumbnail: selectedRoom.thumbnail,
+        moTa: roomType.moTa || selectedRoom.moTa,
+        sucChua: roomType.sucChua,
+        kichThuocPhong: roomType.kichThuocPhong
+      };
+      localStorage.setItem('selectedRoomData', JSON.stringify(roomData));
     }
+
+    // Chuyển đến trang booking-form để điền thông tin trước
+    router.push(`/users/booking-form?maPhong=${maPhong}`);
   };
 
   if (loading || authLoading) {

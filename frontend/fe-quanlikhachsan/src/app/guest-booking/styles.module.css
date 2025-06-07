@@ -1,0 +1,480 @@
+/* Guest Booking Styles */
+.pageContainer {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.mainContent {
+  padding: 2rem 0;
+  min-height: calc(100vh - 200px);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.breadcrumbLink {
+  color: #007bff;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.breadcrumbLink:hover {
+  text-decoration: underline;
+}
+
+.breadcrumbSeparator {
+  margin: 0 0.5rem;
+}
+
+.breadcrumbCurrent {
+  color: #333;
+  font-weight: 500;
+}
+
+.pageTitle {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+/* Booking Summary */
+.bookingSummary {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 2rem;
+}
+
+.bookingSummary h2,
+.bookingSummary h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.bookingSummary h3 {
+  font-size: 1.1rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.roomCard {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+}
+
+.roomImage {
+  position: relative;
+  width: 100%;
+  height: 150px;
+}
+
+.image {
+  object-fit: cover;
+}
+
+.roomDetails {
+  padding: 1rem;
+}
+
+.roomDetails h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 0.5rem 0;
+  padding: 0;
+  border: none;
+}
+
+.roomType {
+  color: #007bff;
+  font-weight: 500;
+}
+
+.customerInfo,
+.bookingDetails,
+.priceBreakdown {
+  margin-bottom: 1rem;
+}
+
+.infoItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.9rem;
+}
+
+.infoItem:last-child {
+  border-bottom: none;
+}
+
+.infoItem span:first-child {
+  color: #666;
+}
+
+.infoItem span:last-child {
+  font-weight: 500;
+  color: #333;
+}
+
+.totalPrice {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  border-top: 2px solid #e0e0e0;
+  margin-top: 1rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.price {
+  color: #e74c3c;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+/* Payment Form */
+.paymentForm {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.paymentForm h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1.5rem;
+}
+
+.errorMessage {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 0.75rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border: 1px solid #f5c6cb;
+}
+
+.paymentMethods {
+  margin-bottom: 2rem;
+}
+
+.paymentMethod {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.paymentMethod:hover {
+  border-color: #007bff;
+  background: #f8f9fa;
+}
+
+.paymentMethod.selected {
+  border-color: #007bff;
+  background: #e7f3ff;
+}
+
+.paymentIcon {
+  font-size: 1.5rem;
+  color: #007bff;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+.paymentInfo {
+  flex: 1;
+}
+
+.paymentInfo h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.25rem;
+}
+
+.paymentInfo p {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0;
+}
+
+.radioButton {
+  margin-left: 1rem;
+}
+
+.radioButton input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  accent-color: #007bff;
+}
+
+.cardTypeSection {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.cardTypeSection h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.cardTypes {
+  display: flex;
+  gap: 1rem;
+}
+
+.cardTypeOption {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cardTypeOption:hover {
+  border-color: #007bff;
+  background: white;
+}
+
+.cardTypeOption input[type="radio"] {
+  accent-color: #007bff;
+}
+
+.noteSection {
+  margin-bottom: 2rem;
+}
+
+.noteSection label {
+  display: block;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.noteSection textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  resize: vertical;
+  transition: border-color 0.3s ease;
+}
+
+.noteSection textarea:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.securityNote {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #e8f5e8;
+  border-radius: 8px;
+  border-left: 4px solid #28a745;
+  margin-bottom: 2rem;
+}
+
+.securityIcon {
+  color: #28a745;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.securityNote p {
+  margin: 0;
+  color: #155724;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.formActions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.backButton {
+  padding: 0.75rem 1.5rem;
+  background: #6c757d;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.backButton:hover:not(:disabled) {
+  background: #5a6268;
+}
+
+.backButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.submitButton {
+  padding: 0.75rem 2rem;
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.submitButton:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+}
+
+.submitButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.buttonSpinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Loading & Error */
+.loadingContainer,
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  gap: 1rem;
+  text-align: center;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .contentGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .bookingSummary {
+    position: static;
+    order: 2;
+  }
+  
+  .paymentForm {
+    order: 1;
+  }
+  
+  .cardTypes {
+    flex-direction: column;
+  }
+  
+  .formActions {
+    flex-direction: column;
+  }
+  
+  .backButton,
+  .submitButton {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 0.5rem;
+  }
+  
+  .pageTitle {
+    font-size: 1.5rem;
+  }
+  
+  .bookingSummary,
+  .paymentForm {
+    padding: 1rem;
+  }
+  
+  .paymentMethod {
+    flex-direction: column;
+    text-align: center;
+    gap: 0.5rem;
+  }
+  
+  .paymentIcon {
+    margin-right: 0;
+  }
+}

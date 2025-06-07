@@ -8,14 +8,29 @@ interface DecodedToken {
 }
 
 // Danh sách các đường dẫn công khai không yêu cầu token
-const PUBLIC_PATHS = ['/login', '/signup', '/users/home', '/users/about', '/users/explore', '/users/rooms', '/users/roomsinformation', '/users/services', '/users/promotions'];
+const PUBLIC_PATHS = ['/login', '/signup', '/users/home', '/users/about', '/users/explore', '/users/rooms', '/users/roomsinformation', '/users/services', '/users/promotions', '/users/booking', '/users/booking-form'];
+
+// Hàm kiểm tra đường dẫn công khai (bao gồm dynamic routes)
+const isPublicPath = (path: string): boolean => {
+  // Kiểm tra các đường dẫn tĩnh
+  if (PUBLIC_PATHS.includes(path)) {
+    return true;
+  }
+  
+  // Kiểm tra dynamic routes cho trang chi tiết phòng
+  if (path.startsWith('/rooms/') && path.split('/').length === 3) {
+    return true; // /rooms/[slug] - trang chi tiết phòng
+  }
+  
+  return false;
+};
 
 export function middleware(request: NextRequest) {
   const token = request.cookies.get('token')?.value; // Lấy giá trị của cookie
   const currentPath = request.nextUrl.pathname;
 
   // Nếu không có token và đường dẫn hiện tại không nằm trong danh sách công khai và không phải là trang gốc
-  if (!token && !PUBLIC_PATHS.includes(currentPath) && currentPath !== '/') {
+  if (!token && !isPublicPath(currentPath) && currentPath !== '/') {
     // Giữ lại redirectUrl nếu có để sau khi login thành công sẽ quay lại trang đó
     const redirectUrl = currentPath + request.nextUrl.search;
     const loginUrl = new URL('/login', request.url);

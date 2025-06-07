@@ -5,10 +5,13 @@ import Image from 'next/image';
 import { useRouter, useSearchParams } from 'next/navigation';
 import styles from './styles.module.css';
 import { useTranslation } from 'react-i18next';
-import { useLanguage } from '../../../app/components/profile/LanguageContext';
-import i18n from '../../../app/i18n';
+import { useLanguage } from '../../components/profile/LanguageContext';
+import i18n from '../../i18n';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
+import Breadcrumb, { BookingBreadcrumb } from '../../components/navigation/Breadcrumb';
+import { LoadingButton, FormLoadingOverlay } from '../../components/ui/LoadingStates';
+import { useNotification, useCommonNotifications } from '../../components/ui/NotificationSystem';
 import { useAuth } from '@/lib/auth';
 import { APP_CONFIG, API_BASE_URL } from '@/lib/config';
 
@@ -57,6 +60,7 @@ export default function BookingPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, loading: authLoading } = useAuth();
+  const { bookingSuccess, bookingError, validationError } = useCommonNotifications();
   const [isClient, setIsClient] = useState(false);
   const [selectedRoomData, setSelectedRoomData] = useState<RoomData | null>(null);
   const [mainImage, setMainImage] = useState('/images/default-room.jpg');
@@ -209,8 +213,10 @@ useEffect(() => {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      setSuccess('');
       setIsSubmitting(false);
+      // Show validation error notification
+      const firstError = Object.values(newErrors)[0];
+      validationError(firstError);
       return;
     }
 
@@ -253,18 +259,16 @@ useEffect(() => {
         throw new Error(errorData.message || `Lỗi đặt phòng: ${response.status}`);
       }
 
-      setSuccess(t('booking.notification') || 'Đặt phòng thành công!');
+      bookingSuccess();
       localStorage.removeItem('selectedRoomData');
       
       setTimeout(() => {
-        setSuccess('');
         router.push('/users/profile?tab=bookings');
-      }, 3000);
+      }, 2000);
 
     } catch (error: any) {
       console.error('Lỗi khi đặt phòng:', error);
-      setApiError(error.message || 'Đã có lỗi xảy ra trong quá trình đặt phòng.');
-      setSuccess('');
+      bookingError(error.message || 'Đã có lỗi xảy ra trong quá trình đặt phòng.');
     } finally {
       setIsSubmitting(false);
     }
@@ -300,11 +304,11 @@ useEffect(() => {
   return (
     <div className={styles.container}>
       <Header />
+      <BookingBreadcrumb roomName={selectedRoomData?.name} />
 
       <main className={styles.main}>
         <div className={styles.bookingContainer}>
-          {success && <div className={styles.notificationSuccess}>{success}</div>}
-          {apiError && <div className={styles.notificationError}>{apiError}</div>}
+          {isSubmitting && <FormLoadingOverlay message="Đang xử lý đặt phòng..." />}
 
           <section className={styles.hero}>
             <div className={styles.heroContent}>

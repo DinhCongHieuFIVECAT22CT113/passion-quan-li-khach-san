@@ -11,6 +11,11 @@ import { RoomType } from '../../../types/auth';
 import { API_BASE_URL } from '../../../lib/config';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
+import Breadcrumb from '../../components/navigation/Breadcrumb';
+import SearchBar from '../../components/search/SearchBar';
+import { RoomGridSkeleton, LoadingSpinner } from '../../components/ui/LoadingStates';
+import { NetworkError } from '../../components/ui/ErrorBoundary';
+
 
 // Hàm hỗ trợ để đảm bảo đường dẫn hình ảnh hợp lệ
 const getValidImageSrc = (imagePath: string | undefined): string => {
@@ -123,21 +128,32 @@ export default function RoomsPage() {
 
   if (loading) {
     return (
-      <div className={styles.loadingContainer}>
-        <div className={styles.spinner}></div>
-        <p>Đang tải danh sách phòng...</p>
+      <div className={styles.pageContainer}>
+        <Header />
+        <Breadcrumb />
+        <main className={styles.main}>
+          <div className={styles.heroSection}>
+            <div className={styles.heroContent}>
+              <h1>Khám phá không gian nghỉ dưỡng tuyệt vời</h1>
+              <SearchBar variant="compact" />
+            </div>
+          </div>
+          <RoomGridSkeleton count={6} />
+        </main>
+        <Footer />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className={styles.errorContainer}>
-        <h2>Có lỗi xảy ra</h2>
-        <p>{error}</p>
-        <button onClick={() => window.location.reload()} className={styles.reloadButton}>
-          Thử lại
-        </button>
+      <div className={styles.pageContainer}>
+        <Header />
+        <Breadcrumb />
+        <main className={styles.main}>
+          <NetworkError onRetry={() => window.location.reload()} />
+        </main>
+        <Footer />
       </div>
     );
   }
@@ -146,10 +162,28 @@ export default function RoomsPage() {
     setShowFilters(!showFilters);
   };
 
+  // Tạo slug thân thiện cho URL
+  const createRoomSlug = (roomName: string, roomId: string): string => {
+    const slug = roomName
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+      .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
+      .replace(/\s+/g, '-') // Replace spaces with hyphens
+      .replace(/-+/g, '-') // Replace multiple hyphens with single
+      .trim();
+    return `${slug}-${roomId}`;
+  };
+
+
+
   return (
     <div className={styles.pageContainer}>
       {/* Header */}
       <Header />
+      
+      {/* Breadcrumb */}
+      <Breadcrumb />
 
       {/* Hero Section */}
       <section className={styles.heroSection}>
@@ -157,6 +191,9 @@ export default function RoomsPage() {
         <div className={styles.heroContent}>
           <h1>Khám phá không gian nghỉ dưỡng tuyệt vời</h1>
           <p>Tìm kiếm phòng phù hợp cho kì nghỉ hoàn hảo của bạn</p>
+          
+          {/* Search Bar */}
+          <SearchBar variant="compact" />
           
           {/* Search and filter control bar */}
           <div className={styles.searchContainer}>
@@ -359,12 +396,12 @@ export default function RoomsPage() {
                       <span className={styles.priceAmount}>{(roomType.giaMoiDem !== undefined) ? roomType.giaMoiDem.toLocaleString() : 0}đ</span>
                       <span className={styles.priceUnit}>/đêm</span>
                     </div>
-<Link 
-  href={`/users/roomsinformation?maLoaiPhong=${roomType.maLoaiPhong}`} 
-  className={styles.viewDetailButton}
->
-  Xem chi tiết
-</Link>
+                    <Link 
+                      href={`/rooms/${createRoomSlug(roomType.tenLoaiPhong, roomType.maLoaiPhong)}`}
+                      className={styles.viewDetailButton}
+                    >
+                      Xem chi tiết
+                    </Link>
                   </div>
                 </div>
               </div>

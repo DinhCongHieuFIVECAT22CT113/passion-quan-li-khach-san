@@ -17,8 +17,13 @@ export default function Header() {
   const { t } = useTranslation();
   const { selectedLanguage } = useLanguage();
   const [isReady, setIsReady] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const { user, loading: authLoading } = useAuth();
   const handleLogout = useLogout();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (i18n.language !== selectedLanguage) {
@@ -29,6 +34,23 @@ export default function Header() {
       setIsReady(true);
     }
   }, [selectedLanguage]);
+
+  // Don't render during SSR to avoid hydration mismatch
+  if (!mounted) {
+    return (
+      <header className={styles.header}>
+        <div className={styles.headerContent}>
+          <div className={styles.logoContainer}>
+            <Link href="/">
+              <Image src="/images/logo.png" alt="Hotel Logo" width={100} height={100} />
+            </Link>
+          </div>
+          <nav className={styles.mainNav}></nav>
+          <div className={styles.userActions}></div>
+        </div>
+      </header>
+    );
+  }
 
   if (authLoading) {
     return (

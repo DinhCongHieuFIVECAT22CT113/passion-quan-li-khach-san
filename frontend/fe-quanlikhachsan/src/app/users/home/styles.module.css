@@ -129,6 +129,85 @@
   transform: translateY(-2px);
 }
 
+/* Search Form */
+.searchForm {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 2rem;
+  margin: 2rem 0;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.searchGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 1rem;
+  align-items: end;
+}
+
+.searchField {
+  display: flex;
+  flex-direction: column;
+}
+
+.searchField label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #333;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.searchIcon {
+  color: #8B7355;
+  font-size: 0.9rem;
+}
+
+.searchField input,
+.searchField select {
+  padding: 0.75rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+  background: white;
+}
+
+.searchField input:focus,
+.searchField select:focus {
+  outline: none;
+  border-color: #8B7355;
+  box-shadow: 0 0 0 3px rgba(139, 115, 85, 0.1);
+}
+
+.searchButton {
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(135deg, #8B7355 0%, #6F5B3E 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  height: fit-content;
+}
+
+.searchButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(139, 115, 85, 0.3);
+}
+
+.heroActions {
+  margin-top: 1rem;
+}
+
 .viewOfferBtn {
 color: #8B7355;
 }
@@ -551,9 +630,7 @@ color: black;
   }
 }
 
-/* Map Section */
-.mapSection {
-}
+
 
 .mapSection h2 {
   font-size: 1.5rem;

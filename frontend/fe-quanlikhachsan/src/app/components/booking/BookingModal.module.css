@@ -1,0 +1,711 @@
+/* Booking Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+  backdrop-filter: blur(5px);
+}
+
+.modalContent {
+  background: white;
+  border-radius: 16px;
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-50px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.modalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem 2rem 1rem 2rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.modalHeader h1 {
+  font-size: 1.8rem;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #7f8c8d;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.closeButton:hover {
+  background: #f8f9fa;
+  color: #2c3e50;
+}
+
+/* Step Indicator */
+.stepIndicator {
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem 2rem;
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  flex: 1;
+  max-width: 150px;
+}
+
+.step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 15px;
+  right: -50%;
+  width: 100%;
+  height: 2px;
+  background: #dee2e6;
+  z-index: 1;
+}
+
+.step.completed:not(:last-child)::after {
+  background: #28a745;
+}
+
+.step span {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #dee2e6;
+  color: #6c757d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  position: relative;
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+
+.step.active span {
+  background: #007bff;
+  color: white;
+}
+
+.step.completed span {
+  background: #28a745;
+  color: white;
+}
+
+.step label {
+  font-size: 0.85rem;
+  color: #6c757d;
+  text-align: center;
+  font-weight: 500;
+}
+
+.step.active label {
+  color: #007bff;
+  font-weight: 600;
+}
+
+.step.completed label {
+  color: #28a745;
+}
+
+/* Modal Body */
+.modalBody {
+  padding: 2rem;
+}
+
+.stepContent h2 {
+  color: #2c3e50;
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.stepDescription {
+  color: #7f8c8d;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+/* Choice Step */
+.choiceGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.choiceCard {
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  padding: 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  background: white;
+}
+
+.choiceCard:hover {
+  border-color: #007bff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 123, 255, 0.15);
+}
+
+.choiceCard.selected {
+  border-color: #007bff;
+  background: linear-gradient(135deg, #f8f9ff 0%, #e3f2fd 100%);
+}
+
+.choiceCard.recommended {
+  border-color: #28a745;
+}
+
+.recommendedBadge {
+  position: absolute;
+  top: -10px;
+  right: 1rem;
+  background: #28a745;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.choiceIcon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.choiceCard h3 {
+  color: #2c3e50;
+  margin-bottom: 0.75rem;
+  font-size: 1.2rem;
+}
+
+.choiceCard p {
+  color: #7f8c8d;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
+}
+
+.benefits,
+.features {
+  margin-bottom: 1.5rem;
+}
+
+.benefit,
+.feature {
+  color: #28a745;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.socialLogin {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.socialButton {
+  flex: 1;
+  background: white;
+  border: 1px solid #dee2e6;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.socialButton:hover {
+  background: #f8f9fa;
+  border-color: #007bff;
+}
+
+/* Form Step */
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.formSection h3 {
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  font-size: 1.2rem;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 0.5rem;
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.formGroup label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #2c3e50;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.inputIcon {
+  color: #007bff;
+  font-size: 1rem;
+}
+
+.formGroup input,
+.formGroup textarea,
+.formGroup select {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.formGroup input:focus,
+.formGroup textarea:focus,
+.formGroup select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.inputError {
+  border-color: #dc3545 !important;
+}
+
+.errorText {
+  color: #dc3545;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Payment Step */
+.paymentGrid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.paymentMethods {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.paymentMethod {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.paymentMethod:hover {
+  border-color: #007bff;
+  background: #f8f9ff;
+}
+
+.paymentMethod.selected {
+  border-color: #007bff;
+  background: linear-gradient(135deg, #f8f9ff 0%, #e3f2fd 100%);
+}
+
+.paymentIcon {
+  font-size: 2rem;
+  color: #007bff;
+}
+
+.paymentInfo h4 {
+  color: #2c3e50;
+  margin-bottom: 0.25rem;
+}
+
+.paymentInfo p {
+  color: #7f8c8d;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.cardTypes {
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.cardTypes h4 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+}
+
+.cardTypeGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.cardTypeOption {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cardTypeOption:hover {
+  background: #f8f9fa;
+  border-color: #007bff;
+}
+
+.cardTypeOption input[type="radio"] {
+  margin: 0;
+  width: auto;
+}
+
+/* Booking Summary */
+.bookingSummary {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 12px;
+  height: fit-content;
+  position: sticky;
+  top: 1rem;
+}
+
+.bookingSummary h3 {
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.summaryItem {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  color: #2c3e50;
+}
+
+.summaryTotal {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 1rem;
+  border-top: 2px solid #dee2e6;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #2c3e50;
+}
+
+.totalPrice {
+  color: #e74c3c;
+  font-weight: 700;
+}
+
+/* Success Step */
+.successContainer {
+  text-align: center;
+  padding: 2rem;
+}
+
+.successIcon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #28a745;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  margin: 0 auto 1.5rem auto;
+  animation: successPulse 0.6s ease-out;
+}
+
+@keyframes successPulse {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.successContainer h2 {
+  color: #28a745;
+  margin-bottom: 1rem;
+}
+
+.successContainer p {
+  color: #7f8c8d;
+  margin-bottom: 2rem;
+  line-height: 1.6;
+}
+
+.bookingInfo {
+  background: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+.infoItem {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  color: #2c3e50;
+}
+
+.bookingCode {
+  font-weight: 700;
+  color: #007bff;
+  font-family: monospace;
+  font-size: 1.1rem;
+}
+
+.successActions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+/* Step Actions */
+.stepActions {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.backButton {
+  background: #6c757d;
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.backButton:hover {
+  background: #5a6268;
+  transform: translateY(-1px);
+}
+
+.nextButton {
+  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  min-width: 150px;
+}
+
+.nextButton:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 15px rgba(0, 123, 255, 0.3);
+}
+
+.nextButton:disabled {
+  background: #6c757d;
+  cursor: not-allowed;
+}
+
+.viewBookingsButton {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.viewBookingsButton:hover {
+  background: #218838;
+  transform: translateY(-1px);
+}
+
+.errorMessage {
+  background: #f8d7da;
+  color: #721c24;
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+  border: 1px solid #f5c6cb;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .modalOverlay {
+    padding: 0.5rem;
+  }
+
+  .modalContent {
+    max-height: 95vh;
+    border-radius: 12px;
+  }
+
+  .modalHeader {
+    padding: 1.5rem 1rem 1rem 1rem;
+  }
+
+  .modalHeader h1 {
+    font-size: 1.5rem;
+  }
+
+  .stepIndicator {
+    padding: 1rem;
+  }
+
+  .step {
+    max-width: 80px;
+  }
+
+  .step label {
+    font-size: 0.75rem;
+  }
+
+  .modalBody {
+    padding: 1rem;
+  }
+
+  .choiceGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+
+  .paymentGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .cardTypeGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .stepActions {
+    flex-direction: column;
+  }
+
+  .successActions {
+    flex-direction: column;
+  }
+
+  .socialLogin {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  .modalHeader {
+    padding: 1rem 0.75rem 0.75rem 0.75rem;
+  }
+
+  .modalBody {
+    padding: 0.75rem;
+  }
+
+  .stepIndicator {
+    padding: 0.75rem;
+  }
+
+  .choiceCard,
+  .formSection,
+  .bookingSummary {
+    padding: 1rem;
+  }
+
+  .nextButton,
+  .backButton {
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+  }
+}

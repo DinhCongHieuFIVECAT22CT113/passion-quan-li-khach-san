@@ -1,0 +1,292 @@
+/* Search Form Base Styles */
+.searchForm {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  margin: 0 auto;
+  transition: all 0.3s ease;
+}
+
+.searchForm:hover {
+  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Variant Styles */
+.searchForm.hero {
+  max-width: 900px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+}
+
+.searchForm.compact {
+  max-width: 600px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.searchForm.sticky {
+  position: sticky;
+  top: 80px;
+  z-index: 100;
+  max-width: 100%;
+  margin: 0;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Grid Layout */
+.searchGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  align-items: end;
+}
+
+.hero .searchGrid {
+  grid-template-columns: 1fr 1fr 1fr auto;
+}
+
+.compact .searchGrid {
+  grid-template-columns: 1fr 1fr auto auto;
+  gap: 12px;
+}
+
+.sticky .searchGrid {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+/* Search Field */
+.searchField {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.searchField label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.searchIcon {
+  color: #6B7280;
+  font-size: 14px;
+}
+
+.dateInputWrapper {
+  position: relative;
+}
+
+.searchField input,
+.searchField select {
+  padding: 12px 16px;
+  border: 2px solid #E5E7EB;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: all 0.2s ease;
+  background: white;
+  width: 100%;
+}
+
+.dateDisplay {
+  position: absolute;
+  top: 50%;
+  left: 16px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #374151;
+  font-weight: 500;
+  background: white;
+  padding: 0 4px;
+  border-radius: 4px;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 1;
+}
+
+.nightsCount {
+  background: #3B82F6;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.searchField input[type="date"] {
+  color: transparent;
+}
+
+.searchField input[type="date"]:focus {
+  color: #374151;
+}
+
+.searchField input[type="date"]:focus + .dateDisplay {
+  opacity: 0;
+}
+
+.searchField input:focus,
+.searchField select:focus {
+  outline: none;
+  border-color: #3B82F6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.searchField input.error,
+.searchField select.error {
+  border-color: #EF4444;
+}
+
+/* Error Message */
+.errorMessage {
+  color: #EF4444;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+/* Nights Info */
+.nightsInfo {
+  color: #6B7280;
+  font-size: 12px;
+  margin-top: 4px;
+  display: block;
+}
+
+/* Search Button */
+.searchButton {
+  background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+}
+
+.searchButton:hover {
+  background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.searchButton:active {
+  transform: translateY(0);
+}
+
+.hero .searchButton {
+  padding: 16px 32px;
+  font-size: 18px;
+  min-height: 56px;
+}
+
+.compact .searchButton {
+  padding: 10px 20px;
+  font-size: 14px;
+  min-height: 44px;
+}
+
+/* Search Summary */
+.searchSummary {
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: #F3F4F6;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #6B7280;
+  text-align: center;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .searchGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .hero .searchGrid,
+  .compact .searchGrid {
+    grid-template-columns: 1fr;
+  }
+  
+  .searchForm {
+    padding: 16px;
+  }
+  
+  .searchField input,
+  .searchField select {
+    padding: 10px 12px;
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+  
+  .searchButton {
+    padding: 14px 24px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .searchForm {
+    padding: 12px;
+    border-radius: 8px;
+  }
+  
+  .searchField label {
+    font-size: 13px;
+    margin-bottom: 6px;
+  }
+  
+  .searchField input,
+  .searchField select {
+    padding: 8px 12px;
+  }
+  
+  .searchButton {
+    padding: 12px 20px;
+    font-size: 15px;
+  }
+}
+
+/* Animation for form appearance */
+.searchForm {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Loading state */
+.searchButton:disabled {
+  background: #9CA3AF;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.searchButton:disabled:hover {
+  background: #9CA3AF;
+  transform: none;
+  box-shadow: none;
+}

@@ -1,0 +1,110 @@
+.breadcrumb {
+  background: #F9FAFB;
+  border-bottom: 1px solid #E5E7EB;
+  padding: 12px 0;
+  margin-bottom: 24px;
+}
+
+.breadcrumbList {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.breadcrumbItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.breadcrumbLink {
+  color: #6B7280;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.breadcrumbLink:hover {
+  color: #3B82F6;
+  background: #EBF8FF;
+}
+
+.currentPage {
+  color: #1F2937;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.separator {
+  color: #9CA3AF;
+  font-size: 12px;
+  margin: 0 4px;
+}
+
+.homeIcon {
+  font-size: 12px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .breadcrumbList {
+    padding: 0 16px;
+  }
+  
+  .breadcrumbLink,
+  .currentPage {
+    font-size: 13px;
+    padding: 3px 6px;
+  }
+  
+  .separator {
+    font-size: 10px;
+    margin: 0 2px;
+  }
+}
+
+@media (max-width: 480px) {
+  .breadcrumb {
+    padding: 8px 0;
+    margin-bottom: 16px;
+  }
+  
+  .breadcrumbList {
+    padding: 0 12px;
+    gap: 4px;
+  }
+  
+  .breadcrumbLink,
+  .currentPage {
+    font-size: 12px;
+    padding: 2px 4px;
+  }
+  
+  /* Hide intermediate items on very small screens */
+  .breadcrumbItem:not(:first-child):not(:last-child) {
+    display: none;
+  }
+  
+  /* Show ellipsis for hidden items */
+  .breadcrumbItem:not(:first-child):not(:last-child) + .breadcrumbItem::before {
+    content: "...";
+    color: #9CA3AF;
+    margin-right: 8px;
+  }
+}

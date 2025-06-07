@@ -78,9 +78,15 @@ export interface RoomType {
   maLoaiPhong: string;
   tenLoaiPhong: string;
   giaMoiDem: number;
+  giaMoiGio?: number; // Giá mỗi giờ (optional)
   soGiuongNgu: number;
   sucChua: number;
   kichThuocPhong: number;
+  dienTich?: number; // Diện tích phòng (alias)
   moTa?: string;
   thumbnail?: string;
+  hinhAnh?: string; // URL hình ảnh
+  tienNghi?: string[]; // Danh sách tiện nghi
+  soGiuong?: number; // Số giường (alias)
+  loaiGiuong?: string; // Loại giường
 } 
