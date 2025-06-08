@@ -83,50 +83,116 @@
 /* Hero Section */
 .hero {
   height: 100vh;
-  background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+  background-image: linear-gradient(135deg, rgba(139, 115, 85, 0.7), rgba(111, 91, 62, 0.8)),
     url('/heros/home-hero.jpg');
   background-size: cover;
   background-position: center;
+  background-attachment: fixed;
   display: flex;
   align-items: center;
   justify-content: center;
   text-align: center;
   color: white;
   padding: 0 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(139, 115, 85, 0.1) 0%, rgba(111, 91, 62, 0.2) 100%);
+  animation: shimmer 3s ease-in-out infinite alternate;
+}
+
+@keyframes shimmer {
+  0% { opacity: 0.8; }
+  100% { opacity: 1; }
 }
 
 .heroContent {
-  max-width: 800px;
+  max-width: 900px;
+  position: relative;
+  z-index: 2;
+  animation: fadeInUp 1s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .heroContent h1 {
-  font-size: 4rem;
-  font-weight: 600;
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-weight: 700;
   margin-bottom: 1.5rem;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 2px 4px 8px rgba(0, 0, 0, 0.4);
+  background: linear-gradient(135deg, #ffffff 0%, #f8f8f8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1.2;
 }
 
 .heroContent p {
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
-  opacity: 0.9;
+  font-size: 1.3rem;
+  margin-bottom: 2.5rem;
+  opacity: 0.95;
+  text-shadow: 1px 2px 4px rgba(0, 0, 0, 0.3);
+  font-weight: 300;
+  line-height: 1.6;
 }
 
 .heroButton {
   display: inline-block;
-  background: #8B7355;
+  background: linear-gradient(135deg, #8B7355 0%, #6F5B3E 100%);
   color: white;
   text-decoration: none;
-  padding: 1rem 2.5rem;
-  border-radius: 4px;
+  padding: 1.2rem 3rem;
+  border-radius: 50px;
   font-size: 1.1rem;
-  font-weight: 500;
-  transition: all 0.3s ease;
+  font-weight: 600;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 8px 25px rgba(139, 115, 85, 0.3);
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.heroButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.heroButton:hover::before {
+  left: 100%;
 }
 
 .heroButton:hover {
-  background: #6F5B3E;
-  transform: translateY(-2px);
+  background: linear-gradient(135deg, #6F5B3E 0%, #5A4A32 100%);
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 12px 35px rgba(139, 115, 85, 0.4);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.heroButton:active {
+  transform: translateY(-1px) scale(1.02);
 }
 
 /* Search Form */
@@ -209,11 +275,32 @@
 }
 
 .viewOfferBtn {
-color: #8B7355;
+  color: #8B7355;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 0.8rem 1.5rem;
+  border: 2px solid #8B7355;
+  border-radius: 25px;
+  transition: all 0.3s ease;
+  background: transparent;
+  display: inline-block;
+}
+
+.viewOfferBtn:hover {
+  background: #8B7355;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(139, 115, 85, 0.3);
 }
 
 .offerCode {
-color: black;
+  color: #2c3e50;
+  font-weight: 700;
+  font-size: 1.1rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid rgba(139, 115, 85, 0.2);
 }
 
 /* Booking Section */
@@ -328,120 +415,236 @@ color: black;
 
 /* Services Section */
 .services {
-  padding: 4rem 5% 2rem;
-  background: #f8f8f8;
-  margin-top: 2rem;
+  padding: 6rem 5% 4rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.services::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #8B7355, transparent);
 }
 
 .sectionHeader {
   text-align: center;
-  max-width: 800px;
-  margin: 0 auto 3rem;
+  max-width: 900px;
+  margin: 0 auto 4rem;
+  position: relative;
 }
 
 .sectionHeader h2 {
-  font-size: 2.5rem;
-  color: #333;
-  margin-bottom: 1rem;
+  font-size: clamp(2rem, 4vw, 3rem);
+  color: #2c3e50;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  position: relative;
+  display: inline-block;
+}
+
+.sectionHeader h2::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(135deg, #8B7355 0%, #6F5B3E 100%);
+  border-radius: 2px;
 }
 
 .sectionHeader p {
-  color: #666;
-  font-size: 1.1rem;
+  color: #5a6c7d;
+  font-size: 1.2rem;
+  font-weight: 300;
+  line-height: 1.7;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .servicesGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2.5rem;
   max-width: 1400px;
   margin: 0 auto;
 }
 
 .serviceCard {
   background: white;
-  border-radius: 8px;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  border: 1px solid rgba(139, 115, 85, 0.1);
+}
+
+.serviceCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(135deg, #8B7355 0%, #6F5B3E 100%);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.serviceCard:hover::before {
+  transform: scaleX(1);
+}
+
+.serviceCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(139, 115, 85, 0.15);
 }
 
 .serviceImage {
   position: relative;
-  height: 160px;
+  height: 200px;
+  overflow: hidden;
+}
+
+.serviceImage img {
+  transition: transform 0.4s ease;
+}
+
+.serviceCard:hover .serviceImage img {
+  transform: scale(1.05);
 }
 
 .serviceContent {
-  padding: 1.5rem;
+  padding: 2rem 1.5rem;
   text-align: center;
 }
 
 .serviceContent h3 {
-  font-size: 1.2rem;
-  color: #333;
-  margin-bottom: 0.5rem;
+  font-size: 1.4rem;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  line-height: 1.3;
 }
 
 .serviceContent p {
-  color: #666;
-  font-size: 0.9rem;
-  line-height: 1.5;
+  color: #5a6c7d;
+  font-size: 1rem;
+  line-height: 1.6;
+  font-weight: 300;
 }
 
 /* Special Offers */
 .specialOffers {
-  padding: 5rem 5%;
+  padding: 6rem 5%;
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  position: relative;
+}
+
+.specialOffers::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #8B7355, transparent);
 }
 
 .offerGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 2.5rem;
   max-width: 1400px;
   margin: 0 auto;
 }
 
 .offerCard {
   background: white;
-  border-radius: 12px;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  border: 1px solid rgba(139, 115, 85, 0.1);
+}
+
+.offerCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(139, 115, 85, 0.05) 0%, rgba(111, 91, 62, 0.05) 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.offerCard:hover::before {
+  opacity: 1;
 }
 
 .offerCard:hover {
-  transform: translateY(-5px);
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 20px 50px rgba(139, 115, 85, 0.15);
 }
 
 .offerImage {
   position: relative;
-  height: 250px;
+  height: 280px;
+  overflow: hidden;
+}
+
+.offerImage img {
+  transition: transform 0.4s ease;
+}
+
+.offerCard:hover .offerImage img {
+  transform: scale(1.08);
 }
 
 .offerType {
   position: absolute;
-  top: 1rem;
-  left: 1rem;
-  background: rgba(139, 115, 85, 0.9);
+  top: 1.5rem;
+  left: 1.5rem;
+  background: linear-gradient(135deg, rgba(139, 115, 85, 0.95) 0%, rgba(111, 91, 62, 0.95) 100%);
   color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+  padding: 0.7rem 1.2rem;
+  border-radius: 25px;
   font-size: 0.9rem;
+  font-weight: 600;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(139, 115, 85, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .offerContent {
-  padding: 1.5rem;
+  padding: 2rem 1.5rem;
+  position: relative;
+  z-index: 2;
 }
 
 .offerContent h3 {
-  font-size: 1.5rem;
-  color: #333;
-  margin-bottom: 0.5rem;
+  font-size: 1.6rem;
+  color: #2c3e50;
+  margin-bottom: 1rem;
+  font-weight: 600;
+  line-height: 1.3;
 }
 
 .offerContent p {
-  color: #666;
-  margin-bottom: 1rem;
-  line-height: 1.6;
+  color: #5a6c7d;
+  margin-bottom: 1.5rem;
+  line-height: 1.7;
+  font-weight: 300;
 }
 
 .offerRating {
@@ -632,8 +835,77 @@ color: black;
 
 
 
+.mapSection {
+  padding: 4rem 5%;
+  background: #f8f9fa;
+}
+
 .mapSection h2 {
-  font-size: 1.5rem;
-  color: #333;
+  font-size: 2rem;
+  color: #2c3e50;
+  margin-bottom: 2rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.mapSection iframe {
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Loading States */
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #8B7355;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
   margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+  color: #e74c3c;
+}
+
+.retryButton {
+  background: #8B7355;
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: background 0.3s ease;
+}
+
+.retryButton:hover {
+  background: #6F5B3E;
+}
+
+.noOffers {
+  text-align: center;
+  padding: 3rem;
+  color: #666;
+  font-size: 1.1rem;
 }
