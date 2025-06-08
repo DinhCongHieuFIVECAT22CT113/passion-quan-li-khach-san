@@ -1,0 +1,67 @@
+### Test Supabase Storage Integration
+
+# 1. Test tạo DichVu với file upload (cần thay đổi file path)
+POST https://localhost:7139/api/DichVu
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+Authorization: Bearer YOUR_JWT_TOKEN
+
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="TenDichVu"
+
+Test Service Supabase
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="MoTa"
+
+Test service with Supabase storage
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="DonGia"
+
+100000
+------WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="ThumbnailFile"; filename="test-image.jpg"
+Content-Type: image/jpeg
+
+< ./test-image.jpg
+------WebKitFormBoundary7MA4YWxkTrZu0gW--
+
+###
+
+# 2. Test tạo DichVu với URL
+POST https://localhost:7139/api/DichVu
+Content-Type: application/json
+Authorization: Bearer YOUR_JWT_TOKEN
+
+{
+  "TenDichVu": "Test Service URL",
+  "Thumbnail": "https://ttumqjufzmvfkccnyxfx.supabase.co/storage/v1/object/public/hotel-images/services/test.jpg",
+  "MoTa": "Test service with URL",
+  "DonGia": 200000
+}
+
+###
+
+# 3. Test Migration (chỉ Admin - Role R00)
+POST https://localhost:7139/api/Migration/migrate-all-images
+Authorization: Bearer YOUR_ADMIN_JWT_TOKEN
+
+###
+
+# 4. Test Migration DichVu only
+POST https://localhost:7139/api/Migration/migrate-dichvu-images
+Authorization: Bearer YOUR_ADMIN_JWT_TOKEN
+
+###
+
+# 5. Test Migration KhuyenMai only
+POST https://localhost:7139/api/Migration/migrate-khuyenmai-images
+Authorization: Bearer YOUR_ADMIN_JWT_TOKEN
+
+###
+
+# 6. Get all DichVu to check URLs
+GET https://localhost:7139/api/DichVu
+
+###
+
+# 7. Get all KhuyenMai to check URLs
+GET https://localhost:7139/api/KhuyenMai

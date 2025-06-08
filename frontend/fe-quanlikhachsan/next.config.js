@@ -62,6 +62,11 @@ const nextConfig = {
           protocol: 'https',
           hostname: 'ui-avatars.com',
         },
+        {
+          protocol: 'https',
+          hostname: 'ttumqjufzmvfkccnyxfx.supabase.co',
+          pathname: '/storage/v1/object/public/**',
+        },
       ],
     },
     // Không sử dụng rewrites vì chúng ta sẽ gọi trực tiếp đến backend API

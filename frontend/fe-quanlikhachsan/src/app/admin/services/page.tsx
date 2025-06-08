@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import styles from "./ServiceManager.module.css";
 import { API_BASE_URL } from '@/lib/config';
+import { getValidImageSrc } from '@/config/supabase';
 import { getAuthHeaders, getFormDataHeaders, handleResponse } from '@/lib/api';
 import Image from 'next/image';
 
@@ -240,11 +241,15 @@ export default function ServiceManager() {
                     <td>{service.moTa || "-"}</td>
                     <td>
                       {service.thumbnail ? (
-                        <Image 
-                            src={service.thumbnail.startsWith('http') || service.thumbnail.startsWith('/') ? service.thumbnail : `${API_BASE_URL}${service.thumbnail}`} 
+                        <img 
+                            src={getValidImageSrc(service.thumbnail)} 
                             alt={service.tenDichVu || 'thumbnail'} 
                             width={50} 
-                            height={50} 
+                            height={50}
+                            style={{ objectFit: 'cover' }}
+                            onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+                              e.currentTarget.src = '/images/no-image.png';
+                            }}
                         />
                       ) : (
                         "N/A"

@@ -20,7 +20,11 @@ namespace be_quanlikhachsanapi.DTOs
         [Required]
         [MaxLength(100)]
         public string TenDichVu { get; set; } = default!;
-        [Required(ErrorMessage = "Hình ảnh là bắt buộc.")]
+        
+        // For file upload
+        public IFormFile? ThumbnailFile { get; set; }
+        
+        // For URL (when file is uploaded)
         [MaxLength(500)]
         public string? Thumbnail { get; set; }
 
@@ -34,7 +38,11 @@ namespace be_quanlikhachsanapi.DTOs
         [Required]
         [MaxLength(100)]
         public string TenDichVu { get; set; } = default!;
-        [Required(ErrorMessage = "Hình ảnh là bắt buộc.")]
+        
+        // For file upload
+        public IFormFile? ThumbnailFile { get; set; }
+        
+        // For URL (when file is uploaded or keeping existing)
         [MaxLength(500)]
         public string? Thumbnail { get; set; }
 

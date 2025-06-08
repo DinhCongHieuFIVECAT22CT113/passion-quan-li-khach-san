@@ -102,11 +102,28 @@ builder.Services.AddCors(options =>
 // Add Memory Cache
 builder.Services.AddMemoryCache();
 
+// Add Supabase
+builder.Services.AddSingleton<Supabase.Client>(provider =>
+{
+    var configuration = provider.GetRequiredService<IConfiguration>();
+    var url = configuration["Supabase:Url"] ?? throw new InvalidOperationException("Supabase URL not found");
+    var key = configuration["Supabase:ServiceKey"] ?? throw new InvalidOperationException("Supabase Service Key not found");
+    
+    var options = new Supabase.SupabaseOptions
+    {
+        AutoConnectRealtime = false
+    };
+    
+    return new Supabase.Client(url, key, options);
+});
+
 // Add custom services
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<ISendEmailServices, SendEmailServices>();
+builder.Services.AddScoped<ISupabaseStorageService, SupabaseStorageService>();
 builder.Services.AddScoped<IWriteFileRepository, WriteFileRepository>();
+builder.Services.AddScoped<IImageMigrationService, ImageMigrationService>();
 builder.Services.AddScoped<IPhongRepository, PhongRepository>();
 builder.Services.AddScoped<ILoaiPhongRepository, LoaiPhongRepository>();
 builder.Services.AddScoped<IDichVuRepository, DichVuRepository>();

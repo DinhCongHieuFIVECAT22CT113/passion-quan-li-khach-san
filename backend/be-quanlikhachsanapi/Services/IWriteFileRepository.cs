@@ -3,66 +3,111 @@ namespace be_quanlikhachsanapi.Services
     public interface IWriteFileRepository
     {
         Task<List<string>> WriteFileAsync(List<IFormFile> files, string folder);
+        Task<string> WriteFileAsync(IFormFile file, string folder);
+        Task<bool> DeleteFileAsync(string filePath);
     }
+    
     public class WriteFileRepository : IWriteFileRepository
     {
+        private readonly ISupabaseStorageService _supabaseStorage;
+        private readonly ILogger<WriteFileRepository> _logger;
+
+        public WriteFileRepository(ISupabaseStorageService supabaseStorage, ILogger<WriteFileRepository> logger)
+        {
+            _supabaseStorage = supabaseStorage;
+            _logger = logger;
+        }
+
         public async Task<List<string>> WriteFileAsync(List<IFormFile> files, string? folder = null)
         {
-            string local;
-
-            var imageUrls = new List<string>();
-            var errorMessages = new List<string>(); // Danh sách để lưu trữ thông báo lỗi
-            foreach (var file in files)
+            try
             {
-                if (file.Length == 0)
+                var validFiles = new List<IFormFile>();
+                var errorMessages = new List<string>();
+
+                // Validate files first
+                foreach (var file in files)
                 {
-                    continue;
+                    if (file.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+
+                    if (extension == ".jpg" || extension == ".jpeg" || extension == ".png" || extension == ".gif" || extension == ".webp")
+                    {
+                        validFiles.Add(file);
+                    }
+                    else if (extension == ".pdf" || extension == ".doc" || extension == ".docx" || extension == ".xls" || extension == ".xlsx")
+                    {
+                        validFiles.Add(file);
+                    }
+                    else
+                    {
+                        errorMessages.Add($"File không hợp lệ '{file.FileName}'.");
+                    }
                 }
 
-                var extension = "." + file.FileName.Split('.')[file.FileName.Split('.').Length - 1];
-
-                if (extension == ".jpg" || extension == ".jpge" || extension == ".png")
+                if (errorMessages.Any())
                 {
-                    local = "Images";
-                }
-                else if (extension == ".pdf" || extension == ".doc" || extension == ".docx" || extension == ".xls" || extension == ".xlsx")
-                {
-                    local = "Files";
-                }
-                else
-                {
-                    // Nếu extension không hợp lệ, thêm thông báo lỗi vào danh sách và chuyển sang file tiếp theo
-                    errorMessages.Add($"File không hợp lệ '{file.FileName}'.");
-                    continue;
+                    throw new Exception(string.Join(Environment.NewLine, errorMessages));
                 }
 
-                try
-                {
-                    var exactpath = Path.Combine(Directory.GetCurrentDirectory(),
-                        "UpLoad\\" + local + "\\" + folder + "", file.FileName);
-
-                    var stream = new FileStream(exactpath, FileMode.Create);
-
-                    await file.CopyToAsync(stream);
-
-                    stream.Close();
-
-                    string result = "Upload/" + local + "/" + folder + "/" + file.FileName;
-
-                    imageUrls.Add(result);
-                }
-                catch (Exception ex)
-                {
-                    errorMessages.Add($"Lỗi khi upload file '{file.FileName}': {ex.Message}");
-                }
+                // Upload to Supabase
+                var uploadedUrls = await _supabaseStorage.UploadFilesAsync(validFiles, folder ?? "general");
+                
+                _logger.LogInformation($"Successfully uploaded {uploadedUrls.Count} files to Supabase");
+                return uploadedUrls;
             }
-            // Kiểm tra nếu có lỗi, trả về danh sách thông báo lỗi
-            if (errorMessages.Count > 0)
+            catch (Exception ex)
             {
-                throw new Exception(string.Join(Environment.NewLine, errorMessages));
+                _logger.LogError(ex, "Error in WriteFileAsync");
+                throw;
             }
+        }
 
-            return imageUrls;
+        public async Task<string> WriteFileAsync(IFormFile file, string? folder = null)
+        {
+            try
+            {
+                if (file == null || file.Length == 0)
+                {
+                    throw new ArgumentException("File không hợp lệ");
+                }
+
+                var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+
+                if (!(extension == ".jpg" || extension == ".jpeg" || extension == ".png" || extension == ".gif" || extension == ".webp" ||
+                      extension == ".pdf" || extension == ".doc" || extension == ".docx" || extension == ".xls" || extension == ".xlsx"))
+                {
+                    throw new ArgumentException($"File không hợp lệ '{file.FileName}'.");
+                }
+
+                // Upload to Supabase
+                var uploadedUrl = await _supabaseStorage.UploadFileAsync(file, folder ?? "general");
+                
+                _logger.LogInformation($"Successfully uploaded file {file.FileName} to Supabase");
+                return uploadedUrl;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error uploading file {file?.FileName}");
+                throw;
+            }
+        }
+
+        public async Task<bool> DeleteFileAsync(string filePath)
+        {
+            try
+            {
+                return await _supabaseStorage.DeleteFileAsync(filePath);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error deleting file {filePath}");
+                return false;
+            }
         }
     }
 }
