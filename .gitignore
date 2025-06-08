@@ -8,6 +8,7 @@ node_modules/
 .next/
 out/
 build/
+dist/
 
 # TypeScript
 *.tsbuildinfo
@@ -39,16 +40,8 @@ coverage/
 *.nuget.g.props
 *.nuget.dgspec.json
 
-# Visual Studio / JetBrains / VS Code
+# IDEs and Editor files
 *.user
 *.suo
 .idea/
 .vscode/
-
-# Thêm cho thư mục backend nếu cần (đảm bảo tránh commit thư mục debug/release)
-backend/bin/
-backend/obj/
-
-# Thêm cho thư mục frontend nếu bạn có thư mục build riêng
-frontend/build/
-frontend/dist/
