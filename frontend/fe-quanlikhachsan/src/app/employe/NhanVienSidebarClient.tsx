@@ -66,12 +66,13 @@ export default function NhanVienSidebarClient({ children }: { children: React.Re
 
   return (
     <div style={{display:'flex', minHeight:'100vh', background:'#f6f8fa'}}>
-      <aside style={{width:240, background:'#232946', color:'#fff', display:'flex', flexDirection:'column', justifyContent:'space-between', padding:'32px 0 24px 0', boxShadow:'2px 0 16px #0002'}}>
-        <div>
+      <aside style={{width:240, background:'#232946', color:'#fff', display:'flex', flexDirection:'column', padding:'32px 0 24px 0', boxShadow:'2px 0 16px #0002'}}>
+        <div style={{display:'flex', flexDirection:'column', height:'100%'}}>
           <div style={{display:'flex', alignItems:'center', gap:10, fontWeight:700, fontSize:'1.3rem', margin:'0 0 32px 32px'}}>
             <span role="img" aria-label="staff">🧑‍💼</span> 
             {profile?.role || 'Nhân viên'}
           </div>
+          
           <nav style={{display:'flex', flexDirection:'column', gap:6}}>
             {navItems.map(nav => (
               <Link
@@ -94,20 +95,22 @@ export default function NhanVienSidebarClient({ children }: { children: React.Re
               </Link>
             ))}
           </nav>
-        </div>
-        <div style={{margin:'0 18px 0 18px', borderTop:'1px solid #4a5568', paddingTop:18, display:'flex', flexDirection:'column', gap:8}}>
-          {profile && (
-            <div style={{display:'flex', alignItems:'center', gap:10}}>
-              <div style={{background:'#eebbc3', color:'#232946', borderRadius:'50%', width:38, height:38, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, fontSize:'1.1rem'}}>
-                {profile.name.split(' ').slice(-1)[0][0]}
+          
+          {/* Thông tin nhân viên và nút đăng xuất ở dưới, sát với thanh công cụ */}
+          <div style={{margin:'8px 18px 0 18px', padding:'16px 0 0 0', display:'flex', flexDirection:'column', gap:8, borderTop:'1px solid #4a5568', marginTop:'auto'}}>
+            {profile && (
+              <div style={{display:'flex', alignItems:'center', gap:10}}>
+                <div style={{background:'#eebbc3', color:'#232946', borderRadius:'50%', width:38, height:38, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, fontSize:'1.1rem'}}>
+                  {profile.name.split(' ').slice(-1)[0][0]}
+                </div>
+                <div>
+                  <div style={{fontWeight:600}}>{profile.name}</div>
+                  <div style={{fontSize:'0.97em', color:'#b8c1ec'}}>{profile.role}</div>
+                </div>
               </div>
-              <div>
-                <div style={{fontWeight:600}}>{profile.name}</div>
-                <div style={{fontSize:'0.97em', color:'#b8c1ec'}}>{profile.role}</div>
-              </div>
-            </div>
-          )}
-          <button onClick={handleLogout} style={{marginTop:8, background:'#e5e7eb', color:'#232946', border:'none', borderRadius:6, padding:'7px 16px', fontWeight:500, fontSize:'0.97em', cursor:'pointer', transition:'background 0.2s'}}>Đăng xuất</button>
+            )}
+            <button onClick={handleLogout} style={{marginTop:8, background:'#e5e7eb', color:'#232946', border:'none', borderRadius:6, padding:'7px 16px', fontWeight:500, fontSize:'0.97em', cursor:'pointer', transition:'background 0.2s'}}>Đăng xuất</button>
+          </div>
         </div>
       </aside>
       <main style={{flex:1, minHeight:'100vh'}}>{children}</main>

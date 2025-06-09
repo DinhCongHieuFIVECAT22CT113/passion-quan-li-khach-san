@@ -6,7 +6,7 @@ import { API_BASE_URL } from '@/lib/config';
 import { getAuthHeaders, getFormDataHeaders, handleResponse } from '@/lib/api';
 // import Image from 'next/image'; // Xóa import Image không sử dụng
 import { withAuth, ROLES, useAuth } from '@/lib/auth'; // Import HOC và ROLES
-// import { FaPlus, FaEdit, FaTrash } from "react-icons/fa"; // Xóa import icons không sử dụng
+import { FaPlus, FaEdit, FaTrash, FaSearch } from "react-icons/fa";
 
 interface Staff {
   maNV: string;
@@ -351,66 +351,90 @@ function StaffPage() {
       {error && <p className={styles.errorText}>Lỗi: {error}</p>}
 
       <div className={styles.toolbar}>
-        <input
-          type="text"
-          placeholder="Tìm kiếm nhân viên..."
-          className={styles.searchInput}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+        <div className={styles.searchContainer}>
+          <FaSearch className={styles.searchIcon} />
+          <input
+            type="text"
+            placeholder="Tìm kiếm nhân viên..."
+            className={styles.searchInput}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
         {user && user.permissions.canManageStaff && (
-          <button onClick={openAddModal} className={styles.addBtn}>Thêm Nhân Viên</button>
+          <button onClick={openAddModal} className={styles.addBtn}>
+            <FaPlus className={styles.btnIcon} /> Thêm Nhân Viên
+          </button>
         )}
       </div>
 
+      {isLoading ? (
+        <div className={styles.loadingContainer}>
+          <div className={styles.spinner}></div>
+          <p>Đang tải dữ liệu...</p>
+        </div>
+      ) : (
+        <div className={styles.tableContainer}>
           <table className={styles.table}>
             <thead>
               <tr>
-            <th>Mã NV</th>
-            <th>Họ tên</th>
-            <th>Username</th>
-            <th>Chức vụ</th>
-            <th>SĐT</th>
-            <th>Email</th>
-            <th>Ngày vào làm</th>
-            <th>Lương cơ bản</th>
-            <th>Vai trò</th>
-            <th>Trạng thái</th>
-            <th>Hành động</th>
+                <th>Mã NV</th>
+                <th>Họ tên</th>
+                <th>Username</th>
+                <th>Chức vụ</th>
+                <th>SĐT</th>
+                <th>Email</th>
+                <th>Ngày vào làm</th>
+                <th>Lương cơ bản</th>
+                <th>Vai trò</th>
+                <th>Trạng thái</th>
+                <th>Hành động</th>
               </tr>
             </thead>
             <tbody>
-          {filteredStaffs.length === 0 ? (
+              {filteredStaffs.length === 0 ? (
                 <tr>
-              <td colSpan={11} style={{textAlign: 'center', padding: '16px'}}>Không có dữ liệu nhân viên</td>
+                  <td colSpan={11} className={styles.emptyState}>Không có dữ liệu nhân viên</td>
                 </tr>
               ) : (
-            filteredStaffs.map((staff, index) => (
+                filteredStaffs.map((staff, index) => (
                   <tr key={staff.maNV || `staff-${index}`}>
                     <td>{staff.maNV || 'N/A'}</td>
-                    <td>{`${staff.hoNv || ''} ${staff.tenNv || ''}`.trim() || 'N/A'}</td>
-                <td>{staff.userName || 'N/A'}</td>
+                    <td className={styles.nameCell}>{`${staff.hoNv || ''} ${staff.tenNv || ''}`.trim() || 'N/A'}</td>
+                    <td>{staff.userName || 'N/A'}</td>
                     <td>{staff.chucVu || 'N/A'}</td>
                     <td>{staff.soDienThoai || 'N/A'}</td>
-                <td>{staff.email || 'N/A'}</td>
-                <td>{staff.ngayVaoLam ? new Date(staff.ngayVaoLam).toLocaleDateString() : 'N/A'}</td>
-                <td>{staff.luongCoBan?.toLocaleString() || '0'}</td>
-                <td>{staff.tenRole || staff.maRole || 'N/A'}</td>
-                <td>{staff.trangThai || 'N/A'}</td>
-                <td>
-                  <button onClick={() => openEditModal(staff)} className={styles.editBtn}>Sửa</button>
-                  <button onClick={() => handleDelete(staff.maNV)} className={styles.deleteBtn}>Xóa</button>
+                    <td>{staff.email || 'N/A'}</td>
+                    <td>{staff.ngayVaoLam ? new Date(staff.ngayVaoLam).toLocaleDateString() : 'N/A'}</td>
+                    <td className={styles.salaryCell}>{staff.luongCoBan?.toLocaleString() || '0'} VNĐ</td>
+                    <td>
+                      <span className={styles.roleBadge}>{staff.tenRole || staff.maRole || 'N/A'}</span>
+                    </td>
+                    <td>
+                      <span className={`${styles.statusBadge} ${staff.trangThai === 'Hoạt động' ? styles.statusActive : styles.statusInactive}`}>
+                        {staff.trangThai || 'N/A'}
+                      </span>
+                    </td>
+                    <td className={styles.actionCell}>
+                      <button onClick={() => openEditModal(staff)} className={styles.editBtn} title="Sửa">
+                        <FaEdit />
+                      </button>
+                      <button onClick={() => handleDelete(staff.maNV)} className={styles.deleteBtn} title="Xóa">
+                        <FaTrash />
+                      </button>
                     </td>
                   </tr>
                 ))
               )}
             </tbody>
           </table>
+        </div>
+      )}
 
       {(showAddModal || showEditModal) && (
         <div className={styles.modal}>
           <div className={styles.modalContent}>
-            <h2>{editingStaff ? "Sửa Nhân Viên" : "Thêm Nhân Viên"}</h2>
+            <h2>{editingStaff ? "Sửa Thông Tin Nhân Viên" : "Thêm Nhân Viên Mới"}</h2>
             <form onSubmit={handleSubmit} className={styles.form}>
               <div className={styles.formGroup}>
                 <label htmlFor="hoNv">Họ</label>
@@ -427,7 +451,7 @@ function StaffPage() {
               {!editingStaff && (
                 <div className={styles.formGroup}>
                   <label htmlFor="password">Mật khẩu</label>
-                  <input type="password" id="password" name="password" value={formState.password || ''} onChange={handleInputChange} required className={styles.input} placeholder="Nhập mật khẩu" />
+                  <input type="password" id="password" name="password" value={formState.password || ''} onChange={handleInputChange} required={!editingStaff} className={styles.input} />
                 </div>
               )}
               <div className={styles.formGroup}>
@@ -448,12 +472,12 @@ function StaffPage() {
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="luongCoBan">Lương cơ bản</label>
-                <input type="number" id="luongCoBan" name="luongCoBan" value={formState.luongCoBan} onChange={handleInputChange} required min="0" className={styles.input}/>
+                <input type="number" id="luongCoBan" name="luongCoBan" value={formState.luongCoBan} onChange={handleInputChange} required className={styles.input} />
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="maRole">Vai trò</label>
-                <select id="maRole" name="maRole" value={formState.maRole} onChange={handleInputChange} required className={styles.input}>
-                  <option value="" disabled>Chọn vai trò</option>
+                <select id="maRole" name="maRole" value={formState.maRole} onChange={handleInputChange} required className={styles.select}>
+                  <option value="">-- Chọn vai trò --</option>
                   {roles.map(role => (
                     <option key={role.maRole} value={role.maRole}>{role.tenRole}</option>
                   ))}
@@ -461,10 +485,9 @@ function StaffPage() {
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="trangThai">Trạng thái</label>
-                <select id="trangThai" name="trangThai" value={formState.trangThai} onChange={handleInputChange} required className={styles.input}>
-                  <option key="hoat-dong" value="Hoạt động">Hoạt động</option>
-                  <option key="nghi-viec" value="Nghỉ việc">Nghỉ việc</option>
-                  <option key="tam-ngung" value="Tạm ngưng">Tạm ngưng</option>
+                <select id="trangThai" name="trangThai" value={formState.trangThai} onChange={handleInputChange} required className={styles.select}>
+                  <option value="Hoạt động">Hoạt động</option>
+                  <option value="Không hoạt động">Không hoạt động</option>
                 </select>
               </div>
 

@@ -41,8 +41,14 @@ export default function Header() {
       <header className={styles.header}>
         <div className={styles.headerContent}>
           <div className={styles.logoContainer}>
-            <Link href="/">
-              <Image src="/images/logo.png" alt="Hotel Logo" width={100} height={100} />
+            <Link href="/" className={styles.logo}>
+              <Image 
+                src="/images/logo-clean.png" 
+                alt="Passion Hotel" 
+                width={120} 
+                height={60} 
+                priority
+              />
             </Link>
           </div>
           <nav className={styles.mainNav}></nav>
@@ -57,8 +63,14 @@ export default function Header() {
       <header className={styles.header}>
         <div className={styles.headerContent}>
           <div className={styles.logoContainer}>
-            <Link href="/">
-              <Image src="/images/logo.png" alt="Hotel Logo" width={100} height={100} />
+            <Link href="/" className={styles.logo}>
+              <Image 
+                src="/images/logo-clean.png" 
+                alt="Passion Hotel" 
+                width={120} 
+                height={60} 
+                priority
+              />
             </Link>
           </div>
           <nav className={styles.mainNav}></nav>

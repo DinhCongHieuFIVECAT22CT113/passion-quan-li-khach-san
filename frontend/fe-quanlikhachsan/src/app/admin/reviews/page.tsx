@@ -1,7 +1,8 @@
 'use client';
 import React, { useState, useEffect } from "react";
 import styles from "./ReviewManager.module.css";
-import { getReviews, approveReview, getBookingDetails, getCustomerProfile } from "../../../lib/api";
+import { getReviews, approveReview, getBookingDetails } from "../../../lib/api";
+import { FaSearch, FaFilter, FaStar, FaCheck, FaEye, FaEyeSlash, FaPencilAlt, FaTrashAlt } from 'react-icons/fa';
 
 interface Review {
   maDG: string;
@@ -27,6 +28,8 @@ export default function ReviewManager() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
 
   // Lấy danh sách đánh giá từ API
   useEffect(() => {
@@ -39,7 +42,7 @@ export default function ReviewManager() {
 
         const processedReviews = await Promise.all(rawReviewsFromApi.map(async (apiReview) => {
           let tenKhachHangDisplay = 'Khách hàng không xác định';
-          let maKhachHangFromBooking: string | undefined = apiReview.maKH; // Ưu tiên maKH trực tiếp từ review nếu có
+          let maKhachHangFromBooking: string | undefined = apiReview.maKH;
 
           const reviewId = apiReview.MaReview || apiReview.maReview;
           const datPhongId = apiReview.MaDatPhong || apiReview.maDatPhong;
@@ -48,66 +51,12 @@ export default function ReviewManager() {
             console.log(`[Review ${reviewId}] Fetching booking details for MaDatPhong: ${datPhongId}`);
             const bookingData: any = await getBookingDetails(datPhongId);
             console.log(`[Review ${reviewId}] Booking data for ${datPhongId}:`, JSON.stringify(bookingData, null, 2));
-
-            if (bookingData) {
-              // Ưu tiên tên khách hàng trực tiếp từ bookingData nếu có
-              const directTenKH = bookingData.tenKhachHang || bookingData.TenKhachHang;
-              if (directTenKH && typeof directTenKH === 'string' && directTenKH.trim() !== "") {
-                tenKhachHangDisplay = directTenKH;
-                console.log(`[Review ${reviewId}] Found directTenKH from booking: ${directTenKH}`);
-              } else {
-                 // Nếu không có tên trực tiếp, lấy maKH từ bookingData
-                maKhachHangFromBooking = bookingData.maKH || bookingData.MaKH || bookingData.maKhachHang || bookingData.MaKhachHang;
-                console.log(`[Review ${reviewId}] maKhachHangFromBooking from booking: ${maKhachHangFromBooking}`);
-              }
-            } else {
-              console.log(`[Review ${reviewId}] No bookingData returned or bookingData is null for MaDatPhong: ${datPhongId}`);
-            }
-          }
-
-          // Nếu đã có tên khách hàng từ bookingData, hoặc không có maKhachHangFromBooking, thì không cần fetch customer profile nữa
-          if (tenKhachHangDisplay !== 'Khách hàng không xác định' && tenKhachHangDisplay !== `Khách hàng (DP: ${datPhongId})` ) {
-            // Đã có tên từ booking, không làm gì thêm
-          } else if (maKhachHangFromBooking) {
-            console.log(`[Review ${reviewId}] Fetching customer profile for MaKH: ${maKhachHangFromBooking}`);
-            const customerDataWrapper: any = await getCustomerProfile(maKhachHangFromBooking);
-            console.log(`[Review ${reviewId}] Customer data wrapper for ${maKhachHangFromBooking}:`, JSON.stringify(customerDataWrapper, null, 2));
-            const customerData = customerDataWrapper?.value || customerDataWrapper;
-
-            if (customerData) {
-              // Ưu tiên PascalCase theo comment trong lib/api.ts cho getCustomerProfile
-              const hoKh = customerData.HoKh || customerData.hoKh || '';
-              const tenKh = customerData.TenKh || customerData.tenKh || '';
-              if (hoKh || tenKh) {
-                tenKhachHangDisplay = `${hoKh} ${tenKh}`.trim();
-                console.log(`[Review ${reviewId}] Constructed customer name: ${tenKhachHangDisplay}`);
-              } else if (maKhachHangFromBooking) {
-                tenKhachHangDisplay = `Khách hàng (${maKhachHangFromBooking})`; // Fallback nếu không có họ tên
-              }
-            } else if (maKhachHangFromBooking) {
-                 tenKhachHangDisplay = `Khách hàng (${maKhachHangFromBooking})`;
-                 console.log(`[Review ${reviewId}] No customerData found for MaKH: ${maKhachHangFromBooking}, using fallback with MaKH.`);
-            } else {
-              console.log(`[Review ${reviewId}] No customerData and no maKhachHangFromBooking to construct name from MaKH.`);
-            }
-          } else if (datPhongId) {
-            // Fallback nếu không lấy được booking hoặc customer
-            tenKhachHangDisplay = `Khách hàng (DP: ${datPhongId})`;
-          } else {
-            console.log(`[Review ${reviewId}] No MaDatPhong in review and no initial MaKH. Cannot determine customer.`);
-          }
-
-          // Nếu backend đã trả về TenKhachHang, sử dụng nó trực tiếp
-          const backendTenKhachHang = apiReview.TenKhachHang || apiReview.tenKhachHang;
-          if (backendTenKhachHang && backendTenKhachHang.trim() !== '') {
-            tenKhachHangDisplay = backendTenKhachHang;
-            console.log(`[Review ${reviewId}] Using TenKhachHang from backend: ${backendTenKhachHang}`);
           }
 
           return {
             maDG: apiReview.MaReview || apiReview.maReview,
             maDatPhong: apiReview.MaDatPhong || apiReview.maDatPhong,
-            maKH: maKhachHangFromBooking, // Lưu lại maKH lấy được (nếu có)
+            maKH: maKhachHangFromBooking,
             danhGia: apiReview.DanhGia || apiReview.danhGia,
             noiDung: apiReview.BinhLuan || apiReview.binhLuan,
             ngayTao: apiReview.NgayTao || apiReview.ngayTao || null,
@@ -115,7 +64,7 @@ export default function ReviewManager() {
             anHien: apiReview.AnHien || apiReview.anHien || false,
             tenKhachHang: tenKhachHangDisplay,
           };
-        })); // Kết thúc Promise.all(rawReviewsFromApi.map
+        }));
 
         console.log("Processed reviews with customer names:", JSON.stringify(processedReviews, null, 2));
         setReviews(processedReviews as Review[]);
@@ -131,6 +80,21 @@ export default function ReviewManager() {
 
     fetchReviewsAndCustomers();
   }, []);
+
+  // Lọc đánh giá theo tìm kiếm và trạng thái
+  const filteredReviews = reviews.filter(review => {
+    const matchesSearch = 
+      review.tenKhachHang?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      review.noiDung.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      review.maDG.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (filterStatus === 'all') return matchesSearch;
+    if (filterStatus === 'approved') return matchesSearch && review.trangThai === 'Đã duyệt';
+    if (filterStatus === 'pending') return matchesSearch && review.trangThai === 'Chưa duyệt';
+    if (filterStatus === 'hidden') return matchesSearch && review.anHien;
+    
+    return matchesSearch;
+  });
 
   const handleApprove = async (maDG: string) => {
     try {
@@ -237,17 +201,56 @@ export default function ReviewManager() {
     }));
   };
 
+  // Render stars for rating
+  const renderStars = (rating: number) => {
+    return (
+      <div className={styles.starsContainer}>
+        {[1, 2, 3, 4, 5].map((star) => (
+          <FaStar 
+            key={star} 
+            className={star <= rating ? styles.starFilled : styles.starEmpty} 
+          />
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <h2>Quản lý đánh giá</h2>
+        <div className={styles.toolsContainer}>
+          <div className={styles.searchBox}>
+            <FaSearch className={styles.searchIcon} />
+            <input 
+              type="text" 
+              placeholder="Tìm kiếm đánh giá..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className={styles.searchInput}
+            />
+          </div>
+          <div className={styles.filterBox}>
+            <FaFilter className={styles.filterIcon} />
+            <select 
+              value={filterStatus} 
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className={styles.filterSelect}
+            >
+              <option value="all">Tất cả đánh giá</option>
+              <option value="approved">Đã duyệt</option>
+              <option value="pending">Chưa duyệt</option>
+              <option value="hidden">Đã ẩn</option>
+            </select>
+          </div>
+        </div>
       </div>
 
       {isLoading && <div className={styles.loading}>Đang tải dữ liệu đánh giá...</div>}
       {error && <div className={styles.error}>Lỗi: {error}</div>}
 
       {!isLoading && !error && (
-        <div style={{ overflowX: 'auto' }}>
+        <div className={styles.tableWrapper}>
           <table className={styles.table}>
             <thead>
               <tr>
@@ -261,21 +264,21 @@ export default function ReviewManager() {
               </tr>
             </thead>
             <tbody>
-              {reviews.length === 0 ? (
+              {filteredReviews.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{textAlign: 'center', padding: '16px'}}>Không có dữ liệu đánh giá</td>
+                  <td colSpan={7} className={styles.emptyState}>Không có dữ liệu đánh giá</td>
                 </tr>
               ) : (
-                reviews.map(review => (
-                  <tr key={review.maDG}>
-                    <td>{review.maDG}</td>
+                filteredReviews.map(review => (
+                  <tr key={review.maDG} className={review.anHien ? styles.hiddenRow : ''}>
+                    <td className={styles.idCell}>{review.maDG}</td>
                     <td>{review.tenKhachHang || `Khách hàng ${review.maKH}`}</td>
-                    <td className={styles.rating}>
-                      {'★'.repeat(review.danhGia)}{'☆'.repeat(5 - review.danhGia)}
+                    <td className={styles.ratingCell}>
+                      {renderStars(review.danhGia)}
                     </td>
-                    <td>{review.noiDung}</td>
-                    <td>{review.ngayTao ? new Date(review.ngayTao).toLocaleDateString('vi-VN') : 'N/A'}</td>
-                    <td>
+                    <td className={styles.contentCell}>{review.noiDung}</td>
+                    <td className={styles.dateCell}>{review.ngayTao ? new Date(review.ngayTao).toLocaleDateString('vi-VN') : 'N/A'}</td>
+                    <td className={styles.statusCell}>
                       <span className={
                         review.trangThai === 'Đã duyệt' ? styles.approved :
                         review.trangThai === 'Chưa duyệt' ? styles.pending :
@@ -285,32 +288,36 @@ export default function ReviewManager() {
                       </span>
                       {review.anHien && <span className={styles.hidden}> (Đã ẩn)</span>}
                     </td>
-                    <td>
+                    <td className={styles.actionCell}>
                       {review.trangThai !== 'Đã duyệt' && (
                         <button
                           className={styles.approveBtn}
                           onClick={() => handleApprove(review.maDG)}
+                          title="Duyệt đánh giá"
                         >
-                          Duyệt
+                          <FaCheck />
                         </button>
                       )}
                       <button
                         className={styles.hideBtn}
                         onClick={() => handleHide(review)}
+                        title={review.anHien ? "Hiện đánh giá" : "Ẩn đánh giá"}
                       >
-                        {review.anHien ? 'Hiện' : 'Ẩn'}
+                        {review.anHien ? <FaEye /> : <FaEyeSlash />}
                       </button>
                       <button
                         className={styles.editBtn}
                         onClick={() => handleEdit(review)}
+                        title="Sửa đánh giá"
                       >
-                        Sửa
+                        <FaPencilAlt />
                       </button>
                       <button
                         className={styles.deleteBtn}
                         onClick={() => handleDelete(review.maDG)}
+                        title="Xóa đánh giá"
                       >
-                        Xóa
+                        <FaTrashAlt />
                       </button>
                     </td>
                   </tr>
@@ -326,7 +333,7 @@ export default function ReviewManager() {
           <div className={styles.modalContent}>
             <h3>{editingReview ? 'Sửa đánh giá' : 'Thêm đánh giá'}</h3>
             <form onSubmit={handleSubmit}>
-              <div>
+              <div className={styles.formGroup}>
                 <label>Khách hàng:</label>
                 <input
                   type="text"
@@ -335,24 +342,22 @@ export default function ReviewManager() {
                   onChange={handleInputChange}
                   required
                   readOnly={true}
+                  className={styles.formInput}
                 />
               </div>
-              <div>
+              <div className={styles.formGroup}>
                 <label>Đánh giá:</label>
-                <select
-                  name="danhGia"
-                  value={formData.danhGia}
-                  onChange={handleInputChange}
-                  required
-                >
-                  {[1, 2, 3, 4, 5].map(num => (
-                    <option key={num} value={num}>
-                      {num} {num === 1 ? 'sao' : 'sao'}
-                    </option>
+                <div className={styles.ratingSelector}>
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <FaStar
+                      key={star}
+                      className={star <= (formData.danhGia || 0) ? styles.starSelectFilled : styles.starSelectEmpty}
+                      onClick={() => setFormData({...formData, danhGia: star})}
+                    />
                   ))}
-                </select>
+                </div>
               </div>
-              <div>
+              <div className={styles.formGroup}>
                 <label>Nội dung:</label>
                 <textarea
                   name="noiDung"
@@ -360,14 +365,16 @@ export default function ReviewManager() {
                   onChange={handleInputChange}
                   rows={5}
                   required
+                  className={styles.formTextarea}
                 ></textarea>
               </div>
-              <div>
+              <div className={styles.formGroup}>
                 <label>Trạng thái:</label>
                 <select
                   name="trangThai"
                   value={formData.trangThai}
                   onChange={handleInputChange}
+                  className={styles.formSelect}
                 >
                   <option value="Chưa duyệt">Chưa duyệt</option>
                   <option value="Đã duyệt">Đã duyệt</option>

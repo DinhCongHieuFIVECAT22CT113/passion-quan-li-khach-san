@@ -1,42 +1,22 @@
+/* Đảm bảo màu chữ mặc định là đen */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #000000; /* Đổi từ #171717 sang #000000 */
 }
 
+/* Vô hiệu hóa dark mode */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #ffffff; /* Giữ nền trắng */
+    --foreground: #000000; /* Giữ chữ đen */
   }
-}
-
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-* {
-  box-sizing: border-box;
-  padding: 0;
-  margin: 0;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-@media (prefers-color-scheme: dark) {
+  
   html {
-    color-scheme: dark;
+    color-scheme: light; /* Bắt buộc sử dụng light mode */
   }
+}
+
+/* Đảm bảo tất cả input, select có màu chữ đen */
+input, select, option, label {
+  color: #000000 !important;
 }

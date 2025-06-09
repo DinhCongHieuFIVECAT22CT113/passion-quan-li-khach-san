@@ -187,31 +187,50 @@ export default function RoomsPage() {
 
       {/* Hero Section */}
       <section className={styles.heroSection}>
-        <div className={styles.heroOverlay}></div>
         <div className={styles.heroContent}>
           <h1>Khám phá không gian nghỉ dưỡng tuyệt vời</h1>
           <p>Tìm kiếm phòng phù hợp cho kì nghỉ hoàn hảo của bạn</p>
           
-          {/* Search Bar */}
-          <SearchBar variant="compact" />
-          
-          {/* Search and filter control bar */}
           <div className={styles.searchContainer}>
-            <div className={styles.searchBar}>
-              <FaSearch className={styles.searchIcon} />
-              <input 
-                type="text" 
-                placeholder="Tìm kiếm loại phòng..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className={styles.searchInput}
-              />
+            <div className={styles.datePickerGroup}>
+              <div className={styles.datePicker}>
+                <label>
+                  <i className="far fa-calendar-alt"></i> Ngày nhận phòng
+                </label>
+                <input 
+                  type="date" 
+                  defaultValue={new Date().toISOString().split('T')[0]}
+                />
+              </div>
+              
+              <div className={styles.datePicker}>
+                <label>
+                  <i className="far fa-calendar-alt"></i> Ngày trả phòng
+                </label>
+                <input 
+                  type="date" 
+                  defaultValue={new Date(Date.now() + 86400000).toISOString().split('T')[0]}
+                />
+              </div>
             </div>
-            <button onClick={toggleFilters} className={styles.filterToggle}>
-              <FaFilter />
-              <span>Bộ lọc</span>
-              {showFilters ? <FaChevronUp /> : <FaChevronDown />}
-            </button>
+            
+            <div className={styles.guestPicker}>
+              <label>
+                <i className="fas fa-user"></i> Số khách
+              </label>
+              <select>
+                <option value="1">1 khách</option>
+                <option value="2" selected>2 khách</option>
+                <option value="3">3 khách</option>
+                <option value="4">4 khách</option>
+              </select>
+            </div>
+            
+            <button className={styles.searchBtn}>Tìm</button>
+          </div>
+          
+          <div className={styles.dateInfo}>
+            2025-06-09 - 2025-06-10 • 2 khách • 1 đêm
           </div>
         </div>
       </section>

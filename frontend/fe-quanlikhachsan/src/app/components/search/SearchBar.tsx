@@ -200,24 +200,18 @@ export default function SearchBar({
             />
             <div className={styles.dateDisplay}>
               {mounted && localSearchData.checkOutDate && formatDateDisplay(localSearchData.checkOutDate)}
-              {mounted && calculateNights() > 0 && (
-                <span className={styles.nightsCount}>
-                  {calculateNights()} đêm
-                </span>
-              )}
+              {/* Đã xóa phần hiển thị số đêm ở đây */}
             </div>
           </div>
           {errors.checkOutDate && (
             <span className={styles.errorMessage}>{errors.checkOutDate}</span>
           )}
-          {nights > 0 && (
-            <span className={styles.nightsInfo}>{nights} đêm</span>
-          )}
+          {/* Xóa phần hiển thị số đêm ở đây */}
         </div>
         
         {/* Guests */}
         <div className={styles.searchField}>
-          <label htmlFor="guests">
+          <label htmlFor="guests" className={styles.darkText}>
             <FaUsers className={styles.searchIcon} />
             Số khách
           </label>
@@ -225,10 +219,10 @@ export default function SearchBar({
             id="guests"
             value={localSearchData.guests}
             onChange={(e) => handleInputChange('guests', parseInt(e.target.value))}
-            className={errors.guests ? styles.error : ''}
+            className={`${errors.guests ? styles.error : ''} ${styles.darkText}`}
           >
             {[1, 2, 3, 4, 5, 6, 7, 8].map(num => (
-              <option key={num} value={num}>{num} khách</option>
+              <option key={num} value={num} className={styles.darkText}>{num} khách</option>
             ))}
           </select>
           {errors.guests && (
@@ -239,7 +233,7 @@ export default function SearchBar({
         {/* Rooms (optional) */}
         {showRoomCount && (
           <div className={styles.searchField}>
-            <label htmlFor="rooms">
+            <label htmlFor="rooms" className={styles.darkText}>
               <FaBed className={styles.searchIcon} />
               Số phòng
             </label>
@@ -247,10 +241,10 @@ export default function SearchBar({
               id="rooms"
               value={localSearchData.rooms}
               onChange={(e) => handleInputChange('rooms', parseInt(e.target.value))}
-              className={errors.rooms ? styles.error : ''}
+              className={`${errors.rooms ? styles.error : ''} ${styles.darkText}`}
             >
               {[1, 2, 3, 4, 5].map(num => (
-                <option key={num} value={num}>{num} phòng</option>
+                <option key={num} value={num} className={styles.darkText}>{num} phòng</option>
               ))}
             </select>
             {errors.rooms && (
