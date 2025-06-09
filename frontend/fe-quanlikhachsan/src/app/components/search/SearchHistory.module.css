@@ -1,0 +1,357 @@
+/* Search History Styles */
+.searchHistory {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.section {
+  padding: 16px;
+}
+
+.section:not(:last-child) {
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.sectionHeader h4 {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.clearButton {
+  background: none;
+  border: none;
+  color: #6b7280;
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.clearButton:hover {
+  color: #ef4444;
+  background: #fef2f2;
+}
+
+/* Frequent Searches */
+.frequentGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 8px;
+}
+
+.frequentItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.frequentItem:hover {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  transform: translateY(-1px);
+}
+
+.frequentContent {
+  flex: 1;
+}
+
+.frequentQuery {
+  font-weight: 500;
+  color: #1f2937;
+  margin-bottom: 4px;
+  font-size: 0.875rem;
+}
+
+.frequentDetails {
+  font-size: 0.75rem;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.frequentBadge {
+  background: #3b82f6;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 10px;
+  min-width: 24px;
+  text-align: center;
+}
+
+/* Recent Searches */
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.historyItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.historyItem:hover {
+  background: #f8fafc;
+}
+
+.historyIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: #eff6ff;
+  color: #3b82f6;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.historyContent {
+  flex: 1;
+  min-width: 0;
+}
+
+.historyMain {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.historyQuery {
+  font-weight: 500;
+  color: #1f2937;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.historyTime {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  white-space: nowrap;
+  margin-left: 8px;
+}
+
+.historyDetails {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.historyDetail {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.detailIcon {
+  font-size: 0.7rem;
+  color: #9ca3af;
+}
+
+.nightsCount {
+  background: #f3f4f6;
+  color: #374151;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+.removeButton {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: none;
+  color: #9ca3af;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.2s ease;
+  font-size: 0.75rem;
+}
+
+.historyItem:hover .removeButton {
+  opacity: 1;
+}
+
+.removeButton:hover {
+  background: #fef2f2;
+  color: #ef4444;
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.emptyIcon {
+  font-size: 2rem;
+  color: #d1d5db;
+  margin-bottom: 12px;
+}
+
+.emptyState p {
+  margin: 0 0 4px 0;
+  font-weight: 500;
+  color: #374151;
+}
+
+.emptyState span {
+  font-size: 0.875rem;
+  color: #9ca3af;
+}
+
+/* Scrollbar Styling */
+.searchHistory::-webkit-scrollbar {
+  width: 6px;
+}
+
+.searchHistory::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.searchHistory::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.searchHistory::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .section {
+    padding: 12px;
+  }
+  
+  .frequentGrid {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  
+  .frequentItem {
+    padding: 10px;
+  }
+  
+  .historyItem {
+    padding: 10px;
+    gap: 10px;
+  }
+  
+  .historyIcon {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .historyMain {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .historyTime {
+    margin-left: 0;
+  }
+  
+  .historyDetails {
+    gap: 8px;
+  }
+  
+  .removeButton {
+    position: static;
+    opacity: 1;
+    margin-left: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .searchHistory {
+    max-height: 300px;
+  }
+  
+  .section {
+    padding: 10px;
+  }
+  
+  .sectionHeader h4 {
+    font-size: 0.8rem;
+  }
+  
+  .clearButton {
+    font-size: 0.7rem;
+    padding: 2px 6px;
+  }
+  
+  .frequentItem {
+    padding: 8px;
+  }
+  
+  .frequentQuery {
+    font-size: 0.8rem;
+  }
+  
+  .frequentDetails {
+    font-size: 0.7rem;
+  }
+  
+  .historyItem {
+    padding: 8px;
+  }
+  
+  .historyQuery {
+    font-size: 0.8rem;
+  }
+  
+  .historyDetail {
+    font-size: 0.7rem;
+  }
+}

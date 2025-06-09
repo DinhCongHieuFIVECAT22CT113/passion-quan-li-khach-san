@@ -1,0 +1,276 @@
+/* Availability Checker Styles */
+.availabilityChecker {
+  background: white;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border-left: 4px solid #e5e7eb;
+}
+
+.availabilityChecker.checking {
+  border-left-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.availabilityChecker.pending {
+  border-left-color: #6b7280;
+}
+
+.availabilityChecker.unavailable {
+  border-left-color: #ef4444;
+  background: #fef2f2;
+}
+
+.availabilityChecker.low {
+  border-left-color: #10b981;
+  background: #f0fdf4;
+}
+
+.availabilityChecker.medium {
+  border-left-color: #f59e0b;
+  background: #fffbeb;
+}
+
+.availabilityChecker.high {
+  border-left-color: #ef4444;
+  background: #fef2f2;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+  }
+}
+
+.statusHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.statusIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.iconChecking {
+  color: #3b82f6;
+  animation: spin 1s linear infinite;
+}
+
+.iconPending {
+  color: #6b7280;
+}
+
+.iconAvailable {
+  color: #10b981;
+}
+
+.iconUnavailable {
+  color: #ef4444;
+}
+
+.iconUrgent {
+  color: #f59e0b;
+  animation: bounce 1s infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes bounce {
+  0%, 20%, 53%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40%, 43% {
+    transform: translateY(-8px);
+  }
+  70% {
+    transform: translateY(-4px);
+  }
+  90% {
+    transform: translateY(-2px);
+  }
+}
+
+.statusContent {
+  flex: 1;
+}
+
+.statusMessage {
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 4px;
+}
+
+.priceInfo {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.price {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #3b82f6;
+}
+
+.priceUnit {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.refreshButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #d1d5db;
+  border-radius: 50%;
+  background: white;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.refreshButton:hover:not(:disabled) {
+  border-color: #3b82f6;
+  color: #3b82f6;
+  background: #eff6ff;
+}
+
+.refreshButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+.statusDetails {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.availabilityDetails {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.detailItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detailLabel {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.detailValue {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.lastChecked {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  text-align: right;
+}
+
+.urgencyBanner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  border: 1px solid #f59e0b;
+  border-radius: 8px;
+  color: #92400e;
+  font-size: 0.875rem;
+  font-weight: 600;
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  from {
+    box-shadow: 0 0 5px rgba(245, 158, 11, 0.5);
+  }
+  to {
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.8);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .availabilityChecker {
+    padding: 12px;
+  }
+  
+  .statusHeader {
+    gap: 8px;
+  }
+  
+  .statusIcon {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .refreshButton {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .price {
+    font-size: 1.125rem;
+  }
+  
+  .availabilityDetails {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .urgencyBanner {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .availabilityChecker {
+    padding: 10px;
+  }
+  
+  .statusMessage {
+    font-size: 0.875rem;
+  }
+  
+  .price {
+    font-size: 1rem;
+  }
+  
+  .priceUnit {
+    font-size: 0.75rem;
+  }
+}

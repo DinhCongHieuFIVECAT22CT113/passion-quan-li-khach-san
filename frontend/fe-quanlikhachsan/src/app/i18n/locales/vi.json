@@ -1,0 +1,43 @@
+{
+  "search": {
+    "destination": "Điểm đến hoặc tên khách sạn",
+    "checkIn": "Ngày nhận phòng",
+    "checkOut": "Ngày trả phòng",
+    "guests": "Số khách",
+    "search": "Tìm kiếm",
+    "advancedFilters": "Bộ lọc nâng cao",
+    "priceRange": "Khoảng giá",
+    "amenities": "Tiện nghi",
+    "roomFeatures": "Đặc điểm phòng"
+  },
+  "testimonials": {
+    "title": "Khách hàng nói gì về chúng tôi",
+    "subtitle": "Hàng nghìn khách hàng đã tin tưởng và lựa chọn dịch vụ của chúng tôi"
+  },
+  "home": {
+    "title": "Khám phá những trải nghiệm tuyệt vời",
+    "description": "Tìm kiếm và đặt phòng khách sạn tốt nhất với giá ưu đãi",
+    "viewRooms": "Xem tất cả phòng",
+    "location": "Vị trí thuận lợi",
+    "locationDesc": "Nằm ở vị trí trung tâm, gần các điểm du lịch nổi tiếng",
+    "specialOffers": "Ưu đãi đặc biệt",
+    "specialOffersDesc": "Những chương trình khuyến mãi hấp dẫn dành riêng cho bạn",
+    "viewAllOffers": "Xem tất cả ưu đãi"
+  },
+  "availability": {
+    "checking": "Đang kiểm tra tình trạng phòng...",
+    "available": "Còn phòng trống",
+    "unavailable": "Hết phòng",
+    "lastUpdated": "Cập nhật lần cuối",
+    "roomsLeft": "phòng còn lại",
+    "perNight": "/đêm"
+  },
+  "booking": {
+    "title": "Đặt phòng",
+    "customerInfo": "Thông tin khách hàng",
+    "bookingDetails": "Chi tiết đặt phòng",
+    "paymentMethod": "Phương thức thanh toán",
+    "confirm": "Xác nhận đặt phòng",
+    "success": "Đặt phòng thành công"
+  }
+}

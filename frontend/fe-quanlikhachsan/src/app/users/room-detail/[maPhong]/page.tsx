@@ -5,6 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { getPhongById, getLoaiPhongById } from '../../../../lib/api';
 import { PhongDTO, LoaiPhongDTO } from '../../../../lib/DTOs';
 import { useAuth } from '../../../../lib/auth';
+import AvailabilityChecker from '../../../components/availability/AvailabilityChecker';
+import BookingModal from '../../../components/booking/BookingModal';
 // import { API_BASE_URL } from '../../../../lib/config'; // Commented out as it's mainly for images
 // import Image from 'next/image'; // Commented out as Image component is removed
 import Link from 'next/link';
@@ -19,6 +21,12 @@ const RoomDetailPage: React.FC = () => {
     const [loaiPhongDetails, setLoaiPhongDetails] = useState<LoaiPhongDTO | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [showBookingModal, setShowBookingModal] = useState(false);
+    const [searchDates, setSearchDates] = useState({
+        checkIn: new Date().toISOString().split('T')[0],
+        checkOut: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+        guests: 2
+    });
     // const [currentImageIndex, setCurrentImageIndex] = useState(0); // Commented out
     // const [mainImageError, setMainImageError] = useState(false); // Commented out
     // const [thumbnailErrors, setThumbnailErrors] = useState<boolean[]>([]); // Commented out
@@ -96,16 +104,7 @@ const RoomDetailPage: React.FC = () => {
 
     const handleBookNow = () => {
         if (!room) return;
-        if (!user && !authLoading) {
-            router.push(`/login?redirectUrl=/users/booking?maPhong=${room.maPhong}`);
-        } else if (user) {
-            const bookingRoomData = { 
-                ...room, 
-                loaiPhong: loaiPhongDetails
-            };
-            localStorage.setItem('selectedRoomData', JSON.stringify(bookingRoomData));
-            router.push(`/users/booking?maPhong=${room.maPhong}`);
-        }
+        setShowBookingModal(true);
     };
 
     if (loading || authLoading) {
@@ -251,6 +250,18 @@ const RoomDetailPage: React.FC = () => {
                             <p className="text-gray-600">Tầng: {room.tang}</p>
                         </div>
 
+                        {/* Availability Checker */}
+                        <div className="mb-6">
+                            <AvailabilityChecker
+                                roomTypeId={room.maLoaiPhong || ''}
+                                checkInDate={searchDates.checkIn}
+                                checkOutDate={searchDates.checkOut}
+                                guests={searchDates.guests}
+                                autoCheck={true}
+                                showDetails={true}
+                            />
+                        </div>
+
                         {room.trangThai === 'Trống' ? (
                             <button 
                                 onClick={handleBookNow}
@@ -266,6 +277,15 @@ const RoomDetailPage: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Booking Modal */}
+            {showBookingModal && (
+                <BookingModal
+                    room={room}
+                    loaiPhong={loaiPhongDetails}
+                    onClose={() => setShowBookingModal(false)}
+                />
+            )}
         </div>
     );
 };
