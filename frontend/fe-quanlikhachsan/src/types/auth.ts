@@ -72,6 +72,7 @@ export interface Room {
   moTa?: string;
   thumbnail?: string;
   hinhAnh?: string;
+  soPhong?: string;
 }
 
 // Interface cho loại phòng
@@ -90,4 +91,7 @@ export interface RoomType {
   tienNghi?: string[]; // Danh sách tiện nghi
   soGiuong?: number; // Số giường (alias)
   loaiGiuong?: string; // Loại giường
+  soPhongTam?: number;
+  giuongDon?: number;
+  giuongDoi?: number;
 } 
