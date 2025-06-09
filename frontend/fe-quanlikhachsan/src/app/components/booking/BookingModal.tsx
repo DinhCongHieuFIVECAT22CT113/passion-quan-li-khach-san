@@ -9,7 +9,7 @@ import { FaTimes, FaUser, FaUserPlus, FaClock, FaCalendarAlt, FaUsers, FaPhone, 
 import styles from './BookingModal.module.css';
 
 interface BookingModalProps {
-  room?: PhongDTO;
+  selectedRoom?: PhongDTO;
   loaiPhong: LoaiPhongDTO | null;
   onClose: () => void;
 }
@@ -31,7 +31,7 @@ interface BookingErrors {
   [key: string]: string;
 }
 
-const BookingModal: React.FC<BookingModalProps> = ({ room, loaiPhong, onClose }) => {
+const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, onClose }) => {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const [step, setStep] = useState<'choice' | 'form' | 'payment' | 'success'>('choice');
@@ -178,7 +178,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, loaiPhong, onClose })
         hoTen: formData.hoTen,
         soDienThoai: formData.soDienThoai,
         email: formData.email,
-        maPhong: room?.maPhong || loaiPhong?.maLoaiPhong || '',
+        maPhong: selectedRoom?.maPhong || loaiPhong?.maLoaiPhong || '',
         ngayNhanPhong: formData.ngayNhanPhong,
         ngayTraPhong: formData.ngayTraPhong,
         soNguoiLon: formData.soNguoiLon,
@@ -552,7 +552,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, loaiPhong, onClose })
           <h3>Tóm tắt đặt phòng</h3>
           <div className={styles.summaryItem}>
             <span>Phòng:</span>
-            <span>{room?.soPhong || loaiPhong?.tenLoaiPhong}</span>
+            <span>{selectedRoom?.soPhong}</span>
           </div>
           <div className={styles.summaryItem}>
             <span>Loại phòng:</span>
@@ -614,7 +614,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, loaiPhong, onClose })
           </div>
           <div className={styles.infoItem}>
             <span>Phòng:</span>
-            <span>{room?.soPhong || loaiPhong?.tenLoaiPhong}</span>
+            <span>{selectedRoom?.soPhong}</span>
           </div>
           <div className={styles.infoItem}>
             <span>Tổng tiền:</span>
@@ -643,7 +643,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, loaiPhong, onClose })
     <div className={styles.modalOverlay} onClick={onClose}>
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
-          <h1>Đặt phòng {room?.soPhong || loaiPhong?.tenLoaiPhong}</h1>
+          <h1>Đặt phòng {selectedRoom?.soPhong}</h1>
           <button onClick={onClose} className={styles.closeButton}>
             <FaTimes />
           </button>
