@@ -39,8 +39,7 @@ namespace be_quanlikhachsanapi.DTOs
 
     public class UploadAvatarDTO
     {
-        //public string UserName { get; set; } = null!;
-        public IFormFile? AvatarFile { get; set; } 
-        public string? AvatarUrl { get; set; }    
+        [Required(ErrorMessage = "File avatar là bắt buộc.")]
+        public IFormFile AvatarFile { get; set; } = null!;
     }
 }

@@ -27,6 +27,10 @@ namespace be_quanlikhachsanapi.DTOs
 
         public int? Tang { get; set; } = default; // Cho phép null
 
+        // Thêm properties cho upload file
+        public IFormFile? ThumbnailFile { get; set; }
+
+        public IFormFile? HinhAnhFile { get; set; }
     }
 
     public class UpdatePhongDTO
@@ -43,5 +47,9 @@ namespace be_quanlikhachsanapi.DTOs
 
         public int? Tang { get; set; } = default; // Cho phép null
 
+        // Thêm properties cho upload file
+        public IFormFile? ThumbnailFile { get; set; }
+
+        public IFormFile? HinhAnhFile { get; set; }
     }
 }

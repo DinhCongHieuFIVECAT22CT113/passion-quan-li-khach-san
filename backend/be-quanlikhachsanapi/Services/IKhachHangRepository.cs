@@ -28,14 +28,16 @@ namespace be_quanlikhachsanapi.Services
         private readonly ISendEmailServices _sendEmail;
         private readonly IConfiguration _confMail;
         private readonly IWebHostEnvironment _webHostEnvironment;
+        private readonly ISupabaseStorageService _storageService;
 
-        public KhachHangRepository(QuanLyKhachSanContext context, IPasswordHasher<KhachHang> passwordHasher, ISendEmailServices sendEmail, IConfiguration confMail, IWebHostEnvironment webHostEnvironment)
+        public KhachHangRepository(QuanLyKhachSanContext context, IPasswordHasher<KhachHang> passwordHasher, ISendEmailServices sendEmail, IConfiguration confMail, IWebHostEnvironment webHostEnvironment, ISupabaseStorageService storageService)
         {
             _context = context;
             _passwordHasher = passwordHasher;
             _sendEmail = sendEmail;
             _confMail = confMail;
             _webHostEnvironment = webHostEnvironment;
+            _storageService = storageService;
         }
 
         public List<KhachHangDto> GetAll()
@@ -221,40 +223,26 @@ namespace be_quanlikhachsanapi.Services
         
         public async Task<JsonResult> UploadAvatarAsync(string userName, UploadAvatarDTO dto)
         {
-            var khachHang = await _context.KhachHangs.FirstOrDefaultAsync(kh => kh.UserName == userName);
-            if (khachHang == null)
-                return new JsonResult("Không tìm thấy khách hàng.") { StatusCode = 404 };
-
-            string fileName;
-            string avatarPath = Path.Combine(_webHostEnvironment.WebRootPath, "images/avatars");
-
-            if (!Directory.Exists(avatarPath))
-                Directory.CreateDirectory(avatarPath);
-
             try
             {
-                if (dto.AvatarFile != null && dto.AvatarFile.Length > 0)
+                var khachHang = await _context.KhachHangs.FirstOrDefaultAsync(kh => kh.UserName == userName);
+                if (khachHang == null)
+                    return new JsonResult("Không tìm thấy khách hàng.") { StatusCode = 404 };
+
+                if (dto.AvatarFile == null || dto.AvatarFile.Length == 0)
+                    return new JsonResult("Vui lòng chọn file avatar.") { StatusCode = 400 };
+
+                // Xóa avatar cũ trên Supabase nếu có
+                if (!string.IsNullOrEmpty(khachHang.AnhDaiDien))
                 {
-                    fileName = $"{Guid.NewGuid()}{Path.GetExtension(dto.AvatarFile.FileName)}";
-                    var filePath = Path.Combine(avatarPath, fileName);
-                    using var stream = new FileStream(filePath, FileMode.Create);
-                    await dto.AvatarFile.CopyToAsync(stream);
-                }
-                else if (!string.IsNullOrEmpty(dto.AvatarUrl))
-                {
-                    using var httpClient = new HttpClient();
-                    var imageBytes = await httpClient.GetByteArrayAsync(dto.AvatarUrl);
-                    var extension = Path.GetExtension(new Uri(dto.AvatarUrl).AbsolutePath);
-                    fileName = $"{Guid.NewGuid()}{extension}";
-                    var filePath = Path.Combine(avatarPath, fileName);
-                    await File.WriteAllBytesAsync(filePath, imageBytes);
-                }
-                else
-                {
-                    return new JsonResult("Vui lòng gửi ảnh hoặc URL.") { StatusCode = 400 };
+                    await _storageService.DeleteFileAsync(khachHang.AnhDaiDien);
                 }
 
-                khachHang.AnhDaiDien = $"/images/avatars/{fileName}";
+                // Upload avatar mới lên Supabase
+                var avatarUrl = await _storageService.UploadFileAsync(dto.AvatarFile, "avatars");
+
+                // Cập nhật URL avatar trong database
+                khachHang.AnhDaiDien = avatarUrl;
                 await _context.SaveChangesAsync();
 
                 return new JsonResult(new
@@ -265,7 +253,7 @@ namespace be_quanlikhachsanapi.Services
             }
             catch (Exception ex)
             {
-                return new JsonResult($"Lỗi: {ex.Message}") { StatusCode = 500 };
+                return new JsonResult($"Lỗi khi upload avatar: {ex.Message}") { StatusCode = 500 };
             }
         }
     }

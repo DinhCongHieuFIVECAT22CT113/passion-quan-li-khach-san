@@ -83,28 +83,44 @@ namespace be_quanlikhachsanapi.Controllers
         [Consumes("multipart/form-data")]
         [Authorize]
         [RequireRole("R00", "R01")]
-        public IActionResult CreatePhong([FromForm] CreatePhongDTO createPhong)
+        public async Task<IActionResult> CreatePhong([FromForm] CreatePhongDTO createPhong)
         {
-            var phong = _phongRepo.CreatePhong(createPhong);
-            if (phong == null)
+            var result = await _phongRepo.CreatePhong(createPhong);
+            
+            if (result.StatusCode == StatusCodes.Status201Created)
             {
-                return BadRequest("Không thể tạo phòng mới.");
+                return Ok(result.Value);
             }
-            return Ok(phong);
+            else if (result.StatusCode == StatusCodes.Status500InternalServerError)
+            {
+                return StatusCode(500, result.Value);
+            }
+            
+            return BadRequest("Không thể tạo phòng mới.");
         }
         // Cập nhật phòng
         [HttpPut("{maPhong}")]
         [Consumes("multipart/form-data")]
         [Authorize]
         [RequireRole("R00", "R01")]
-        public IActionResult UpdatePhong(string maPhong, [FromForm] UpdatePhongDTO updatePhong)
+        public async Task<IActionResult> UpdatePhong(string maPhong, [FromForm] UpdatePhongDTO updatePhong)
         {
-            var phong = _phongRepo.UpdatePhong(maPhong, updatePhong);
-            if (phong == null)
+            var result = await _phongRepo.UpdatePhong(maPhong, updatePhong);
+            
+            if (result.StatusCode == StatusCodes.Status404NotFound)
             {
-                return NotFound("Không tìm thấy phòng để cập nhật.");
+                return NotFound(result.Value);
             }
-            return Ok(phong);
+            else if (result.StatusCode == StatusCodes.Status200OK)
+            {
+                return Ok(result.Value);
+            }
+            else if (result.StatusCode == StatusCodes.Status500InternalServerError)
+            {
+                return StatusCode(500, result.Value);
+            }
+            
+            return StatusCode(result.StatusCode ?? 500, result.Value);
         }
         // Cập nhật trạng thái phòng
         [HttpPut("{maPhong}/trangThai")]
