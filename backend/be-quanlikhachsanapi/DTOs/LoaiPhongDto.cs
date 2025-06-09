@@ -62,7 +62,7 @@ namespace be_quanlikhachsanapi.DTOs
         [Range(0, int.MaxValue)]
         public int SucChua { get; set; }
 
-        public string? Thumbnail { get; set; }
+        public IFormFile? Thumbnail { get; set; }
 
     }
     public class UpdateLoaiPhongDTO
@@ -97,7 +97,7 @@ namespace be_quanlikhachsanapi.DTOs
         [Range(0, int.MaxValue)]
         public int SucChua { get; set; }
 
-        public string? Thumbnail { get; set; }
+        public IFormFile? Thumbnail { get; set; }
 
     }
 
