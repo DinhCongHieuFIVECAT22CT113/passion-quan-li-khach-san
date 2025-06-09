@@ -4,17 +4,18 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { FaStar, FaCalendarAlt, FaUsers, FaSearch } from 'react-icons/fa';
+import { FaStar } from 'react-icons/fa';
 import styles from './styles.module.css';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../../components/profile/LanguageContext';
 import i18n from '../../i18n';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
-import SearchBar from '../../components/search/SearchBar';
-import { getPromotions, getRoomTypes } from '../../../lib/api';
-import { RoomType } from '../../../types/auth';
-import BookingModal from '../../components/booking/BookingModal';
+import EnhancedSearchBar from '../../components/search/EnhancedSearchBar';
+import TestimonialsSection from '../../components/testimonials/TestimonialsSection';
+import { SkeletonPromotionGrid } from '../../components/ui/SkeletonLoader';
+import { getPromotions } from '../../../lib/api';
+
 
 // Định nghĩa interface cho Promotion
 interface Promotion {
@@ -38,18 +39,11 @@ export default function Home() {
   
   // Thêm state cho dữ liệu từ API với kiểu dữ liệu đã định nghĩa
   const [promotions, setPromotions] = useState<Promotion[]>([]);
-  const [roomTypes, setRoomTypes] = useState<RoomType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [showBookingModal, setShowBookingModal] = useState(false);
-  const [selectedRoomType, setSelectedRoomType] = useState<RoomType | null>(null);
 
-  // State cho form tìm kiếm
-  const [searchForm, setSearchForm] = useState({
-    checkInDate: '',
-    checkOutDate: '',
-    guests: 2,
-  });
+
+
 
   useEffect(() => {
     i18n.changeLanguage(selectedLanguage).then(() => {
@@ -59,30 +53,17 @@ export default function Home() {
     // Lấy dữ liệu từ API
     fetchData();
 
-    // Thiết lập ngày mặc định
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    
-    setSearchForm({
-      checkInDate: today.toISOString().split('T')[0],
-      checkOutDate: tomorrow.toISOString().split('T')[0],
-      guests: 2,
-    });
+
   }, [selectedLanguage]);
 
   // Hàm lấy dữ liệu từ API
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Lấy danh sách khuyến mãi và phòng song song
-      const [promotionsData, roomTypesData] = await Promise.all([
-        getPromotions(),
-        getRoomTypes()
-      ]);
+      // Lấy danh sách khuyến mãi
+      const promotionsData = await getPromotions();
       
       console.log('Dữ liệu promotions:', promotionsData);
-      console.log('Dữ liệu roomTypes:', roomTypesData);
       
       // Xử lý dữ liệu khuyến mãi
       if (Array.isArray(promotionsData)) {
@@ -101,13 +82,6 @@ export default function Home() {
       } else {
         console.error('Dữ liệu promotions không phải dạng mảng:', promotionsData);
       }
-
-      // Xử lý dữ liệu phòng
-      if (Array.isArray(roomTypesData)) {
-        setRoomTypes(roomTypesData.slice(0, 6)); // Lấy 6 phòng đầu tiên
-      } else {
-        console.error('Dữ liệu roomTypes không phải dạng mảng:', roomTypesData);
-      }
     } catch (err) {
       console.error('Lỗi khi lấy dữ liệu:', err);
       setError('Không thể tải dữ liệu từ server.');
@@ -116,50 +90,7 @@ export default function Home() {
     }
   };
 
-  // Hàm xử lý thay đổi form tìm kiếm
-  const handleSearchFormChange = (field: string, value: string | number) => {
-    setSearchForm(prev => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
 
-  // Hàm xử lý tìm kiếm
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    // Validate form
-    if (!searchForm.checkInDate || !searchForm.checkOutDate) {
-      alert('Vui lòng chọn ngày nhận và trả phòng');
-      return;
-    }
-
-    const checkIn = new Date(searchForm.checkInDate);
-    const checkOut = new Date(searchForm.checkOutDate);
-    
-    if (checkOut <= checkIn) {
-      alert('Ngày trả phòng phải sau ngày nhận phòng');
-      return;
-    }
-
-    // Lưu thông tin tìm kiếm vào localStorage
-    const searchData = {
-      checkInDate: searchForm.checkInDate,
-      checkOutDate: searchForm.checkOutDate,
-      guests: searchForm.guests,
-      searchTimestamp: new Date().toISOString(),
-    };
-    localStorage.setItem('roomSearchData', JSON.stringify(searchData));
-
-    // Chuyển đến trang rooms với tham số tìm kiếm
-    const searchParams = new URLSearchParams({
-      checkIn: searchForm.checkInDate,
-      checkOut: searchForm.checkOutDate,
-      guests: searchForm.guests.toString(),
-    });
-    
-    router.push(`/users/rooms?${searchParams.toString()}`);
-  };
 
   // Hàm lấy đường dẫn hình ảnh hợp lệ
   const getValidImageSrc = (imagePath?: string): string => {
@@ -189,8 +120,8 @@ export default function Home() {
           <h1>{t('home.title')}</h1>
           <p>{t('home.description')}</p>
           
-          {/* Search Form */}
-          <SearchBar variant="hero" showRoomCount={true} />
+          {/* Enhanced Search Form */}
+          <EnhancedSearchBar variant="hero" showAdvancedFilters={true} />
           
           <div className={styles.heroActions}>
             <Link href="/users/rooms" className={styles.heroButton}>
@@ -256,10 +187,7 @@ export default function Home() {
         </div>
 
         {loading ? (
-          <div className={styles.loadingContainer}>
-            <div className={styles.spinner}></div>
-            <p>Đang tải dữ liệu khuyến mãi...</p>
-          </div>
+          <SkeletonPromotionGrid />
         ) : error ? (
           <div className={styles.errorContainer}>
             <p>{error}</p>
@@ -318,6 +246,10 @@ export default function Home() {
           loading="lazy"
         ></iframe>
       </section>
+
+      {/* Testimonials Section */}
+      <TestimonialsSection limit={6} showNavigation={true} autoPlay={true} />
+
       {/* Footer */}
       <Footer />
     </div>

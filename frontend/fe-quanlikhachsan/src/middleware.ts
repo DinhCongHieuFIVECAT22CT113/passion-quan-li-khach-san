@@ -8,7 +8,7 @@ interface DecodedToken {
 }
 
 // Danh sách các đường dẫn công khai không yêu cầu token
-const PUBLIC_PATHS = ['/login', '/signup', '/users/home', '/users/about', '/users/explore', '/users/rooms', '/users/roomsinformation', '/users/services', '/users/promotions', '/users/booking', '/users/booking-form'];
+const PUBLIC_PATHS = ['/login', '/signup', '/users/home', '/users/about', '/users/explore', '/users/rooms', '/users/services', '/users/promotions', '/users/booking', '/users/booking-form'];
 
 // Hàm kiểm tra đường dẫn công khai (bao gồm dynamic routes)
 const isPublicPath = (path: string): boolean => {

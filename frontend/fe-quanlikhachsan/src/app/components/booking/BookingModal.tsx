@@ -68,6 +68,14 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, loaiPhong, onClose })
     }));
   }, [user]);
 
+  // Auto-skip choice step if user is logged in
+  useEffect(() => {
+    if (!authLoading && user && step === 'choice') {
+      setBookingType('user');
+      setStep('form');
+    }
+  }, [user, authLoading, step]);
+
   const calculateNights = (): number => {
     if (formData.ngayNhanPhong && formData.ngayTraPhong) {
       const checkIn = new Date(formData.ngayNhanPhong);
@@ -315,6 +323,18 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, loaiPhong, onClose })
   const renderFormStep = () => (
     <div className={styles.stepContent}>
       <h2>Thông tin đặt phòng</h2>
+      
+      {user && bookingType === 'user' && (
+        <div className={styles.userWelcome}>
+          <div className={styles.welcomeIcon}>
+            <FaUser />
+          </div>
+          <div className={styles.welcomeText}>
+            <h4>Xin chào, {user.hoTen}!</h4>
+            <p>Chúng tôi đã điền sẵn thông tin của bạn. Vui lòng kiểm tra và cập nhật nếu cần.</p>
+          </div>
+        </div>
+      )}
       
       <div className={styles.formGrid}>
         <div className={styles.formSection}>
@@ -630,29 +650,41 @@ const BookingModal: React.FC<BookingModalProps> = ({ room, loaiPhong, onClose })
         </div>
 
         <div className={styles.stepIndicator}>
-          <div className={`${styles.step} ${step === 'choice' ? styles.active : ['form', 'payment', 'success'].includes(step) ? styles.completed : ''}`}>
-            <span>1</span>
-            <label>Chọn phương thức</label>
-          </div>
+          {/* Only show choice step if user is not logged in */}
+          {!user && (
+            <div className={`${styles.step} ${step === 'choice' ? styles.active : ['form', 'payment', 'success'].includes(step) ? styles.completed : ''}`}>
+              <span>1</span>
+              <label>Chọn phương thức</label>
+            </div>
+          )}
           <div className={`${styles.step} ${step === 'form' ? styles.active : ['payment', 'success'].includes(step) ? styles.completed : ''}`}>
-            <span>2</span>
+            <span>{user ? '1' : '2'}</span>
             <label>Thông tin</label>
           </div>
           <div className={`${styles.step} ${step === 'payment' ? styles.active : step === 'success' ? styles.completed : ''}`}>
-            <span>3</span>
+            <span>{user ? '2' : '3'}</span>
             <label>Thanh toán</label>
           </div>
           <div className={`${styles.step} ${step === 'success' ? styles.active : ''}`}>
-            <span>4</span>
+            <span>{user ? '3' : '4'}</span>
             <label>Hoàn thành</label>
           </div>
         </div>
 
         <div className={styles.modalBody}>
-          {step === 'choice' && renderChoiceStep()}
-          {step === 'form' && renderFormStep()}
-          {step === 'payment' && renderPaymentStep()}
-          {step === 'success' && renderSuccessStep()}
+          {authLoading ? (
+            <div className={styles.loadingState}>
+              <div className={styles.spinner}></div>
+              <p>Đang kiểm tra thông tin đăng nhập...</p>
+            </div>
+          ) : (
+            <>
+              {step === 'choice' && renderChoiceStep()}
+              {step === 'form' && renderFormStep()}
+              {step === 'payment' && renderPaymentStep()}
+              {step === 'success' && renderSuccessStep()}
+            </>
+          )}
         </div>
 
         {errors.submit && (

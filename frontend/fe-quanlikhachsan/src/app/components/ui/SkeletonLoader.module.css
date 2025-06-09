@@ -1,0 +1,96 @@
+/* Skeleton Animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+  display: block;
+}
+
+.skeletonCard {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease;
+}
+
+.skeletonImage {
+  width: 100%;
+}
+
+.skeletonContent {
+  padding: 16px;
+}
+
+.skeletonTitle {
+  margin-bottom: 12px;
+}
+
+.skeletonText {
+  margin-bottom: 8px;
+}
+
+.skeletonFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.skeletonGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.skeletonTestimonial {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.skeletonTestimonialHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.skeletonTestimonialInfo {
+  flex: 1;
+}
+
+.skeletonTestimonialGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .skeletonGrid,
+  .skeletonTestimonialGrid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .skeletonContent {
+    padding: 12px;
+  }
+  
+  .skeletonTestimonial {
+    padding: 16px;
+  }
+}
