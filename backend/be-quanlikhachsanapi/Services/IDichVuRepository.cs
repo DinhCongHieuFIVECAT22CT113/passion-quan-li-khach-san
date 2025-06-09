@@ -75,15 +75,15 @@ namespace be_quanlikhachsanapi.Services
                     newMaDichVu = "DV" + (soHienTai + 1).ToString("D2");
                 }
 
-                string thumbnailUrl = createDichVu.Thumbnail ?? "";
+                string thumbnailUrl = "";
 
-                // Handle file upload if ThumbnailFile is provided
-                if (createDichVu.ThumbnailFile != null)
+                // Handle file upload if Thumbnail is provided
+                if (createDichVu.Thumbnail != null)
                 {
-                    var uploadResult = _fileRepository.WriteFileAsync(createDichVu.ThumbnailFile, "services").Result;
+                    var uploadResult = _fileRepository.WriteFileAsync(createDichVu.Thumbnail, "services").Result;
                     thumbnailUrl = uploadResult;
                 }
-                else if (string.IsNullOrEmpty(createDichVu.Thumbnail))
+                else
                 {
                     return new JsonResult("Thumbnail là bắt buộc.")
                     {
@@ -139,8 +139,8 @@ namespace be_quanlikhachsanapi.Services
 
                 string thumbnailUrl = dichVu.Thumbnail ?? "";
 
-                // Handle file upload if ThumbnailFile is provided
-                if (updateDichVu.ThumbnailFile != null)
+                // Handle file upload if Thumbnail is provided
+                if (updateDichVu.Thumbnail != null)
                 {
                     // Delete old thumbnail if exists
                     if (!string.IsNullOrEmpty(dichVu.Thumbnail))
@@ -149,14 +149,10 @@ namespace be_quanlikhachsanapi.Services
                     }
 
                     // Upload new thumbnail
-                    var uploadResult = _fileRepository.WriteFileAsync(updateDichVu.ThumbnailFile, "services").Result;
+                    var uploadResult = _fileRepository.WriteFileAsync(updateDichVu.Thumbnail, "services").Result;
                     thumbnailUrl = uploadResult;
                 }
-                else if (!string.IsNullOrEmpty(updateDichVu.Thumbnail))
-                {
-                    // Keep existing URL or use provided URL
-                    thumbnailUrl = updateDichVu.Thumbnail;
-                }
+                // Nếu không có file upload mới, giữ nguyên thumbnailUrl hiện tại
 
                 dichVu.TenDichVu = updateDichVu.TenDichVu;
                 dichVu.Thumbnail = thumbnailUrl;

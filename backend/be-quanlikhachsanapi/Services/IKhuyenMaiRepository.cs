@@ -85,15 +85,15 @@ namespace be_quanlikhachsanapi.Services
                     newMaKhuyenMai = "KM" + (lastId + 1).ToString("D3");
                 }
 
-                string thumbnailUrl = createKhuyenMai.Thumbnail ?? "";
+                string thumbnailUrl = "";
 
-                // Handle file upload if ThumbnailFile is provided
-                if (createKhuyenMai.ThumbnailFile != null)
+                // Handle file upload if Thumbnail is provided
+                if (createKhuyenMai.Thumbnail != null)
                 {
-                    var uploadResult = _fileRepository.WriteFileAsync(createKhuyenMai.ThumbnailFile, "promotions").Result;
+                    var uploadResult = _fileRepository.WriteFileAsync(createKhuyenMai.Thumbnail, "promotions").Result;
                     thumbnailUrl = uploadResult;
                 }
-                else if (string.IsNullOrEmpty(createKhuyenMai.Thumbnail))
+                else
                 {
                     return new JsonResult("Thumbnail là bắt buộc.")
                     {
@@ -153,8 +153,8 @@ namespace be_quanlikhachsanapi.Services
 
                 string thumbnailUrl = khuyenMai.Thumbnail ?? "";
 
-                // Handle file upload if ThumbnailFile is provided
-                if (updateKhuyenMai.ThumbnailFile != null)
+                // Handle file upload if Thumbnail is provided
+                if (updateKhuyenMai.Thumbnail != null)
                 {
                     // Delete old thumbnail if exists
                     if (!string.IsNullOrEmpty(khuyenMai.Thumbnail))
@@ -163,14 +163,10 @@ namespace be_quanlikhachsanapi.Services
                     }
 
                     // Upload new thumbnail
-                    var uploadResult = _fileRepository.WriteFileAsync(updateKhuyenMai.ThumbnailFile, "promotions").Result;
+                    var uploadResult = _fileRepository.WriteFileAsync(updateKhuyenMai.Thumbnail, "promotions").Result;
                     thumbnailUrl = uploadResult;
                 }
-                else if (!string.IsNullOrEmpty(updateKhuyenMai.Thumbnail))
-                {
-                    // Keep existing URL or use provided URL
-                    thumbnailUrl = updateKhuyenMai.Thumbnail;
-                }
+                // Nếu không có file upload mới, giữ nguyên thumbnailUrl hiện tại
 
                 khuyenMai.TenKhuyenMai = updateKhuyenMai.TenKhuyenMai;
                 khuyenMai.Thumbnail = thumbnailUrl;
@@ -271,4 +267,3 @@ namespace be_quanlikhachsanapi.Services
         }
     }
 }
-    
