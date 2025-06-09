@@ -53,7 +53,7 @@ namespace be_quanlikhachsanapi.Services
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddHours(1), // Tăng lên 1 giờ để giảm tần suất refresh
+                Expires = DateTime.Now.AddMinutes(15), // 15 phút cho bảo mật tốt hơn
                 SigningCredentials = creds
             };
 
@@ -81,7 +81,7 @@ namespace be_quanlikhachsanapi.Services
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddHours(1), // Tăng lên 1 giờ để giảm tần suất refresh
+                Expires = DateTime.Now.AddMinutes(15), // 15 phút cho bảo mật tốt hơn
                 SigningCredentials = creds
             };
 

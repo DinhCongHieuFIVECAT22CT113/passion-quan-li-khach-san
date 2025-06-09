@@ -37,13 +37,13 @@ class TokenManager {
     }
   }
 
-  // Kiểm tra token có sắp hết hạn không (còn ít hơn 5 phút)
+  // Kiểm tra token có sắp hết hạn không (còn ít hơn 2 phút)
   isTokenExpiringSoon(token: string): boolean {
     try {
       const decoded = jwtDecode<DecodedToken>(token);
       const currentTime = Date.now() / 1000;
       const timeUntilExpiry = decoded.exp - currentTime;
-      return timeUntilExpiry < 300; // Còn ít hơn 5 phút (300 giây)
+      return timeUntilExpiry < 120; // Còn ít hơn 2 phút (120 giây)
     } catch {
       return true;
     }
@@ -120,6 +120,7 @@ class TokenManager {
       localStorage.setItem('userName', result.userName);
 
       console.log('Token đã được refresh thành công');
+      console.log(`Thời gian hết hạn mới: ${new Date(this.getTokenExpiration(result.token)! * 1000).toLocaleString('vi-VN')}`);
       
       // Thiết lập timer cho lần refresh tiếp theo
       this.scheduleNextRefresh(result.token);
@@ -141,8 +142,8 @@ class TokenManager {
     const currentTime = Date.now() / 1000;
     const timeUntilExpiry = expiration - currentTime;
     
-    // Refresh khi còn 5 phút trước khi hết hạn
-    const refreshTime = Math.max(0, (timeUntilExpiry - 300) * 1000);
+    // Refresh khi còn 2 phút trước khi hết hạn
+    const refreshTime = Math.max(0, (timeUntilExpiry - 120) * 1000);
 
     this.refreshTimer = setTimeout(async () => {
       try {
@@ -154,7 +155,8 @@ class TokenManager {
       }
     }, refreshTime);
 
-    console.log(`Đã lên lịch refresh token sau ${Math.round(refreshTime / 1000)} giây`);
+    console.log(`🔄 Đã lên lịch refresh token sau ${Math.round(refreshTime / 1000)} giây (${Math.round(refreshTime / 60000)} phút)`);
+    console.log(`⏰ Token sẽ được refresh lúc: ${new Date(Date.now() + refreshTime).toLocaleString('vi-VN')}`);
   }
 
   // Xóa timer refresh

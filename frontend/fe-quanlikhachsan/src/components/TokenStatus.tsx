@@ -134,7 +134,7 @@ export default function TokenStatus() {
         <p><strong>Thời gian còn lại:</strong> 
           <span style={{ color: tokenInfo.isExpiringSoon ? 'orange' : 'green' }}>
             {tokenInfo.timeUntilExpiry}
-            {tokenInfo.isExpiringSoon && ' ⚠️ Sắp hết hạn'}
+            {tokenInfo.isExpiringSoon && ' ⚠️ Sắp hết hạn (< 2 phút)'}
           </span>
         </p>
         
