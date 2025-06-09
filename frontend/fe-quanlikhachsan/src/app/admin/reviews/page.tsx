@@ -41,8 +41,8 @@ export default function ReviewManager() {
         console.log("Raw reviews data from getReviews():", JSON.stringify(rawReviewsFromApi, null, 2));
 
         const processedReviews = await Promise.all(rawReviewsFromApi.map(async (apiReview) => {
-          let tenKhachHangDisplay = 'Khách hàng không xác định';
-          let maKhachHangFromBooking: string | undefined = apiReview.maKH;
+          const tenKhachHangDisplay = 'Khách hàng không xác định';
+          const maKhachHangFromBooking: string | undefined = apiReview.maKH;
 
           const reviewId = apiReview.MaReview || apiReview.maReview;
           const datPhongId = apiReview.MaDatPhong || apiReview.maDatPhong;
