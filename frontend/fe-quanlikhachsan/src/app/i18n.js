@@ -190,6 +190,10 @@ const resources = {
       'explore.exploreServices':'Xem Thêm Dịch Vụ',
 
       // Home Page
+      'testimonials.title': "Khách hàng nói gì về chúng tôi",
+      'testimonials.subtitle': "Hàng nghìn khách hàng đã tin tưởng và lựa chọn dịch vụ của chúng tôi",
+      'search.destination': "Điểm đến hoặc tên khách sạn",
+      'search.search': "Tìm kiếm",
       'home.title': 'Trải Nghiệm Đẳng Cấp Chưa Từng Có',
       'home.description': 'Khám phá sự thoải mái, sang trọng và những khoảnh khắc khó quên',
       'home.viewRooms': 'Xem Phòng',
