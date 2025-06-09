@@ -10,9 +10,9 @@ interface RoomTypeFormState {
   MaLoaiPhong?: string;
   TenLoaiPhong: string;
   MoTa?: string;
-  GiaMoiGio: number;
+  GiaMoiGio?: number;
   GiaMoiDem: number;
-  SoPhongTam: number;
+  SoPhongTam?: number;
   SoGiuongNgu: number;
   GiuongDoi?: number;
   GiuongDon?: number;
@@ -280,7 +280,7 @@ export default function RoomTypeManager() {
                     )}
                   </td>
                   <td>{formatCurrency(roomType.giaMoiDem)}</td>
-                  <td>{formatCurrency(roomType.giaMoiGio)}</td>
+                  <td>{formatCurrency(roomType.giaMoiGio ?? 0)}</td>
                   <td>{roomType.sucChua} người</td>
                   <td>{roomType.kichThuocPhong} m²</td>
                   <td>
