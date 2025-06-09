@@ -24,7 +24,7 @@
 }
 
 .breadcrumbLink {
-  color: #6B7280;
+  color: white;
   text-decoration: none;
   font-size: 14px;
   font-weight: 500;
@@ -42,7 +42,7 @@
 }
 
 .currentPage {
-  color: #1F2937;
+  color: white;
   font-size: 14px;
   font-weight: 600;
   padding: 4px 8px;
