@@ -5,9 +5,9 @@ export interface LoaiPhongDTO {
     maLoaiPhong: string;
     tenLoaiPhong: string;
     moTa?: string; // Mô tả chi tiết về loại phòng
-    giaMoiGio: number; // Giá mỗi giờ
+    giaMoiGio?: number; // Giá mỗi giờ
     giaMoiDem: number; // Giá mỗi đêm
-    soPhongTam: number; // Số phòng tắm
+    soPhongTam?: number; // Số phòng tắm
     soGiuongNgu: number; // Số giường ngủ
     giuongDoi?: number; // Số giường đôi
     giuongDon?: number; // Số giường đơn
@@ -56,9 +56,9 @@ export interface UpdateLoaiPhongDTO {
 export interface PhongDTO {
     maPhong: string;
     maLoaiPhong: string;
-    soPhong: string;
+    soPhong?: string;
     thumbnail?: string | null; // URL ảnh thumbnail của phòng
-    hinhAnh?: string | null;   // Chuỗi các URL hình ảnh khác, cách nhau bởi dấu phẩy
+    hinhAnh?: string[] | null;   // Chuỗi các URL hình ảnh khác, cách nhau bởi dấu phẩy
     trangThai: string;        // Ví dụ: "Trống", "Đã đặt", "Đang sử dụng", "Đang dọn"
     tang?: number;
     loaiPhong?: LoaiPhongDTO; // Thông tin chi tiết loại phòng (sẽ cần nếu API backend trả về)
