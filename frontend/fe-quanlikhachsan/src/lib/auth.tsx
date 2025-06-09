@@ -3,6 +3,7 @@
 import React, { useEffect, useState, createContext, useContext, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { jwtDecode } from 'jwt-decode';
+import { tokenManager } from './tokenManager';
 
 export const ROLES = {
   ADMIN: 'R00',
@@ -141,7 +142,7 @@ export interface AuthUser {
 interface AuthContextType {
   user: AuthUser | null;
   loading: boolean;
-  login: (token: string) => void;
+  login: (token: string, refreshToken?: string) => void;
   logout: () => void;
 }
 
@@ -151,9 +152,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-const loginUser = (token: string) => {
+const loginUser = (token: string, refreshToken?: string) => {
   try {
     localStorage.setItem('token', token);
+    if (refreshToken) {
+      localStorage.setItem('refreshToken', refreshToken);
+    }
+    
     const decodedToken = jwtDecode<DecodedToken>(token);
     const permissions = getUserPermissions(decodedToken.role);
 
@@ -177,32 +182,70 @@ const loginUser = (token: string) => {
       avatarUrl: decodedToken.picture, // undefined
     };
     setUser(currentUser);
+    
+    // Khởi tạo auto-refresh
+    tokenManager.initializeAutoRefresh();
   } catch (err) {
-    localStorage.removeItem('token');
+    tokenManager.clearTokens();
     setUser(null);
     console.error("Failed to login user:", err);
   }
 };
 
   const logoutUser = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('userName');
-    localStorage.removeItem('userId');
-    // localStorage.removeItem('userRole'); // Đã bỏ
-    localStorage.removeItem('staffInfo');
-    // Quan trọng: Xóa Cookies nếu được sử dụng để xác thực phía server hoặc middleware
-    // Cookies.remove('token'); // Cần import Cookies từ js-cookie nếu dùng ở đây
-
+    // Dừng auto-refresh và xóa tất cả tokens
+    tokenManager.stopAutoRefresh();
+    tokenManager.clearTokens();
+    
     setUser(null);
     // Không cần redirect ở đây, việc redirect sẽ do useLogout hoặc component gọi logout xử lý
   };
 
   useEffect(() => {
     const token = localStorage.getItem('token');
+    const refreshTokenValue = localStorage.getItem('refreshToken');
+    
     if (token) {
-      loginUser(token); // Sử dụng hàm loginUser nội bộ
+      // Kiểm tra token có hết hạn không
+      if (tokenManager.isTokenExpired(token)) {
+        // Nếu token hết hạn, thử refresh
+        if (refreshTokenValue) {
+          tokenManager.refreshTokenIfNeeded()
+            .then((result) => {
+              if (result) {
+                loginUser(result.token, result.refreshToken);
+              } else {
+                tokenManager.clearTokens();
+              }
+              setLoading(false);
+            })
+            .catch(() => {
+              tokenManager.clearTokens();
+              setLoading(false);
+            });
+        } else {
+          tokenManager.clearTokens();
+          setLoading(false);
+        }
+      } else {
+        loginUser(token, refreshTokenValue || undefined);
+        setLoading(false);
+      }
+    } else {
+      setLoading(false);
     }
-    setLoading(false);
+
+    // Lắng nghe sự kiện refresh token thất bại
+    const handleTokenRefreshFailed = () => {
+      logoutUser();
+    };
+
+    window.addEventListener('tokenRefreshFailed', handleTokenRefreshFailed);
+
+    return () => {
+      window.removeEventListener('tokenRefreshFailed', handleTokenRefreshFailed);
+      tokenManager.stopAutoRefresh();
+    };
   }, []); // Chỉ chạy một lần khi mount
 
   return (

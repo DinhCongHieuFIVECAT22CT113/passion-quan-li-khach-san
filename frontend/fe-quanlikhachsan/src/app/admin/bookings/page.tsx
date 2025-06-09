@@ -156,11 +156,16 @@ export default function BookingManager() {
 
       try {
         // Fetch all data concurrently
+        const bookingsHeaders = await getAuthHeaders('GET');
+        const customersHeaders = await getAuthHeaders('GET');
+        const roomsHeaders = await getAuthHeaders('GET');
+        const roomTypesHeaders = await getAuthHeaders('GET');
+        
         const [bookingsResponse, customersResponse, roomsResponse, roomTypesResponse] = await Promise.all([
-          fetch(`${API_BASE_URL}/DatPhong`, { method: 'GET', headers: getAuthHeaders('GET'), credentials: 'include' }),
-          fetch(`${API_BASE_URL}/KhachHang`, { method: 'GET', headers: getAuthHeaders('GET'), credentials: 'include' }),
-          fetch(`${API_BASE_URL}/Phong`, { method: 'GET', headers: getAuthHeaders('GET'), credentials: 'include' }),
-          fetch(`${API_BASE_URL}/LoaiPhong`, { method: 'GET', headers: getAuthHeaders('GET'), credentials: 'include' }) // Fetch Loại Phòng
+          fetch(`${API_BASE_URL}/DatPhong`, { method: 'GET', headers: bookingsHeaders, credentials: 'include' }),
+          fetch(`${API_BASE_URL}/KhachHang`, { method: 'GET', headers: customersHeaders, credentials: 'include' }),
+          fetch(`${API_BASE_URL}/Phong`, { method: 'GET', headers: roomsHeaders, credentials: 'include' }),
+          fetch(`${API_BASE_URL}/LoaiPhong`, { method: 'GET', headers: roomTypesHeaders, credentials: 'include' }) // Fetch Loại Phòng
         ]);
 
         console.log("Bookings API status:", bookingsResponse.status);
@@ -294,11 +299,16 @@ export default function BookingManager() {
 
     try {
       // Fetch all data concurrently
+      const bookingsHeaders2 = await getAuthHeaders('GET');
+      const customersHeaders2 = await getAuthHeaders('GET');
+      const roomsHeaders2 = await getAuthHeaders('GET');
+      const roomTypesHeaders2 = await getAuthHeaders('GET');
+      
       const [bookingsResponse, customersResponse, roomsResponse, roomTypesResponse] = await Promise.all([
-        fetch(`${API_BASE_URL}/DatPhong`, { method: 'GET', headers: getAuthHeaders('GET'), credentials: 'include' }),
-        fetch(`${API_BASE_URL}/KhachHang`, { method: 'GET', headers: getAuthHeaders('GET'), credentials: 'include' }),
-        fetch(`${API_BASE_URL}/Phong`, { method: 'GET', headers: getAuthHeaders('GET'), credentials: 'include' }),
-        fetch(`${API_BASE_URL}/LoaiPhong`, { method: 'GET', headers: getAuthHeaders('GET'), credentials: 'include' })
+        fetch(`${API_BASE_URL}/DatPhong`, { method: 'GET', headers: bookingsHeaders2, credentials: 'include' }),
+        fetch(`${API_BASE_URL}/KhachHang`, { method: 'GET', headers: customersHeaders2, credentials: 'include' }),
+        fetch(`${API_BASE_URL}/Phong`, { method: 'GET', headers: roomsHeaders2, credentials: 'include' }),
+        fetch(`${API_BASE_URL}/LoaiPhong`, { method: 'GET', headers: roomTypesHeaders2, credentials: 'include' })
       ]);
 
       // Handle responses and parse data
@@ -529,9 +539,10 @@ export default function BookingManager() {
       console.log('Gửi request đến:', endpoint);
       console.log('Method:', method);
 
+      const headers = await getFormDataHeaders();
       const response = await fetch(endpoint, {
         method: method,
-        headers: getFormDataHeaders(),
+        headers: headers,
         body: formData,
         credentials: 'include'
       });
@@ -549,11 +560,14 @@ export default function BookingManager() {
       const result = await handleResponse(response);
       console.log('API response success:', result);
 
-      const bookingsResponse = await fetch(`${API_BASE_URL}/DatPhong`, { headers: getAuthHeaders('GET'), credentials: 'include' });
+      const bookingsHeaders = await getAuthHeaders('GET');
+      const bookingsResponse = await fetch(`${API_BASE_URL}/DatPhong`, { headers: bookingsHeaders, credentials: 'include' });
       const bookingsData = await handleResponse(bookingsResponse);
-      const customersResponse = await fetch(`${API_BASE_URL}/KhachHang`, { headers: getAuthHeaders('GET'), credentials: 'include' });
+      const customersHeaders = await getAuthHeaders('GET');
+      const customersResponse = await fetch(`${API_BASE_URL}/KhachHang`, { headers: customersHeaders, credentials: 'include' });
       const customersData = await handleResponse(customersResponse);
-      const roomsResponse = await fetch(`${API_BASE_URL}/Phong`, { headers: getAuthHeaders('GET'), credentials: 'include' });
+      const roomsHeaders = await getAuthHeaders('GET');
+      const roomsResponse = await fetch(`${API_BASE_URL}/Phong`, { headers: roomsHeaders, credentials: 'include' });
       const roomsData = await handleResponse(roomsResponse);
 
       const bookingsArray: BookingBE[] = Array.isArray(bookingsData) ? bookingsData : [];

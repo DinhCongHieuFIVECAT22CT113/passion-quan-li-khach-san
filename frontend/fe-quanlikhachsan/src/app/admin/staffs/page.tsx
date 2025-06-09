@@ -70,9 +70,10 @@ function StaffPage() {
       setIsLoading(true);
       setError(null);
       try {
+      const headers = await getAuthHeaders('GET');
       const response = await fetch(`${API_BASE_URL}/NhanVien`, {
         method: 'GET',
-        headers: getAuthHeaders('GET'),
+        headers: headers,
         credentials: 'include'
       });
       const data = await handleResponse(response);
@@ -98,9 +99,10 @@ function StaffPage() {
         // Lấy tên Role nếu có maRole
         if (normalizedStaff.maRole) {
           try {
+            const roleHeaders = await getAuthHeaders('GET');
             const roleResponse = await fetch(`${API_BASE_URL}/Role/${normalizedStaff.maRole}`, {
               method: 'GET',
-              headers: getAuthHeaders('GET'),
+              headers: roleHeaders,
               credentials: 'include'
             });
             const roleData = await handleResponse(roleResponse);
@@ -125,9 +127,10 @@ function StaffPage() {
 
   const fetchAllRoles = async () => {
     try {
+      const headers = await getAuthHeaders('GET');
       const response = await fetch(`${API_BASE_URL}/Role`, {
         method: 'GET',
-        headers: getAuthHeaders('GET'),
+        headers: headers,
         credentials: 'include'
       });
       const rolesData = await handleResponse(response);
@@ -215,9 +218,10 @@ function StaffPage() {
 
       console.log('Sending form data:', Object.fromEntries(formData.entries()));
 
+      const headers = await getFormDataHeaders(); // Use form data headers instead
       const response = await fetch(url, {
         method: method,
-        headers: getFormDataHeaders(), // Use form data headers instead
+        headers: headers,
         credentials: 'include',
         body: formData,
       });
@@ -293,9 +297,10 @@ function StaffPage() {
       setIsLoading(true);
       setError(null);
       try {
+        const headers = await getAuthHeaders('DELETE');
         const response = await fetch(`${API_BASE_URL}/NhanVien/${maNV}`, {
           method: 'DELETE',
-          headers: getAuthHeaders('DELETE'),
+          headers: headers,
           credentials: 'include'
         });
 

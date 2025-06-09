@@ -59,9 +59,10 @@ export default function InvoiceManager() {
 
         // Lấy danh sách đặt phòng - Sử dụng API admin để lấy tất cả đặt phòng
         console.log('[DEBUG] Calling admin bookings API...');
+        const bookingsHeaders = await getAuthHeaders('GET');
         const bookingsResponse = await fetch(`${API_BASE_URL}/DatPhong`, {
           method: 'GET',
-          headers: getAuthHeaders('GET'),
+          headers: bookingsHeaders,
           credentials: 'include'
         });
         const bookingsDataFromApi: any[] = await handleResponse(bookingsResponse);
@@ -73,9 +74,10 @@ export default function InvoiceManager() {
 
         // Lấy tất cả khách hàng trước
         console.log('[DEBUG] Fetching all customers...');
+        const customersHeaders = await getAuthHeaders('GET');
         const customersResponse = await fetch(`${API_BASE_URL}/KhachHang`, {
           method: 'GET',
-          headers: getAuthHeaders('GET'),
+          headers: customersHeaders,
           credentials: 'include'
         });
         const customersDataFromApi: any[] = await handleResponse(customersResponse);

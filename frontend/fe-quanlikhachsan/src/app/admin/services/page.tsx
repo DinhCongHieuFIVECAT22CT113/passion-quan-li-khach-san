@@ -44,9 +44,10 @@ export default function ServiceManager() {
       setIsLoading(true);
       setError(null);
       try {
+        const headers = await getAuthHeaders('GET');
         const response = await fetch(`${API_BASE_URL}/DichVu`, {
           method: 'GET',
-          headers: getAuthHeaders('GET'), 
+          headers: headers, 
           credentials: 'include'
         });
         
@@ -120,9 +121,10 @@ export default function ServiceManager() {
     if (window.confirm('Bạn có chắc chắn muốn xóa dịch vụ này?')) {
       setIsLoading(true);
       try {
+        const headers = await getAuthHeaders('DELETE');
         const response = await fetch(`${API_BASE_URL}/DichVu/${maDichVuToDelete}`, {
           method: 'DELETE',
-          headers: getAuthHeaders('DELETE'), 
+          headers: headers, 
           credentials: 'include',
         });
         
@@ -167,7 +169,7 @@ export default function ServiceManager() {
       // console.log("Form data to submit:", Object.fromEntries(formData)); // Có thể xóa nếu đã xác nhận đúng
 
       let response;
-      const headers = getFormDataHeaders(); 
+      const headers = await getFormDataHeaders(); 
       const idToUpdate = editingService?.maDichVu; // Lấy ID (camelCase) từ service gốc đang sửa
 
       if (idToUpdate) { // Nếu có editingService.maDichVu (camelCase)
@@ -188,9 +190,10 @@ export default function ServiceManager() {
       
       await handleResponse(response); 
       
+      const fetchHeaders = await getAuthHeaders('GET');
       const fetchServicesResponse = await fetch(`${API_BASE_URL}/DichVu`, {
         method: 'GET',
-        headers: getAuthHeaders('GET'),
+        headers: fetchHeaders,
         credentials: 'include'
       });
       const updatedServicesData: ServiceBE[] = await handleResponse(fetchServicesResponse);

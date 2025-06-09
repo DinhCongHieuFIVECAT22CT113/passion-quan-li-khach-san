@@ -68,16 +68,18 @@ export default function RoomManager() {
         const token = localStorage.getItem('token');
         if (!token) throw new Error("Token không hợp lệ hoặc bạn chưa đăng nhập.");
 
+        const roomsHeaders = await getAuthHeaders('GET');
         const roomsResponse = await fetch(`${API_BASE_URL}/Phong`, {
           method: 'GET',
-          headers: getAuthHeaders('GET'),
+          headers: roomsHeaders,
           credentials: 'include'
         });
         const roomsData: PhongBE[] = await handleResponse(roomsResponse);
 
+        const roomTypesHeaders = await getAuthHeaders('GET');
         const roomTypesResponse = await fetch(`${API_BASE_URL}/LoaiPhong`, {
           method: 'GET',
-          headers: getAuthHeaders('GET'),
+          headers: roomTypesHeaders,
           credentials: 'include'
         });
         const roomTypesData: LoaiPhongBE[] = await handleResponse(roomTypesResponse);
@@ -192,9 +194,10 @@ export default function RoomManager() {
     if (window.confirm('Bạn có chắc chắn muốn xóa phòng này?')) {
       setIsLoading(true);
       try {
+        const headers = await getFormDataHeaders();
         const response = await fetch(`${API_BASE_URL}/Phong/${maPhongToDelete}`, {
           method: 'DELETE',
-          headers: getFormDataHeaders(),
+          headers: headers,
           credentials: 'include',
         });
 
@@ -236,17 +239,18 @@ export default function RoomManager() {
       let response;
       const maPhongBeingEdited = editingRoom?.maPhong;
 
+      const headers = await getFormDataHeaders();
       if (maPhongBeingEdited) {
         response = await fetch(`${API_BASE_URL}/Phong/${maPhongBeingEdited}`, {
           method: 'PUT',
-          headers: getFormDataHeaders(),
+          headers: headers,
           body: formData,
           credentials: 'include',
         });
       } else {
         response = await fetch(`${API_BASE_URL}/Phong`, {
           method: 'POST',
-          headers: getFormDataHeaders(),
+          headers: headers,
           body: formData,
           credentials: 'include',
         });
@@ -254,9 +258,10 @@ export default function RoomManager() {
 
       await handleResponse(response);
 
+      const roomsHeaders = await getAuthHeaders('GET');
       const roomsResponse = await fetch(`${API_BASE_URL}/Phong`, {
         method: 'GET',
-        headers: getAuthHeaders('GET'),
+        headers: roomsHeaders,
         credentials: 'include'
       });
       const roomsData: PhongBE[] = await handleResponse(roomsResponse);

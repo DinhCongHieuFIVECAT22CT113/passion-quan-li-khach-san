@@ -1,6 +1,7 @@
 import { UserLoginDto, UserRegisterDto, UserDto } from '../types/auth';
 import { API_BASE_URL } from './config';
 import { PhongDTO, LoaiPhongDTO } from './DTOs';
+import { ensureValidToken } from './tokenManager';
 
 // Helper function để lấy token từ localStorage
 const getToken = () => {
@@ -10,9 +11,9 @@ const getToken = () => {
   return null;
 };
 
-// Helper function để tạo headers với token
-export const getAuthHeaders = (method = 'GET') => {
-  const token = getToken();
+// Helper function để tạo headers với token (với auto-refresh)
+export const getAuthHeaders = async (method = 'GET') => {
+  const token = await ensureValidToken();
 
   // Với các phương thức GET và OPTIONS, không cần gửi Content-Type
   if (method === 'GET' || method === 'OPTIONS') {
@@ -30,9 +31,9 @@ export const getAuthHeaders = (method = 'GET') => {
   };
 };
 
-// Helper function để tạo headers cho form data
-export const getFormDataHeaders = () => {
-  const token = getToken();
+// Helper function để tạo headers cho form data (với auto-refresh)
+export const getFormDataHeaders = async () => {
+  const token = await ensureValidToken();
   return {
     'Accept': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -207,14 +208,42 @@ export const registerUser = async (registerData: UserRegisterDto): Promise<UserD
   }
 };
 
+// API Refresh Token
+export const refreshToken = async (refreshTokenData: { refreshToken: string; userId: string; userType: string }): Promise<UserDto> => {
+  const formData = new FormData();
+  formData.append('RefreshToken', refreshTokenData.refreshToken);
+  formData.append('UserId', refreshTokenData.userId);
+  formData.append('UserType', refreshTokenData.userType);
+
+  console.log(`Đang gọi API refresh token: ${API_BASE_URL}/Auth/refresh-token`);
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/Auth/refresh-token`, {
+      method: 'POST',
+      mode: 'cors',
+      credentials: 'include',
+      body: formData,
+      headers: {
+        'Accept': 'application/json',
+      }
+    });
+
+    return handleResponse(response);
+  } catch (error) {
+    console.error('Lỗi kết nối API refresh token:', error);
+    throw new Error('Không thể refresh token. Vui lòng đăng nhập lại.');
+  }
+};
+
 // API lấy danh sách phòng
 export const getRooms = async () => {
   console.log(`Đang gọi API lấy danh sách phòng: ${API_BASE_URL}/Phong`);
 
   try {
+    const headers = await getAuthHeaders('GET');
     const response = await fetch(`${API_BASE_URL}/Phong`, {
     method: 'GET',
-    headers: getAuthHeaders('GET'),
+    headers: headers,
       credentials: 'include'
   });
 
@@ -236,9 +265,10 @@ export const getRoomTypes = async () => {
   console.log(`Đang gọi API lấy danh sách loại phòng: ${API_BASE_URL}/LoaiPhong`);
 
   try {
+    const headers = await getAuthHeaders('GET');
     const response = await fetch(`${API_BASE_URL}/LoaiPhong`, {
       method: 'GET',
-      headers: getAuthHeaders('GET'),
+      headers: headers,
       credentials: 'include'
     });
 
@@ -272,9 +302,10 @@ export const createRoom = async (roomData: RoomData) => {
   }
 
   try {
+    const headers = await getFormDataHeaders();
     const response = await fetch(`${API_BASE_URL}/Phong`, {
     method: 'POST',
-    headers: getFormDataHeaders(),
+    headers: headers,
       body: formData,
       credentials: 'include'
     });
@@ -305,9 +336,10 @@ export const updateRoom = async (roomId: string, roomData: unknown) => {
   }
 
   try {
+    const headers = await getFormDataHeaders();
     const response = await fetch(`${API_BASE_URL}/Phong/${roomId}`, {
     method: 'PUT',
-    headers: getFormDataHeaders(),
+    headers: headers,
       body: formData,
       credentials: 'include'
     });
@@ -324,9 +356,10 @@ export const deleteRoom = async (roomId: string) => {
   console.log(`Đang gọi API xóa phòng: ${API_BASE_URL}/Phong/${roomId}`);
 
   try {
+    const headers = await getAuthHeaders('DELETE');
     const response = await fetch(`${API_BASE_URL}/Phong/${roomId}`, {
     method: 'DELETE',
-      headers: getAuthHeaders('DELETE'),
+      headers: headers,
       credentials: 'include'
     });
 
@@ -342,9 +375,10 @@ export const bookRoom = async (bookingData: BookingData) => {
   console.log(`Đang gọi API đặt phòng: ${API_BASE_URL}/DatPhong`, bookingData);
 
   try {
+    const headers = await getAuthHeaders('POST');
     const response = await fetch(`${API_BASE_URL}/DatPhong`, {
     method: 'POST',
-      headers: getAuthHeaders('POST'),
+      headers: headers,
       body: JSON.stringify(bookingData),
       credentials: 'include'
     });
@@ -360,9 +394,10 @@ export const bookRoom = async (bookingData: BookingData) => {
 export const getCustomerProfile = async (customerId: string) => {
   console.log(`Đang gọi API lấy thông tin khách hàng: ${API_BASE_URL}/KhachHang/${customerId}`);
   try {
+    const headers = await getAuthHeaders('GET');
     const response = await fetch(`${API_BASE_URL}/KhachHang/${customerId}`, {
       method: 'GET',
-      headers: getAuthHeaders('GET'),
+      headers: headers,
       credentials: 'include'
     });
     const data = await handleResponse(response);
@@ -388,9 +423,10 @@ export const updateCustomerProfile = async (profileData: unknown) => {
       }
     }
 
+    const headers = await getFormDataHeaders();
     const response = await fetch(`${API_BASE_URL}/KhachHang`, {
     method: 'PUT',
-    headers: getFormDataHeaders(),
+    headers: headers,
       body: formData,
       credentials: 'include'
     });
@@ -406,9 +442,10 @@ export const updateCustomerProfile = async (profileData: unknown) => {
 export const getBookingHistory = async () => {
   console.log(`Đang gọi API lấy lịch sử đặt phòng của người dùng hiện tại`);
   try {
+    const headers = await getAuthHeaders('GET');
     const response = await fetch(`${API_BASE_URL}/DatPhong/KhachHang`, {
       method: 'GET',
-      headers: getAuthHeaders('GET'),
+      headers: headers,
       credentials: 'include'
     });
 
@@ -428,9 +465,10 @@ export const getBookingHistory = async () => {
 // API hủy đặt phòng
 export const cancelBooking = async (bookingId: string) => {
   try {
+    const headers = await getAuthHeaders('PUT');
     const response = await fetch(`${API_BASE_URL}/DatPhong/${bookingId}/cancel`, {
     method: 'PUT',
-      headers: getAuthHeaders('PUT'),
+      headers: headers,
       credentials: 'include'
     });
 
@@ -446,9 +484,10 @@ export const getServices = async () => {
   console.log(`Đang gọi API lấy danh sách dịch vụ: ${API_BASE_URL}/DichVu`);
 
   try {
+    const headers = await getAuthHeaders('GET');
     const response = await fetch(`${API_BASE_URL}/DichVu`, {
       method: 'GET',
-      headers: getAuthHeaders('GET'),
+      headers: headers,
       credentials: 'include'
     });
 
@@ -470,9 +509,10 @@ export const getPromotions = async () => {
   console.log(`Đang gọi API lấy danh sách khuyến mãi: ${API_BASE_URL}/KhuyenMai`);
 
   try {
+    const headers = await getAuthHeaders('GET');
     const response = await fetch(`${API_BASE_URL}/KhuyenMai`, {
       method: 'GET',
-      headers: getAuthHeaders('GET'),
+      headers: headers,
       credentials: 'include'
     });
 
@@ -493,9 +533,10 @@ export const getPromotions = async () => {
 export const getInvoices = async () => {
   console.log(`Đang gọi API lấy danh sách hóa đơn: ${API_BASE_URL}/HoaDon`);
   try {
+    const headers = await getAuthHeaders('GET');
     const response = await fetch(`${API_BASE_URL}/HoaDon`, {
       method: 'GET',
-      headers: getAuthHeaders('GET'),
+      headers: headers,
       credentials: 'include'
     });
     const data = await handleResponse(response);
@@ -520,8 +561,9 @@ export const getInvoices = async () => {
 // API lấy chi tiết hóa đơn
 export const getInvoiceById = async (invoiceId: string) => {
   try {
+    const headers = await getAuthHeaders('GET');
     const response = await fetch(`${API_BASE_URL}/HoaDon/${invoiceId}`, {
-      headers: getAuthHeaders(),
+      headers: headers,
       credentials: 'include'
     });
 
@@ -535,9 +577,10 @@ export const getInvoiceById = async (invoiceId: string) => {
 // API tạo hóa đơn mới
 export const createInvoice = async (invoiceData: InvoiceData) => {
   try {
+    const headers = await getAuthHeaders('POST');
     const response = await fetch(`${API_BASE_URL}/HoaDon`, {
     method: 'POST',
-      headers: getAuthHeaders('POST'),
+      headers: headers,
       body: JSON.stringify(invoiceData),
       credentials: 'include'
     });
@@ -553,10 +596,11 @@ export const createInvoice = async (invoiceData: InvoiceData) => {
 export const updateInvoiceStatus = async (invoiceId: string, status: string) => {
   console.log(`Đang gọi API cập nhật trạng thái hóa đơn: ${API_BASE_URL}/HoaDon/${invoiceId}/trangthai`);
   try {
+    const authHeaders = await getAuthHeaders('PUT');
     const response = await fetch(`${API_BASE_URL}/HoaDon/${invoiceId}/trangthai`, {
       method: 'PUT',
       headers: {
-        ...getAuthHeaders('PUT'),
+        ...authHeaders,
         'Content-Type': 'application/json'
       },
       credentials: 'include',
@@ -578,9 +622,10 @@ export const updateInvoiceStatus = async (invoiceId: string, status: string) => 
 // API xóa hóa đơn
 export const deleteInvoice = async (invoiceId: string) => {
   try {
+    const headers = await getAuthHeaders('DELETE');
     const response = await fetch(`${API_BASE_URL}/HoaDon/${invoiceId}`, {
     method: 'DELETE',
-    headers: getAuthHeaders('DELETE'),
+    headers: headers,
       credentials: 'include'
     });
 
@@ -594,8 +639,9 @@ export const deleteInvoice = async (invoiceId: string) => {
 // API tính doanh thu theo tháng
 export const calculateRevenue = async (month: number, year: number) => {
   try {
+    const headers = await getAuthHeaders();
     const response = await fetch(`${API_BASE_URL}/HoaDon/doanhthu?thang=${month}&nam=${year}`, {
-      headers: getAuthHeaders(),
+      headers: headers,
       credentials: 'include'
     });
 
@@ -615,8 +661,9 @@ export const getStaffs = async () => {
   try {
     console.log(`Đang gọi API lấy danh sách nhân viên: ${API_BASE_URL}/NhanVien`);
 
+    const headers = await getAuthHeaders();
     const response = await fetch(`${API_BASE_URL}/NhanVien`, {
-      headers: getAuthHeaders(),
+      headers: headers,
       credentials: 'include'
     });
 
@@ -666,9 +713,10 @@ export const createStaff = async (staffData: unknown) => {
       }
     }
 
+    const headers = await getFormDataHeaders();
     const response = await fetch(`${API_BASE_URL}/NhanVien`, {
     method: 'POST',
-    headers: getFormDataHeaders(),
+    headers: headers,
       body: formData,
       credentials: 'include'
     });
@@ -695,9 +743,10 @@ export const updateStaff = async (staffData: unknown) => {
       }
     }
 
+    const headers = await getFormDataHeaders();
     const response = await fetch(`${API_BASE_URL}/NhanVien/${staffId}`, {
     method: 'PUT',
-    headers: getFormDataHeaders(),
+    headers: headers,
       body: formData,
       credentials: 'include'
     });
@@ -712,9 +761,10 @@ export const updateStaff = async (staffData: unknown) => {
 // API xóa nhân viên
 export const deleteStaff = async (staffId: string) => {
   try {
+    const headers = await getAuthHeaders('DELETE');
     const response = await fetch(`${API_BASE_URL}/NhanVien/${staffId}`, {
     method: 'DELETE',
-    headers: getAuthHeaders('DELETE'),
+    headers: headers,
       credentials: 'include'
     });
 
@@ -728,8 +778,9 @@ export const deleteStaff = async (staffId: string) => {
 // API lấy danh sách đánh giá
 export const getReviews = async () => {
   try {
+    const headers = await getAuthHeaders();
     const response = await fetch(`${API_BASE_URL}/Review`, {
-      headers: getAuthHeaders(),
+      headers: headers,
       credentials: 'include'
     });
 
@@ -743,9 +794,10 @@ export const getReviews = async () => {
 // API phê duyệt/từ chối đánh giá
 export const approveReview = async (reviewId: string, isApproved: boolean) => {
   try {
+    const headers = await getAuthHeaders('PUT');
     const response = await fetch(`${API_BASE_URL}/Review/${reviewId}/approve`, {
     method: 'PUT',
-      headers: getAuthHeaders('PUT'),
+      headers: headers,
       body: JSON.stringify({ isApproved }),
       credentials: 'include'
     });
@@ -762,11 +814,12 @@ export const getEmployeeRooms = async () => {
   console.log(`Đang gọi API lấy danh sách phòng cho nhân viên: ${API_BASE_URL}/Phong`);
 
   try {
+    const headers = await getAuthHeaders('GET');
     const response = await fetch(`${API_BASE_URL}/Phong`, {
       method: 'GET',
       mode: 'cors',
       credentials: 'include',
-      headers: getAuthHeaders('GET'),
+      headers: headers,
     });
 
     const data = await handleResponse(response);
@@ -803,12 +856,13 @@ export const updateRoomStatus = async (roomId: string, status: string) => {
   formData.append('roomId', roomId);
   formData.append('status', status);
 
+  const headers = await getFormDataHeaders();
   const response = await fetch(`${API_BASE_URL}/Phong/${roomId}`, {
     method: 'PUT',
     mode: 'cors',
     credentials: 'include',
     body: formData,
-    headers: getFormDataHeaders(),
+    headers: headers,
   });
 
   return handleResponse(response);
@@ -818,32 +872,35 @@ export const updateRoomStatus = async (roomId: string, status: string) => {
 export const getEmployeeBookings = async () => {
   console.log(`Đang gọi API lấy danh sách đặt phòng cho nhân viên: ${API_BASE_URL}/DatPhong`);
 
+  const headers = await getAuthHeaders('GET');
   const response = await fetch(`${API_BASE_URL}/DatPhong`, {
     method: 'GET',
     mode: 'cors',
     credentials: 'include',
-    headers: getAuthHeaders('GET'),
+    headers: headers,
   });
 
   const bookingsData = await handleResponse(response);
 
   // Lấy thêm thông tin khách hàng
+  const customersHeaders = await getAuthHeaders('GET');
   const customersResponse = await fetch(`${API_BASE_URL}/KhachHang`, {
     method: 'GET',
     mode: 'cors',
     credentials: 'include',
-    headers: getAuthHeaders('GET'),
+    headers: customersHeaders,
   });
 
   const customersData = await handleResponse(customersResponse);
   const customers = Array.isArray(customersData) ? customersData : [];
 
   // Lấy thêm thông tin phòng
+  const roomsHeaders = await getAuthHeaders('GET');
   const roomsResponse = await fetch(`${API_BASE_URL}/Phong`, {
     method: 'GET',
     mode: 'cors',
     credentials: 'include',
-    headers: getAuthHeaders('GET'),
+    headers: roomsHeaders,
   });
 
   const roomsData = await handleResponse(roomsResponse);
@@ -889,11 +946,12 @@ export const updateBookingStatus = async (bookingId: string, status: string) => 
   console.log(`Đang gọi API cập nhật trạng thái đặt phòng: ${API_BASE_URL}/DatPhong/${bookingId}`);
 
   // Đầu tiên lấy thông tin đặt phòng hiện tại
+  const getHeaders = await getAuthHeaders('GET');
   const getResponse = await fetch(`${API_BASE_URL}/DatPhong/${bookingId}`, {
     method: 'GET',
     mode: 'cors',
     credentials: 'include',
-    headers: getAuthHeaders('GET'),
+    headers: getHeaders,
   });
 
   const bookingData = await handleResponse(getResponse);
@@ -915,12 +973,13 @@ export const updateBookingStatus = async (bookingId: string, status: string) => 
   // Ghi đè trạng thái mới
   formData.set('status', status);
 
+  const headers = await getFormDataHeaders();
   const response = await fetch(`${API_BASE_URL}/DatPhong/${bookingId}`, {
     method: 'PUT',
     mode: 'cors',
     credentials: 'include',
     body: formData,
-    headers: getFormDataHeaders(),
+    headers: headers,
   });
 
   return handleResponse(response);
@@ -947,12 +1006,13 @@ export const createEmployeeBooking = async (bookingData: BookingData) => {
     formData.append(backendKey, String(bookingData[key] || ''));
   }
 
+  const headers = await getFormDataHeaders();
   const response = await fetch(`${API_BASE_URL}/DatPhong`, {
     method: 'POST',
     mode: 'cors',
     credentials: 'include',
     body: formData,
-    headers: getFormDataHeaders(),
+    headers: headers,
   });
 
   return handleResponse(response);
@@ -962,32 +1022,35 @@ export const createEmployeeBooking = async (bookingData: BookingData) => {
 export const getEmployeeInvoices = async () => {
   console.log(`Đang gọi API lấy danh sách hóa đơn cho nhân viên: ${API_BASE_URL}/HoaDon`);
 
+  const headers = await getAuthHeaders('GET');
   const response = await fetch(`${API_BASE_URL}/HoaDon`, {
     method: 'GET',
     mode: 'cors',
     credentials: 'include',
-    headers: getAuthHeaders('GET'),
+    headers: headers,
   });
 
   const invoicesData = await handleResponse(response);
 
   // Lấy thông tin đặt phòng
+  const bookingsHeaders = await getAuthHeaders('GET');
   const bookingsResponse = await fetch(`${API_BASE_URL}/DatPhong`, {
     method: 'GET',
     mode: 'cors',
     credentials: 'include',
-    headers: getAuthHeaders('GET'),
+    headers: bookingsHeaders,
   });
 
   const bookingsData = await handleResponse(bookingsResponse);
   const bookings = Array.isArray(bookingsData) ? bookingsData : [];
 
   // Lấy thông tin khách hàng
+  const customersHeaders2 = await getAuthHeaders('GET');
   const customersResponse = await fetch(`${API_BASE_URL}/KhachHang`, {
     method: 'GET',
     mode: 'cors',
     credentials: 'include',
-    headers: getAuthHeaders('GET'),
+    headers: customersHeaders2,
   });
 
   const customersData = await handleResponse(customersResponse);
@@ -1051,12 +1114,13 @@ export const createEmployeeInvoice = async (invoiceData: InvoiceData) => {
     formData.append('IssueDate', new Date().toISOString());
   }
 
+  const headers = await getFormDataHeaders();
   const response = await fetch(`${API_BASE_URL}/HoaDon`, {
     method: 'POST',
     mode: 'cors',
     credentials: 'include',
     body: formData,
-    headers: getFormDataHeaders(),
+    headers: headers,
   });
 
   return handleResponse(response);
@@ -1154,9 +1218,10 @@ export const getDashboardStats = async () => {
 export const getBookingDetails = async (maDatPhong: string) => {
   console.log(`Đang gọi API lấy chi tiết đặt phòng: ${API_BASE_URL}/DatPhong/${maDatPhong}`);
   try {
+    const headers = await getAuthHeaders('GET');
     const response = await fetch(`${API_BASE_URL}/DatPhong/${maDatPhong}`, {
       method: 'GET',
-      headers: getAuthHeaders('GET'),
+      headers: headers,
       credentials: 'include'
     });
     const data = await handleResponse(response);
@@ -1181,9 +1246,10 @@ export const getBookingDetails = async (maDatPhong: string) => {
 export const getPhongById = async (maPhong: string): Promise<PhongDTO> => {
   console.log(`Đang gọi API lấy chi tiết phòng: ${API_BASE_URL}/Phong/${maPhong}`);
   try {
+    const headers = await getAuthHeaders('GET'); // API này public, không cần token nhưng vẫn giữ header chung
     const response = await fetch(`${API_BASE_URL}/Phong/${maPhong}`, {
       method: 'GET',
-      headers: getAuthHeaders('GET'), // API này public, không cần token nhưng vẫn giữ header chung
+      headers: headers,
     });
     // Không cần gọi handleResponse ở đây nếu API GET /Phong/{maPhong}
     // đã được cấu hình để trả về JSON chuẩn (kể cả khi lỗi 404 thì body vẫn là JSON)
@@ -1213,9 +1279,10 @@ export const getPhongById = async (maPhong: string): Promise<PhongDTO> => {
 export const getLoaiPhongById = async (maLoaiPhong: string): Promise<LoaiPhongDTO> => {
   console.log(`Đang gọi API lấy chi tiết loại phòng: ${API_BASE_URL}/LoaiPhong/${maLoaiPhong}`);
   try {
+    const headers = await getAuthHeaders('GET'); // API này public
     const response = await fetch(`${API_BASE_URL}/LoaiPhong/${maLoaiPhong}`, {
       method: 'GET',
-      headers: getAuthHeaders('GET'), // API này public
+      headers: headers,
     });
     if (!response.ok) {
         if (response.status === 404) {
@@ -1350,9 +1417,10 @@ export const getAccountantInvoices = async () => {
   try {
     console.log('Đang gọi API lấy danh sách hóa đơn cho kế toán');
     // Gọi API thật từ backend
+    const headers = await getAuthHeaders('GET');
     const response = await fetch(`${API_BASE_URL}/HoaDon`, {
       method: 'GET',
-      headers: getAuthHeaders('GET'),
+      headers: headers,
       credentials: 'include'
     });
     if (!response.ok) {
@@ -1361,17 +1429,21 @@ export const getAccountantInvoices = async () => {
     const invoicesData = await handleResponse(response);
     console.log('Raw invoices data for accountant:', invoicesData);
     // Lấy thêm thông tin đặt phòng và khách hàng
+    const bookingsHeaders = await getAuthHeaders('GET');
+    const customersHeaders = await getAuthHeaders('GET');
+    const paymentsHeaders = await getAuthHeaders('GET');
+    
     const [bookingsData, customersData, paymentsData] = await Promise.all([
       fetch(`${API_BASE_URL}/DatPhong`, {
-        headers: getAuthHeaders('GET'),
+        headers: bookingsHeaders,
         credentials: 'include'
       }).then(res => res.ok ? handleResponse(res) : []).catch(() => []),
       fetch(`${API_BASE_URL}/KhachHang`, {
-        headers: getAuthHeaders('GET'),
+        headers: customersHeaders,
         credentials: 'include'
       }).then(res => res.ok ? handleResponse(res) : []).catch(() => []),
       fetch(`${API_BASE_URL}/PhuongThucThanhToan`, {
-        headers: getAuthHeaders('GET'),
+        headers: paymentsHeaders,
         credentials: 'include'
       }).then(res => res.ok ? handleResponse(res) : []).catch(() => [])
     ]);
@@ -1472,10 +1544,11 @@ export const updateAccountantInvoiceStatus = async (invoiceId: string, status: s
   try {
     console.log(`Đang cập nhật trạng thái hóa đơn ${invoiceId} thành ${status}`);
 
+    const authHeaders = await getAuthHeaders('PUT');
     const response = await fetch(`${API_BASE_URL}/HoaDon/${invoiceId}/trangthai`, {
       method: 'PUT',
       headers: {
-        ...getAuthHeaders('PUT'),
+        ...authHeaders,
         'Content-Type': 'application/json'
       },
       credentials: 'include',

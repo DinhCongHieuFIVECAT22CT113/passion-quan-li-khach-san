@@ -58,8 +58,12 @@ const LoginForm: React.FC = () => {
           throw new Error('Dữ liệu đăng nhập không hợp lệ. Vui lòng thử lại.');
         }
         
-        login(userData.token);
+        // Truyền cả token và refreshToken
+        login(userData.token, userData.refreshToken);
         Cookies.set('token', userData.token, { expires: rememberMe ? 7 : undefined });
+        if (userData.refreshToken) {
+          Cookies.set('refreshToken', userData.refreshToken, { expires: 7 }); // Refresh token có thời hạn dài hơn
+        }
         
         console.log('Đã gọi login từ AuthContext và lưu cookie.');
         

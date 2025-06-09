@@ -23,6 +23,7 @@ export interface UserDto {
   hoTen: string;
   maRole?: string;
   token: string;
+  refreshToken: string;
 }
 
 // Interface cho thông tin khách hàng

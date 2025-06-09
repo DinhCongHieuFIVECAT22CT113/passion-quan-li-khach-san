@@ -43,9 +43,10 @@ export default function CustomerManager() {
         const token = localStorage.getItem('token');
         if (!token) throw new Error("Bạn cần đăng nhập để xem dữ liệu");
         
+        const headers = await getAuthHeaders('GET');
         const response = await fetch(`${API_BASE_URL}/KhachHang`, {
           method: 'GET',
-          headers: getAuthHeaders('GET'),
+          headers: headers,
           credentials: 'include'
         });
         
@@ -159,9 +160,10 @@ export default function CustomerManager() {
       if (form.diaChi) formData.append('DiaChi', form.diaChi);
       // MaKh không gửi khi tạo mới, BE tự sinh
       
+      const headers = await getFormDataHeaders(); // Sử dụng getFormDataHeaders cho FormData
       const response = await fetch(`${API_BASE_URL}/KhachHang`, {
         method: 'POST',
-        headers: getFormDataHeaders(), // Sử dụng getFormDataHeaders cho FormData
+        headers: headers,
         body: formData, // Gửi FormData
         credentials: 'include'
       });
@@ -172,9 +174,10 @@ export default function CustomerManager() {
       await handleResponse(response); // Nếu BE chỉ trả về status
       
       // Tải lại danh sách khách hàng
+      const customersHeaders = await getAuthHeaders('GET');
       const customersResponse = await fetch(`${API_BASE_URL}/KhachHang`, {
         method: 'GET',
-        headers: getAuthHeaders('GET'),
+        headers: customersHeaders,
         credentials: 'include'
       });
       let data = await handleResponse(customersResponse);
@@ -268,9 +271,10 @@ export default function CustomerManager() {
          return;
       }
       
+      const headers = await getFormDataHeaders();
       const response = await fetch(`${API_BASE_URL}/KhachHang/${form.MaKh}`, {
         method: 'PUT',
-        headers: getFormDataHeaders(),
+        headers: headers,
         body: formData,
         credentials: 'include'
       });
@@ -278,9 +282,10 @@ export default function CustomerManager() {
       await handleResponse(response);
       
       // Tải lại danh sách khách hàng
+      const customersHeaders2 = await getAuthHeaders('GET');
       const customersResponse = await fetch(`${API_BASE_URL}/KhachHang`, {
         method: 'GET',
-        headers: getAuthHeaders('GET'),
+        headers: customersHeaders2,
         credentials: 'include'
       });
       let data = await handleResponse(customersResponse);

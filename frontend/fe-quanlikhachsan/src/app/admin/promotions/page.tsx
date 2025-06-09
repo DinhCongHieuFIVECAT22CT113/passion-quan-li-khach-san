@@ -212,18 +212,19 @@ export default function PromotionManager() {
       formData.append('SoTienGiam', String(form.SoTienGiam || 0));
 
       let response;
+      const headers = await getFormDataHeaders();
       if (editPromotion && editPromotion.MaKm) {
         formData.append('MaKm', editPromotion.MaKm);
         response = await fetch(`${API_BASE_URL}/KhuyenMai/${editPromotion.MaKm}`, {
           method: 'PUT',
-          headers: getFormDataHeaders(),
+          headers: headers,
           body: formData,
           credentials: 'include',
         });
       } else {
         response = await fetch(`${API_BASE_URL}/KhuyenMai`, {
         method: 'POST',
-        headers: getFormDataHeaders(),
+        headers: headers,
         body: formData,
         credentials: 'include',
       });
@@ -287,9 +288,10 @@ export default function PromotionManager() {
       const token = localStorage.getItem('token');
       if (!token) throw new Error("Bạn cần đăng nhập để thực hiện hành động này");
       
+      const headers = await getAuthHeaders('DELETE');
       const response = await fetch(`${API_BASE_URL}/KhuyenMai/${MaKm}`, {
         method: 'DELETE',
-        headers: getAuthHeaders('DELETE'),
+        headers: headers,
         credentials: 'include',
       });
       
