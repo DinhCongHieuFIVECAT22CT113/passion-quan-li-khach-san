@@ -37,13 +37,13 @@ class TokenManager {
     }
   }
 
-  // Kiểm tra token có sắp hết hạn không (còn ít hơn 1 phút)
+  // Kiểm tra token có sắp hết hạn không (còn ít hơn 5 phút)
   isTokenExpiringSoon(token: string): boolean {
     try {
       const decoded = jwtDecode<DecodedToken>(token);
       const currentTime = Date.now() / 1000;
       const timeUntilExpiry = decoded.exp - currentTime;
-      return timeUntilExpiry < 60; // Còn ít hơn 1 phút
+      return timeUntilExpiry < 300; // Còn ít hơn 5 phút (300 giây)
     } catch {
       return true;
     }
@@ -141,8 +141,8 @@ class TokenManager {
     const currentTime = Date.now() / 1000;
     const timeUntilExpiry = expiration - currentTime;
     
-    // Refresh khi còn 1 phút trước khi hết hạn
-    const refreshTime = Math.max(0, (timeUntilExpiry - 60) * 1000);
+    // Refresh khi còn 5 phút trước khi hết hạn
+    const refreshTime = Math.max(0, (timeUntilExpiry - 300) * 1000);
 
     this.refreshTimer = setTimeout(async () => {
       try {

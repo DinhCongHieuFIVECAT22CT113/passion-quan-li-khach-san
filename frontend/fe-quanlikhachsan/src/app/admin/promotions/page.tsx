@@ -3,6 +3,7 @@ import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import styles from "./PromotionManager.module.css";
 import { getPromotions, getAuthHeaders, getFormDataHeaders, handleResponse } from "../../../lib/api";
 import { API_BASE_URL } from "../../../lib/config";
+import { KhuyenMaiDTO } from "../../../lib/DTOs";
 import Image from 'next/image';
 
 interface PromotionFE {
@@ -11,10 +12,10 @@ interface PromotionFE {
   PhanTramGiam: number;
   NgayBatDau: string;
   NgayKetThuc: string;
-  MoTa?: string;
+  MoTa: string;
   Thumbnail?: string;
-  MaGiamGia?: string;
-  SoTienGiam?: number;
+  MaGiamGia: string;
+  SoTienGiam: number;
   trangThaiDisplay: 'Đang áp dụng' | 'Đã hết hạn' | 'Sắp diễn ra';
 }
 
@@ -49,6 +50,9 @@ export default function PromotionManager() {
     MaGiamGia: "",
     SoTienGiam: 0,
   });
+
+  const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
 
   const formatDateForInput = (dateString?: string): string => {
     if (!dateString) return '';
@@ -166,6 +170,8 @@ export default function PromotionManager() {
       MaGiamGia: "",
       SoTienGiam: 0,
     });
+    setThumbnailFile(null);
+    setThumbnailPreview(null);
     setEditPromotion(null);
     setShowAddModal(true);
   };
@@ -182,6 +188,8 @@ export default function PromotionManager() {
       MaGiamGia: promo.MaGiamGia,
       SoTienGiam: promo.SoTienGiam,
     });
+    setThumbnailFile(null);
+    setThumbnailPreview(promo.Thumbnail || null);
     setEditPromotion(promo);
     setShowAddModal(true);
   };
@@ -194,6 +202,32 @@ export default function PromotionManager() {
     }));
   };
 
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Vui lòng chọn file hình ảnh');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('File không được vượt quá 5MB');
+        return;
+      }
+
+      setThumbnailFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setThumbnailPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     
@@ -201,13 +235,19 @@ export default function PromotionManager() {
       const token = localStorage.getItem('token');
       if (!token) throw new Error("Bạn cần đăng nhập để thực hiện hành động này");
       
+      // Validation for new promotion
+      if (!editPromotion && !thumbnailFile) {
+        alert("Vui lòng chọn hình ảnh cho khuyến mãi");
+        return;
+      }
+      
       const formData = new FormData();
       formData.append('TenKhuyenMai', form.TenKhuyenMai);
       formData.append('PhanTramGiam', String(form.PhanTramGiam || 0));
       formData.append('NgayBatDau', form.NgayBatDau);
       formData.append('NgayKetThuc', form.NgayKetThuc);
       if (form.MoTa) formData.append('MoTa', form.MoTa);
-      if (form.Thumbnail) formData.append('Thumbnail', form.Thumbnail);
+      if (thumbnailFile) formData.append('Thumbnail', thumbnailFile);
       if (form.MaGiamGia) formData.append('MaGiamGia', form.MaGiamGia);
       formData.append('SoTienGiam', String(form.SoTienGiam || 0));
 
@@ -338,6 +378,7 @@ export default function PromotionManager() {
             <thead>
               <tr>
                 <th>Mã KM</th>
+                <th>Hình ảnh</th>
                 <th>Tên chương trình</th>
                 <th>Loại</th>
                 <th>Giảm (%)</th>
@@ -350,7 +391,7 @@ export default function PromotionManager() {
             </thead>
             <tbody>
               {filtered.length === 0 ? (
-                <tr><td colSpan={9} className={styles.noData}>Không có dữ liệu khuyến mãi</td></tr>
+                <tr><td colSpan={10} className={styles.noData}>Không có dữ liệu khuyến mãi</td></tr>
               ) : filtered.map(promo => {
                 console.log(
                   'Render promo:', 
@@ -379,20 +420,26 @@ export default function PromotionManager() {
                 return (
                   <tr key={promo.MaKm}>
                     <td>{promo.MaKm}</td>
-                    <td>
-                      <Image 
-                        src={promo.Thumbnail || '/placeholder-image.png'} 
-                        alt={promo.TenKhuyenMai} 
-                        width={50}
-                        height={50}
-                        className={styles.thumbnail} 
-                        onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = '/placeholder-image.png';
-                        }}
-                      />
-                      {promo.TenKhuyenMai}
+                    <td style={{textAlign: 'center'}}>
+                      {promo.Thumbnail ? (
+                        <Image 
+                          src={promo.Thumbnail} 
+                          alt={promo.TenKhuyenMai} 
+                          width={60}
+                          height={40}
+                          style={{objectFit: 'cover', borderRadius: '4px'}}
+                          onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/images/promotion-placeholder.jpg';
+                          }}
+                        />
+                      ) : (
+                        <div style={{width: '60px', height: '40px', backgroundColor: '#f0f0f0', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px', fontSize: '12px', color: '#666'}}>
+                          Không có ảnh
+                        </div>
+                      )}
                     </td>
+                    <td>{promo.TenKhuyenMai}</td>
                     <td>{promo.MaGiamGia}</td>
                     <td>{promo.PhanTramGiam}%</td>
                     <td>{promo.SoTienGiam ? promo.SoTienGiam.toLocaleString('vi-VN') : '0'} VND</td>
@@ -441,24 +488,40 @@ export default function PromotionManager() {
                 <input type="date" id="NgayKetThuc" name="NgayKetThuc" value={form.NgayKetThuc} onChange={handleChange} required />
               </div>
               <div className={styles.formGroup}>
-                <label htmlFor="Thumbnail" className={styles.label}>Thumbnail URL:</label>
+                <label htmlFor="Thumbnail" className={styles.label}>
+                  Hình ảnh khuyến mãi{!editPromotion ? '*' : ''}:
+                </label>
                 <input
-                  type="text"
+                  type="file"
                   name="Thumbnail"
                   id="Thumbnail"
-                  value={form.Thumbnail || ''}
-                  onChange={handleChange}
+                  accept="image/*"
+                  onChange={handleFileChange}
                   className={styles.input}
                 />
-                {form.Thumbnail && 
-                  <Image 
-                      src={form.Thumbnail} 
-                      alt="Preview Thumbnail" 
-                      width={100}
-                      height={100}
-                      style={{maxWidth: '200px', marginTop: '10px'}} 
-                  />
+                {thumbnailPreview && 
+                  <div style={{marginTop: '10px'}}>
+                    <Image 
+                        src={thumbnailPreview} 
+                        alt="Preview Thumbnail" 
+                        width={200}
+                        height={150}
+                        style={{maxWidth: '200px', objectFit: 'cover', border: '1px solid #ddd', borderRadius: '4px'}} 
+                    />
+                  </div>
                 }
+                {editPromotion && !thumbnailPreview && form.Thumbnail && (
+                  <div style={{marginTop: '10px'}}>
+                    <Image 
+                        src={form.Thumbnail} 
+                        alt="Current Thumbnail" 
+                        width={200}
+                        height={150}
+                        style={{maxWidth: '200px', objectFit: 'cover', border: '1px solid #ddd', borderRadius: '4px'}} 
+                    />
+                    <p style={{fontSize: '12px', color: '#666', marginTop: '5px'}}>Hình ảnh hiện tại</p>
+                  </div>
+                )}
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="MoTa">Mô tả</label>

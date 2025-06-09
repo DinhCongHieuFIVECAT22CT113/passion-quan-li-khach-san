@@ -62,4 +62,48 @@ export interface PhongDTO {
     trangThai: string;        // Ví dụ: "Trống", "Đã đặt", "Đang sử dụng", "Đang dọn"
     tang?: number;
     loaiPhong?: LoaiPhongDTO; // Thông tin chi tiết loại phòng (sẽ cần nếu API backend trả về)
-} 
+}
+
+/**
+ * Đại diện cho thông tin khuyến mãi.
+ */
+export interface KhuyenMaiDTO {
+    maKm: string;
+    tenKhuyenMai: string;
+    thumbnail?: string;
+    moTa: string;
+    maGiamGia: string;
+    phanTramGiam: number;
+    soTienGiam: number;
+    ngayBatDau: string;
+    ngayKetThuc: string;
+    trangThai: string;
+}
+
+/**
+ * DTO cho việc tạo khuyến mãi mới
+ */
+export interface CreateKhuyenMaiDTO {
+    tenKhuyenMai: string;
+    thumbnail?: File;
+    moTa: string;
+    maGiamGia: string;
+    phanTramGiam: number;
+    soTienGiam: number;
+    ngayBatDau: string;
+    ngayKetThuc: string;
+}
+
+/**
+ * DTO cho việc cập nhật khuyến mãi
+ */
+export interface UpdateKhuyenMaiDTO {
+    tenKhuyenMai: string;
+    thumbnail?: File;
+    moTa: string;
+    maGiamGia: string;
+    phanTramGiam: number;
+    soTienGiam: number;
+    ngayBatDau: string;
+    ngayKetThuc: string;
+}
