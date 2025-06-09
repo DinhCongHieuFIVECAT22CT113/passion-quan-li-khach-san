@@ -290,7 +290,7 @@ const RoomDetailPage: React.FC = () => {
             {/* Booking Modal */}
             {showBookingModal && (
                 <BookingModal
-                    room={room}
+                    selectedRoom={room}
                     loaiPhong={loaiPhongDetails}
                     onClose={() => setShowBookingModal(false)}
                 />
