@@ -211,9 +211,18 @@ const RoomDetailPage: React.FC = () => {
 
                         <div className="mb-8 border-t pt-6"> {/* Increased mb and pt */}
                             <h2 className="text-2xl font-semibold text-gray-700 mb-3">Tiện nghi</h2> {/* Increased size and mb */}
-                            {loaiPhongDetails?.tienNghi && loaiPhongDetails.tienNghi.length > 0 ? (
+                            {loaiPhongDetails ? (
                                 <ul className="list-disc list-inside text-gray-600 grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-1">
-                                    {loaiPhongDetails.tienNghi.map((tn: string, i: number) => <li key={i}>{tn}</li>)}
+                                    <li>Diện tích: {loaiPhongDetails.kichThuocPhong} m²</li>
+                                    <li>Sức chứa: {loaiPhongDetails.sucChua} người</li>
+                                    <li>Số phòng tắm: {loaiPhongDetails.soPhongTam}</li>
+                                    <li>Tổng số giường: {loaiPhongDetails.soGiuongNgu}</li>
+                                    {loaiPhongDetails.giuongDoi && loaiPhongDetails.giuongDoi > 0 && (
+                                        <li>Giường đôi: {loaiPhongDetails.giuongDoi}</li>
+                                    )}
+                                    {loaiPhongDetails.giuongDon && loaiPhongDetails.giuongDon > 0 && (
+                                        <li>Giường đơn: {loaiPhongDetails.giuongDon}</li>
+                                    )}
                                 </ul>
                             ) : (
                                 <p className="text-gray-500 italic">Không có thông tin tiện nghi.</p>

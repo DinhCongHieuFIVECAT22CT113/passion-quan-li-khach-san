@@ -42,13 +42,24 @@ const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({ onClose, onAvatar
 
       // Decode token để lấy username (hoặc có thể lấy từ user context)
       const payload = JSON.parse(atob(token.split('.')[1]));
-      const username = payload.unique_name || payload.sub;
+      const username = payload.username;
+
+      console.log('Token payload:', payload);
+      console.log('Username from token:', username);
+
+      if (!username) {
+        alert('Không thể xác định username từ token');
+        return;
+      }
 
       const formData = new FormData();
       formData.append('AvatarFile', selectedFile);
 
       const headers = await getFormDataHeaders();
-      const response = await fetch(`${API_BASE_URL}/KhachHang/${username}/upload-avatar`, {
+      const uploadUrl = `${API_BASE_URL}/KhachHang/${username}/upload-avatar`;
+      console.log('Upload URL:', uploadUrl);
+      
+      const response = await fetch(uploadUrl, {
         method: 'POST',
         headers: headers,
         body: formData,

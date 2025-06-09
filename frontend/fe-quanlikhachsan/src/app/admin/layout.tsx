@@ -30,6 +30,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className={styles.logo}>🏨 <span>Admin</span></div>
         <nav className={styles.nav}>
           <Link href="/admin/rooms" className={`${styles.navLink} ${pathname === '/admin/rooms' ? styles.active : ''}`}>Quản lý phòng</Link>
+          <Link href="/admin/room-types" className={`${styles.navLink} ${pathname === '/admin/room-types' ? styles.active : ''}`}>Loại phòng</Link>
           <Link href="/admin/customers" className={`${styles.navLink} ${pathname === '/admin/customers' ? styles.active : ''}`}>Khách hàng</Link>
           <Link href="/admin/bookings" className={`${styles.navLink} ${pathname === '/admin/bookings' ? styles.active : ''}`}>Đặt phòng</Link>
           <Link href="/admin/invoices" className={`${styles.navLink} ${pathname === '/admin/invoices' ? styles.active : ''}`}>Hóa đơn</Link>

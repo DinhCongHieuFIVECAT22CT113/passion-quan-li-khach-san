@@ -5,17 +5,49 @@ export interface LoaiPhongDTO {
     maLoaiPhong: string;
     tenLoaiPhong: string;
     moTa?: string; // Mô tả chi tiết về loại phòng
-    giaMoiGio?: number; // Giá mỗi giờ (optional)
-    giaMoiDem: number;
-    hinhAnh?: string; // URL hình ảnh đại diện cho loại phòng
-    tienNghi?: string[]; // Danh sách các tiện nghi, ví dụ: ["TV", "Máy lạnh", "Wifi"]
-    dienTich?: number; // Diện tích phòng
-    kichThuocPhong?: number; // Kích thước phòng (alias cho dienTich)
-    soGiuong?: number; // Số giường
-    soGiuongNgu?: number; // Số giường ngủ (alias cho soGiuong)
-    loaiGiuong?: string; // Loại giường, ví dụ: "King", "Queen", "Twin"
-    sucChua?: number; // Số người tối đa
+    giaMoiGio: number; // Giá mỗi giờ
+    giaMoiDem: number; // Giá mỗi đêm
+    soPhongTam: number; // Số phòng tắm
+    soGiuongNgu: number; // Số giường ngủ
+    giuongDoi?: number; // Số giường đôi
+    giuongDon?: number; // Số giường đơn
+    kichThuocPhong: number; // Kích thước phòng (m²)
+    sucChua: number; // Số người tối đa
     thumbnail?: string; // Thumbnail image
+}
+
+/**
+ * DTO cho việc tạo loại phòng mới
+ */
+export interface CreateLoaiPhongDTO {
+    tenLoaiPhong: string;
+    moTa?: string;
+    giaMoiGio: number;
+    giaMoiDem: number;
+    soPhongTam: number;
+    soGiuongNgu: number;
+    giuongDoi?: number;
+    giuongDon?: number;
+    kichThuocPhong: number;
+    sucChua: number;
+    thumbnail?: File;
+}
+
+/**
+ * DTO cho việc cập nhật loại phòng
+ */
+export interface UpdateLoaiPhongDTO {
+    tenLoaiPhong: string;
+    moTa?: string;
+    giaMoiGio: number;
+    giaMoiDem: number;
+    soPhongTam: number;
+    soGiuongNgu: number;
+    giuongDoi?: number;
+    giuongDon?: number;
+    kichThuocPhong: number;
+    sucChua: number;
+    thumbnail?: File;
 }
 
 /**
