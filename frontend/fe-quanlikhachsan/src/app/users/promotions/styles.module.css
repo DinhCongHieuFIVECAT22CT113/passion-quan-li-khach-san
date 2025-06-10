@@ -1,9 +1,7 @@
+/* Cải thiện tổng thể */
 .pageContainer {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  padding-top: 80px;
   background-color: #f8f9fa;
+  font-family: 'Poppins', sans-serif;
 }
 
 /* Header Styles */
@@ -89,45 +87,37 @@
   font-size: 1.2rem;
 }
 
-/* Hero Section */
+/* Hero Section hiện đại hơn */
 .heroSection {
-  height: 50vh;
-  min-height: 400px;
-  position: relative;
-  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/heros/promotions-hero.jpg');
-  background-size: cover;
+  height: 60vh;
+  background-image: linear-gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.4)), url('/heros/promotions-hero.jpg');
   background-position: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-}
-
-.heroOverlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-size: cover;
+  clip-path: polygon(0 0, 100% 0, 100% 85%, 0 100%);
+  margin-bottom: 2rem;
 }
 
 .heroContent {
-  position: relative;
-  z-index: 2;
-  max-width: 800px;
-  padding: 0 2rem;
+  text-align: center;
 }
 
 .heroContent h1 {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  font-weight: 700;
+  font-size: 3.5rem;
+  font-weight: 800;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+  margin-bottom: 1.5rem;
+  background: linear-gradient(45deg, #fff, #f0f0f0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .heroContent p {
-  font-size: 1.2rem;
-  margin-bottom: 2rem;
+  font-size: 1.4rem;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+  max-width: 700px;
+  margin: 0 auto;
+  line-height: 1.6;
 }
 
 /* Main Content */
@@ -135,55 +125,62 @@
   flex: 1;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 3rem 2rem;
+  padding: 3rem 2rem 5rem;
 }
 
 .sectionHeader {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
 }
 
 .sectionHeader h2 {
-  font-size: 2.5rem;
+  font-size: 2.2rem;
   margin-bottom: 1rem;
-  color: #333;
+  color: #222;
+  font-weight: 700;
 }
 
 .sectionHeader p {
-  font-size: 1.1rem;
-  color: #666;
+  font-size: 1.2rem;
+  color: #555;
+  max-width: 700px;
+  margin: 0 auto;
 }
 
-/* Filter Tabs */
+/* Filter Tabs hiện đại */
 .filterTabs {
+  background-color: white;
+  padding: 1rem;
+  border-radius: 50px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  margin: -2rem auto 3rem;
+  position: relative;
+  z-index: 10;
+  max-width: 600px;
   display: flex;
-  justify-content: center;
-  margin-bottom: 3rem;
-  gap: 1rem;
+  justify-content: space-between;
 }
 
 .filterTabs button {
-  background: none;
-  border: none;
-  padding: 0.75rem 1.5rem;
+  padding: 0.8rem 2rem;
   font-size: 1rem;
-  cursor: pointer;
-  border-radius: 30px;
+  font-weight: 600;
+  border-radius: 25px;
   transition: all 0.3s ease;
-  color: #555;
 }
 
 .filterTabs button:hover {
   background-color: #f0f0f0;
+  transform: translateY(-2px);
 }
 
 .filterTabs button.activeTab {
-  background-color: #ff6b6b;
+  background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
   color: white;
-  font-weight: 500;
+  box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
 }
 
-/* Promotions Grid */
+/* Promotion Cards hiện đại */
 .promotionsGrid {
   display: grid;
   grid-template-columns: repeat(5, 1fr); /* 5 cards per row */
@@ -217,23 +214,25 @@
 }
 
 .promotionCard {
-  background-color: white;
-  border-radius: 8px;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  cursor: pointer;
-  min-width: 220px; /* Ensure cards are wide enough */
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.05);
+  transition: all 0.4s ease;
+  background-color: white;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .promotionCard:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
 .promotionImageContainer {
   position: relative;
-  height: 200px;
+  height: 220px;
   overflow: hidden;
 }
 
@@ -241,11 +240,11 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s ease;
+  transition: transform 0.8s ease;
 }
 
 .promotionCard:hover .promotionImage {
-  transform: scale(1.05);
+  transform: scale(1.08);
 }
 
 .promotionDiscount {
@@ -254,33 +253,36 @@
   left: 15px;
   background-color: #ff6b6b;
   color: white;
-  width: 50px;
-  height: 50px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: 1.1rem;
+  font-size: 1.3rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 .promotionStatus {
   position: absolute;
   top: 15px;
   right: 15px;
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1.2rem;
   border-radius: 20px;
   font-size: 0.8rem;
   font-weight: 600;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 .promotionStatus.active {
-  background-color: rgba(46, 213, 115, 0.9);
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
   color: white;
 }
 
 .promotionStatus.expired {
-  background-color: rgba(255, 71, 87, 0.9);
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
   color: white;
 }
 
@@ -299,128 +301,137 @@
   font-size: 0.9rem;
 }
 
+/* Card Content hiện đại */
 .promotionContent {
-  padding: 1.5rem;
+  padding: 1.8rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .promotionContent h3 {
   font-size: 1.5rem;
-  margin-bottom: 0.75rem;
-  color: #333;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #222;
+  line-height: 1.3;
 }
 
 .promotionPeriod {
-  display: flex;
+  margin-bottom: 1.2rem;
+  background-color: #f8f9fa;
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  color: #666;
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
 }
 
 .periodIcon {
   color: #ff6b6b;
+  margin-right: 8px;
 }
 
 .promotionShortDesc {
-  color: #666;
+  line-height: 1.7;
+  color: #555;
   margin-bottom: 1.5rem;
-  line-height: 1.6;
-  height: 80px;
-  overflow: hidden;
+  font-size: 1.05rem;
+  flex-grow: 1;
 }
 
 .promotionCardFooter {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  margin-top: 1rem;
+  margin-top: auto;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 1.2rem;
+  width: 100%;
 }
 
 .promotionCode {
   background-color: #f8f9fa;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  font-family: monospace;
+  padding: 0.7rem 1.2rem;
+  border-radius: 8px;
   font-weight: 600;
-  color: #333;
+  letter-spacing: 1px;
+  border: 1px dashed #ddd;
+  margin-bottom: 1rem;
+  text-align: center;
+  width: 100%;
 }
 
 .viewDetailBtn {
-  background-color: transparent;
-  border: 1px solid #ff6b6b;
-  color: #ff6b6b;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
+  background: linear-gradient(135deg, #8B7355, #6F5B3E);
+  color: white;
+  padding: 0.7rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
   transition: all 0.3s ease;
+  border: none;
+  box-shadow: 0 5px 15px rgba(139, 115, 85, 0.2);
+  width: 100%;
+  text-align: center;
 }
 
 .viewDetailBtn:hover {
-  background-color: #ff6b6b;
-  color: white;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(139, 115, 85, 0.3);
+  background: linear-gradient(135deg, #9c8250, #8B7355);
 }
 
-/* Promotion Detail */
+/* Promotion Detail hiện đại */
 .promotionDetail {
   background-color: white;
-  border-radius: 8px;
-  padding: 2rem;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+  padding: 3rem;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
 }
 
 .backButton {
-  background-color: transparent;
-  border: none;
-  color: #ff6b6b;
-  font-size: 1rem;
-  cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  margin-bottom: 2rem;
-  padding: 0;
+  gap: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 3rem;
+  transition: all 0.3s ease;
+  color: #555;
+  background-color: #f8f9fa;
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  border: none;
+}
+
+.backButton:hover {
+  transform: translateX(-5px);
+  background-color: #f0f0f0;
 }
 
 .promotionDetailHeader {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 2rem;
-  margin-bottom: 3rem;
-}
-
-@media (max-width: 768px) {
-  .promotionDetailHeader {
-    grid-template-columns: 1fr;
-  }
+  gap: 4rem;
 }
 
 .promotionDetailImage {
-  position: relative;
-  height: 400px;
-  border-radius: 8px;
+  height: 450px;
+  border-radius: 16px;
   overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
 .detailImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  transition: transform 1s ease;
+}
+
+.promotionDetailImage:hover .detailImage {
+  transform: scale(1.05);
 }
 
 .promotionBadge {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  background-color: #ff6b6b;
-  color: white;
-  padding: 0.75rem;
-  border-radius: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 70px;
-  height: 70px;
+  width: 85px;
+  height: 85px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(135deg, #8B7355, #6F5B3E);
+  border: 3px solid rgba(255, 255, 255, 0.3);
 }
 
 .percentIcon {
@@ -434,32 +445,38 @@
 }
 
 .promotionDetailInfo h2 {
-  font-size: 2rem;
-  margin-bottom: 1.5rem;
-  color: #333;
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 1.8rem;
+  color: #222;
+  line-height: 1.3;
 }
 
 .promotionMeta {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 .metaItem {
+  margin-bottom: 1.2rem;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
-  color: #555;
+  gap: 1rem;
+  background-color: #f8f9fa;
+  padding: 1rem 1.5rem;
+  border-radius: 10px;
 }
 
 .metaIcon {
   color: #ff6b6b;
-  font-size: 1.1rem;
+  font-size: 1.3rem;
 }
 
 .promotionDescription {
-  color: #555;
+  font-size: 1.2rem;
   line-height: 1.8;
-  margin-bottom: 2rem;
+  color: #444;
+  margin-bottom: 3rem;
+  padding: 0 0.5rem;
 }
 
 .promotionCode {
@@ -467,139 +484,117 @@
 }
 
 .codeBox {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   background-color: #f8f9fa;
-  padding: 1rem;
-  border-radius: 4px;
-  margin-bottom: 1rem;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.8rem;
+  border: 2px dashed #ddd;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .codeBox span {
-  font-family: monospace;
-  font-size: 1.2rem;
-  font-weight: 600;
+  font-size: 1.5rem;
+  letter-spacing: 2px;
+  font-weight: 700;
   color: #333;
 }
 
 .copyButton {
-  background-color: #ff6b6b;
-  color: white;
+  background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+  padding: 0.8rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: background-color 0.3s ease;
+  box-shadow: 0 5px 15px rgba(255, 107, 107, 0.2);
 }
 
 .copyButton:hover {
-  background-color: #ff5252;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
 }
 
 .copyButton:disabled {
-  background-color: #4caf50;
-  cursor: default;
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  box-shadow: 0 5px 15px rgba(46, 204, 113, 0.2);
 }
 
 .saveButton {
-  background-color: transparent;
-  border: 1px solid #ff6b6b;
-  color: #ff6b6b;
-  padding: 0.75rem;
-  border-radius: 4px;
-  width: 100%;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
+  padding: 1.2rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1.1rem;
   transition: all 0.3s ease;
+  border: 2px solid #ff6b6b;
+  background-color: transparent;
+  color: #ff6b6b;
 }
 
 .saveButton:hover {
   background-color: #fff0f0;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(255, 107, 107, 0.1);
 }
 
 .saveButton.saved {
-  background-color: #ff6b6b;
-  color: white;
+  background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+  box-shadow: 0 8px 20px rgba(255, 107, 107, 0.2);
+  border: none;
 }
 
-.promotionDetailContent {
-  margin-top: 3rem;
+/* Terms & How to Use hiện đại */
+.promotionTerms, .howToUse {
+  background-color: #f9f9fa;
+  padding: 2.8rem;
+  border-radius: 16px;
+  margin-bottom: 3rem;
+  border: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
 }
 
-.promotionTerms {
-  background-color: #f8f9fa;
-  padding: 2rem;
-  border-radius: 8px;
-  margin-bottom: 2rem;
+.promotionTerms h3, .howToUse h3 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 1.8rem;
+  color: #222;
+  position: relative;
+  padding-bottom: 1rem;
 }
 
-.promotionTerms h3 {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  color: #333;
-}
-
-.termsContent p {
-  margin-bottom: 1rem;
-  color: #555;
-  line-height: 1.6;
-}
-
-.termsContent ul {
-  list-style-type: disc;
-  margin-left: 1.5rem;
-  color: #555;
-}
-
-.termsContent li {
-  margin-bottom: 0.5rem;
-}
-
-.howToUse {
-  margin-bottom: 2rem;
-}
-
-.howToUse h3 {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  color: #333;
-}
-
-.howToUse ol {
-  list-style-type: decimal;
-  margin-left: 1.5rem;
-  color: #555;
-}
-
-.howToUse li {
-  margin-bottom: 0.75rem;
-  padding-left: 0.5rem;
+.promotionTerms h3:after, .howToUse h3:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 60px;
+  height: 4px;
+  background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+  border-radius: 2px;
 }
 
 .callToAction {
+  margin-top: 4rem;
   text-align: center;
-  margin-top: 3rem;
 }
 
 .bookNowButton {
-  display: inline-block;
-  background-color: #ff6b6b;
-  color: white;
-  padding: 1rem 2rem;
-  border-radius: 4px;
-  font-size: 1.1rem;
-  font-weight: 600;
-  text-decoration: none;
-  transition: background-color 0.3s ease;
+  background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+  padding: 1.2rem 3rem;
+  border-radius: 50px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
 }
 
 .bookNowButton:hover {
-  background-color: #ff5252;
+  transform: translateY(-5px);
+  box-shadow: 0 15px 30px rgba(255, 107, 107, 0.4);
 }
 
 /* No Promotions */

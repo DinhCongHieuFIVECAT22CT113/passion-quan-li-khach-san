@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FaTag, FaPercent, FaClock, FaCalendarAlt, FaInfoCircle, FaCheck, FaCopy } from 'react-icons/fa';
+import { FaTag, FaPercent, FaClock, FaCalendarAlt, FaInfoCircle, FaCheck, FaCopy, FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import styles from './styles.module.css';
 import { useLanguage } from '../../components/profile/LanguageContext';
 import i18n from '../../i18n';
@@ -204,7 +204,7 @@ export default function PromotionsPage() {
               onClick={() => setSelectedPromotion(null)} 
               className={styles.backButton}
             >
-              &larr; Quay lại danh sách khuyến mãi
+              <FaArrowLeft /> Quay lại danh sách khuyến mãi
             </button>
             
             <div className={styles.promotionDetailHeader}>
@@ -252,7 +252,7 @@ export default function PromotionsPage() {
                       {copiedCode === selectedPromotion.maGiamGia ? (
                         <><FaCheck /> Đã sao chép</>
                       ) : (
-                        <><FaCopy /> Sao chép</>
+                        <><FaCopy /> Sao chép mã</>
                       )}
                     </button>
                   </div>
@@ -260,7 +260,11 @@ export default function PromotionsPage() {
                     onClick={() => savePromotion(selectedPromotion.maMK)} 
                     className={`${styles.saveButton} ${savedPromotions.includes(selectedPromotion.maMK) ? styles.saved : ''}`}
                   >
-                    {savedPromotions.includes(selectedPromotion.maMK) ? 'Đã lưu' : 'Lưu mã'}
+                    {savedPromotions.includes(selectedPromotion.maMK) ? (
+                      <>✓ Đã lưu mã này</>
+                    ) : (
+                      <>Lưu mã này</>
+                    )}
                   </button>
                 </div>
               </div>
@@ -292,7 +296,7 @@ export default function PromotionsPage() {
               
               <div className={styles.callToAction}>
                 <Link href="/users/rooms" className={styles.bookNowButton}>
-                  Đặt phòng ngay
+                  Đặt phòng ngay <FaArrowRight />
                 </Link>
               </div>
             </div>
@@ -356,8 +360,11 @@ export default function PromotionsPage() {
                     <div className={styles.promotionContent}>
                       <h3>{promotion.tenKhuyenMai || 'Khuyến mãi đặc biệt'}</h3>
                       <div className={styles.promotionPeriod}>
-                        <FaClock className={styles.periodIcon} />
-                        <span>{formatDate(promotion.ngayBatDau)} - {formatDate(promotion.ngayKetThuc)}</span>
+                        <FaCalendarAlt className={styles.periodIcon} />
+                        <span>
+                          <strong>Từ:</strong> {formatDate(promotion.ngayBatDau)} 
+                          <strong> đến:</strong> {formatDate(promotion.ngayKetThuc)}
+                        </span>
                       </div>
                       <p className={styles.promotionShortDesc}>
                         {safeString(promotion.moTa).length > 100 
@@ -369,7 +376,7 @@ export default function PromotionsPage() {
                           <span>{promotion.maGiamGia || 'N/A'}</span>
                         </div>
                         <button className={styles.viewDetailBtn}>
-                          Xem chi tiết
+                          Xem chi tiết <FaArrowRight style={{ marginLeft: '8px' }} />
                         </button>
                       </div>
                     </div>
