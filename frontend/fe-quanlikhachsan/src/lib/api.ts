@@ -370,7 +370,48 @@ export const deleteRoom = async (roomId: string) => {
   }
 };
 
-// API đặt phòng
+// API đặt phòng (sử dụng FormData theo yêu cầu backend)
+export const createDatPhong = async (bookingData: {
+  maKH: string;
+  maPhong: string;
+  treEm?: number;
+  nguoiLon?: number;
+  ghiChu?: string;
+  soLuongPhong?: number;
+  thoiGianDen?: string;
+  ngayNhanPhong: string;
+  ngayTraPhong: string;
+}) => {
+  console.log(`Đang gọi API đặt phòng: ${API_BASE_URL}/DatPhong`, bookingData);
+
+  try {
+    const formData = new FormData();
+    formData.append('MaKH', bookingData.maKH);
+    formData.append('MaPhong', bookingData.maPhong);
+    formData.append('TreEm', (bookingData.treEm || 0).toString());
+    formData.append('NguoiLon', (bookingData.nguoiLon || 1).toString());
+    formData.append('GhiChu', bookingData.ghiChu || 'Đặt phòng qua website');
+    formData.append('SoLuongPhong', (bookingData.soLuongPhong || 1).toString());
+    formData.append('ThoiGianDen', bookingData.thoiGianDen || '14:00');
+    formData.append('NgayNhanPhong', bookingData.ngayNhanPhong);
+    formData.append('NgayTraPhong', bookingData.ngayTraPhong);
+
+    const headers = await getFormDataHeaders();
+    const response = await fetch(`${API_BASE_URL}/DatPhong`, {
+      method: 'POST',
+      headers: headers,
+      body: formData,
+      credentials: 'include'
+    });
+
+    return await handleResponse(response);
+  } catch (error) {
+    console.error('Lỗi khi gọi API createDatPhong:', error);
+    throw error;
+  }
+};
+
+// API đặt phòng (legacy - sử dụng JSON)
 export const bookRoom = async (bookingData: BookingData) => {
   console.log(`Đang gọi API đặt phòng: ${API_BASE_URL}/DatPhong`, bookingData);
 

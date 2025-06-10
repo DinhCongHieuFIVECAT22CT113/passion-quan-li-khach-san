@@ -167,14 +167,33 @@ class TokenManager {
     }
   }
 
-  // Xóa tất cả tokens
+  // Xóa tất cả tokens và dữ liệu liên quan
   clearTokens(): void {
+    // Clear tokens chính
     localStorage.removeItem('token');
     localStorage.removeItem('refreshToken');
     localStorage.removeItem('userId');
     localStorage.removeItem('userName');
     localStorage.removeItem('staffInfo');
+    
+    // Clear thêm các dữ liệu user khác
+    localStorage.removeItem('user');
+    localStorage.removeItem('userRole');
+    localStorage.removeItem('userPermissions');
+    localStorage.removeItem('userProfile');
+    
+    // Clear session storage
+    sessionStorage.removeItem('token');
+    sessionStorage.removeItem('user');
+    sessionStorage.removeItem('tempBookingData');
+    sessionStorage.removeItem('currentBooking');
+    
+    // Clear refresh timer
     this.clearRefreshTimer();
+    
+    // Reset trạng thái
+    this.isRefreshing = false;
+    this.refreshPromise = null;
   }
 
   // Khởi tạo auto-refresh khi có token

@@ -813,3 +813,151 @@
     border-width: 3px;
   }
 }
+
+/* Room Summary Styles */
+.roomSummary {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+}
+
+.roomSummary h3 {
+  margin: 0 0 1rem 0;
+  color: #2c3e50;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.roomCard {
+  display: flex;
+  gap: 1rem;
+  background: white;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.roomImage {
+  flex-shrink: 0;
+  width: 120px;
+  height: 80px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.roomImage .image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.roomDetails {
+  flex: 1;
+}
+
+.roomDetails h4 {
+  margin: 0 0 0.5rem 0;
+  color: #2c3e50;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.roomType {
+  margin: 0 0 1rem 0;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.roomSpecs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 0.5rem;
+}
+
+.specItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.specItem span:first-child {
+  color: #6c757d;
+}
+
+.specItem span:last-child {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.specItem .price {
+  color: #e74c3c !important;
+  font-weight: 700 !important;
+}
+
+/* Auth Section Styles */
+.authSection {
+  margin-top: 1rem;
+  text-align: center;
+}
+
+.loginButton {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 0.9rem;
+  background: #3b82f6;
+  color: white;
+  margin-bottom: 0.75rem;
+}
+
+.loginButton:hover {
+  background: #2563eb;
+  transform: translateY(-1px);
+}
+
+.signupText {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.signupLink {
+  background: none;
+  border: none;
+  color: #10b981;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  margin-left: 4px;
+  font-size: 0.85rem;
+}
+
+.signupLink:hover {
+  color: #059669;
+}
+
+@media (max-width: 768px) {
+  .roomCard {
+    flex-direction: column;
+  }
+  
+  .roomImage {
+    width: 100%;
+    height: 120px;
+  }
+  
+  .roomSpecs {
+    grid-template-columns: 1fr;
+  }
+  
+  .authSection {
+    text-align: center;
+  }
+}

@@ -367,14 +367,56 @@ export default function RoomsListPage() {
               rooms.map((room) => (
                 <div key={room.maPhong} className={styles.roomRow}>
                   <div className={styles.roomRowImage}>
-                    <Image
-                      src={room.thumbnail}
-                      alt={getValidAltText(room.tenPhong)}
-                      width={250}
-                      height={150}
-                      className={styles.rowImage}
-                      priority={rooms.indexOf(room) < 3}
-                    />
+                    {room.hinhAnh && room.hinhAnh.length > 1 ? (
+                      <div className={styles.imageGallery}>
+                        <div className={styles.mainImage}>
+                          <Image
+                            src={room.hinhAnh[0]}
+                            alt={getValidAltText(room.tenPhong)}
+                            width={250}
+                            height={150}
+                            className={styles.rowImage}
+                            priority={rooms.indexOf(room) < 3}
+                          />
+                          <div className={styles.imageCount}>
+                            <span>{room.hinhAnh.length} ảnh</span>
+                          </div>
+                        </div>
+                        <div className={styles.thumbnailGrid}>
+                          {room.hinhAnh.slice(1, 4).map((img, index) => (
+                            <div key={index} className={styles.thumbnailItem}>
+                              <Image
+                                src={img}
+                                alt={`${getValidAltText(room.tenPhong)} ${index + 2}`}
+                                width={60}
+                                height={40}
+                                className={styles.thumbnailImage}
+                              />
+                            </div>
+                          ))}
+                          {room.hinhAnh.length > 4 && (
+                            <div className={styles.moreImages} onClick={() => handleViewImages(room.hinhAnh!)}>
+                              <span>+{room.hinhAnh.length - 4}</span>
+                            </div>
+                          )}
+                        </div>
+                        <button 
+                          className={styles.viewAllButton}
+                          onClick={() => handleViewImages(room.hinhAnh!)}
+                        >
+                          Xem tất cả ảnh
+                        </button>
+                      </div>
+                    ) : (
+                      <Image
+                        src={room.thumbnail}
+                        alt={getValidAltText(room.tenPhong)}
+                        width={250}
+                        height={150}
+                        className={styles.rowImage}
+                        priority={rooms.indexOf(room) < 3}
+                      />
+                    )}
                   </div>
                   <div className={styles.roomRowContent}>
                     <h3>{room.tenPhong}</h3>
@@ -451,10 +493,10 @@ export default function RoomsListPage() {
                     </div>
                     <div className={styles.roomActions}>
                       <button
-                        className={styles.viewDetailButton}
-                        onClick={() => router.push(`/users/room-detail/${room.maPhong}`)}
+                        className={styles.bookNowButton}
+                        onClick={() => handleBookNow(room)}
                       >
-                        Xem chi tiết phòng
+                        Đặt phòng ngay
                       </button>
                     </div>
                   </div>

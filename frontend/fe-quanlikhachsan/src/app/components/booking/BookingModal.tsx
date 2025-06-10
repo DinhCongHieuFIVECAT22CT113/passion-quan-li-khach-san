@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import { PhongDTO, LoaiPhongDTO } from '../../../lib/DTOs';
 import { useAuth } from '../../../lib/auth';
 import { API_BASE_URL } from '../../../lib/config';
-import { FaTimes, FaUser, FaUserPlus, FaClock, FaCalendarAlt, FaUsers, FaPhone, FaEnvelope, FaStickyNote, FaCreditCard, FaMoneyBillWave, FaUniversity, FaGoogle, FaFacebook } from 'react-icons/fa';
+import { createDatPhong } from '../../../lib/api';
+import { FaTimes, FaUser, FaUserPlus, FaClock, FaCalendarAlt, FaUsers, FaPhone, FaEnvelope, FaStickyNote, FaCreditCard, FaMoneyBillWave, FaUniversity } from 'react-icons/fa';
 import styles from './BookingModal.module.css';
 
 interface BookingModalProps {
@@ -174,11 +175,12 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
     setIsSubmitting(true);
     
     try {
+      // Chuẩn bị dữ liệu đặt phòng
       const bookingPayload: any = {
         hoTen: formData.hoTen,
         soDienThoai: formData.soDienThoai,
         email: formData.email,
-        maPhong: selectedRoom?.maPhong || loaiPhong?.maLoaiPhong || '',
+        maPhong: selectedRoom?.maPhong || '',
         ngayNhanPhong: formData.ngayNhanPhong,
         ngayTraPhong: formData.ngayTraPhong,
         soNguoiLon: formData.soNguoiLon,
@@ -190,32 +192,45 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
         isGuestBooking: bookingType === 'guest',
       };
 
-      const endpoint = bookingType === 'guest' 
-        ? `${API_BASE_URL}/Booking/CreateGuestBooking`
-        : `${API_BASE_URL}/PhieuDatPhong`;
+      // Nếu là khách vãng lai, lưu dữ liệu vào localStorage và chuyển đến trang thanh toán
+      if (bookingType === 'guest') {
+        const guestBookingData = {
+          ...bookingPayload,
+          roomData: {
+            maPhong: selectedRoom?.maPhong || '',
+            tenPhong: selectedRoom?.soPhong || `Phòng ${selectedRoom?.maPhong}`,
+            tenLoaiPhong: loaiPhong?.tenLoaiPhong || '',
+            giaMoiDem: loaiPhong?.giaMoiDem || 0,
+            thumbnail: selectedRoom?.thumbnail || loaiPhong?.thumbnail || '',
+            moTa: loaiPhong?.moTa || '',
+          }
+        };
+        
+        // Lưu dữ liệu vào localStorage để trang guest-booking sử dụng
+        localStorage.setItem('bookingFormData', JSON.stringify(guestBookingData));
+        
+        // Đóng modal và chuyển đến trang thanh toán khách vãng lai
+        onClose();
+        router.push('/guest-booking');
+        return;
+      }
 
-      const headers: any = {
-        'Content-Type': 'application/json',
+      // Xử lý đặt phòng cho user đã đăng nhập
+      const bookingData = {
+        maKH: user?.maNguoiDung || '',
+        maPhong: selectedRoom?.maPhong || '',
+        treEm: formData.soTreEm || 0,
+        nguoiLon: formData.soNguoiLon || 1,
+        ghiChu: formData.ghiChu || 'Đặt phòng qua website',
+        soLuongPhong: 1,
+        thoiGianDen: '14:00',
+        ngayNhanPhong: formData.ngayNhanPhong,
+        ngayTraPhong: formData.ngayTraPhong,
       };
 
-      if (bookingType === 'user' && user) {
-        const token = localStorage.getItem('token');
-        headers['Authorization'] = `Bearer ${token}`;
-        bookingPayload.maNguoiDung = user.maNguoiDung;
-      }
+      console.log('Booking data being sent:', bookingData);
 
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(bookingPayload),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(errorData || 'Có lỗi xảy ra khi đặt phòng');
-      }
-
-      const result = await response.json();
+      const result = await createDatPhong(bookingData);
       setBookingResult(result);
       setStep('success');
 
@@ -227,10 +242,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
     }
   };
 
-  const handleSocialLogin = (provider: 'google' | 'facebook') => {
-    // Implement social login logic here
-    console.log(`Login with ${provider}`);
-  };
+
 
   const renderChoiceStep = () => (
     <div className={styles.stepContent}>
@@ -265,19 +277,22 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
           </div>
 
           {!user && (
-            <div className={styles.socialLogin}>
+            <div className={styles.authSection}>
               <button 
-                onClick={(e) => { e.stopPropagation(); handleSocialLogin('google'); }}
-                className={styles.socialButton}
+                onClick={(e) => { e.stopPropagation(); router.push('/login'); }}
+                className={styles.loginButton}
               >
-                <FaGoogle /> Google
+                Đăng nhập
               </button>
-              <button 
-                onClick={(e) => { e.stopPropagation(); handleSocialLogin('facebook'); }}
-                className={styles.socialButton}
-              >
-                <FaFacebook /> Facebook
-              </button>
+              <p className={styles.signupText}>
+                Chưa có tài khoản? 
+                <button 
+                  onClick={(e) => { e.stopPropagation(); router.push('/signup'); }}
+                  className={styles.signupLink}
+                >
+                  Đăng ký ngay
+                </button>
+              </p>
             </div>
           )}
         </div>
@@ -310,9 +325,8 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
           Hủy
         </button>
         <button 
-          onClick={handleNextStep}
+          onClick={!user && bookingType === 'user' ? () => router.push('/login') : handleNextStep}
           className={styles.nextButton}
-          disabled={!user && bookingType === 'user'}
         >
           {!user && bookingType === 'user' ? 'Đăng nhập để tiếp tục' : 'Tiếp tục đặt phòng'}
         </button>
@@ -323,6 +337,38 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
   const renderFormStep = () => (
     <div className={styles.stepContent}>
       <h2>Thông tin đặt phòng</h2>
+      
+      {/* Chi tiết phòng */}
+      <div className={styles.roomSummary}>
+        <h3>Chi tiết phòng đã chọn</h3>
+        <div className={styles.roomCard}>
+          <div className={styles.roomImage}>
+            <img
+              src={selectedRoom?.thumbnail || loaiPhong?.thumbnail || '/images/room-placeholder.jpg'}
+              alt={selectedRoom?.soPhong || loaiPhong?.tenLoaiPhong}
+              className={styles.image}
+            />
+          </div>
+          <div className={styles.roomDetails}>
+            <h4>{selectedRoom?.soPhong || `Phòng ${selectedRoom?.maPhong}`}</h4>
+            <p className={styles.roomType}>{loaiPhong?.tenLoaiPhong}</p>
+            <div className={styles.roomSpecs}>
+              <div className={styles.specItem}>
+                <span>Diện tích:</span>
+                <span>{loaiPhong?.kichThuocPhong || 0}m²</span>
+              </div>
+              <div className={styles.specItem}>
+                <span>Sức chứa:</span>
+                <span>{loaiPhong?.sucChua || 0} người</span>
+              </div>
+              <div className={styles.specItem}>
+                <span>Giá mỗi đêm:</span>
+                <span className={styles.price}>{loaiPhong?.giaMoiDem?.toLocaleString() || 0}đ</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       
       {user && bookingType === 'user' && (
         <div className={styles.userWelcome}>

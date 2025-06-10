@@ -1,14 +1,14 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getPhongById, getLoaiPhongById } from '../../../../lib/api';
 import { PhongDTO, LoaiPhongDTO } from '../../../../lib/DTOs';
 import { useAuth } from '../../../../lib/auth';
 import AvailabilityChecker from '../../../components/availability/AvailabilityChecker';
 import BookingModal from '../../../components/booking/BookingModal';
-// import { API_BASE_URL } from '../../../../lib/config'; // Commented out as it's mainly for images
-// import Image from 'next/image'; // Commented out as Image component is removed
+import { API_BASE_URL } from '../../../../lib/config';
+import Image from 'next/image';
 import Link from 'next/link';
 
 const RoomDetailPage: React.FC = () => {
@@ -27,9 +27,9 @@ const RoomDetailPage: React.FC = () => {
         checkOut: new Date(Date.now() + 86400000).toISOString().split('T')[0],
         guests: 2
     });
-    // const [currentImageIndex, setCurrentImageIndex] = useState(0); // Commented out
-    // const [mainImageError, setMainImageError] = useState(false); // Commented out
-    // const [thumbnailErrors, setThumbnailErrors] = useState<boolean[]>([]); // Commented out
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [mainImageError, setMainImageError] = useState(false);
+    const [thumbnailErrors, setThumbnailErrors] = useState<boolean[]>([]);
 
     const fetchRoomAndLoaiPhongDetails = useCallback(async () => {
         if (!maPhong) return;
@@ -70,37 +70,65 @@ const RoomDetailPage: React.FC = () => {
         fetchRoomAndLoaiPhongDetails();
     }, [fetchRoomAndLoaiPhongDetails]);
 
-    // useEffect(() => {
-    //     // Reset main image error when room or currentImageIndex changes
-    //     setMainImageError(false);
-    // }, [room, currentImageIndex]); // Commented out
+    useEffect(() => {
+        // Reset main image error when room or currentImageIndex changes
+        setMainImageError(false);
+    }, [room, currentImageIndex]);
 
-    // const roomImages = room?.hinhAnh?.split(',').map((img: string) => img.trim()) || []; // Commented out
+    // Tạo danh sách hình ảnh từ nhiều nguồn
+    const roomImages = useMemo(() => {
+        const images: string[] = [];
+        
+        // Thêm thumbnail của phòng nếu có
+        if (room?.thumbnail) {
+            images.push(room.thumbnail);
+        }
+        
+        // Thêm hình ảnh chính của phòng nếu có
+        if (room?.hinhAnh && typeof room.hinhAnh === 'string') {
+            // hinhAnh là chuỗi các URL phân cách bằng dấu phẩy
+            const additionalImages = room.hinhAnh.split(',')
+                .map((img: string) => img.trim())
+                .filter(img => img && img !== room.thumbnail);
+            images.push(...additionalImages);
+        }
+        
+        // Thêm thumbnail của loại phòng nếu có và chưa có trong danh sách
+        if (loaiPhongDetails?.thumbnail && !images.includes(loaiPhongDetails.thumbnail)) {
+            images.push(loaiPhongDetails.thumbnail);
+        }
+        
+        // Nếu không có hình nào, sử dụng hình mặc định
+        if (images.length === 0) {
+            images.push('/images/room-placeholder.jpg');
+        }
+        
+        return images;
+    }, [room, loaiPhongDetails]);
 
-    // useEffect(() => {
-    //     // Initialize thumbnailErrors state based on roomImages length
-    //     // Ensure roomImages is defined and has a length property
-    //     if (roomImages && typeof roomImages.length === 'number') {
-    //         setThumbnailErrors(new Array(roomImages.length).fill(false));
-    //     }
-    // }, [roomImages]); // Commented out
+    useEffect(() => {
+        // Initialize thumbnailErrors state based on roomImages length
+        if (roomImages && typeof roomImages.length === 'number') {
+            setThumbnailErrors(new Array(roomImages.length).fill(false));
+        }
+    }, [roomImages]);
 
-    // const mainImageSrcPath = roomImages.length > 0 ? roomImages[currentImageIndex] : room?.thumbnail; // Commented out
-    // const mainImageDisplayUrl = mainImageError ? '/images/default-room.jpg' // Commented out
-    //     : (mainImageSrcPath && mainImageSrcPath.startsWith('http') ? mainImageSrcPath 
-    //     : (mainImageSrcPath ? `${API_BASE_URL}${mainImageSrcPath}` : '/images/default-room.jpg'));
+    const mainImageSrcPath = roomImages.length > 0 ? roomImages[currentImageIndex] : '/images/room-placeholder.jpg';
+    const mainImageDisplayUrl = mainImageError ? '/images/room-placeholder.jpg'
+        : (mainImageSrcPath && mainImageSrcPath.startsWith('http') ? mainImageSrcPath 
+        : (mainImageSrcPath ? `${API_BASE_URL}${mainImageSrcPath}` : '/images/room-placeholder.jpg'));
 
-    // const nextImage = () => { // Commented out
-    //     if (roomImages.length > 0) {
-    //         setCurrentImageIndex((prevIndex) => (prevIndex + 1) % roomImages.length);
-    //     }
-    // };
+    const nextImage = () => {
+        if (roomImages.length > 0) {
+            setCurrentImageIndex((prevIndex) => (prevIndex + 1) % roomImages.length);
+        }
+    };
 
-    // const prevImage = () => { // Commented out
-    //     if (roomImages.length > 0) {
-    //         setCurrentImageIndex((prevIndex) => (prevIndex - 1 + roomImages.length) % roomImages.length);
-    //     }
-    // };
+    const prevImage = () => {
+        if (roomImages.length > 0) {
+            setCurrentImageIndex((prevIndex) => (prevIndex - 1 + roomImages.length) % roomImages.length);
+        }
+    };
 
     const handleBookNow = () => {
         if (!room) return;
@@ -142,7 +170,7 @@ const RoomDetailPage: React.FC = () => {
             {error && room && <p className="text-orange-600 bg-orange-100 border-l-4 border-orange-500 p-4 text-center mb-4 rounded-md">Lưu ý: {error}</p>} 
             <div className="bg-white shadow-xl rounded-lg overflow-hidden">
                 <div className="md:flex">
-                    {/* Image Gallery - Commented out
+                    {/* Image Gallery */}
                     <div className="md:w-1/2 p-4">
                         <div className="relative">
                             <Image 
@@ -154,10 +182,10 @@ const RoomDetailPage: React.FC = () => {
                                 onError={() => setMainImageError(true)}/>
                             {roomImages.length > 1 && (
                                 <>
-                                    <button onClick={() => setCurrentImageIndex((prev) => (prev - 1 + roomImages.length) % roomImages.length)} className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-opacity">
+                                    <button onClick={prevImage} className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-opacity">
                                         &#10094;
                                     </button>
-                                    <button onClick={() => setCurrentImageIndex((prev) => (prev + 1) % roomImages.length)} className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-opacity">
+                                    <button onClick={nextImage} className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75 transition-opacity">
                                         &#10095;
                                     </button>
                                 </> 
@@ -167,7 +195,7 @@ const RoomDetailPage: React.FC = () => {
                              <div className="flex space-x-2 mt-4 overflow-x-auto p-2 bg-gray-100 rounded">
                                 {roomImages.map((img: string, index: number) => {
                                     const thumbnailSrcPath = img;
-                                    const thumbnailUrl = thumbnailErrors[index] ? '/images/default-room.jpg'
+                                    const thumbnailUrl = thumbnailErrors[index] ? '/images/room-placeholder.jpg'
                                         : (thumbnailSrcPath.startsWith('http') ? thumbnailSrcPath
                                         : `${API_BASE_URL}${thumbnailSrcPath}`);
                                     return (
@@ -196,10 +224,9 @@ const RoomDetailPage: React.FC = () => {
                             </div>
                         )}
                     </div>
-                    */}
 
-                    {/* Room Details - Now takes full width if images are commented out */}
-                    <div className="md:w-full p-8"> {/* Adjusted to md:w-full */}
+                    {/* Room Details */}
+                    <div className="md:w-1/2 p-8">
                         <h1 className="text-4xl font-bold text-gray-800 mb-3">Phòng {room.soPhong}</h1>
                         <p className="text-gray-700 text-md mb-1">Loại phòng: <span className="font-semibold">{loaiPhongDetails?.tenLoaiPhong || room.maLoaiPhong}</span></p>
                         <p className="text-gray-500 text-sm mb-6">Mã phòng: {room.maPhong}</p> {/* Increased mb for separation */}
