@@ -2,8 +2,20 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  padding-top: 80px; /* Space for fixed header */
-  background-color: #f5f5f5;
+  padding-top: 80px;
+  background: linear-gradient(135deg, #f8fafc 0%, #eef2f7 100%);
+  position: relative;
+}
+
+.profileContainer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 300px;
+  background: linear-gradient(135deg, rgba(156, 130, 80, 0.15), rgba(139, 115, 85, 0.1));
+  z-index: 0;
 }
 
 .main {
@@ -12,35 +24,65 @@
   width: 100%;
   margin: 2rem auto;
   padding: 0 1.5rem;
+  position: relative;
+  z-index: 1;
 }
 
 .profileCard {
   max-width: 800px;
   margin: 0 auto;
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.08), 0 5px 15px rgba(0, 0, 0, 0.04);
   overflow: hidden;
+  border: 1px solid rgba(156, 130, 80, 0.15);
+  transform: translateY(0);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.profileCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12), 0 8px 20px rgba(0, 0, 0, 0.06);
 }
 
 .profileHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 2rem;
-  background: #8B7355;
+  padding: 2.5rem;
+  background: linear-gradient(135deg, #9c8250, #8B7355);
   color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.profileHeader::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 100%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  transform: rotate(30deg);
 }
 
 .profileHeader h1 {
-  font-size: 1.8rem;
+  font-size: 2rem;
   margin: 0;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 2;
 }
 
 .actionsContainer {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 1.2rem;
+  position: relative;
+  z-index: 2;
 }
 
 .languageSelectorContainer {
@@ -48,22 +90,26 @@
 }
 
 .languageButton {
-  background: white;
+  background: rgba(255, 255, 255, 0.95);
   color: #8B7355;
   border: none;
-  padding: 0.6rem 1.5rem;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  font-weight: 500;
+  padding: 0.7rem 1.6rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 0.5rem;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
 }
 
 .languageButton:hover {
-  background: #f0f0f0;
+  background: white;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
 }
 
 .dropdownArrow {
@@ -100,128 +146,247 @@
 }
 
 .logoutButton {
-  background: #8B7355;
+  background: transparent;
   color: white;
-  border: none;
-  padding: 0.6rem 1.5rem;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  font-weight: 500;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  padding: 0.7rem 1.6rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(5px);
 }
 
 .logoutButton:hover {
-  background: #6F5B3E;
+  background: rgba(255, 255, 255, 0.25);
   transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+  border-color: white;
 }
 
 .profileBody {
-  padding: 2rem;
+  padding: 2.5rem;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 2.5rem;
 }
 
 .avatarSection {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  gap: 1.2rem;
+  position: relative;
+}
+
+.avatarSection::after {
+  content: '';
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(156, 130, 80, 0.1) 0%, transparent 70%);
+  z-index: 0;
 }
 
 .avatarImage {
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
   cursor: pointer;
   object-fit: cover;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  border: 5px solid white;
+  transition: all 0.4s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.avatarImage:hover {
+  transform: scale(1.05);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+  border-color: rgba(156, 130, 80, 0.2);
 }
 
 .editAvatarButton {
-  background: #8B7355;
+  background: linear-gradient(135deg, #9c8250, #8B7355);
   color: white;
   border: none;
-  padding: 0.6rem 1.5rem;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  font-weight: 500;
+  padding: 0.7rem 1.8rem;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: 0 6px 12px rgba(156, 130, 80, 0.25);
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.editAvatarButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.7s ease;
+  z-index: -1;
 }
 
 .editAvatarButton:hover {
-  background: #6F5B3E;
-  transform: translateY(-2px);
+  background: linear-gradient(135deg, #8B7355, #6F5B3E);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(156, 130, 80, 0.3);
+}
+
+.editAvatarButton:hover::before {
+  left: 100%;
 }
 
 .infoSection {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 2rem;
 }
 
 .infoDisplay {
-  background: #fff;
-  border-radius: 8px;
-  padding: 2rem;
-  box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 16px;
+  padding: 2.2rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(156, 130, 80, 0.1);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.infoDisplay::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background: linear-gradient(90deg, #9c8250, #8B7355);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.infoDisplay:hover {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.08);
+  border-color: rgba(156, 130, 80, 0.2);
+}
+
+.infoDisplay:hover::before {
+  opacity: 1;
 }
 
 .infoDisplay h2 {
-  font-size: 1.5rem;
-  color: #333;
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.8rem;
-  border-bottom: 1px solid #eee;
+  font-size: 1.6rem;
+  margin-bottom: 1.8rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid rgba(156, 130, 80, 0.3);
+  color: #9c8250;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  position: relative;
+}
+
+.infoDisplay h2::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 60px;
+  height: 2px;
+  background: #9c8250;
 }
 
 .infoDisplay p {
   font-size: 1.1rem;
   color: #333;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px dashed #e0e0e0;
-  margin: 0.5rem 0;
+  padding: 1rem 0;
+  border-bottom: 1px dashed rgba(156, 130, 80, 0.15);
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  transition: all 0.2s ease;
+}
+
+.infoDisplay p:hover {
+  background: rgba(156, 130, 80, 0.03);
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
 }
 
 .profileActionsRow {
   display: flex;
-  gap: 1rem;
+  gap: 1.2rem;
   flex-wrap: wrap;
-  margin-top: 1.5rem;
+  margin-top: 2rem;
 }
 
 .editButton {
-  background: #8B7355;
+  background: linear-gradient(135deg, #9c8250, #8B7355);
   color: white;
   border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  font-weight: 500;
+  padding: 0.8rem 2rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: 0 6px 15px rgba(156, 130, 80, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.editButton::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .editButton:hover {
-  background: #6F5B3E;
-  transform: translateY(-2px);
+  background: linear-gradient(135deg, #8B7355, #6F5B3E);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(156, 130, 80, 0.3);
+}
+
+.editButton:hover::after {
+  opacity: 1;
 }
 
 .actionButton {
-  background: #6b7280;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  font-weight: 500;
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  border: 1px solid rgba(156, 130, 80, 0.2);
+  padding: 0.8rem 2rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 .actionButton:hover {
-  background: #4b5563;
-  transform: translateY(-2px);
+  background: #f8f9fa;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  border-color: rgba(156, 130, 80, 0.3);
+  color: #9c8250;
 }
 
 .loadingContainer {
@@ -230,17 +395,19 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: 1.5rem;
   color: #666;
+  background: linear-gradient(135deg, #f8fafc 0%, #eef2f7 100%);
 }
 
 .loadingSpinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #8B7355;
+  width: 50px;
+  height: 50px;
+  border: 3px solid rgba(156, 130, 80, 0.1);
+  border-top: 3px solid #9c8250;
   border-radius: 50%;
   animation: spin 1s linear infinite;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 @keyframes spin {
@@ -256,12 +423,13 @@
 
   .profileHeader {
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.5rem;
     text-align: center;
+    padding: 2rem 1.5rem;
   }
 
   .profileBody {
-    padding: 1.5rem;
+    padding: 1.8rem 1.5rem;
   }
 
   .profileActionsRow {
@@ -276,6 +444,6 @@
 
   .actionsContainer {
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 1rem;
   }
 }
