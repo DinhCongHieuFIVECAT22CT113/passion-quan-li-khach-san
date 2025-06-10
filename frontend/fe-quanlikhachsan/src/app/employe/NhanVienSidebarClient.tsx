@@ -101,7 +101,7 @@ export default function NhanVienSidebarClient({ children }: { children: React.Re
       
       <aside className={`${styles.sidebar} ${isOpen ? styles.open : styles.closed}`}>
         <div className={styles.sidebarHeader}>
-          <h2>{isOpen ? 'Nhân Viên Panel' : ''}</h2>
+          <h2>{isOpen ? 'Nhân Viên' : ''}</h2>
         </div>
         
         <nav className={styles.sidebarNav}>

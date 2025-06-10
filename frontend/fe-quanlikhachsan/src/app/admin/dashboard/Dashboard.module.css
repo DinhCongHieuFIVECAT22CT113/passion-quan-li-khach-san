@@ -1,12 +1,26 @@
+/* Import common admin styles */
+@import '../../../styles/admin-common.css';
+
 .dashboardContainer {
-  width: 100%;
+  max-width: 1200px;
+  margin: 32px auto;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+  padding: 32px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .dashboardTitle {
-  font-size: 1.8rem;
+  font-size: 2rem;
   font-weight: 700;
   color: #1e293b;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.8rem;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
 }
 
 .statsGrid {
@@ -20,42 +34,63 @@
   background: white;
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
   display: flex;
   align-items: center;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+  position: relative;
+  overflow: hidden;
+}
+
+.statCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .statCard:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 15px 25px rgba(0, 0, 0, 0.1);
+}
+
+.statCard:hover::before {
+  opacity: 1;
 }
 
 .statIcon {
-  background: #3b82f6;
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
   color: white;
-  width: 50px;
-  height: 50px;
+  width: 56px;
+  height: 56px;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.5rem;
-  margin-right: 1rem;
+  margin-right: 1.2rem;
+  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.2);
 }
 
 .statInfo h3 {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 600;
   color: #64748b;
   margin: 0 0 0.5rem 0;
 }
 
 .statInfo p {
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   font-weight: 700;
   color: #1e293b;
   margin: 0;
+  line-height: 1;
 }
 
 .dashboardSections {
@@ -68,25 +103,39 @@
   background: white;
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.03);
 }
 
 .sectionTitle {
   font-size: 1.2rem;
   font-weight: 600;
   color: #1e293b;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.8rem;
   border-bottom: 1px solid #e2e8f0;
+  position: relative;
+}
+
+.sectionTitle::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
 }
 
 .tableContainer {
   overflow-x: auto;
+  margin: 0 -0.5rem;
 }
 
 .dataTable {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 .dataTable th, .dataTable td {
@@ -99,10 +148,17 @@
   font-weight: 600;
   color: #64748b;
   font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .dataTable tr {
   border-bottom: 1px solid #e2e8f0;
+  transition: background 0.2s;
+}
+
+.dataTable tr:hover {
+  background: #f8fafc;
 }
 
 .dataTable tr:last-child {
@@ -142,4 +198,105 @@
   background: #f8fafc;
   border-radius: 8px;
   padding: 1rem;
+  border: 1px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.occupancyCard:hover {
+  background: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.occupancyCard h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 0.8rem 0;
+}
+
+.occupancyBar {
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.8rem;
+}
+
+.occupancyFill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  border-radius: 4px;
+  transition: width 0.5s ease-out;
+}
+
+.occupancyCard p {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* Loading state */
+.loading {
+  padding: 40px 0;
+  text-align: center;
+  color: #64748b;
+  font-style: italic;
+  font-size: 1.1rem;
+}
+
+/* Error state */
+.error {
+  padding: 16px;
+  margin: 20px 0;
+  background: #fee2e2;
+  color: #b91c1c;
+  border-radius: 10px;
+  border: 1px solid #fca5a5;
+  font-weight: 500;
+}
+
+/* Responsive styles */
+@media (max-width: 1200px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboardContainer {
+    padding: 20px 16px;
+    margin: 16px;
+    border-radius: 12px;
+  }
+  
+  .statsGrid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .dashboardSections {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .statCard {
+    padding: 1.2rem;
+  }
+  
+  .statIcon {
+    width: 48px;
+    height: 48px;
+    font-size: 1.3rem;
+  }
+  
+  .statInfo p {
+    font-size: 1.5rem;
+  }
+  
+  .dashboardTitle {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
 }

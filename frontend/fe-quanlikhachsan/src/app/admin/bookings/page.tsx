@@ -646,6 +646,32 @@ export default function BookingManager() {
     }
   };
 
+  const handleDelete = async (maDatPhong: string) => {
+    if (window.confirm('Bạn có chắc chắn muốn xóa đặt phòng này?')) {
+      setIsLoading(true);
+      try {
+        const headers = await getAuthHeaders('DELETE');
+        const response = await fetch(`${API_BASE_URL}/DatPhong/${maDatPhong}`, {
+          method: 'DELETE',
+          headers: headers,
+          credentials: 'include',
+        });
+
+        await handleResponse(response);
+        
+        // Remove the deleted booking from the state
+        setBookings(bookings.filter(booking => booking.maDatPhong !== maDatPhong));
+        alert('Xóa đặt phòng thành công');
+      } catch (err) {
+        const e = err as Error;
+        alert(`Lỗi: ${e.message}`);
+        console.error("Error deleting booking:", e);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+  };
+
   const filtered = bookings.filter(b =>
     (b.tenKhachHang || '').toLowerCase().includes(search.toLowerCase()) ||
     (b.maDatPhong || '').toLowerCase().includes(search.toLowerCase()) ||
@@ -730,6 +756,7 @@ export default function BookingManager() {
                   <td style={{whiteSpace:'nowrap'}}>
                     <button className={styles.editBtn} onClick={() => openEditModal(booking)}>Sửa</button>
                     <button className={styles.historyBtn} onClick={() => setHistoryBooking(booking)}>Chi tiết</button>
+                    <button className={styles.deleteBtn} onClick={() => handleDelete(booking.maDatPhong)}>Xóa</button>
                   </td>
                 </tr>
               );
