@@ -224,7 +224,7 @@
 
 .serviceFooter {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
   margin-top: auto;
   padding-top: 1rem;
@@ -232,16 +232,17 @@
 }
 
 .servicePrice {
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   font-weight: 700;
   color: #9c8250;
   display: flex;
   align-items: center;
+  margin-bottom: 0.8rem;
 }
 
 .servicePrice::before {
   content: '₫';
-  font-size: 1rem;
+  font-size: 0.9rem;
   margin-right: 2px;
   font-weight: 400;
 }
@@ -256,13 +257,14 @@
   font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.3s ease;
+  width: 100%;
+  text-align: center;
 }
 
 .viewDetailsBtn:hover {
   background-color: #9c8250;
   color: white;
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(156, 130, 80, 0.25);
 }
 
 /* Service Detail */
