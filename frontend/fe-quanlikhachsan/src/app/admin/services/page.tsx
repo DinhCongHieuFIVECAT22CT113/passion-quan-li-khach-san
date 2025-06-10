@@ -156,10 +156,13 @@ export default function ServiceManager() {
       }
 
       if (selectedThumbnailFile) {
-        formData.append('ThumbnailFile', selectedThumbnailFile); 
-        formData.append('Thumbnail', selectedThumbnailFile.name); 
+        // Chỉ gửi file, không gửi tên file
+        formData.append('Thumbnail', selectedThumbnailFile); 
+        console.log("Đang gửi file mới:", selectedThumbnailFile.name, selectedThumbnailFile.size, "bytes");
       } else if (editingService && form.Thumbnail) { // form.Thumbnail là URL/path cũ (PascalCase)
-        formData.append('Thumbnail', form.Thumbnail);
+        // Giữ nguyên URL cũ
+        formData.append('ThumbnailUrl', form.Thumbnail);
+        console.log("Giữ nguyên URL cũ:", form.Thumbnail);
       } else if (!editingService && !selectedThumbnailFile) {
         alert("Thumbnail là bắt buộc khi thêm mới dịch vụ.");
         setIsLoading(false);

@@ -1,6 +1,7 @@
 using be_quanlikhachsanapi.Data;
 using be_quanlikhachsanapi.DTOs;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 
 namespace be_quanlikhachsanapi.Services
 {
@@ -17,12 +18,18 @@ namespace be_quanlikhachsanapi.Services
         private readonly QuanLyKhachSanContext _context;
         private readonly IWriteFileRepository _fileRepository;
         private readonly ILogger<DichVuRepository> _logger;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public DichVuRepository(QuanLyKhachSanContext context, IWriteFileRepository fileRepository, ILogger<DichVuRepository> logger)
+        public DichVuRepository(
+            QuanLyKhachSanContext context, 
+            IWriteFileRepository fileRepository, 
+            ILogger<DichVuRepository> logger,
+            IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _fileRepository = fileRepository;
             _logger = logger;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public List<DichVuDTO> GetAll()
@@ -80,8 +87,33 @@ namespace be_quanlikhachsanapi.Services
                 // Handle file upload if Thumbnail is provided
                 if (createDichVu.Thumbnail != null)
                 {
-                    var uploadResult = _fileRepository.WriteFileAsync(createDichVu.Thumbnail, "services").Result;
-                    thumbnailUrl = uploadResult;
+                    try 
+                    {
+                        _logger.LogInformation($"Bắt đầu upload file: {createDichVu.Thumbnail.FileName}, Size: {createDichVu.Thumbnail.Length} bytes");
+                        
+                        var uploadResult = _fileRepository.WriteFileAsync(createDichVu.Thumbnail, "services").Result;
+                        thumbnailUrl = uploadResult;
+                        
+                        _logger.LogInformation($"Upload thành công, URL: {thumbnailUrl}");
+                        
+                        // Kiểm tra URL trả về
+                        if (string.IsNullOrEmpty(thumbnailUrl))
+                        {
+                            _logger.LogWarning("URL trả về rỗng sau khi upload");
+                            return new JsonResult("Không thể upload hình ảnh. URL trả về rỗng.")
+                            {
+                                StatusCode = StatusCodes.Status500InternalServerError
+                            };
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Lỗi khi upload file");
+                        return new JsonResult($"Lỗi khi upload file: {ex.Message}")
+                        {
+                            StatusCode = StatusCodes.Status500InternalServerError
+                        };
+                    }
                 }
                 else
                 {
@@ -138,21 +170,67 @@ namespace be_quanlikhachsanapi.Services
                 }
 
                 string thumbnailUrl = dichVu.Thumbnail ?? "";
+                bool thumbnailChanged = false;
 
-                // Handle file upload if Thumbnail is provided
-                if (updateDichVu.Thumbnail != null)
+                // Kiểm tra xem có ThumbnailUrl được gửi từ form không (giữ nguyên URL cũ)
+                string thumbnailUrlFromForm = "";
+                if (_httpContextAccessor.HttpContext != null && 
+                    _httpContextAccessor.HttpContext.Request.Form.TryGetValue("ThumbnailUrl", out var value))
                 {
-                    // Delete old thumbnail if exists
-                    if (!string.IsNullOrEmpty(dichVu.Thumbnail))
-                    {
-                        _ = _fileRepository.DeleteFileAsync(dichVu.Thumbnail);
-                    }
-
-                    // Upload new thumbnail
-                    var uploadResult = _fileRepository.WriteFileAsync(updateDichVu.Thumbnail, "services").Result;
-                    thumbnailUrl = uploadResult;
+                    thumbnailUrlFromForm = value.ToString();
                 }
-                // Nếu không có file upload mới, giữ nguyên thumbnailUrl hiện tại
+                if (!string.IsNullOrEmpty(thumbnailUrlFromForm))
+                {
+                    _logger.LogInformation($"Sử dụng URL từ form: {thumbnailUrlFromForm}");
+                    thumbnailUrl = thumbnailUrlFromForm;
+                    thumbnailChanged = false;
+                }
+                // Nếu có file mới được upload
+                else if (updateDichVu.Thumbnail != null)
+                {
+                    try
+                    {
+                        _logger.LogInformation($"Bắt đầu cập nhật file: {updateDichVu.Thumbnail.FileName}, Size: {updateDichVu.Thumbnail.Length} bytes");
+                        
+                        // Delete old thumbnail if exists
+                        if (!string.IsNullOrEmpty(dichVu.Thumbnail))
+                        {
+                            _logger.LogInformation($"Xóa file cũ: {dichVu.Thumbnail}");
+                            var deleteResult = _fileRepository.DeleteFileAsync(dichVu.Thumbnail).Result;
+                            _logger.LogInformation($"Kết quả xóa file cũ: {(deleteResult ? "Thành công" : "Thất bại")}");
+                        }
+
+                        // Upload new thumbnail
+                        var uploadResult = _fileRepository.WriteFileAsync(updateDichVu.Thumbnail, "services").Result;
+                        thumbnailUrl = uploadResult;
+                        thumbnailChanged = true;
+                        
+                        _logger.LogInformation($"Upload thành công, URL mới: {thumbnailUrl}");
+                        
+                        // Kiểm tra URL trả về
+                        if (string.IsNullOrEmpty(thumbnailUrl))
+                        {
+                            _logger.LogWarning("URL trả về rỗng sau khi upload");
+                            return new JsonResult("Không thể upload hình ảnh. URL trả về rỗng.")
+                            {
+                                StatusCode = StatusCodes.Status500InternalServerError
+                            };
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Lỗi khi cập nhật file");
+                        return new JsonResult($"Lỗi khi cập nhật file: {ex.Message}")
+                        {
+                            StatusCode = StatusCodes.Status500InternalServerError
+                        };
+                    }
+                }
+                // Nếu không có file upload mới và không có URL từ form, giữ nguyên thumbnailUrl hiện tại
+                else
+                {
+                    _logger.LogInformation($"Không có file mới, giữ nguyên URL cũ: {thumbnailUrl}");
+                }
 
                 dichVu.TenDichVu = updateDichVu.TenDichVu;
                 dichVu.Thumbnail = thumbnailUrl;

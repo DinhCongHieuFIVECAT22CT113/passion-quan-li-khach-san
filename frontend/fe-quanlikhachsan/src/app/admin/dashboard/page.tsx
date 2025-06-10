@@ -63,11 +63,11 @@ function DashboardPage() {
               .map(b => ({
                 id: b.MaDatPhong || b.maDatPhong || b.id,
                 customer: (() => {
-                  const kh = customers.find(c => (c.MaKh || c.maKh) === (b.MaKH || b.maKH));
+                  const kh = customers.find((c: any) => (c.MaKh || c.maKh) === (b.MaKH || b.maKH));
                   return kh ? `${kh.HoKh || kh.hoKh || ''} ${kh.TenKh || kh.tenKh || ''}`.trim() : 'Không rõ';
                 })(),
                 room: (() => {
-                  const p = rooms.find(r => (r.MaPhong || r.maPhong) === (b.MaPhong || b.maPhong));
+                  const p = rooms.find((r: any) => (r.MaPhong || r.maPhong) === (b.MaPhong || b.maPhong));
                   return p ? (p.SoPhong || p.soPhong || p.roomNumber || 'N/A') : 'N/A';
                 })(),
                 checkIn: b.NgayNhanPhong || b.ngayNhanPhong || b.checkInDate,
@@ -78,7 +78,7 @@ function DashboardPage() {
         // Tình trạng phòng (group theo loại phòng và trạng thái)
         const roomOccupancy = Array.isArray(rooms)
           ? Object.values(
-              rooms.reduce((acc, r) => {
+              rooms.reduce((acc: Record<string, {type: string, total: number, occupied: number}>, r: any) => {
                 const type = r.TenLoaiPhong || r.tenLoaiPhong || r.LoaiPhong || r.loaiPhong || r.MaLoaiPhong || r.maLoaiPhong || 'Không rõ';
                 if (!acc[type]) acc[type] = { type, total: 0, occupied: 0 };
                 acc[type].total += 1;

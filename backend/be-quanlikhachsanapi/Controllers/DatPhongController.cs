@@ -2,6 +2,7 @@ using be_quanlikhachsanapi.Data;
 using be_quanlikhachsanapi.DTOs;
 using be_quanlikhachsanapi.Services;
 using be_quanlikhachsanapi.Models;
+using be_quanlikhachsanapi.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using be_quanlikhachsanapi.Authorization;
@@ -11,20 +12,22 @@ namespace be_quanlikhachsanapi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
     public class DatPhongController : ControllerBase
     {
         private readonly IDatPhongRepository _datPhongRepo;
+        private readonly ISendEmailServices _sendEmail;
 
         // Tạm lưu booking chưa xác nhận (bạn nên chuyển sang cache hoặc DB)
         private static readonly Dictionary<string, PendingGuestBooking> _pendingBookings = new();
 
-        public DatPhongController(IDatPhongRepository datPhongRepo)
+        public DatPhongController(IDatPhongRepository datPhongRepo, ISendEmailServices sendEmail)
         {
             _datPhongRepo = datPhongRepo;
+            _sendEmail = sendEmail;
         }
 
         [HttpGet]
+        [Authorize]
         [RequireRole("R00", "R01", "R02", "R03")]
         public IActionResult GetAll()
         {
@@ -37,6 +40,7 @@ namespace be_quanlikhachsanapi.Controllers
         }
 
         [HttpGet("{maDatPhong}")]
+        [Authorize]
         [RequireRole("R00", "R01", "R02", "R04")]
         public IActionResult GetByID(string maDatPhong)
         {
@@ -49,6 +53,7 @@ namespace be_quanlikhachsanapi.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [Consumes("multipart/form-data")]
         [RequireRole("R00", "R01", "R02", "R04")]
         public IActionResult CreateDatPhong([FromForm] CreateDatPhongDTO createDatPhong)
@@ -143,8 +148,44 @@ namespace be_quanlikhachsanapi.Controllers
 
             _pendingBookings[booking.Id] = booking;
 
-            // TODO: Gửi email với mã xác nhận booking.MaXacNhan đến booking.Email
-            Console.WriteLine($"Mã xác nhận cho booking {booking.Id}: {booking.MaXacNhan}");
+            // Gửi email với mã xác nhận
+            try {
+                var emailModel = new EmailModel
+                {
+                    ToEmail = booking.Email,
+                    Subject = "Xác nhận đặt phòng - Passion Hotel",
+                    Body = $@"
+                        <html>
+                        <body style='font-family: Arial, sans-serif; line-height: 1.6;'>
+                            <div style='max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 5px;'>
+                                <h2 style='color: #4a4a4a;'>Xác nhận đặt phòng</h2>
+                                <p>Kính gửi Quý khách,</p>
+                                <p>Cảm ơn Quý khách đã đặt phòng tại Passion Hotel. Để hoàn tất quá trình đặt phòng, vui lòng sử dụng mã xác nhận dưới đây:</p>
+                                <div style='background-color: #f5f5f5; padding: 15px; border-radius: 5px; text-align: center;'>
+                                    <h3 style='margin: 0; color: #e63946; font-size: 24px;'>{booking.MaXacNhan}</h3>
+                                </div>
+                                <p>Thông tin đặt phòng:</p>
+                                <ul>
+                                    <li>Họ tên: {booking.HoTen}</li>
+                                    <li>Ngày nhận phòng: {booking.NgayNhanPhong}</li>
+                                    <li>Ngày trả phòng: {booking.NgayTraPhong}</li>
+                                    <li>Số người: {booking.SoNguoiLon} người lớn, {booking.SoTreEm} trẻ em</li>
+                                </ul>
+                                <p>Vui lòng không chia sẻ mã xác nhận này với người khác.</p>
+                                <p>Trân trọng,<br>Passion Hotel</p>
+                            </div>
+                        </body>
+                        </html>"
+                };
+
+                bool emailSent = _sendEmail.SendEmail(emailModel);
+                Console.WriteLine($"Gửi email xác nhận cho booking {booking.Id}: {(emailSent ? "Thành công" : "Thất bại")}");
+                Console.WriteLine($"Mã xác nhận cho booking {booking.Id}: {booking.MaXacNhan}");
+            }
+            catch (Exception ex) {
+                Console.WriteLine($"Lỗi khi gửi email: {ex.Message}");
+                // Vẫn tiếp tục xử lý, không trả về lỗi cho người dùng
+            }
 
             return Ok(new { 
                 bookingId = booking.Id,
@@ -198,6 +239,7 @@ namespace be_quanlikhachsanapi.Controllers
         }
 
         [HttpPut("{maDatPhong}")]
+        [Authorize]
         [Consumes("multipart/form-data")]
         [RequireRole("R00", "R01", "R02")]
         public IActionResult UpdateDatPhong(string maDatPhong, [FromForm] UpdateDatPhongDTO updateDatPhong)
@@ -211,6 +253,7 @@ namespace be_quanlikhachsanapi.Controllers
         }
 
         [HttpDelete("{maDatPhong}")]
+        [Authorize]
         [RequireRole("R00", "R01")]
         public IActionResult DeleteDatPhong(string maDatPhong)
         {
@@ -223,6 +266,7 @@ namespace be_quanlikhachsanapi.Controllers
         }
 
         [HttpPut("{maDatPhong}/trangthai")]
+        [Authorize]
         [RequireRole("R00", "R01", "R02")]
         public IActionResult UpdateTrangThai(string maDatPhong, [FromBody] UpdateTrangThaiDTO trangThaiDto)
         {
@@ -235,6 +279,7 @@ namespace be_quanlikhachsanapi.Controllers
         }
 
         [HttpGet("KhachHang")]
+        [Authorize]
         [RequireRole("R00", "R01", "R02", "R04")]
         public async Task<IActionResult> GetDatPhongByKhachHang()
         {

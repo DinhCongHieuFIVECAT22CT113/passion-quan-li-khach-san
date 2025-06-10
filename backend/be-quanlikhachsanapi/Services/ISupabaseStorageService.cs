@@ -47,24 +47,37 @@ namespace be_quanlikhachsanapi.Services
                 await file.CopyToAsync(memoryStream);
                 var fileBytes = memoryStream.ToArray();
 
+                _logger.LogInformation($"Bắt đầu upload file đến Supabase Storage: {filePath}, ContentType: {file.ContentType}, Size: {fileBytes.Length} bytes");
+                
                 // Upload to Supabase Storage
                 var result = await _supabaseClient.Storage
                     .From(_bucketName)
                     .Upload(fileBytes, filePath, new Supabase.Storage.FileOptions
                     {
                         ContentType = file.ContentType,
-                        Upsert = false
+                        Upsert = true // Thay đổi thành true để ghi đè nếu file đã tồn tại
                     });
 
                 if (result == null)
-                    throw new Exception("Upload thất bại");
+                {
+                    _logger.LogError($"Upload thất bại, result là null");
+                    throw new Exception("Upload thất bại, không nhận được kết quả từ Supabase");
+                }
+                
+                _logger.LogInformation($"Upload thành công, kết quả: {result}");
 
                 // Return public URL
                 var publicUrl = _supabaseClient.Storage
                     .From(_bucketName)
                     .GetPublicUrl(filePath);
+                
+                if (string.IsNullOrEmpty(publicUrl))
+                {
+                    _logger.LogError($"Không thể lấy public URL cho file: {filePath}");
+                    throw new Exception("Không thể lấy public URL sau khi upload thành công");
+                }
 
-                _logger.LogInformation($"File uploaded successfully: {filePath}");
+                _logger.LogInformation($"File uploaded successfully: {filePath}, Public URL: {publicUrl}");
                 return publicUrl;
             }
             catch (Exception ex)

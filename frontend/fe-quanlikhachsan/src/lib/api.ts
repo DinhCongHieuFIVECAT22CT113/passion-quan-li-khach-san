@@ -1316,6 +1316,79 @@ export const getPhongById = async (maPhong: string): Promise<PhongDTO> => {
   }
 };
 
+// API đặt phòng cho khách vãng lai (không yêu cầu đăng nhập)
+export const createGuestPendingBooking = async (bookingData: any) => {
+  console.log(`Đang gọi API đặt phòng cho khách vãng lai: ${API_BASE_URL}/DatPhong/GuestPending`);
+  
+  try {
+    const formData = new FormData();
+    
+    // Chuyển đổi dữ liệu thành FormData
+    for (const [key, value] of Object.entries(bookingData)) {
+      if (value !== undefined && value !== null) {
+        formData.append(key, String(value));
+      }
+    }
+    
+    const response = await fetch(`${API_BASE_URL}/DatPhong/GuestPending`, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      // Xử lý lỗi đặc biệt cho API này, không chuyển hướng đến trang đăng nhập
+      if (response.status === 401) {
+        throw new Error('API yêu cầu xác thực. Vui lòng liên hệ quản trị viên.');
+      }
+      
+      const errorData = await response.json().catch(() => ({ message: response.statusText }));
+      throw new Error(errorData.message || `Lỗi khi đặt phòng: ${response.status}`);
+    }
+    
+    return response.json();
+  } catch (error) {
+    console.error('Lỗi khi gọi API createGuestPendingBooking:', error);
+    throw error;
+  }
+};
+
+// API xác nhận đặt phòng cho khách vãng lai (không yêu cầu đăng nhập)
+export const confirmGuestBooking = async (bookingId: string, maXacNhan: string) => {
+  console.log(`Đang gọi API xác nhận đặt phòng cho khách vãng lai: ${API_BASE_URL}/DatPhong/GuestConfirm`);
+  
+  try {
+    const formData = new FormData();
+    formData.append('bookingId', bookingId);
+    formData.append('maXacNhan', maXacNhan);
+    
+    const response = await fetch(`${API_BASE_URL}/DatPhong/GuestConfirm`, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'Accept': 'application/json'
+      }
+    });
+    
+    if (!response.ok) {
+      // Xử lý lỗi đặc biệt cho API này, không chuyển hướng đến trang đăng nhập
+      if (response.status === 401) {
+        throw new Error('API yêu cầu xác thực. Vui lòng liên hệ quản trị viên.');
+      }
+      
+      const errorData = await response.json().catch(() => ({ message: response.statusText }));
+      throw new Error(errorData.message || `Lỗi khi xác nhận đặt phòng: ${response.status}`);
+    }
+    
+    return response.json();
+  } catch (error) {
+    console.error('Lỗi khi gọi API confirmGuestBooking:', error);
+    throw error;
+  }
+};
+
 // API lấy thông tin chi tiết một Loại Phòng theo Mã Loại Phòng
 export const getLoaiPhongById = async (maLoaiPhong: string): Promise<LoaiPhongDTO> => {
   console.log(`Đang gọi API lấy chi tiết loại phòng: ${API_BASE_URL}/LoaiPhong/${maLoaiPhong}`);

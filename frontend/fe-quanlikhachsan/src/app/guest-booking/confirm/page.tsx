@@ -22,14 +22,54 @@ export default function GuestBookingConfirmPage() {
       const formData = new FormData();
       formData.append('bookingId', bookingId);
       formData.append('maXacNhan', otp);
+      
       const response = await fetch(`${API_BASE_URL}/DatPhong/GuestConfirm`, {
         method: 'POST',
         body: formData,
+        headers: {
+          'Accept': 'application/json'
+        },
+        // Quan trọng: Không gửi credentials để tránh gửi cookie
+        credentials: 'omit'
       });
+      
       if (!response.ok) {
+        // Xử lý lỗi đặc biệt cho API này, không chuyển hướng đến trang đăng nhập
+        if (response.status === 401) {
+          throw new Error('API yêu cầu xác thực. Vui lòng liên hệ quản trị viên.');
+        }
+        
         const err = await response.text();
         throw new Error(err || 'Xác nhận thất bại');
       }
+      
+      // Lấy dữ liệu đặt phòng từ response
+      const responseData = await response.json();
+      console.log('Dữ liệu đặt phòng thành công:', responseData);
+      
+      // Tạo dữ liệu đặt phòng thành công để hiển thị ở trang success
+      const successData = {
+        maDatPhong: responseData.datPhong?.maDatPhong || 'DP' + Math.floor(Math.random() * 1000000),
+        hoTen: responseData.datPhong?.hoTen || localStorage.getItem('guestName') || '',
+        soDienThoai: responseData.datPhong?.soDienThoai || localStorage.getItem('guestPhone') || '',
+        email: responseData.datPhong?.email || localStorage.getItem('guestEmail') || '',
+        roomData: {
+          tenPhong: responseData.datPhong?.tenPhong || localStorage.getItem('roomName') || 'Phòng đã đặt',
+          tenLoaiPhong: responseData.datPhong?.tenLoaiPhong || localStorage.getItem('roomType') || 'Loại phòng',
+          thumbnail: responseData.datPhong?.thumbnail || localStorage.getItem('roomThumbnail') || '/images/rooms/room1.jpg',
+        },
+        ngayNhanPhong: responseData.datPhong?.ngayNhanPhong || localStorage.getItem('checkInDate') || new Date().toISOString(),
+        ngayTraPhong: responseData.datPhong?.ngayTraPhong || localStorage.getItem('checkOutDate') || new Date(Date.now() + 86400000).toISOString(),
+        soNguoiLon: responseData.datPhong?.soNguoiLon || parseInt(localStorage.getItem('adultCount') || '1'),
+        soTreEm: responseData.datPhong?.soTreEm || parseInt(localStorage.getItem('childCount') || '0'),
+        tongTien: responseData.datPhong?.tongTien || parseInt(localStorage.getItem('totalPrice') || '1000000'),
+        phuongThucThanhToan: responseData.datPhong?.phuongThucThanhToan || localStorage.getItem('paymentMethod') || 'cash',
+        ngayDat: responseData.datPhong?.ngayDat || new Date().toISOString(),
+      };
+      
+      // Lưu dữ liệu đặt phòng thành công vào localStorage
+      localStorage.setItem('guestBookingSuccess', JSON.stringify(successData));
+      
       setSuccess(true);
       // Xóa bookingId tạm
       localStorage.removeItem('pendingGuestBookingId');

@@ -268,35 +268,39 @@ const EnhancedSearchBar: React.FC<EnhancedSearchBarProps> = ({
           {/* Check-in Date */}
           <div className={styles.searchField}>
             <FaCalendarAlt className={styles.fieldIcon} />
-            <DatePicker
-              selected={checkInDate}
-              onChange={(date) => setCheckInDate(date)}
-              selectsStart
-              startDate={checkInDate}
-              endDate={checkOutDate}
-              minDate={new Date()}
-              placeholderText={t('search.checkIn')}
-              className={styles.dateInput}
-              dateFormat="dd/MM/yyyy"
-              showPopperArrow={false}
-            />
+            <div className={styles.datepickerWrapper}>
+              <DatePicker
+                selected={checkInDate}
+                onChange={(date) => setCheckInDate(date)}
+                selectsStart
+                startDate={checkInDate}
+                endDate={checkOutDate}
+                minDate={new Date()}
+                placeholderText={t('search.checkIn')}
+                className={styles.dateInput}
+                dateFormat="dd/MM/yyyy"
+                showPopperArrow={false}
+              />
+            </div>
           </div>
 
           {/* Check-out Date */}
           <div className={styles.searchField}>
             <FaCalendarAlt className={styles.fieldIcon} />
-            <DatePicker
-              selected={checkOutDate}
-              onChange={(date) => setCheckOutDate(date)}
-              selectsEnd
-              startDate={checkInDate}
-              endDate={checkOutDate}
-              minDate={checkInDate || new Date()}
-              placeholderText={t('search.checkOut')}
-              className={styles.dateInput}
-              dateFormat="dd/MM/yyyy"
-              showPopperArrow={false}
-            />
+            <div className={styles.datepickerWrapper}>
+              <DatePicker
+                selected={checkOutDate}
+                onChange={(date) => setCheckOutDate(date)}
+                selectsEnd
+                startDate={checkInDate}
+                endDate={checkOutDate}
+                minDate={checkInDate || new Date()}
+                placeholderText={t('search.checkOut')}
+                className={styles.dateInput}
+                dateFormat="dd/MM/yyyy"
+                showPopperArrow={false}
+              />
+            </div>
           </div>
 
           {/* Guests */}

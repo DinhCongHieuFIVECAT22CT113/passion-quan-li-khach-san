@@ -58,7 +58,7 @@ export interface PhongDTO {
     maLoaiPhong: string;
     soPhong?: string;
     thumbnail?: string | null; // URL ảnh thumbnail của phòng
-    hinhAnh?: string | null;   // Chuỗi các URL hình ảnh, cách nhau bởi dấu phẩy
+    hinhAnh?: string | string[] | null;   // Có thể là chuỗi các URL hình ảnh cách nhau bởi dấu phẩy hoặc mảng các URL
     trangThai: string;        // Ví dụ: "Trống", "Đã đặt", "Đang sử dụng", "Đang dọn"
     tang?: number;
     loaiPhong?: LoaiPhongDTO; // Thông tin chi tiết loại phòng (sẽ cần nếu API backend trả về)

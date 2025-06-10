@@ -151,19 +151,47 @@ export default function GuestBookingPage() {
           formData.append(key, value as any);
         }
       });
+      
       const response = await fetch(`${API_BASE_URL}/DatPhong/GuestPending`, {
         method: 'POST',
         body: formData,
+        headers: {
+          'Accept': 'application/json'
+        },
+        // Quan trọng: Không gửi credentials để tránh gửi cookie
+        credentials: 'omit'
       });
 
       if (!response.ok) {
+        // Xử lý lỗi đặc biệt cho API này, không chuyển hướng đến trang đăng nhập
+        if (response.status === 401) {
+          throw new Error('API yêu cầu xác thực. Vui lòng liên hệ quản trị viên.');
+        }
+        
         const errorData = await response.text();
         throw new Error(errorData || 'Có lỗi xảy ra khi đặt phòng');
       }
 
       const result = await response.json();
       const bookingId = result.bookingId;
+      
+      // Lưu ID booking tạm thời
       localStorage.setItem('pendingGuestBookingId', bookingId);
+      
+      // Lưu thông tin đặt phòng để sử dụng sau này
+      localStorage.setItem('guestName', bookingData.hoTen);
+      localStorage.setItem('guestPhone', bookingData.soDienThoai);
+      localStorage.setItem('guestEmail', bookingData.email);
+      localStorage.setItem('roomName', bookingData.roomData.tenPhong);
+      localStorage.setItem('roomType', bookingData.roomData.tenLoaiPhong);
+      localStorage.setItem('roomThumbnail', bookingData.roomData.thumbnail || '');
+      localStorage.setItem('checkInDate', bookingData.ngayNhanPhong);
+      localStorage.setItem('checkOutDate', bookingData.ngayTraPhong);
+      localStorage.setItem('adultCount', bookingData.soNguoiLon.toString());
+      localStorage.setItem('childCount', bookingData.soTreEm.toString());
+      localStorage.setItem('totalPrice', calculateTotalPrice().toString());
+      localStorage.setItem('paymentMethod', paymentData.phuongThucThanhToan);
+      
       router.push('/guest-booking/confirm');
       return;
 

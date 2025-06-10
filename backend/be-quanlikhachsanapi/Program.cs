@@ -102,6 +102,9 @@ builder.Services.AddCors(options =>
 // Add Memory Cache
 builder.Services.AddMemoryCache();
 
+// Add HttpContextAccessor
+builder.Services.AddHttpContextAccessor();
+
 // Add Supabase
 builder.Services.AddSingleton<Supabase.Client>(provider =>
 {
