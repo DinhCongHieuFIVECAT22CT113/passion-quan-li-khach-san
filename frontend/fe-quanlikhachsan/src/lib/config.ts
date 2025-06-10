@@ -16,7 +16,7 @@ export const APP_CONFIG = {
     login: '/login',
     signup: '/signup',
     userProfile: '/users/profile',
-    adminDashboard: '/admin/rooms',
+    adminDashboard: '/admin/dashboard',
     managerDashboard: '/employe/dashboard',
     employeeDashboard: '/employe/bookings',
     accountantDashboard: '/employe/invoices',
@@ -34,7 +34,7 @@ export const APP_CONFIG = {
 
   // Các đường dẫn phù hợp với từng vai trò
   roleRoutes: {
-    'R00': '/admin/rooms',  // Admin đến trang rooms thay vì dashboard
+    'R00': '/admin/dashboard',  // Admin đến trang dashboard
     'R01': '/employe/dashboard', // Quản lý đến trang quản lý
     'R02': '/employe/bookings', // Nhân viên đến trang đặt phòng
     'R03': '/employe/invoices', // Kế toán đến trang hóa đơn

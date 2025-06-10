@@ -31,37 +31,72 @@ function DashboardPage() {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        // Mô phỏng dữ liệu dashboard vì API chưa có
-        // Trong thực tế, bạn sẽ gọi API thực sự
-        // const response = await fetch(`${API_BASE_URL}/dashboard/stats`, {
-        //   headers: getAuthHeaders()
-        // });
-        // const data = await handleResponse(response);
-        
-        // Dữ liệu mẫu
-        const mockData = {
-          totalCustomers: 245,
-          totalRooms: 50,
-          totalBookings: 128,
-          totalRevenue: 75000000,
-          recentBookings: [
-            { id: 'BK001', customer: 'Nguyễn Văn A', room: '101', checkIn: '2023-10-15', checkOut: '2023-10-18', status: 'Đã thanh toán' },
-            { id: 'BK002', customer: 'Trần Thị B', room: '205', checkIn: '2023-10-16', checkOut: '2023-10-20', status: 'Đang ở' },
-            { id: 'BK003', customer: 'Lê Văn C', room: '302', checkIn: '2023-10-18', checkOut: '2023-10-22', status: 'Đã đặt' },
-          ],
-          roomOccupancy: [
-            { type: 'Standard', total: 20, occupied: 15 },
-            { type: 'Deluxe', total: 15, occupied: 10 },
-            { type: 'Suite', total: 10, occupied: 5 },
-            { type: 'Presidential', total: 5, occupied: 2 },
-          ]
-        };
-        
-        // Giả lập delay API
-        setTimeout(() => {
-          setStats(mockData);
-          setLoading(false);
-        }, 1000);
+        // Gọi song song các API nhỏ để tổng hợp dữ liệu dashboard
+        const [roomsRes, bookingsRes, invoicesRes, customersRes] = await Promise.all([
+          fetch(`${API_BASE_URL}/Phong`, { headers: await getAuthHeaders() }),
+          fetch(`${API_BASE_URL}/DatPhong`, { headers: await getAuthHeaders() }),
+          fetch(`${API_BASE_URL}/HoaDon`, { headers: await getAuthHeaders() }),
+          fetch(`${API_BASE_URL}/KhachHang`, { headers: await getAuthHeaders() })
+        ]);
+        const [rooms, bookings, invoices, customers] = await Promise.all([
+          handleResponse(roomsRes),
+          handleResponse(bookingsRes),
+          handleResponse(invoicesRes),
+          handleResponse(customersRes)
+        ]);
+
+        // Tổng số khách hàng
+        const totalCustomers = Array.isArray(customers) ? customers.length : 0;
+        // Tổng số phòng
+        const totalRooms = Array.isArray(rooms) ? rooms.length : 0;
+        // Tổng số đặt phòng
+        const totalBookings = Array.isArray(bookings) ? bookings.length : 0;
+        // Tổng doanh thu
+        const totalRevenue = Array.isArray(invoices)
+          ? invoices.reduce((sum, inv) => sum + (parseFloat(inv.TongTien || inv.tongTien || inv.amount || 0)), 0)
+          : 0;
+        // Đặt phòng gần đây (lấy 3 booking mới nhất theo ngày nhận phòng)
+        const recentBookings = Array.isArray(bookings)
+          ? bookings
+              .sort((a, b) => new Date(b.NgayNhanPhong || b.ngayNhanPhong || b.checkInDate).getTime() - new Date(a.NgayNhanPhong || a.ngayNhanPhong || a.checkInDate).getTime())
+              .slice(0, 3)
+              .map(b => ({
+                id: b.MaDatPhong || b.maDatPhong || b.id,
+                customer: (() => {
+                  const kh = customers.find(c => (c.MaKh || c.maKh) === (b.MaKH || b.maKH));
+                  return kh ? `${kh.HoKh || kh.hoKh || ''} ${kh.TenKh || kh.tenKh || ''}`.trim() : 'Không rõ';
+                })(),
+                room: (() => {
+                  const p = rooms.find(r => (r.MaPhong || r.maPhong) === (b.MaPhong || b.maPhong));
+                  return p ? (p.SoPhong || p.soPhong || p.roomNumber || 'N/A') : 'N/A';
+                })(),
+                checkIn: b.NgayNhanPhong || b.ngayNhanPhong || b.checkInDate,
+                checkOut: b.NgayTraPhong || b.ngayTraPhong || b.checkOutDate,
+                status: b.TrangThai || b.trangThai || b.status || 'Đã đặt'
+              }))
+          : [];
+        // Tình trạng phòng (group theo loại phòng và trạng thái)
+        const roomOccupancy = Array.isArray(rooms)
+          ? Object.values(
+              rooms.reduce((acc, r) => {
+                const type = r.TenLoaiPhong || r.tenLoaiPhong || r.LoaiPhong || r.loaiPhong || r.MaLoaiPhong || r.maLoaiPhong || 'Không rõ';
+                if (!acc[type]) acc[type] = { type, total: 0, occupied: 0 };
+                acc[type].total += 1;
+                if ((r.TrangThai || r.trangThai || r.status) !== 'Trống') acc[type].occupied += 1;
+                return acc;
+              }, {})
+            )
+          : [];
+
+        setStats({
+          totalCustomers,
+          totalRooms,
+          totalBookings,
+          totalRevenue,
+          recentBookings,
+          roomOccupancy
+        });
+        setLoading(false);
         
       } catch (err) {
         console.error('Error fetching dashboard data:', err);
