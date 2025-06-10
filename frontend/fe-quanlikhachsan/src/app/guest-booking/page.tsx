@@ -144,13 +144,16 @@ export default function GuestBookingPage() {
 
       console.log('Gửi yêu cầu đặt phòng cho khách vãng lai:', bookingPayload);
 
-      // Gọi API đặt phòng cho khách vãng lai
-      const response = await fetch(`${API_BASE_URL}/Booking/CreateGuestBooking`, {
+      // Gọi API tạo booking tạm cho khách vãng lai (public)
+      const formData = new FormData();
+      Object.entries(bookingPayload).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          formData.append(key, value as any);
+        }
+      });
+      const response = await fetch(`${API_BASE_URL}/DatPhong/GuestPending`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(bookingPayload),
+        body: formData,
       });
 
       if (!response.ok) {
@@ -159,24 +162,10 @@ export default function GuestBookingPage() {
       }
 
       const result = await response.json();
-      console.log('Kết quả đặt phòng:', result);
-
-      // Lưu thông tin đặt phòng thành công
-      const successData = {
-        ...bookingPayload,
-        maDatPhong: result.maDatPhong || result.id,
-        ngayDat: new Date().toISOString(),
-        trangThai: 'Đã đặt',
-      };
-      
-      localStorage.setItem('guestBookingSuccess', JSON.stringify(successData));
-      
-      // Xóa dữ liệu tạm thời
-      localStorage.removeItem('bookingFormData');
-      localStorage.removeItem('selectedRoomData');
-
-      // Chuyển đến trang thành công
-      router.push('/guest-booking/success');
+      const bookingId = result.bookingId;
+      localStorage.setItem('pendingGuestBookingId', bookingId);
+      router.push('/guest-booking/confirm');
+      return;
 
     } catch (error) {
       console.error('Lỗi khi đặt phòng:', error);
