@@ -22,8 +22,6 @@ interface Service {
 export default function ServicesPage() {
   const { selectedLanguage } = useLanguage();
   const [services, setServices] = useState<Service[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [bookingDetails, setBookingDetails] = useState({
