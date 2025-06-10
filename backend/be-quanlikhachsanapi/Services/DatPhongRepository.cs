@@ -9,10 +9,12 @@ namespace be_quanlikhachsanapi.Services
     public class DatPhongRepository : IDatPhongRepository
     {
         private readonly QuanLyKhachSanContext _context;
+        private readonly INotificationService _notificationService;
 
-        public DatPhongRepository(QuanLyKhachSanContext context)
+        public DatPhongRepository(QuanLyKhachSanContext context, INotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         public List<DatPhongDTO> GetAll()
@@ -174,6 +176,15 @@ namespace be_quanlikhachsanapi.Services
                 };
                 _context.ChiTietDatPhongs.Add(chiTietDatPhong);
                 _context.SaveChanges();
+                
+                // Cập nhật trạng thái phòng thành "Đã đặt"
+                phong.TrangThai = "Đã đặt";
+                phong.NgaySua = DateTime.Now;
+                _context.SaveChanges();
+                
+                // Gửi thông báo realtime
+                _notificationService.NotifyBookingCreated(datPhong).Wait();
+                _notificationService.NotifyRoomStatusChanged(phong.MaPhong, "Đã đặt").Wait();
 
                 return new JsonResult(new
                 {
@@ -297,9 +308,48 @@ namespace be_quanlikhachsanapi.Services
                     StatusCode = StatusCodes.Status404NotFound
                 };
             }
+            
+            string oldTrangThai = datPhong.TrangThai;
             datPhong.TrangThai = TrangThai;
             datPhong.NgaySua = DateTime.Now;
+            
+            // Cập nhật trạng thái phòng tương ứng
+            var chiTietDatPhong = _context.ChiTietDatPhongs.FirstOrDefault(ct => ct.MaDatPhong == MaDatPhong);
+            if (chiTietDatPhong?.MaPhong != null)
+            {
+                var phong = _context.Phongs.FirstOrDefault(p => p.MaPhong == chiTietDatPhong.MaPhong);
+                if (phong != null)
+                {
+                    string oldPhongTrangThai = phong.TrangThai;
+                    
+                    switch (TrangThai)
+                    {
+                        case "Đã xác nhận":
+                            phong.TrangThai = "Đã đặt";
+                            break;
+                        case "Đã hủy":
+                            phong.TrangThai = "Trống";
+                            break;
+                        case "Đã trả phòng":
+                            phong.TrangThai = "Đang dọn";
+                            break;
+                    }
+                    
+                    phong.NgaySua = DateTime.Now;
+                    
+                    // Gửi thông báo cập nhật trạng thái phòng
+                    if (oldPhongTrangThai != phong.TrangThai)
+                    {
+                        _notificationService.NotifyRoomStatusChanged(phong.MaPhong, phong.TrangThai).Wait();
+                    }
+                }
+            }
+            
             _context.SaveChanges();
+            
+            // Gửi thông báo cập nhật trạng thái đặt phòng
+            _notificationService.NotifyBookingStatusChanged(MaDatPhong, TrangThai).Wait();
+            
             return new JsonResult(new
             {
                 message = "Cập nhật trạng thái đặt phòng thành công.",

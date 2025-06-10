@@ -16,6 +16,8 @@ using be_quanlikhachsanapi.Configuration;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
+using be_quanlikhachsanapi.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -102,6 +104,9 @@ builder.Services.AddCors(options =>
 // Add Memory Cache
 builder.Services.AddMemoryCache();
 
+// Add SignalR for realtime updates
+builder.Services.AddSignalR();
+
 // Add HttpContextAccessor
 builder.Services.AddHttpContextAccessor();
 
@@ -144,6 +149,7 @@ builder.Services.AddScoped<ILoaiKhachHangRepository, LoaiKhachHangRepository>();
 // Thêm vào phần đăng ký services
 builder.Services.AddScoped<IDatPhongRepository, DatPhongRepository>();
 builder.Services.AddScoped<IChiTietDatPhongRepository, ChiTietDatPhongRepository>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
 
 builder.Services.AddScoped<IPasswordHasher<KhachHang>, PasswordHasher<KhachHang>>();
 builder.Services.AddScoped<IPasswordHasher<NhanVien>, PasswordHasher<NhanVien>>();
@@ -199,6 +205,9 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Map SignalR hub
+app.MapHub<NotificationHub>("/notificationHub");
 
 app.Run();
 

@@ -9,11 +9,13 @@ namespace be_quanlikhachsanapi.Services
     {
         private readonly QuanLyKhachSanContext _context;
         private readonly IWriteFileRepository _fileRepository;
+        private readonly INotificationService _notificationService;
         
-        public PhongRepository(QuanLyKhachSanContext context, IWriteFileRepository fileRepository)
+        public PhongRepository(QuanLyKhachSanContext context, IWriteFileRepository fileRepository, INotificationService notificationService)
         {
             _context = context;
             _fileRepository = fileRepository;
+            _notificationService = notificationService;
         }
 
         public List<PhongDTO> GetAll()
@@ -222,9 +224,13 @@ namespace be_quanlikhachsanapi.Services
             }
             else
             {
+                string oldTrangThai = phong.TrangThai;
                 phong.TrangThai = TrangThai;
                 phong.NgaySua = DateTime.Now;
                 _context.SaveChanges();
+                
+                // Gửi thông báo cập nhật trạng thái phòng
+                _notificationService.NotifyRoomStatusChanged(MaPhong, TrangThai).Wait();
 
                 return new JsonResult("Cập nhật trạng thái phòng thành công.")
                 {

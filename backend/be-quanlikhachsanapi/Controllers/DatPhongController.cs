@@ -16,14 +16,22 @@ namespace be_quanlikhachsanapi.Controllers
     {
         private readonly IDatPhongRepository _datPhongRepo;
         private readonly ISendEmailServices _sendEmail;
+        private readonly QuanLyKhachSanContext _context;
+        private readonly INotificationService _notificationService;
 
         // Tạm lưu booking chưa xác nhận (bạn nên chuyển sang cache hoặc DB)
         private static readonly Dictionary<string, PendingGuestBooking> _pendingBookings = new();
 
-        public DatPhongController(IDatPhongRepository datPhongRepo, ISendEmailServices sendEmail)
+        public DatPhongController(
+            IDatPhongRepository datPhongRepo, 
+            ISendEmailServices sendEmail,
+            QuanLyKhachSanContext context,
+            INotificationService notificationService)
         {
             _datPhongRepo = datPhongRepo;
             _sendEmail = sendEmail;
+            _context = context;
+            _notificationService = notificationService;
         }
 
         [HttpGet]
@@ -209,12 +217,53 @@ namespace be_quanlikhachsanapi.Controllers
                 return BadRequest("Mã xác nhận không đúng.");
             }
 
-            // TODO: Kiểm tra booking.Email có tồn tại trong bảng KhachHang hay không
-            // Giả sử bạn có method _datPhongRepo.CreateDatPhongForGuest(email, ...)
-
-            // Tạo một khách hàng mới hoặc lấy mã khách hàng hiện có
-            // TODO: Thay thế bằng logic thực tế để tìm hoặc tạo khách hàng
-            string maKhachHang = "KH001"; // Giả sử đây là mã khách hàng mặc định hoặc đã tìm được
+            // Kiểm tra booking.Email có tồn tại trong bảng KhachHang hay không
+            var khachHang = _context.KhachHangs.FirstOrDefault(kh => kh.Email == booking.Email);
+            string maKhachHang;
+            
+            if (khachHang == null)
+            {
+                // Tạo khách hàng mới cho khách vãng lai
+                var lastKhachHang = _context.KhachHangs
+                    .OrderByDescending(kh => kh.MaKh)
+                    .FirstOrDefault();
+                
+                string newMaKhachHang;
+                if (lastKhachHang == null || string.IsNullOrEmpty(lastKhachHang.MaKh))
+                {
+                    newMaKhachHang = "KH001";
+                }
+                else
+                {
+                    var soHienTai = int.Parse(lastKhachHang.MaKh.Substring(2));
+                    newMaKhachHang = "KH" + (soHienTai + 1).ToString("D3");
+                }
+                
+                // Tạo khách hàng mới
+                var newKhachHang = new KhachHang
+                {
+                    MaKh = newMaKhachHang,
+                    HoKh = booking.HoTen.Split(' ')[0],
+                    TenKh = booking.HoTen.Contains(' ') ? booking.HoTen.Substring(booking.HoTen.IndexOf(' ') + 1) : booking.HoTen,
+                    Email = booking.Email,
+                    Sdt = booking.SoDienThoai,
+                    MaLoaiKh = "LKH001", // Loại khách hàng thường
+                    UserName = booking.Email,
+                    PasswordHash = "DefaultPassword123", // Mật khẩu mặc định, nên được hash trong thực tế
+                    SoCccd = "000000000000", // Giá trị mặc định
+                    NgayTao = DateTime.Now,
+                    NgaySua = DateTime.Now
+                };
+                
+                _context.KhachHangs.Add(newKhachHang);
+                _context.SaveChanges();
+                
+                maKhachHang = newMaKhachHang;
+            }
+            else
+            {
+                maKhachHang = khachHang.MaKh;
+            }
             
             var createDto = new CreateDatPhongDTO
             {

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import styles from "./RoomManager.module.css";
 import { API_BASE_URL } from '@/lib/config';
 import { getAuthHeaders, handleResponse, getFormDataHeaders } from '@/lib/api';
+import { getSignalRConnection } from '@/lib/signalr';
 import Image from 'next/image';
 
 interface PhongBE {
@@ -60,61 +61,74 @@ export default function RoomManager() {
   const [selectedThumbnailFile, setSelectedThumbnailFile] = useState<File | null>(null);
   const [selectedHinhAnhFile, setSelectedHinhAnhFile] = useState<File | null>(null);
 
+  const fetchData = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) throw new Error("Token không hợp lệ hoặc bạn chưa đăng nhập.");
+
+      const roomsHeaders = await getAuthHeaders('GET');
+      const roomsResponse = await fetch(`${API_BASE_URL}/Phong`, {
+        method: 'GET',
+        headers: roomsHeaders,
+        credentials: 'include'
+      });
+      const roomsData: PhongBE[] = await handleResponse(roomsResponse);
+
+      const roomTypesHeaders = await getAuthHeaders('GET');
+      const roomTypesResponse = await fetch(`${API_BASE_URL}/LoaiPhong`, {
+        method: 'GET',
+        headers: roomTypesHeaders,
+        credentials: 'include'
+      });
+      const roomTypesData: LoaiPhongBE[] = await handleResponse(roomTypesResponse);
+      setRoomTypes(roomTypesData);
+
+      const roomsWithDetails = roomsData.map((phong): RoomDisplay => {
+        const loaiPhong = roomTypesData.find(lp => lp.maLoaiPhong === phong.maLoaiPhong);
+
+        const roomDetail: RoomDisplay = {
+          ...phong,
+          tenLoaiPhong: loaiPhong?.tenLoaiPhong || "Không xác định",
+          donGia: loaiPhong?.giaMoiDem || 0,
+          giaGio: loaiPhong?.giaMoiGio || 0,
+        };
+        return roomDetail;
+      });
+
+      setRooms(roomsWithDetails);
+    } catch (err) {
+      const e = err as Error;
+      setError(e.message || "Có lỗi xảy ra khi tải dữ liệu phòng.");
+      console.error("Error fetching data:", e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) throw new Error("Token không hợp lệ hoặc bạn chưa đăng nhập.");
-
-        const roomsHeaders = await getAuthHeaders('GET');
-        const roomsResponse = await fetch(`${API_BASE_URL}/Phong`, {
-          method: 'GET',
-          headers: roomsHeaders,
-          credentials: 'include'
-        });
-        const roomsData: PhongBE[] = await handleResponse(roomsResponse);
-
-        const roomTypesHeaders = await getAuthHeaders('GET');
-        const roomTypesResponse = await fetch(`${API_BASE_URL}/LoaiPhong`, {
-          method: 'GET',
-          headers: roomTypesHeaders,
-          credentials: 'include'
-        });
-        const roomTypesData: LoaiPhongBE[] = await handleResponse(roomTypesResponse);
-        console.log("DEBUG: Fetched roomTypesData:", JSON.parse(JSON.stringify(roomTypesData)));
-        setRoomTypes(roomTypesData);
-
-        const roomsWithDetails = roomsData.map((phong): RoomDisplay => {
-          const loaiPhong = roomTypesData.find(lp => lp.maLoaiPhong === phong.maLoaiPhong);
-
-          if (phong.maPhong === 'P001' || phong.maPhong === 'P002') {
-            console.log(`DEBUG: Processing phong ${phong.maPhong} with maLoaiPhong ${phong.maLoaiPhong}`);
-            console.log("DEBUG: Found loaiPhong object:", JSON.parse(JSON.stringify(loaiPhong)));
-            console.log("DEBUG: Value of loaiPhong?.giaMoiGio:", loaiPhong?.giaMoiGio);
-          }
-
-          const roomDetail: RoomDisplay = {
-            ...phong,
-            tenLoaiPhong: loaiPhong?.tenLoaiPhong || "Không xác định",
-            donGia: loaiPhong?.giaMoiDem || 0,
-            giaGio: loaiPhong?.giaMoiGio || 0,
-          };
-          return roomDetail;
-        });
-
-        setRooms(roomsWithDetails);
-      } catch (err) {
-        const e = err as Error;
-        setError(e.message || "Có lỗi xảy ra khi tải dữ liệu phòng.");
-        console.error("Error fetching data:", e);
-      } finally {
-        setIsLoading(false);
+    fetchData();
+    
+    // Đăng ký lắng nghe sự kiện từ SignalR
+    const connection = getSignalRConnection();
+    
+    // Khi nhận được thông báo về thay đổi trạng thái phòng, làm mới dữ liệu
+    const handleRoomStatusChanged = (notification: any) => {
+      if (notification.type === 'room_status_changed' || 
+          notification.type === 'booking_created' || 
+          notification.type === 'booking_status_changed') {
+        console.log('Room data changed, refreshing...', notification);
+        fetchData();
       }
     };
-
-    fetchData();
+    
+    connection.on('ReceiveNotification', handleRoomStatusChanged);
+    
+    // Cleanup
+    return () => {
+      connection.off('ReceiveNotification', handleRoomStatusChanged);
+    };
   }, []);
 
   const openAddModal = () => {
