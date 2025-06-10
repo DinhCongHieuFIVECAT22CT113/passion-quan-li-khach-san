@@ -1301,6 +1301,59 @@ export const getLoaiPhongById = async (maLoaiPhong: string): Promise<LoaiPhongDT
   }
 };
 
+// API lấy danh sách phòng theo loại phòng
+export const getPhongByLoaiPhong = async (maLoaiPhong: string): Promise<PhongDTO[]> => {
+  console.log(`Đang gọi API lấy danh sách phòng theo loại: ${API_BASE_URL}/Phong/GetPhongByLoai/${maLoaiPhong}`);
+  try {
+    const headers = await getAuthHeaders('GET');
+    const response = await fetch(`${API_BASE_URL}/Phong/GetPhongByLoai/${maLoaiPhong}`, {
+      method: 'GET',
+      headers: headers,
+    });
+
+    if (!response.ok) {
+      if (response.status === 404) {
+        return []; // Trả về mảng rỗng nếu không tìm thấy phòng nào
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data || [];
+  } catch (err) {
+    console.error('Lỗi khi lấy danh sách phòng theo loại:', err);
+    throw new Error('Không thể kết nối đến API danh sách phòng theo loại.');
+  }
+};
+
+// API đếm số phòng còn trống theo loại phòng
+export const countAvailableRoomsByType = async (maLoaiPhong: string): Promise<number> => {
+  try {
+    const headers = await getAuthHeaders('GET');
+    const response = await fetch(`${API_BASE_URL}/Phong/GetPhongByLoai/${maLoaiPhong}`, {
+      method: 'GET',
+      headers: headers,
+    });
+
+    if (!response.ok) {
+      return 0;
+    }
+
+    const data = await response.json();
+    const rooms = data || [];
+    
+    // Đếm số phòng có trạng thái "Trống", "Còn trống" hoặc "Available"
+    const availableRooms = rooms.filter((room: any) => {
+      return room.trangThai === 'Trống' || room.trangThai === 'Còn trống' || room.trangThai === 'Available';
+    });
+    
+    return availableRooms.length;
+  } catch (err) {
+    console.error('Lỗi khi đếm phòng còn trống:', err);
+    return 0;
+  }
+};
+
 // ===== MANAGER APIs =====
 
 // API lấy danh sách đặt phòng cho manager

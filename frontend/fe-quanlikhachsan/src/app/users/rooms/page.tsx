@@ -6,13 +6,13 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { FaStar, FaWifi, FaTv, FaSnowflake, FaBath, FaSearch, FaFilter, FaBed, FaDollarSign, FaUsers, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import styles from './styles.module.css';
-import { getRoomTypes } from '../../../lib/api';
+import { getRoomTypes, countAvailableRoomsByType } from '../../../lib/api';
 import { RoomType } from '../../../types/auth';
 import { API_BASE_URL } from '../../../lib/config';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import Breadcrumb from '../../components/navigation/Breadcrumb';
-import SearchBar from '../../components/search/SearchBar';
+import EnhancedSearchBar from '../../components/search/EnhancedSearchBar';
 import { RoomGridSkeleton, LoadingSpinner } from '../../components/ui/LoadingStates';
 import { NetworkError } from '../../components/ui/ErrorBoundary';
 
@@ -36,6 +36,7 @@ const getValidImageSrc = (imagePath: string | undefined): string => {
 
 export default function RoomsPage() {
   const [roomTypes, setRoomTypes] = useState<RoomType[]>([]);
+  const [availableRoomCounts, setAvailableRoomCounts] = useState<{[key: string]: number}>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('all');
@@ -72,6 +73,19 @@ export default function RoomsPage() {
         const data = await getRoomTypes();
         setRoomTypes(data || []);
         console.log('Dữ liệu loại phòng nhận được:', data);
+
+        // Lấy số phòng còn trống cho mỗi loại phòng
+        const counts: {[key: string]: number} = {};
+        for (const roomType of data || []) {
+          try {
+            const count = await countAvailableRoomsByType(roomType.maLoaiPhong);
+            counts[roomType.maLoaiPhong] = count;
+          } catch (err) {
+            console.error(`Lỗi khi đếm phòng cho loại ${roomType.maLoaiPhong}:`, err);
+            counts[roomType.maLoaiPhong] = 0;
+          }
+        }
+        setAvailableRoomCounts(counts);
       } catch (err) {
         console.error('Lỗi khi lấy danh sách phòng:', err);
         let errorMessage = '';
@@ -199,53 +213,9 @@ export default function RoomsPage() {
         <div className={styles.heroContent}>
           <h1>Khám phá không gian nghỉ dưỡng tuyệt vời</h1>
           <p>Tìm kiếm phòng phù hợp cho kì nghỉ hoàn hảo của bạn</p>
-
-          <div className={styles.searchContainer}>
-            <div className={styles.datePickerGroup}>
-              <div className={styles.datePicker}>
-                <label>
-                  <i className="far fa-calendar-alt"></i> Ngày nhận phòng
-                </label>
-                <input
-                  type="date"
-                  value={checkInDate || ''} // Sử dụng value thay vì defaultValue
-                  onChange={(e) => setCheckInDate(e.target.value)}
-                />
-              </div>
-
-              <div className={styles.datePicker}>
-                <label>
-                  <i className="far fa-calendar-alt"></i> Ngày trả phòng
-                </label>
-                <input
-                  type="date"
-                  value={checkOutDate || ''} // Sử dụng value thay vì defaultValue
-                  onChange={(e) => setCheckOutDate(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className={styles.guestPicker}>
-              <label>
-                <i className="fas fa-user"></i> Số khách
-              </label>
-              <select
-                value={numberOfGuests} // Sử dụng value thay vì defaultValue
-                onChange={(e) => setNumberOfGuests(parseInt(e.target.value))}
-              >
-                <option value="1">1 khách</option>
-                <option value="2">2 khách</option>
-                <option value="3">3 khách</option>
-                <option value="4">4 khách</option>
-              </select>
-            </div>
-
-            <button className={styles.searchBtn}>Tìm</button>
-          </div>
-
-          <div className={styles.dateInfo}>
-            {checkInDate} - {checkOutDate} • {numberOfGuests} khách • 1 đêm
-          </div>
+          
+          {/* Enhanced Search Form */}
+          <EnhancedSearchBar variant="page" showAdvancedFilters={true} />
         </div>
       </section>
 
@@ -335,7 +305,7 @@ export default function RoomsPage() {
 
       <main className={styles.mainContent}>
         <div className={styles.sectionHeader}>
-          <h2>Danh sách phòng ({sortedRoomTypes.length})</h2>
+          <h2>Danh sách các loại phòng ({sortedRoomTypes.length})</h2>
           <p>Sắp xếp theo giá từ thấp đến cao</p>
         </div>
 
@@ -374,6 +344,9 @@ export default function RoomsPage() {
                     className={styles.roomImage}
                   />
                   <div className={styles.roomBadge}>{roomType.tenLoaiPhong}</div>
+                  <div className={styles.roomAvailability}>
+                    <span>{availableRoomCounts[roomType.maLoaiPhong] || 0} phòng còn trống</span>
+                  </div>
                   <div className={styles.roomRating}>
                     <FaStar className={styles.starIcon} />
                     <span>5.0</span>

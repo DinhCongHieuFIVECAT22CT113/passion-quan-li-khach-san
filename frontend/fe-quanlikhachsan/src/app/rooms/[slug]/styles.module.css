@@ -467,6 +467,31 @@
   border-top: 1px solid #eee;
 }
 
+.roomActions {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.viewDetailButton {
+  background: linear-gradient(135deg, #6366f1, #4f46e5);
+  color: white;
+  border: none;
+  padding: 0.75rem 2rem;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.viewDetailButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+  background: linear-gradient(135deg, #4f46e5, #4338ca);
+}
+
 .bookButton {
   background-color: #007bff;
   color: white;

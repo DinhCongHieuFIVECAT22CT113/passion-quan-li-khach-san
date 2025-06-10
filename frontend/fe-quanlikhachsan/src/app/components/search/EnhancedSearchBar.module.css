@@ -80,6 +80,18 @@
   padding-right: 32px;
 }
 
+/* Fix DatePicker z-index issue */
+:global(.react-datepicker-popper) {
+  z-index: 9999 !important;
+}
+
+:global(.react-datepicker) {
+  z-index: 9999 !important;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
 .filterButton {
   display: flex;
   align-items: center;

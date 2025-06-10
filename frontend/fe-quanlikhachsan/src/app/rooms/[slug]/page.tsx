@@ -150,20 +150,22 @@ export default function RoomsListPage() {
         const data = await phongResponse.json();
         const roomsData: ApiRoomData[] = Array.isArray(data) ? data : (data ? [data] : []);
 
-        const roomsWithDetails: Room[] = roomsData.map((room: ApiRoomData) => ({
-          maPhong: room.maPhong,
-          tenPhong: room.tenPhong || `Phòng ${room.maPhong}`,
-          maLoaiPhong: room.maLoaiPhong,
-          trangThai: room.trangThai,
-          moTa: room.moTa,
-          soPhong: room.soPhong,
-          thumbnail: getValidImageSrc(room.thumbnail),
-          hinhAnh: parseHinhAnh(room.hinhAnh),
-          amenities: defaultAmenities,
-        }));
+        const roomsWithDetails: Room[] = roomsData
+          .filter((room: ApiRoomData) => room.trangThai === 'Trống' || room.trangThai === 'Còn trống' || room.trangThai === 'Available')
+          .map((room: ApiRoomData) => ({
+            maPhong: room.maPhong,
+            tenPhong: room.tenPhong || `Phòng ${room.soPhong || room.maPhong}`,
+            maLoaiPhong: room.maLoaiPhong,
+            trangThai: room.trangThai,
+            moTa: room.moTa,
+            soPhong: room.soPhong,
+            thumbnail: getValidImageSrc(room.thumbnail),
+            hinhAnh: parseHinhAnh(room.hinhAnh),
+            amenities: defaultAmenities,
+          }));
         setRooms(roomsWithDetails);
         if (roomsWithDetails.length === 0 && phongResponse.ok) {
-          setError(`Không có phòng nào thuộc loại ${maLoaiPhong} hiện có sẵn.`);
+          setError(`Hiện tại không có phòng trống nào thuộc loại này.`);
         }
       }
 
@@ -378,16 +380,16 @@ export default function RoomsListPage() {
                     <h3>{room.tenPhong}</h3>
                     <div className={styles.roomInfo}>
                       <div className={styles.feature}>
-                        <span className={styles.featureLabel}>Mã phòng:</span>
-                        <span className={styles.featureValue}>{room.maPhong}</span>
+                        <span className={styles.featureLabel}>Tên phòng:</span>
+                        <span className={styles.featureValue}>{room.tenPhong}</span>
                       </div>
                       <div className={styles.feature}>
-                        <span className={styles.featureLabel}>Mã loại phòng:</span>
-                        <span className={styles.featureValue}>{room.maLoaiPhong}</span>
+                        <span className={styles.featureLabel}>Loại phòng:</span>
+                        <span className={styles.featureValue}>{roomType?.tenLoaiPhong || 'Không xác định'}</span>
                       </div>
                       <div className={styles.feature}>
                         <span className={styles.featureLabel}>Trạng thái:</span>
-                        <span className={styles.featureValue}>{room.trangThai}</span>
+                        <span className={styles.featureValue}>{room.trangThai === 'Trống' ? 'Còn trống' : room.trangThai}</span>
                       </div>
                     </div>
                     <div className={styles.roomDescription}>
@@ -448,25 +450,11 @@ export default function RoomsListPage() {
                       </ul>
                     </div>
                     <div className={styles.roomActions}>
-                      {room.hinhAnh && room.hinhAnh.length >= 1 && (
-                        <button
-                          className={styles.viewImagesButton}
-                          onClick={() => handleViewImages(room.hinhAnh || [room.thumbnail])}
-                          aria-label={`Xem thêm ảnh cho phòng ${room.tenPhong}`}
-                        >
-                          Xem thêm ảnh của phòng
-                        </button>
-                      )}
                       <button
-                        className={styles.bookButton}
-                        onClick={() => handleBookNow(room)}
-                        disabled={authLoading || room.trangThai === 'Đã đặt' || room.trangThai === 'Đang sử dụng' || room.trangThai === 'Đang dọn'}
+                        className={styles.viewDetailButton}
+                        onClick={() => router.push(`/users/room-detail/${room.maPhong}`)}
                       >
-                        {authLoading ? 'Đang tải...' :
-                         room.trangThai === 'Đã đặt' ? 'Đã được đặt' :
-                         room.trangThai === 'Đang sử dụng' ? 'Đang sử dụng' :
-                         room.trangThai === 'Đang dọn' ? 'Đang dọn' :
-                         'Đặt ngay'}
+                        Xem chi tiết phòng
                       </button>
                     </div>
                   </div>
@@ -474,7 +462,7 @@ export default function RoomsListPage() {
               ))
             ) : (
               <div className={styles.noRoomsFound}>
-                <p>Không có phòng nào được tìm thấy.</p>
+                <p>Hiện tại không có phòng trống nào thuộc loại này.</p>
                 <button onClick={() => router.back()} className={styles.backButton}>
                   Quay lại
                 </button>

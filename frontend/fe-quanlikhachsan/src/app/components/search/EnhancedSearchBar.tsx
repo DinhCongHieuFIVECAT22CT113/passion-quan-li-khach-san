@@ -57,14 +57,31 @@ const EnhancedSearchBar: React.FC<EnhancedSearchBarProps> = ({
   const [amenities, setAmenities] = useState<string[]>([]);
   const [roomFeatures, setRoomFeatures] = useState<string[]>([]);
 
-  // Mock data for suggestions
-  const mockSuggestions: SearchSuggestion[] = [
-    { id: '1', type: 'location', title: 'Hà Nội', subtitle: '245 khách sạn', icon: '🏙️' },
-    { id: '2', type: 'location', title: 'Hồ Chí Minh', subtitle: '189 khách sạn', icon: '🌆' },
-    { id: '3', type: 'location', title: 'Đà Nẵng', subtitle: '156 khách sạn', icon: '🏖️' },
-    { id: '4', type: 'room', title: 'Phòng Deluxe', subtitle: 'Phòng cao cấp', icon: '🛏️' },
-    { id: '5', type: 'room', title: 'Suite Presidential', subtitle: 'Phòng tổng thống', icon: '👑' },
+  // Danh sách tỉnh thành Việt Nam
+  const vietnamProvinces = [
+    'Hà Nội', 'TP. Hồ Chí Minh', 'Đà Nẵng', 'Hải Phòng', 'Cần Thơ',
+    'An Giang', 'Bà Rịa - Vũng Tàu', 'Bắc Giang', 'Bắc Kạn', 'Bạc Liêu',
+    'Bắc Ninh', 'Bến Tre', 'Bình Định', 'Bình Dương', 'Bình Phước',
+    'Bình Thuận', 'Cà Mau', 'Cao Bằng', 'Đắk Lắk', 'Đắk Nông',
+    'Điện Biên', 'Đồng Nai', 'Đồng Tháp', 'Gia Lai', 'Hà Giang',
+    'Hà Nam', 'Hà Tĩnh', 'Hải Dương', 'Hậu Giang', 'Hòa Bình',
+    'Hưng Yên', 'Khánh Hòa', 'Kiên Giang', 'Kon Tum', 'Lai Châu',
+    'Lâm Đồng', 'Lạng Sơn', 'Lào Cai', 'Long An', 'Nam Định',
+    'Nghệ An', 'Ninh Bình', 'Ninh Thuận', 'Phú Thọ', 'Phú Yên',
+    'Quảng Bình', 'Quảng Nam', 'Quảng Ngãi', 'Quảng Ninh', 'Quảng Trị',
+    'Sóc Trăng', 'Sơn La', 'Tây Ninh', 'Thái Bình', 'Thái Nguyên',
+    'Thanh Hóa', 'Thừa Thiên Huế', 'Tiền Giang', 'Trà Vinh', 'Tuyên Quang',
+    'Vĩnh Long', 'Vĩnh Phúc', 'Yên Bái'
   ];
+
+  // Mock data for suggestions
+  const mockSuggestions: SearchSuggestion[] = vietnamProvinces.map((province, index) => ({
+    id: `province-${index}`,
+    type: 'location' as const,
+    title: province,
+    subtitle: `${Math.floor(Math.random() * 200) + 50} khách sạn`,
+    icon: '📍'
+  }));
 
   // Load search history from localStorage
   useEffect(() => {
@@ -231,47 +248,21 @@ const EnhancedSearchBar: React.FC<EnhancedSearchBarProps> = ({
     <div className={containerClass}>
       <form onSubmit={handleSearch} className={styles.searchForm}>
         <div className={styles.searchFields}>
-          {/* Search Input with Autocomplete */}
+          {/* Location Select */}
           <div className={styles.searchField}>
             <FaMapMarkerAlt className={styles.fieldIcon} />
-            <input
-              ref={searchInputRef}
-              type="text"
-              placeholder={t('search.destination')}
+            <select
               value={searchQuery}
-              onChange={handleSearchChange}
-              onFocus={() => searchQuery && setShowSuggestions(true)}
-              className={styles.searchInput}
-            />
-            
-            {showSuggestions && suggestions.length > 0 && (
-              <div ref={suggestionsRef} className={styles.suggestions}>
-                {suggestions.map((suggestion) => (
-                  <div
-                    key={suggestion.id}
-                    className={styles.suggestionItem}
-                    onClick={() => handleSuggestionClick(suggestion)}
-                  >
-                    <span className={styles.suggestionIcon}>
-                      {suggestion.icon}
-                    </span>
-                    <div className={styles.suggestionContent}>
-                      <div className={styles.suggestionTitle}>
-                        {suggestion.title}
-                      </div>
-                      {suggestion.subtitle && (
-                        <div className={styles.suggestionSubtitle}>
-                          {suggestion.subtitle}
-                        </div>
-                      )}
-                    </div>
-                    {suggestion.type === 'recent' && (
-                      <FaClock className={styles.recentIcon} />
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className={styles.guestSelect}
+            >
+              <option value="">Chọn tỉnh thành</option>
+            {vietnamProvinces.map((province, index) => (
+                <option key={index} value={province}>
+                    {province}
+                </option>
+              ))}
+            </select>
           </div>
 
           {/* Check-in Date */}
