@@ -1,15 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import { FaUser, FaSpa, FaUtensils, FaSwimmer, FaDumbbell, FaCar, FaWifi, FaCoffee, FaShoppingBag, FaClock, FaMapMarkerAlt, FaStar } from 'react-icons/fa';
+import { FaUser, FaSpa, FaUtensils, FaSwimmer, FaDumbbell, FaCar, FaWifi, 
+         FaCoffee, FaShoppingBag, FaClock, FaMapMarkerAlt, FaStar, 
+         FaArrowLeft, FaCheck, FaInfoCircle } from 'react-icons/fa';
 import styles from './styles.module.css';
 import { useLanguage } from '../../components/profile/LanguageContext';
+import { useTranslation } from 'react-i18next';
 import i18n from '../../i18n';
 import { API_BASE_URL } from '@/lib/config';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import { getServices } from '../../../lib/api';
+import { formatCurrency as formatCurrencyUtil } from '@/lib/utils';
+import { withErrorBoundary, NetworkError } from '@/app/components/ui/ErrorBoundary';
+import { SafeImage } from '@/config/supabase';
 
 interface Service {
   maDichVu: string;
@@ -17,239 +23,267 @@ interface Service {
   moTa: string;
   donGia: number;
   thumbnail: string;
+  loaiDichVu?: string;
 }
 
-export default function ServicesPage() {
+// Định nghĩa các danh mục dịch vụ
+const SERVICE_CATEGORIES = {
+  SPA: 'Spa & Làm đẹp',
+  FOOD: 'Ẩm thực',
+  POOL: 'Hồ bơi & Thể thao',
+  TRANSPORT: 'Đưa đón & Di chuyển',
+  ENTERTAINMENT: 'Giải trí',
+  OTHER: 'Dịch vụ khác'
+};
+
+function ServicesPage() {
   const { selectedLanguage } = useLanguage();
+  const { t } = useTranslation();
+  const [isClient, setIsClient] = useState(false);
   const [services, setServices] = useState<Service[]>([]);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
-  const [showModal, setShowModal] = useState(false);
-  const [bookingDetails, setBookingDetails] = useState({
-    date: '',
-    time: '',
-    guests: 1,
-    notes: '',
-  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string>('ALL');
+  const [categorizedServices, setCategorizedServices] = useState<{[key: string]: Service[]}>({});
+  const [retryCount, setRetryCount] = useState(0);
 
-  useEffect(() => {
-    i18n.changeLanguage(selectedLanguage);
-    fetchServices();
-  }, [selectedLanguage]);
+  // Phân loại dịch vụ dựa trên tên
+  const categorizeService = useCallback((service: Service): Service => {
+    const name = (service.tenDichVu || '').toLowerCase();
+    let category = 'OTHER';
+    
+    if (name.includes('spa') || name.includes('massage') || name.includes('làm đẹp') || name.includes('beauty')) {
+      category = 'SPA';
+    } else if (name.includes('ăn') || name.includes('food') || name.includes('nhà hàng') || name.includes('restaurant') || name.includes('buffet')) {
+      category = 'FOOD';
+    } else if (name.includes('bơi') || name.includes('swim') || name.includes('gym') || name.includes('thể thao') || name.includes('sport')) {
+      category = 'POOL';
+    } else if (name.includes('đưa đón') || name.includes('transport') || name.includes('xe') || name.includes('car')) {
+      category = 'TRANSPORT';
+    } else if (name.includes('giải trí') || name.includes('entertainment') || name.includes('game') || name.includes('tour')) {
+      category = 'ENTERTAINMENT';
+    }
+    
+    return {
+      ...service,
+      loaiDichVu: category
+    };
+  }, []);
 
-  const fetchServices = async () => {
+  // Tạo object chứa dịch vụ theo danh mục
+  const categorizeServices = useCallback((servicesList: Service[]) => {
+    const categorized: {[key: string]: Service[]} = {
+      ALL: servicesList
+    };
+    
+    Object.keys(SERVICE_CATEGORIES).forEach(category => {
+      categorized[category] = servicesList.filter(
+        (service: Service) => service.loaiDichVu === category
+      );
+    });
+    
+    return categorized;
+  }, []);
+
+  // Fetch dịch vụ từ API
+  const fetchServices = useCallback(async () => {
     try {
       setLoading(true);
       const data = await getServices();
-      console.log('Dữ liệu services:', data);
       
-      // Đảm bảo dữ liệu là mảng hợp lệ
-      if (Array.isArray(data)) {
-        setServices(data);
-      } else {
-        console.error('Dữ liệu services không phải dạng mảng:', data);
-        setError('Không thể lấy danh sách dịch vụ');
+      if (!Array.isArray(data)) {
+        throw new Error('Dữ liệu không hợp lệ');
       }
-    } catch (error) {
-      console.error('Error fetching services:', error);
-      setError('Không thể lấy danh sách dịch vụ');
+      
+      // Phân loại dịch vụ vào các danh mục
+      const servicesWithCategories = data.map(categorizeService);
+      
+      setServices(servicesWithCategories);
+      setCategorizedServices(categorizeServices(servicesWithCategories));
+      setError(null);
+    } catch (err: any) {
+      console.error('Error fetching services:', err);
+      setError(err?.message || 'Không thể tải dữ liệu dịch vụ. Vui lòng thử lại sau.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [categorizeService, categorizeServices]);
 
-  // Hàm định dạng tiền tệ an toàn
-  const formatCurrency = (value: unknown): string => {
-    // Chuyển đổi sang number nếu là string
-    const numValue = typeof value === 'string' ? parseFloat(value) : (value as number);
+  // Xử lý retry khi lỗi
+  const handleRetry = useCallback(() => {
+    setRetryCount(prev => prev + 1);
+    setError(null);
+    fetchServices();
+  }, [fetchServices]);
+
+  useEffect(() => {
+    setIsClient(true);
     
-    // Kiểm tra giá trị hợp lệ
-    if (isNaN(numValue) || numValue === null || numValue === undefined) {
-      return '0 đ';
+    // Đảm bảo i18n được cập nhật khi ngôn ngữ thay đổi
+    if (selectedLanguage) {
+      i18n.changeLanguage(selectedLanguage);
     }
     
-    try {
-      return numValue.toLocaleString('vi-VN') + ' đ';
-    } catch (error) {
-      console.error('Lỗi định dạng tiền tệ:', error);
-      return '0 đ';
-    }
-  };
-  
-  const handleServiceClick = (service: Service) => {
+    fetchServices();
+  }, [selectedLanguage, fetchServices]);
+
+  const handleServiceClick = useCallback((service: Service) => {
     setSelectedService(service);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  }, []);
 
-  const handleBookingSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedService) return;
+  const handleBackClick = useCallback(() => {
+    setSelectedService(null);
+  }, []);
 
-    try {
-      // Thực hiện API call để đặt dịch vụ
-      const response = await fetch(`${API_BASE_URL}/SuDungDichVu`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          serviceId: selectedService.maDichVu,
-          usageDate: bookingDetails.date,
-          usageTime: bookingDetails.time,
-          quantity: bookingDetails.guests,
-          notes: bookingDetails.notes,
-          // Thêm thông tin người dùng từ localStorage hoặc context
-          customerId: localStorage.getItem('userId') || ''
-        })
-      });
+  const handleCategoryChange = useCallback((category: string) => {
+    setActiveCategory(category);
+  }, []);
 
-      if (!response.ok) {
-        throw new Error('Không thể đặt dịch vụ');
-      }
-
-      // Đặt dịch vụ thành công
-      setShowModal(false);
-      alert('Đặt dịch vụ thành công!');
-      
-      // Reset form
-      setBookingDetails({
-        date: '',
-        time: '',
-        guests: 1,
-        notes: '',
-      });
-    } catch (err) {
-      console.error('Lỗi khi đặt dịch vụ:', err);
-      alert('Đã xảy ra lỗi khi đặt dịch vụ. Vui lòng thử lại.');
-    }
-  };
-
-  // Hàm lấy icon phù hợp với loại dịch vụ
-  const getServiceIcon = (serviceName: string) => {
-    const name = serviceName.toLowerCase();
-    if (name.includes('spa') || name.includes('massage')) return <FaSpa />;
-    if (name.includes('ăn') || name.includes('nhà hàng') || name.includes('restaurant')) return <FaUtensils />;
-    if (name.includes('bơi') || name.includes('hồ bơi') || name.includes('swim')) return <FaSwimmer />;
+  const getServiceIcon = useCallback((serviceName: string) => {
+    const name = (serviceName || '').toLowerCase();
+    if (name.includes('spa') || name.includes('massage') || name.includes('làm đẹp')) return <FaSpa />;
+    if (name.includes('ăn') || name.includes('food') || name.includes('nhà hàng') || name.includes('restaurant')) return <FaUtensils />;
+    if (name.includes('bơi') || name.includes('swim')) return <FaSwimmer />;
     if (name.includes('gym') || name.includes('thể dục') || name.includes('fitness')) return <FaDumbbell />;
-    if (name.includes('đưa đón') || name.includes('xe') || name.includes('transport')) return <FaCar />;
+    if (name.includes('đưa đón') || name.includes('transport') || name.includes('xe')) return <FaCar />;
     if (name.includes('wifi') || name.includes('internet')) return <FaWifi />;
     if (name.includes('cà phê') || name.includes('coffee')) return <FaCoffee />;
-    return <FaShoppingBag />;
-  };
+    if (name.includes('mua sắm') || name.includes('shopping')) return <FaShoppingBag />;
+    return <FaInfoCircle />;
+  }, []);
 
-  // Hàm lấy đường dẫn hình ảnh hợp lệ
-  const getValidImageSrc = (imagePath: string | undefined): string => {
-    if (!imagePath) return '/images/service-placeholder.jpg';
-    
-    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
-      return imagePath;
+  const getCategoryIcon = useCallback((category: string) => {
+    switch(category) {
+      case 'SPA': return <FaSpa />;
+      case 'FOOD': return <FaUtensils />;
+      case 'POOL': return <FaSwimmer />;
+      case 'TRANSPORT': return <FaCar />;
+      case 'ENTERTAINMENT': return <FaShoppingBag />;
+      case 'OTHER': return <FaInfoCircle />;
+      default: return null;
     }
-    
-    if (imagePath.startsWith('/')) {
-      return imagePath;
-    }
-    
-    return '/images/service-placeholder.jpg';
-  };
+  }, []);
 
-  // Hàm kiểm tra chuỗi an toàn trước khi dùng các phương thức length, substring
-  const safeString = (value: unknown): string => {
-    if (value === null || value === undefined) return '';
-    return String(value);
-  };
+  const formatCurrency = useCallback((amount: number) => {
+    return formatCurrencyUtil(amount);
+  }, []);
 
-  if (loading) {
-    return (
-      <div className={styles.loadingContainer}>
-        <div className={styles.spinner}></div>
-        <p>Đang tải danh sách dịch vụ...</p>
-      </div>
-    );
+  const getValidImageSrc = useCallback((src: string) => {
+    if (!src) return '/images/service-placeholder.jpg';
+    if (src.startsWith('http')) return src;
+    return `${API_BASE_URL}/${src.replace(/^\//, '')}`;
+  }, []);
+
+  // Tránh lỗi hydration
+  if (!isClient) {
+    return null;
   }
 
-  if (error) {
-    return (
-      <div className={styles.errorContainer}>
-        <h2>Có lỗi xảy ra</h2>
-        <p>{error}</p>
-        <button onClick={() => window.location.reload()} className={styles.reloadButton}>
-          Thử lại
-        </button>
-      </div>
-    );
+  // Hiển thị lỗi kết nối
+  if (error && error.includes('kết nối')) {
+    return <NetworkError onRetry={handleRetry} />;
   }
 
   return (
     <div className={styles.pageContainer}>
-      {/* Header */}
       <Header />
-
-      {/* Hero Section */}
+      
       <section className={styles.heroSection}>
-        <div className={styles.heroOverlay}></div>
         <div className={styles.heroContent}>
-          <h1>Dịch vụ đẳng cấp</h1>
-          <p>Trải nghiệm những dịch vụ cao cấp tại khách sạn của chúng tôi</p>
+          <h1>{t('explore.services', 'Dịch vụ đẳng cấp')}</h1>
+          <p>{t('explore.exploreServices', 'Khám phá các dịch vụ cao cấp tại khách sạn của chúng tôi')}</p>
         </div>
       </section>
 
-      {/* Main Content */}
-      <main className={styles.mainContent}>
-        {selectedService ? (
+      <div className={styles.mainContent}>
+        {loading ? (
+          <div className={styles.loadingContainer}>
+            <div className={styles.spinner}></div>
+            <p>Đang tải dịch vụ...</p>
+          </div>
+        ) : error ? (
+          <div className={styles.errorContainer}>
+            <h3>Đã xảy ra lỗi</h3>
+            <p>{error}</p>
+            <button 
+              className={styles.reloadButton}
+              onClick={handleRetry}
+            >
+              Tải lại trang
+            </button>
+          </div>
+        ) : selectedService ? (
           <div className={styles.serviceDetail}>
             <button 
-              onClick={() => setSelectedService(null)} 
               className={styles.backButton}
+              onClick={handleBackClick}
+              aria-label="Quay lại danh sách dịch vụ"
             >
-              &larr; Quay lại danh sách dịch vụ
+              <FaArrowLeft style={{ marginRight: '8px' }} /> Quay lại danh sách dịch vụ
             </button>
             
             <div className={styles.serviceDetailHeader}>
               <div className={styles.serviceDetailImage}>
-                <Image 
+                <SafeImage 
                   src={getValidImageSrc(selectedService.thumbnail)} 
-                  alt={selectedService.tenDichVu || 'Dịch vụ'}
-                  width={600}
-                  height={400}
+                  alt={selectedService.tenDichVu || 'Chi tiết dịch vụ'}
+                  fill
                   className={styles.detailImage}
+                  fallbackSrc="/images/service-placeholder.jpg"
                 />
               </div>
+              
               <div className={styles.serviceDetailInfo}>
-                <h2>{selectedService.tenDichVu || 'Dịch vụ'}</h2>
+                <div className={styles.serviceCategoryBadge}>
+                  {getCategoryIcon(selectedService.loaiDichVu || 'OTHER')}
+                  <span>{SERVICE_CATEGORIES[selectedService.loaiDichVu as keyof typeof SERVICE_CATEGORIES] || 'Dịch vụ khác'}</span>
+                </div>
+                <h2>{selectedService.tenDichVu || 'Dịch vụ không xác định'}</h2>
                 <div className={styles.servicePrice}>
                   {formatCurrency(selectedService.donGia)}
                 </div>
-                <p className={styles.serviceDescription}>{safeString(selectedService.moTa)}</p>
+                <div className={styles.serviceDescription}>
+                  {selectedService.moTa || 'Không có mô tả chi tiết cho dịch vụ này.'}
+                </div>
                 <button 
-                  onClick={() => setShowModal(true)} 
                   className={styles.bookServiceButton}
+                  aria-label="Đặt dịch vụ ngay"
                 >
-                  Đặt dịch vụ
+                  Đặt dịch vụ ngay
                 </button>
               </div>
             </div>
             
             <div className={styles.serviceDetailContent}>
-              <h3>Thông tin chi tiết</h3>
+              <h3>Tính năng nổi bật</h3>
               <div className={styles.serviceFeatures}>
                 <div className={styles.featureItem}>
-                  <FaUser className={styles.featureIcon} />
+                  <div className={styles.featureIcon}>
+                    <FaClock />
+                  </div>
                   <div className={styles.featureText}>
-                    <h4>Dành cho</h4>
-                    <p>Tất cả khách hàng</p>
+                    <h4>Thời gian linh hoạt</h4>
+                    <p>Dịch vụ được cung cấp 24/7 theo yêu cầu của khách hàng</p>
                   </div>
                 </div>
                 <div className={styles.featureItem}>
-                  <FaClock className={styles.featureIcon} />
+                  <div className={styles.featureIcon}>
+                    <FaMapMarkerAlt />
+                  </div>
                   <div className={styles.featureText}>
-                    <h4>Thời gian</h4>
-                    <p>8:00 - 22:00 hàng ngày</p>
+                    <h4>Vị trí thuận tiện</h4>
+                    <p>Dịch vụ được cung cấp tại khách sạn hoặc địa điểm bạn chọn</p>
                   </div>
                 </div>
                 <div className={styles.featureItem}>
-                  <FaMapMarkerAlt className={styles.featureIcon} />
+                  <div className={styles.featureIcon}>
+                    <FaUser />
+                  </div>
                   <div className={styles.featureText}>
-                    <h4>Địa điểm</h4>
-                    <p>Tại khách sạn</p>
+                    <h4>Nhân viên chuyên nghiệp</h4>
+                    <p>Đội ngũ nhân viên được đào tạo bài bản và giàu kinh nghiệm</p>
                   </div>
                 </div>
               </div>
@@ -257,9 +291,10 @@ export default function ServicesPage() {
               <div className={styles.servicePolicy}>
                 <h3>Chính sách dịch vụ</h3>
                 <ul>
-                  <li>Đặt trước ít nhất 2 giờ</li>
-                  <li>Có thể hủy miễn phí trước 1 giờ</li>
-                  <li>Thanh toán khi sử dụng dịch vụ</li>
+                  <li>Đặt trước ít nhất 2 giờ để đảm bảo dịch vụ tốt nhất</li>
+                  <li>Miễn phí hủy trước 24 giờ, sau đó phí hủy là 30%</li>
+                  <li>Giá đã bao gồm thuế và phí dịch vụ</li>
+                  <li>Thanh toán có thể thực hiện bằng tiền mặt hoặc thẻ tín dụng</li>
                 </ul>
               </div>
             </div>
@@ -267,32 +302,74 @@ export default function ServicesPage() {
         ) : (
           <>
             <div className={styles.sectionHeader}>
-              <h2>Dịch vụ của chúng tôi</h2>
-              <p>Khám phá các dịch vụ cao cấp tại khách sạn</p>
+              <h2>{t('explore.ourServices', 'Dịch vụ của chúng tôi')}</h2>
+              <p>{t('explore.servicesDescription', 'Khám phá các dịch vụ cao cấp tại khách sạn')}</p>
             </div>
             
-            <div className={styles.servicesGrid}>
-              {services.length > 0 ? (
-                services.map((service, index) => (
+            <div className={styles.categoryTabs}>
+              <button 
+                className={`${styles.categoryTab} ${activeCategory === 'ALL' ? styles.activeTab : ''}`}
+                onClick={() => handleCategoryChange('ALL')}
+                aria-label="Hiển thị tất cả dịch vụ"
+                aria-pressed={activeCategory === 'ALL'}
+              >
+                Tất cả
+              </button>
+              {Object.entries(SERVICE_CATEGORIES).map(([key, value]) => (
+                categorizedServices[key] && categorizedServices[key].length > 0 && (
+                  <button 
+                    key={key}
+                    className={`${styles.categoryTab} ${activeCategory === key ? styles.activeTab : ''}`}
+                    onClick={() => handleCategoryChange(key)}
+                    aria-label={`Hiển thị dịch vụ ${value}`}
+                    aria-pressed={activeCategory === key}
+                  >
+                    {getCategoryIcon(key)}
+                    <span>{value}</span>
+                  </button>
+                )
+              ))}
+            </div>
+            
+            {(categorizedServices[activeCategory]?.length || 0) === 0 ? (
+              <div className={styles.noServices}>
+                <p>Hiện tại không có dịch vụ nào trong danh mục này. Vui lòng quay lại sau.</p>
+              </div>
+            ) : (
+              <div className={styles.servicesGrid}>
+                {categorizedServices[activeCategory]?.map((service, index) => (
                   <div 
-                    key={service.maDichVu || index} 
+                    key={service.maDichVu || `service-${index}`} 
                     className={styles.serviceCard}
                     onClick={() => handleServiceClick(service)}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Xem chi tiết dịch vụ ${service.tenDichVu || 'Dịch vụ'}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleServiceClick(service);
+                      }
+                    }}
                   >
                     <div className={styles.serviceImageContainer}>
-                      <Image 
+                      <SafeImage 
                         src={getValidImageSrc(service.thumbnail)} 
                         alt={service.tenDichVu || 'Dịch vụ'}
                         width={400}
                         height={250}
                         className={styles.serviceImage}
+                        fallbackSrc="/images/service-placeholder.jpg"
                       />
                       <div className={styles.serviceIcon}>
                         {getServiceIcon(service.tenDichVu || '')}
                       </div>
+                      <div className={styles.serviceCategoryTag}>
+                        {SERVICE_CATEGORIES[service.loaiDichVu as keyof typeof SERVICE_CATEGORIES] || 'Dịch vụ khác'}
+                      </div>
                     </div>
                     <div className={styles.serviceContent}>
-                      <h3>{service.tenDichVu || 'Dịch vụ'}</h3>
+                      <h3>{service.tenDichVu || 'Dịch vụ không xác định'}</h3>
                       <div className={styles.serviceRating}>
                         <FaStar className={styles.starIcon} />
                         <FaStar className={styles.starIcon} />
@@ -300,114 +377,37 @@ export default function ServicesPage() {
                         <FaStar className={styles.starIcon} />
                         <FaStar className={styles.starIcon} />
                       </div>
-                      <p>{safeString(service.moTa).length > 100 
-                          ? safeString(service.moTa).substring(0, 100) + '...' 
-                          : safeString(service.moTa)}
-                      </p>
+                      <div className={styles.serviceShortDesc}>
+                        {service.moTa 
+                          ? service.moTa.length > 100 
+                            ? `${service.moTa.substring(0, 100)}...` 
+                            : service.moTa
+                          : 'Không có mô tả cho dịch vụ này.'}
+                      </div>
                       <div className={styles.serviceFooter}>
-                        <div className={styles.servicePrice}>{formatCurrency(service.donGia)}</div>
-                        <button className={styles.viewDetailsBtn}>Xem chi tiết</button>
+                        <div className={styles.servicePrice}>
+                          {formatCurrency(service.donGia)}
+                        </div>
+                        <button 
+                          className={styles.viewDetailsBtn}
+                          aria-label={`Xem chi tiết dịch vụ ${service.tenDichVu || 'Dịch vụ'}`}
+                        >
+                          Chi tiết
+                        </button>
                       </div>
                     </div>
                   </div>
-                ))
-              ) : (
-                <div className={styles.noServices}>
-                  <p>Hiện không có dịch vụ nào.</p>
-                </div>
-              )}
-            </div>
+                ))}
+              </div>
+            )}
           </>
         )}
-      </main>
-
-      {/* Modal đặt dịch vụ */}
-{showModal && selectedService && (
-  <div className={styles.modalOverlay}>
-    <div className={styles.modal}>
-      <div className={styles.modalHeader}>
-        <h3>Đặt dịch vụ: {selectedService.tenDichVu}</h3>
-        <button className={styles.closeModalBtn} onClick={() => setShowModal(false)}>
-          &times;
-        </button>
       </div>
-      <div className={styles.modalBody}>
-        <form onSubmit={handleBookingSubmit}>
-          <div className={styles.formGroup}>
-            <label htmlFor="date">Ngày sử dụng:</label>
-            <input
-              type="date"
-              id="date"
-              value={bookingDetails.date}
-              onChange={(e) =>
-                setBookingDetails({ ...bookingDetails, date: e.target.value })
-              }
-              required
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="time">Giờ sử dụng:</label>
-            <input
-              type="time"
-              id="time"
-              value={bookingDetails.time}
-              onChange={(e) =>
-                setBookingDetails({ ...bookingDetails, time: e.target.value })
-              }
-              min="08:00"
-              max="22:00"
-              required
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="guests">Số người:</label>
-            <input
-              type="number"
-              id="guests"
-              value={bookingDetails.guests}
-              onChange={(e) =>
-                setBookingDetails({
-                  ...bookingDetails,
-                  guests: Number(e.target.value),
-                })
-              }
-              min="1"
-              required
-            />
-          </div>
-          <div className={styles.formGroup}>
-            <label htmlFor="notes">Ghi chú:</label>
-            <textarea
-              id="notes"
-              value={bookingDetails.notes}
-              onChange={(e) =>
-                setBookingDetails({ ...bookingDetails, notes: e.target.value })
-              }
-              rows={4}
-            />
-          </div>
-          <div className={styles.bookingSummary}>
-            <h4>Thông tin đặt dịch vụ</h4>
-            <div className={styles.summaryItem}>
-              <span>Dịch vụ:</span>
-              <span>{selectedService.tenDichVu}</span>
-            </div>
-            <div className={styles.summaryItem}>
-              <span>Giá:</span>
-              <span>{formatCurrency(selectedService.donGia)}</span>
-            </div>
-          </div>
-          <button type="submit" className={styles.submitBookingBtn}>
-            Xác nhận đặt dịch vụ
-          </button>
-        </form>
-      </div>
-    </div>
-  </div>
-)}
       
-      {/* Footer */}
       <Footer />
     </div>
   );
-} 
+}
+
+// Bọc component bằng ErrorBoundary để xử lý lỗi
+export default withErrorBoundary(ServicesPage); 
