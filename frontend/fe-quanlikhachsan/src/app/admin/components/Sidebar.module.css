@@ -12,6 +12,8 @@
   overflow-x: hidden;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
   width: 240px;
+  display: flex;
+  flex-direction: column;
 }
 
 .sidebar.closed {
@@ -45,6 +47,8 @@
 /* Navigation styles */
 .sidebarNav {
   padding: 10px 0;
+  flex: 1;
+  overflow-y: auto;
 }
 
 .navItem {
@@ -81,6 +85,60 @@
   margin-left: 10px;
   font-size: 0.95rem;
   white-space: nowrap;
+}
+
+/* Footer styles */
+.sidebarFooter {
+  padding: 15px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.userDetails {
+  overflow: hidden;
+}
+
+.userName {
+  font-weight: 600;
+  margin: 0;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.userRole {
+  color: #cbd5e1;
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.logoutButton {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 10px;
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.logoutButton:hover {
+  background-color: #dc2626;
+}
+
+.sidebar.closed .logoutButton {
+  padding: 10px 0;
+  justify-content: center;
 }
 
 /* Toggle button */
@@ -165,8 +223,13 @@
     display: none;
   }
   
+  .sidebar.closed .userDetails {
+    display: none;
+  }
+  
   .toggleButton {
     left: 10px;
   }
 }
+
 

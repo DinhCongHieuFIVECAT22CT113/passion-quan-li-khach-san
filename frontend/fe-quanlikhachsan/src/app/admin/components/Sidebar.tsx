@@ -5,13 +5,17 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { FaBars, FaTimes, FaHome, FaBed, FaUsers, FaCalendarAlt, 
          FaFileInvoiceDollar, FaConciergeBell, FaPercentage, 
-         FaComments, FaUserTie, FaUserShield, FaChartBar, FaGlobe } from 'react-icons/fa';
+         FaComments, FaUserTie, FaUserShield, FaChartBar, FaGlobe, FaSignOutAlt } from 'react-icons/fa';
 import styles from './Sidebar.module.css';
+import { useAuth } from '../../../lib/auth';
+import { useLogout } from '../../../lib/hooks';
 
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const pathname = usePathname();
+  const { user } = useAuth();
+  const handleLogout = useLogout();
 
   // Kiểm tra kích thước màn hình
   useEffect(() => {
@@ -114,6 +118,34 @@ const Sidebar = () => {
             </Link>
           ))}
         </nav>
+        
+        {/* User info và nút đăng xuất */}
+        <div className={styles.sidebarFooter}>
+          {user && (
+            <div className={styles.userInfo}>
+              {isOpen && (
+                <div className={styles.userDetails}>
+                  <p className={styles.userName}>{user.hoTen || user.maNguoiDung}</p>
+                  <p className={styles.userRole}>
+                    {user.role === 'R00' ? 'Admin' : 
+                     user.role === 'R01' ? 'Quản lý' : 
+                     user.role === 'R02' ? 'Nhân viên' : 
+                     user.role === 'R03' ? 'Kế toán' : 'Người dùng'}
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+          
+          <button 
+            className={styles.logoutButton} 
+            onClick={handleLogout}
+            title="Đăng xuất"
+          >
+            <span className={styles.navIcon}><FaSignOutAlt /></span>
+            {isOpen && <span className={styles.navLabel}>Đăng xuất</span>}
+          </button>
+        </div>
       </aside>
       
       {/* Overlay cho mobile */}
@@ -125,5 +157,6 @@ const Sidebar = () => {
 };
 
 export default Sidebar;
+
 
 
