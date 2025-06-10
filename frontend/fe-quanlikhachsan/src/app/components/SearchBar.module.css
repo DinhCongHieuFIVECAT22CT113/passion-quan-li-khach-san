@@ -1,0 +1,342 @@
+.searchBarContainer {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  position: relative;
+  z-index: 50;
+}
+
+.searchBar {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.inputGroup {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  position: relative;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.inputGroup:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.inputGroup.active {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.inputGroup:last-of-type {
+  border-right: none;
+}
+
+.inputIcon {
+  color: #9c8250;
+  font-size: 18px;
+  margin-right: 14px;
+  flex-shrink: 0;
+}
+
+.inputContent {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.inputLabel {
+  font-size: 12px;
+  color: #6b7280;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.inputField {
+  border: none;
+  outline: none;
+  font-size: 15px;
+  color: #1f2937;
+  background: transparent;
+  width: 100%;
+  padding: 0;
+}
+
+.dateInput {
+  border: none;
+  outline: none;
+  font-size: 15px;
+  color: #1f2937;
+  background: transparent;
+  cursor: pointer;
+  width: 100%;
+  padding: 0;
+}
+
+.guestDisplay {
+  font-size: 15px;
+  color: #1f2937;
+}
+
+.searchButton {
+  background: linear-gradient(135deg, #4f46e5, #3b82f6);
+  color: white;
+  border: none;
+  height: 100%;
+  padding: 0 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.searchButton:hover {
+  background: linear-gradient(135deg, #4338ca, #3b82f6);
+}
+
+.searchIcon {
+  font-size: 18px;
+}
+
+/* Dropdown styles */
+.dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  width: 280px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  overflow: hidden;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdownHeader {
+  padding: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #4b5563;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.dropdownContent {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.dropdownItem {
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.dropdownItem:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.dropdownItemIcon {
+  color: #4f46e5;
+  margin-right: 12px;
+  font-size: 14px;
+}
+
+/* Guest selector styles */
+.guestSelector {
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.guestControls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.guestButton {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  color: #4b5563;
+  transition: all 0.2s;
+}
+
+.guestButton:hover:not(:disabled) {
+  background-color: #f3f4f6;
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+.guestButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.guestCount {
+  font-size: 16px;
+  font-weight: 500;
+  color: #1f2937;
+  min-width: 24px;
+  text-align: center;
+}
+
+/* Calendar container styles */
+.calendarContainer {
+  position: relative;
+  z-index: 100;
+  margin-bottom: 10px;
+}
+
+/* Custom styles for react-datepicker */
+:global(.react-datepicker) {
+  font-family: 'Inter', sans-serif;
+  border-radius: 12px;
+  overflow: hidden;
+  border: none;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+:global(.react-datepicker-popper) {
+  z-index: 100 !important;
+}
+
+:global(.react-datepicker-popper[data-placement^="top"]) {
+  margin-bottom: 10px !important;
+}
+
+:global(.react-datepicker__header) {
+  background-color: #f9fafb;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  padding-top: 12px;
+}
+
+:global(.react-datepicker__current-month) {
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+:global(.react-datepicker__day-name) {
+  color: #6b7280;
+  font-weight: 500;
+  width: 36px;
+  margin: 0;
+}
+
+:global(.react-datepicker__day) {
+  width: 36px;
+  height: 36px;
+  line-height: 36px;
+  margin: 0;
+  border-radius: 50%;
+  color: #1f2937;
+}
+
+:global(.react-datepicker__day--selected) {
+  background-color: #4f46e5;
+}
+
+:global(.react-datepicker__day--in-selecting-range),
+:global(.react-datepicker__day--in-range) {
+  background-color: rgba(79, 70, 229, 0.2);
+  color: #1f2937;
+}
+
+:global(.react-datepicker__day--keyboard-selected) {
+  background-color: rgba(79, 70, 229, 0.5);
+}
+
+:global(.react-datepicker__day:hover) {
+  background-color: rgba(79, 70, 229, 0.1);
+}
+
+:global(.react-datepicker__navigation) {
+  top: 12px;
+}
+
+:global(.react-datepicker__navigation--previous) {
+  left: 12px;
+}
+
+:global(.react-datepicker__navigation--next) {
+  right: 12px;
+}
+
+:global(.react-datepicker__month-container) {
+  float: none;
+}
+
+:global(.react-datepicker__month) {
+  margin: 0;
+  padding: 0 12px 12px;
+}
+
+:global(.react-datepicker__day--outside-month) {
+  color: #9ca3af;
+}
+
+/* Responsive styles */
+@media (max-width: 900px) {
+  .searchBar {
+    flex-wrap: wrap;
+  }
+
+  .inputGroup {
+    flex: 1 0 45%;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  .searchButton {
+    flex: 1 0 100%;
+    padding: 16px;
+  }
+}
+
+@media (max-width: 640px) {
+  .searchBar {
+    flex-direction: column;
+  }
+
+  .inputGroup {
+    width: 100%;
+    border-right: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  .searchButton {
+    width: 100%;
+    padding: 16px;
+  }
+
+  .dropdown {
+    width: 100%;
+    left: 0;
+  }
+}
+
+

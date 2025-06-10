@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 export default function AdminRedirect() {
   const router = useRouter();
   useEffect(() => {
-    router.replace("/admin/rooms");
+    router.replace("/admin/dashboard");
   }, [router]);
   return (
     <div style={{ 
@@ -16,7 +16,7 @@ export default function AdminRedirect() {
       flexDirection: 'column'
     }}>
       <h1>Passion Admin</h1>
-      <p>Đang chuyển hướng đến trang quản lý phòng...</p>
+      <p>Đang chuyển hướng đến trang Dashboard...</p>
     </div>
   );
 }

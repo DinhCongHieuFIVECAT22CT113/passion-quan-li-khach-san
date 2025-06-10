@@ -1,10 +1,10 @@
 // trang Rooms
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FaStar, FaWifi, FaTv, FaSnowflake, FaBath, FaSearch, FaFilter, FaBed, FaDollarSign, FaUsers, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { FaStar, FaWifi, FaTv, FaSnowflake, FaBath, FaSearch, FaFilter, FaBed, FaDollarSign, FaUsers, FaChevronDown, FaChevronUp, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import styles from './styles.module.css';
 import { getRoomTypes, countAvailableRoomsByType } from '../../../lib/api';
 import { RoomType } from '../../../types/auth';
@@ -55,6 +55,20 @@ export default function RoomsPage() {
   const [checkInDate, setCheckInDate] = useState<string | null>(null);
   const [checkOutDate, setCheckOutDate] = useState<string | null>(null);
   const [numberOfGuests, setNumberOfGuests] = useState<number>(2);
+
+  const roomGridRef = useRef<HTMLDivElement>(null);
+
+  const scrollLeft = () => {
+    if (roomGridRef.current) {
+      roomGridRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRight = () => {
+    if (roomGridRef.current) {
+      roomGridRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+    }
+  };
 
   useEffect(() => {
     setMounted(true);
@@ -306,7 +320,7 @@ export default function RoomsPage() {
       <main className={styles.mainContent}>
         <div className={styles.sectionHeader}>
           <h2>Danh sách các loại phòng ({sortedRoomTypes.length})</h2>
-          <p>Sắp xếp theo giá từ thấp đến cao</p>
+          <p>Kéo sang phải để xem thêm phòng</p>
         </div>
 
         {sortedRoomTypes.length === 0 ? (
@@ -332,84 +346,94 @@ export default function RoomsPage() {
             </button>
           </div>
         ) : (
-          <div className={styles.roomGrid}>
-            {sortedRoomTypes.map((roomType) => (
-              <div key={roomType.maLoaiPhong} className={styles.roomCard}>
-                <div className={styles.roomImageContainer}>
-                  <Image
-                    src={getValidImageSrc(roomType.thumbnail)}
-                    alt={roomType.tenLoaiPhong}
-                    width={500}
-                    height={300}
-                    className={styles.roomImage}
-                  />
-                  <div className={styles.roomBadge}>{roomType.tenLoaiPhong}</div>
-                  <div className={styles.roomAvailability}>
-                    <span>{availableRoomCounts[roomType.maLoaiPhong] || 0} phòng còn trống</span>
+          <>
+            <div className={styles.roomGrid} ref={roomGridRef}>
+              {sortedRoomTypes.map((roomType) => (
+                <div key={roomType.maLoaiPhong} className={styles.roomCard}>
+                  <div className={styles.roomImageContainer}>
+                    <Image
+                      src={getValidImageSrc(roomType.thumbnail)}
+                      alt={roomType.tenLoaiPhong}
+                      width={500}
+                      height={300}
+                      className={styles.roomImage}
+                    />
+                    <div className={styles.roomBadge}>{roomType.tenLoaiPhong}</div>
+                    <div className={styles.roomAvailability}>
+                      <span>{availableRoomCounts[roomType.maLoaiPhong] || 0} phòng còn trống</span>
+                    </div>
+                    <div className={styles.roomRating}>
+                      <FaStar className={styles.starIcon} />
+                      <span>5.0</span>
+                    </div>
                   </div>
-                  <div className={styles.roomRating}>
-                    <FaStar className={styles.starIcon} />
-                    <span>5.0</span>
+
+                  <div className={styles.roomContent}>
+                    <h3 className={styles.roomTitle}>{roomType.tenLoaiPhong}</h3>
+
+                    <p className={styles.roomDescription}>
+                      {roomType.moTa || `Phòng ${roomType.tenLoaiPhong} sang trọng với diện tích ${roomType.kichThuocPhong || 0}m², trang bị đầy đủ tiện nghi hiện đại.`}
+                    </p>
+
+                    <div className={styles.amenitiesRow}>
+                      <div className={styles.amenityItem}>
+                        <FaWifi className={styles.amenityIcon} />
+                        <span>WiFi</span>
+                      </div>
+                      <div className={styles.amenityItem}>
+                        <FaTv className={styles.amenityIcon} />
+                        <span>Smart TV</span>
+                      </div>
+                      <div className={styles.amenityItem}>
+                        <FaSnowflake className={styles.amenityIcon} />
+                        <span>Điều hòa</span>
+                      </div>
+                      <div className={styles.amenityItem}>
+                        <FaBath className={styles.amenityIcon} />
+                        <span>Phòng tắm</span>
+                      </div>
+                    </div>
+
+                    <div className={styles.roomSpecifications}>
+                      <div className={styles.specItem}>
+                        <span className={styles.specLabel}>Diện tích</span>
+                        <span className={styles.specValue}>{roomType.kichThuocPhong || 0}m²</span>
+                      </div>
+                      <div className={styles.specItem}>
+                        <span className={styles.specLabel}>Giường</span>
+                        <span className={styles.specValue}>{roomType.soGiuongNgu || 0}</span>
+                      </div>
+                      <div className={styles.specItem}>
+                        <span className={styles.specLabel}>Khách</span>
+                        <span className={styles.specValue}>{roomType.sucChua || 0}</span>
+                      </div>
+                    </div>
+
+                    <div className={styles.roomCardFooter}>
+                      <div className={styles.priceInfo}>
+                        <span className={styles.priceAmount}>{(roomType.giaMoiDem !== undefined) ? roomType.giaMoiDem.toLocaleString() : 0}đ</span>
+                        <span className={styles.priceUnit}>/đêm</span>
+                      </div>
+                      <Link
+                        href={`/rooms/${createRoomSlug(roomType.tenLoaiPhong, roomType.maLoaiPhong)}`}
+                        className={styles.viewDetailButton}
+                      >
+                        Xem chi tiết
+                      </Link>
+                    </div>
                   </div>
                 </div>
-
-                <div className={styles.roomContent}>
-                  <h3 className={styles.roomTitle}>{roomType.tenLoaiPhong}</h3>
-
-                  <p className={styles.roomDescription}>
-                    {roomType.moTa || `Phòng ${roomType.tenLoaiPhong} sang trọng với diện tích ${roomType.kichThuocPhong || 0}m², trang bị đầy đủ tiện nghi hiện đại.`}
-                  </p>
-
-                  <div className={styles.amenitiesRow}>
-                    <div className={styles.amenityItem}>
-                      <FaWifi className={styles.amenityIcon} />
-                      <span>WiFi</span>
-                    </div>
-                    <div className={styles.amenityItem}>
-                      <FaTv className={styles.amenityIcon} />
-                      <span>Smart TV</span>
-                    </div>
-                    <div className={styles.amenityItem}>
-                      <FaSnowflake className={styles.amenityIcon} />
-                      <span>Điều hòa</span>
-                    </div>
-                    <div className={styles.amenityItem}>
-                      <FaBath className={styles.amenityIcon} />
-                      <span>Phòng tắm</span>
-                    </div>
-                  </div>
-
-                  <div className={styles.roomSpecifications}>
-                    <div className={styles.specItem}>
-                      <span className={styles.specLabel}>Diện tích</span>
-                      <span className={styles.specValue}>{roomType.kichThuocPhong || 0}m²</span>
-                    </div>
-                    <div className={styles.specItem}>
-                      <span className={styles.specLabel}>Giường</span>
-                      <span className={styles.specValue}>{roomType.soGiuongNgu || 0}</span>
-                    </div>
-                    <div className={styles.specItem}>
-                      <span className={styles.specLabel}>Khách</span>
-                      <span className={styles.specValue}>{roomType.sucChua || 0}</span>
-                    </div>
-                  </div>
-
-                  <div className={styles.roomCardFooter}>
-                    <div className={styles.priceInfo}>
-                      <span className={styles.priceAmount}>{(roomType.giaMoiDem !== undefined) ? roomType.giaMoiDem.toLocaleString() : 0}đ</span>
-                      <span className={styles.priceUnit}>/đêm</span>
-                    </div>
-                    <Link
-                      href={`/rooms/${createRoomSlug(roomType.tenLoaiPhong, roomType.maLoaiPhong)}`}
-                      className={styles.viewDetailButton}
-                    >
-                      Xem chi tiết
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+            <div className={styles.navigationButtons}>
+              <button className={styles.navButton} onClick={scrollLeft}>
+                <FaChevronLeft />
+              </button>
+              <button className={styles.navButton} onClick={scrollRight}>
+                <FaChevronRight />
+              </button>
+            </div>
+          </>
         )}
       </main>
 
