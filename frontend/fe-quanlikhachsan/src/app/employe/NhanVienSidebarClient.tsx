@@ -1,119 +1,159 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useAuth, ROLES, type Role } from '../../lib/auth';
+'use client';
+import React, { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { FaBars, FaTimes, FaHome, FaBed, FaUsers, FaCalendarAlt, 
+         FaFileInvoiceDollar, FaConciergeBell, FaChartBar, 
+         FaUserTie, FaSignOutAlt } from 'react-icons/fa';
+import { useAuth } from '../../lib/auth';
 import { useLogout } from '../../lib/hooks';
-
-// Danh sách tất cả các mục menu có thể có
-const allNavItems = [
-  { href: "/employe/dashboard", label: "Tổng quan", roles: ["R01"] }, // Chỉ quản lý
-  { href: "/employe/bookings", label: "Đặt phòng", roles: ["R01", "R02"] }, // Quản lý và nhân viên
-  { href: "/employe/rooms", label: "Phòng", roles: ["R01", "R02"] }, // Quản lý và nhân viên
-  { href: "/employe/services", label: "Dịch vụ", roles: ["R01", "R02"] }, // Quản lý và nhân viên 
-  { href: "/employe/invoices", label: "Hóa đơn", roles: ["R01", "R03"] }, // Quản lý và kế toán
-  { href: "/employe/reports", label: "Báo cáo", roles: ["R01", "R03"] }, // Quản lý và kế toán
-  { href: "/employe/staff", label: "Nhân viên", roles: ["R01"] }, // Chỉ quản lý
-];
+import styles from './NhanVienSidebar.module.css';
 
 export default function NhanVienSidebarClient({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  const [isOpen, setIsOpen] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
   const pathname = usePathname();
-  const { user, loading: authLoading } = useAuth();
-  const [profile, setProfile] = useState<{ name: string; role: string } | null>(null);
-  const [navItems, setNavItems] = useState<typeof allNavItems>([]);
   const handleLogout = useLogout();
 
-  useEffect(() => {
-    if (authLoading) return;
-      
-    if (user && user.role) {
-      const currentRole = user.role;
-        
-        const filteredNavs = allNavItems.filter(item => 
-        item.roles.includes(currentRole) || 
-        ((currentRole as string) === 'CRW' && item.roles.includes(ROLES.STAFF))
-        );
-        setNavItems(filteredNavs);
-        
-        setProfile({
-        name: user.hoTen || user.maNguoiDung || 'Nhân viên',
-        role: getRoleName(currentRole)
-        });
-    } else {
-      setNavItems([]);
-      setProfile(null);
-    }
-  }, [user, authLoading]);
+  // Danh sách tất cả các mục menu có thể có
+  const allNavItems = [
+    { href: "/employe/dashboard", label: "Tổng quan", icon: <FaHome />, roles: ["R01"] }, // Chỉ quản lý
+    { href: "/employe/bookings", label: "Đặt phòng", icon: <FaCalendarAlt />, roles: ["R01", "R02"] }, // Quản lý và nhân viên
+    { href: "/employe/rooms", label: "Phòng", icon: <FaBed />, roles: ["R01", "R02"] }, // Quản lý và nhân viên
+    { href: "/employe/services", label: "Dịch vụ", icon: <FaConciergeBell />, roles: ["R01", "R02"] }, // Quản lý và nhân viên 
+    { href: "/employe/invoices", label: "Hóa đơn", icon: <FaFileInvoiceDollar />, roles: ["R01", "R03"] }, // Quản lý và kế toán
+    { href: "/employe/reports", label: "Báo cáo", icon: <FaChartBar />, roles: ["R01", "R03"] }, // Quản lý và kế toán
+    { href: "/employe/staff", label: "Nhân viên", icon: <FaUserTie />, roles: ["R01"] }, // Chỉ quản lý
+  ];
 
-  // Hàm lấy tên vai trò dựa vào mã vai trò
-  const getRoleName = (roleCode: Role | "CRW") => {
-    if (roleCode === 'CRW') {
-      return 'Nhân viên (Legacy)';
+  // Kiểm tra kích thước màn hình
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    // Kiểm tra khi component mount
+    checkMobile();
+    
+    // Thêm event listener
+    window.addEventListener('resize', checkMobile);
+    
+    // Load trạng thái sidebar từ localStorage
+    const savedState = localStorage.getItem('employeSidebarOpen');
+    if (savedState !== null) {
+      setIsOpen(savedState === 'true');
+    } else {
+      // Mặc định: mở trên desktop, đóng trên mobile
+      setIsOpen(window.innerWidth >= 768);
     }
-    // Tại điểm này, roleCode chắc chắn là kiểu Role
-    switch(roleCode) {
-      case ROLES.ADMIN: return 'Admin';
-      case ROLES.MANAGER: return 'Quản lý';
-      case ROLES.STAFF: return 'Nhân viên';
-      case ROLES.ACCOUNTANT: return 'Kế toán';
-      case ROLES.CUSTOMER: return 'Khách hàng';
-      default: 
-        // Trường hợp này không nên xảy ra nếu roleCode là một trong các giá trị của ROLES
-        // và đã được kiểm tra bởi if (roleCode === 'CRW')
-        return `Role (${roleCode}) không xác định`; 
+    
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+    };
+  }, []);
+
+  // Điều chỉnh layout khi trạng thái sidebar thay đổi
+  const adjustLayout = useCallback(() => {
+    if (isOpen) {
+      document.body.classList.remove('sidebar-closed');
+      document.body.classList.add('sidebar-open');
+    } else {
+      document.body.classList.remove('sidebar-open');
+      document.body.classList.add('sidebar-closed');
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    adjustLayout();
+  }, [isOpen, adjustLayout]);
+
+  // Toggle sidebar
+  const toggleSidebar = () => {
+    const newState = !isOpen;
+    setIsOpen(newState);
+    localStorage.setItem('employeSidebarOpen', newState.toString());
+  };
+
+  // Đóng sidebar khi click vào link trên mobile
+  const handleLinkClick = () => {
+    if (isMobile) {
+      setIsOpen(false);
+      localStorage.setItem('employeSidebarOpen', 'false');
     }
   };
 
+  // Lọc các mục menu dựa trên vai trò của người dùng
+  const filteredNavItems = allNavItems.filter(item => {
+    if (!user || !user.role) return false;
+    return item.roles.includes(user.role);
+  });
+
   return (
-    <div style={{display:'flex', minHeight:'100vh', background:'#f6f8fa'}}>
-      <aside style={{width:240, background:'#232946', color:'#fff', display:'flex', flexDirection:'column', padding:'32px 0 24px 0', boxShadow:'2px 0 16px #0002'}}>
-        <div style={{display:'flex', flexDirection:'column', height:'100%'}}>
-          <div style={{display:'flex', alignItems:'center', gap:10, fontWeight:700, fontSize:'1.3rem', margin:'0 0 32px 32px'}}>
-            <span role="img" aria-label="staff">🧑‍💼</span> 
-            {profile?.role || 'Nhân viên'}
-          </div>
-          
-          <nav style={{display:'flex', flexDirection:'column', gap:6}}>
-            {navItems.map(nav => (
-              <Link
-                key={nav.href}
-                href={nav.href}
-                style={{
-                  color: pathname === nav.href ? '#232946' : '#e0e0e0',
-                  background: pathname === nav.href ? 'linear-gradient(90deg,#eebbc3 60%,#b8c1ec 100%)' : 'none',
-                  fontWeight: pathname === nav.href ? 700 : 500,
-                  borderRadius: 8,
-                  padding: '12px 24px',
-                  margin: '0 12px',
-                  textDecoration: 'none',
-                  transition: 'background 0.18s,color 0.18s',
-                  marginBottom: 2,
-                  display: 'block'
-                }}
-              >
-                {nav.label}
-              </Link>
-            ))}
-          </nav>
-          
-          {/* Thông tin nhân viên và nút đăng xuất ở dưới, sát với thanh công cụ */}
-          <div style={{margin:'8px 18px 0 18px', padding:'16px 0 0 0', display:'flex', flexDirection:'column', gap:8, borderTop:'1px solid #4a5568', marginTop:'auto'}}>
-            {profile && (
-              <div style={{display:'flex', alignItems:'center', gap:10}}>
-                <div style={{background:'#eebbc3', color:'#232946', borderRadius:'50%', width:38, height:38, display:'flex', alignItems:'center', justifyContent:'center', fontWeight:700, fontSize:'1.1rem'}}>
-                  {profile.name.split(' ').slice(-1)[0][0]}
+    <div className={styles.layout}>
+      <button 
+        className={styles.toggleButton} 
+        onClick={toggleSidebar}
+        aria-label={isOpen ? "Thu gọn menu" : "Mở rộng menu"}
+      >
+        {isOpen ? <FaTimes /> : <FaBars />}
+      </button>
+      
+      <aside className={`${styles.sidebar} ${isOpen ? styles.open : styles.closed}`}>
+        <div className={styles.sidebarHeader}>
+          <h2>{isOpen ? 'Nhân Viên Panel' : ''}</h2>
+        </div>
+        
+        <nav className={styles.sidebarNav}>
+          {filteredNavItems.map((item) => (
+            <Link 
+              key={item.href} 
+              href={item.href} 
+              className={`${styles.navItem} ${pathname === item.href ? styles.active : ''}`}
+              onClick={handleLinkClick}
+            >
+              <span className={styles.navIcon}>{item.icon}</span>
+              {isOpen && <span className={styles.navLabel}>{item.label}</span>}
+            </Link>
+          ))}
+        </nav>
+        
+        {/* User info và nút đăng xuất */}
+        <div className={styles.sidebarFooter}>
+          {user && (
+            <div className={styles.userInfo}>
+              {isOpen && (
+                <div className={styles.userDetails}>
+                  <p className={styles.userName}>{user.hoTen || user.maNguoiDung}</p>
+                  <p className={styles.userRole}>
+                    {user.role === 'R01' ? 'Quản lý' : 
+                     user.role === 'R02' ? 'Nhân viên' : 
+                     user.role === 'R03' ? 'Kế toán' : 'Người dùng'}
+                  </p>
                 </div>
-                <div>
-                  <div style={{fontWeight:600}}>{profile.name}</div>
-                  <div style={{fontSize:'0.97em', color:'#b8c1ec'}}>{profile.role}</div>
-                </div>
-              </div>
-            )}
-            <button onClick={handleLogout} style={{marginTop:8, background:'#e5e7eb', color:'#232946', border:'none', borderRadius:6, padding:'7px 16px', fontWeight:500, fontSize:'0.97em', cursor:'pointer', transition:'background 0.2s'}}>Đăng xuất</button>
-          </div>
+              )}
+            </div>
+          )}
+          
+          <button 
+            className={styles.logoutButton} 
+            onClick={handleLogout}
+            title="Đăng xuất"
+          >
+            <span className={styles.navIcon}><FaSignOutAlt /></span>
+            {isOpen && <span className={styles.navLabel}>Đăng xuất</span>}
+          </button>
         </div>
       </aside>
-      <main style={{flex:1, minHeight:'100vh'}}>{children}</main>
+      
+      {/* Overlay cho mobile */}
+      {isMobile && isOpen && (
+        <div className={styles.overlay} onClick={toggleSidebar}></div>
+      )}
+      
+      <main className={styles.content}>
+        {children}
+      </main>
     </div>
   );
 }
