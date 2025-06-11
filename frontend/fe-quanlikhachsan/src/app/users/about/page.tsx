@@ -202,16 +202,19 @@ export default function AboutPage() {
         <div className={styles.partnersGrid}>
           {/* Add partner logos here */}
           <div className={styles.partnerLogo}>
-            <Image src="/images/partners/partner1.png" alt="Partner 1" width={150} height={80} />
+            <Image src="/images/partners/american.png" alt="Partner 1" width={150} height={150} />
           </div>
           <div className={styles.partnerLogo}>
-            <Image src="/images/partners/partner2.png" alt="Partner 2" width={150} height={80} />
+            <Image src="/images/partners/mastercard.png" alt="Partner 2" width={150} height={150} />
           </div>
           <div className={styles.partnerLogo}>
-            <Image src="/images/partners/partner3.png" alt="Partner 3" width={150} height={80} />
+            <Image src="/images/partners/visa.png" alt="Partner 3" width={150} height={150} />
           </div>
           <div className={styles.partnerLogo}>
-            <Image src="/images/partners/partner4.png" alt="Partner 4" width={150} height={80} />
+            <Image src="/images/partners/vietcombank.png" alt="Partner 4" width={150} height={150} />
+          </div>
+                    <div className={styles.partnerLogo}>
+            <Image src="/images/partners/mbbank.png" alt="Partner 5" width={150} height={80} /> 
           </div>
         </div>
       </section>
