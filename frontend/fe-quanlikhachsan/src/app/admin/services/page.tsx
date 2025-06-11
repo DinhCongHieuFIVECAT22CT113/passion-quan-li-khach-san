@@ -281,58 +281,84 @@ export default function ServiceManager() {
         <div className={styles.modal}>
           <div className={styles.modalContent}>
             <h3>{editingService ? 'Sửa dịch vụ' : 'Thêm dịch vụ'}</h3>
-            {/* Form inputs vẫn bind với form state (PascalCase) */}
             <form onSubmit={handleSubmit}>
-              <div>
-                <label>Tên dịch vụ:</label>
-                <input name="TenDichVu" value={form.TenDichVu} onChange={handleChange} placeholder="Tên dịch vụ" required />
+              <div className={styles.formGroup}>
+                <label htmlFor="TenDichVu">Tên dịch vụ:</label>
+                <input 
+                  id="TenDichVu"
+                  name="TenDichVu" 
+                  value={form.TenDichVu} 
+                  onChange={handleChange} 
+                  placeholder="Tên dịch vụ" 
+                  required 
+                />
               </div>
-              <div>
-                <label>Giá (VNĐ):</label>
-                <input name="DonGia" type="number" value={form.DonGia} onChange={handleChange} placeholder="Giá" required min={0} />
+              
+              <div className={styles.formGroup}>
+                <label htmlFor="DonGia">Giá (VNĐ):</label>
+                <input 
+                  id="DonGia"
+                  name="DonGia" 
+                  type="number" 
+                  value={form.DonGia} 
+                  onChange={handleChange} 
+                  placeholder="Giá" 
+                  required 
+                  min={0} 
+                />
               </div>
-              <div>
-                <label>Mô tả:</label>
-                <textarea name="MoTa" value={form.MoTa || ''} onChange={handleChange} placeholder="Mô tả dịch vụ" rows={3} />
+              
+              <div className={styles.formGroup}>
+                <label htmlFor="MoTa">Mô tả:</label>
+                <textarea 
+                  id="MoTa"
+                  name="MoTa" 
+                  value={form.MoTa || ''} 
+                  onChange={handleChange} 
+                  placeholder="Mô tả dịch vụ" 
+                  rows={3} 
+                />
               </div>
-              <div>
-                <label htmlFor="Thumbnail">Ảnh thumbnail:</label>
-                <input type="file" id="Thumbnail" name="Thumbnail" accept="image/*" onChange={handleFileChange} />
-                {/* Hiển thị thumbnail hiện tại khi sửa hoặc preview khi chọn file mới */} 
-                {(editingService && form.Thumbnail && !selectedThumbnailFile) && (
-                    <div className={styles.imagePreviewContainer}>
-                        <p>Thumbnail hiện tại:</p>
-                        <Image 
-                            src={form.Thumbnail.startsWith('http') || form.Thumbnail.startsWith('/') ? form.Thumbnail : `${API_BASE_URL}${form.Thumbnail}`} 
-                            alt="Thumbnail hiện tại" 
-                            width={100} 
-                            height={100} 
-                            className={styles.imagePreview}
-                        />
-                    </div>
-                )}
-                {selectedThumbnailFile && (
-                    <div className={styles.imagePreviewContainer}>
-                        <p>Thumbnail mới:</p>
-                        <Image 
-                            src={URL.createObjectURL(selectedThumbnailFile)} 
-                            alt="Preview thumbnail" 
-                            width={100} 
-                            height={100} 
-                            className={styles.imagePreview}
-                        />
-                    </div>
-                )}
+              
+              <div className={styles.formGroup}>
+                <label>Ảnh thumbnail:</label>
+                <div className={styles.fileInput}>
+                  <label className={styles.fileInputLabel}>
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={handleFileChange} 
+                      style={{ display: 'none' }} 
+                    />
+                    Chọn ảnh
+                  </label>
+                  {selectedThumbnailFile && (
+                    <div>Đã chọn: {selectedThumbnailFile.name}</div>
+                  )}
+                </div>
               </div>
+              
+              {(form.Thumbnail || editingService?.thumbnail) && (
+                <div className={styles.formGroup}>
+                  <label>Thumbnail hiện tại:</label>
+                  <img 
+                    src={getValidImageSrc(form.Thumbnail || editingService?.thumbnail)} 
+                    alt="Thumbnail" 
+                    className={styles.thumbnailPreview}
+                    onError={(e) => {
+                      e.currentTarget.src = '/images/no-image.png';
+                    }}
+                  />
+                </div>
+              )}
+              
               <div className={styles.buttonGroup}>
-                <button 
-                  type="submit" 
-                  className={styles.addBtn} 
-                  disabled={isLoading || (!editingService && !selectedThumbnailFile)}
-                >
-                  {editingService ? 'Lưu' : 'Thêm'}
+                <button type="button" onClick={closeModal} className={styles.cancelBtn}>
+                  Hủy
                 </button>
-                <button type="button" onClick={closeModal} className={styles.deleteBtn}>Hủy</button>
+                <button type="submit" className={styles.saveBtn}>
+                  Lưu
+                </button>
               </div>
             </form>
           </div>

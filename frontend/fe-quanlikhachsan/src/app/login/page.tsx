@@ -15,8 +15,21 @@ const LoginPage: React.FC = () => {
 
     if (user && user.role) {
       console.log('Người dùng đã đăng nhập, chuyển hướng theo role từ trang login:', user.role);
-      const redirectPath = getRedirectPathByRole(user.role);
-      router.push(redirectPath);
+      
+      // Kiểm tra xem có redirectUrl trong query params không
+      const params = new URLSearchParams(window.location.search);
+      const redirectUrl = params.get('redirectUrl');
+      
+      if (redirectUrl) {
+        // Nếu có redirectUrl, chuyển hướng đến đó
+        console.log('Chuyển hướng đến:', redirectUrl);
+        router.push(redirectUrl);
+      } else {
+        // Nếu không có, sử dụng logic chuyển hướng mặc định
+        const defaultRedirectPath = getRedirectPathByRole(user.role);
+        console.log('Chuyển hướng theo role đến:', defaultRedirectPath);
+        router.push(defaultRedirectPath);
+      }
     }
   }, [router, user, loading]);
 
