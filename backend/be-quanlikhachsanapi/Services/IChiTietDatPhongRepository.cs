@@ -15,8 +15,8 @@ namespace be_quanlikhachsanapi.Services
     }
     public class ChiTietDatPhongRepository : IChiTietDatPhongRepository
     {
-        private readonly QuanLyKhachSanContext _context;
-        public ChiTietDatPhongRepository(QuanLyKhachSanContext context)
+        private readonly DataQlks113Nhom2Context _context;
+        public ChiTietDatPhongRepository(DataQlks113Nhom2Context context)
         {
             _context = context;
         }

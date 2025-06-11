@@ -16,9 +16,9 @@ namespace be_quanlikhachsanapi.Services
     }
     public class NhanVienRepository : INhanVienRepository
     {
-        private readonly QuanLyKhachSanContext _context;
+        private readonly DataQlks113Nhom2Context _context;
         private readonly IPasswordHasher<NhanVien> _passwordHasher;
-        public NhanVienRepository(QuanLyKhachSanContext context, IPasswordHasher<NhanVien> passwordHasher)
+        public NhanVienRepository(DataQlks113Nhom2Context context, IPasswordHasher<NhanVien> passwordHasher)
         {
             _context = context;
             _passwordHasher = passwordHasher;

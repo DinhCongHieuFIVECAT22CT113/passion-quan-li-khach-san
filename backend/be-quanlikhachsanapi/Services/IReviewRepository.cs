@@ -12,13 +12,14 @@ namespace be_quanlikhachsanapi.Services
         JsonResult CreateReview(CreateReviewDto createReview);
         JsonResult UpdateReview(string MaReview, UpdateReviewDto updateReview);
         JsonResult DeleteReview(string MaReview);
+        JsonResult UpdateTrangThai(string MaReview, string TrangThai);
     }
 
     public class ReviewRepository : IReviewRepository
     {
-        private readonly QuanLyKhachSanContext _context;
+        private readonly DataQlks113Nhom2Context _context;
 
-        public ReviewRepository(QuanLyKhachSanContext context)
+        public ReviewRepository(DataQlks113Nhom2Context context)
         {
             _context = context;
         }
@@ -36,7 +37,6 @@ namespace be_quanlikhachsanapi.Services
                 MaDatPhong = r.Review.MaDatPhong,
                 DanhGia = r.Review.DanhGia,
                 BinhLuan = r.Review.BinhLuan,
-                TenKhachHang = $"{r.KhachHang.HoKh} {r.KhachHang.TenKh}".Trim(),
                 NgayTao = r.Review.NgayTao,
                 TrangThai = "Chưa duyệt", // Mock value since field doesn't exist in DB
                 AnHien = false // Mock value since field doesn't exist in DB
@@ -58,7 +58,10 @@ namespace be_quanlikhachsanapi.Services
                 MaReview = review.MaReview,
                 MaDatPhong = review.MaDatPhong,
                 DanhGia = review.DanhGia,
-                BinhLuan = review.BinhLuan
+                BinhLuan = review.BinhLuan,
+                NgayTao = review.NgayTao,
+                TrangThai = "Chưa duyệt", // Mock value since field doesn't exist in DB
+                AnHien = false // Mock value since field doesn't exist in DB
             };
             return new JsonResult(_review);
         }
@@ -85,7 +88,9 @@ namespace be_quanlikhachsanapi.Services
                 MaReview = newMaReview,
                 MaDatPhong = createReview.MaDatPhong,
                 DanhGia = createReview.DanhGia,
-                BinhLuan = createReview.BinhLuan
+                BinhLuan = createReview.BinhLuan,
+                NgayTao = DateTime.Now,
+                TrangThai = "Chưa duyệt"
             };
             _context.Reviews.Add(review);
             _context.SaveChanges();
@@ -140,6 +145,29 @@ namespace be_quanlikhachsanapi.Services
             return new JsonResult(new
             {
                 message = "Xóa đánh giá thành công.",
+                review = MaReview
+            })
+            {
+                StatusCode = StatusCodes.Status200OK
+            };
+        }
+
+        public JsonResult UpdateTrangThai(string MaReview, string TrangThai)
+        {
+            var review = _context.Reviews.FirstOrDefault(r => r.MaReview == MaReview);
+            if (review == null)
+            {
+                return new JsonResult("Không tìm thấy đánh giá với mã đã cho.")
+                {
+                    StatusCode = StatusCodes.Status404NotFound
+                };
+            }
+            review.TrangThai = TrangThai;
+            _context.SaveChanges();
+
+            return new JsonResult(new
+            {
+                message = "Cập nhật trạng thái đánh giá thành công.",
                 review = MaReview
             })
             {

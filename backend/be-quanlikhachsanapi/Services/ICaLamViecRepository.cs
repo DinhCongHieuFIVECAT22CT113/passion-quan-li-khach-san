@@ -15,9 +15,9 @@ namespace be_quanlikhachsanapi.Services
     }
     public class CaLamViecRepository : ICaLamViecRepository
     {
-        private readonly QuanLyKhachSanContext _context;
+        private readonly DataQlks113Nhom2Context _context;
 
-        public CaLamViecRepository(QuanLyKhachSanContext context)
+        public CaLamViecRepository(DataQlks113Nhom2Context context)
         {
             _context = context;
         }

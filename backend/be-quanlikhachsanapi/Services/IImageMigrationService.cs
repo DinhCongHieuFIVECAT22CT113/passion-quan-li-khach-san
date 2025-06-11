@@ -22,13 +22,13 @@ namespace be_quanlikhachsanapi.Services
 
     public class ImageMigrationService : IImageMigrationService
     {
-        private readonly QuanLyKhachSanContext _context;
+        private readonly DataQlks113Nhom2Context _context;
         private readonly ISupabaseStorageService _supabaseStorage;
         private readonly ILogger<ImageMigrationService> _logger;
         private readonly IWebHostEnvironment _environment;
 
         public ImageMigrationService(
-            QuanLyKhachSanContext context,
+            DataQlks113Nhom2Context context,
             ISupabaseStorageService supabaseStorage,
             ILogger<ImageMigrationService> logger,
             IWebHostEnvironment environment)

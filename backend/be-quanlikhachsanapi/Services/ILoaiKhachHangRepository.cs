@@ -15,9 +15,9 @@ namespace be_quanlikhachsanapi.Services
 
     public class LoaiKhachHangRepository : ILoaiKhachHangRepository
     {
-        private readonly QuanLyKhachSanContext _context;
+        private readonly DataQlks113Nhom2Context _context;
 
-        public LoaiKhachHangRepository(QuanLyKhachSanContext context)
+        public LoaiKhachHangRepository(DataQlks113Nhom2Context context)
         {
             _context = context;
         }

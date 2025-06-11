@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace be_quanlikhachsanapi.Data;
 
-public partial class QuanLyKhachSanContext : DbContext
+public partial class DataQlks113Nhom2Context : DbContext
 {
-    public QuanLyKhachSanContext()
+    public DataQlks113Nhom2Context()
     {
     }
 
-    public QuanLyKhachSanContext(DbContextOptions<QuanLyKhachSanContext> options)
+    public DataQlks113Nhom2Context(DbContextOptions<DataQlks113Nhom2Context> options)
         : base(options)
     {
     }
@@ -50,7 +50,8 @@ public partial class QuanLyKhachSanContext : DbContext
     public virtual DbSet<Role> Roles { get; set; }
 
     public virtual DbSet<SuDungDichVu> SuDungDichVus { get; set; }
-    
+
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<ApDungKm>(entity =>
@@ -455,6 +456,7 @@ public partial class QuanLyKhachSanContext : DbContext
             entity.Property(e => e.MaDatPhong)
                 .HasMaxLength(10)
                 .IsUnicode(false);
+            entity.Property(e => e.TrangThai).HasMaxLength(50);
 
             entity.HasOne(d => d.MaDatPhongNavigation).WithMany(p => p.Reviews)
                 .HasForeignKey(d => d.MaDatPhong)

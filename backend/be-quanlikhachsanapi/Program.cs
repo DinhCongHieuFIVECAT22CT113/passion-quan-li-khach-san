@@ -72,7 +72,7 @@ builder.Services.Configure<SwaggerGenOptions>(options => {
 });
 
 // Add DbContext - sử dụng connection string từ appsettings.json
-builder.Services.AddDbContext<QuanLyKhachSanContext>(options =>
+builder.Services.AddDbContext<DataQlks113Nhom2Context>(options =>
     options.UseSqlServer(connectionString));
 
 // Add CORS
@@ -171,6 +171,7 @@ builder.Services.AddScoped<ILoaiKhachHangRepository, LoaiKhachHangRepository>();
 builder.Services.AddScoped<IDatPhongRepository, DatPhongRepository>();
 builder.Services.AddScoped<IChiTietDatPhongRepository, ChiTietDatPhongRepository>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IBaoCaoRepository, BaoCaoRepository>();
 
 builder.Services.AddScoped<IPasswordHasher<KhachHang>, PasswordHasher<KhachHang>>();
 builder.Services.AddScoped<IPasswordHasher<NhanVien>, PasswordHasher<NhanVien>>();
@@ -196,7 +197,7 @@ var app = builder.Build();
 try
 {
     using var scope = app.Services.CreateScope();
-    var dbContext = scope.ServiceProvider.GetRequiredService<QuanLyKhachSanContext>();
+    var dbContext = scope.ServiceProvider.GetRequiredService<DataQlks113Nhom2Context>();
     dbContext.Database.OpenConnection();
     Console.WriteLine("Kết nối cơ sở dữ liệu thành công!");
     dbContext.Database.CloseConnection();

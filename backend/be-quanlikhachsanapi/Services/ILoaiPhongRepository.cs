@@ -14,11 +14,11 @@ namespace be_quanlikhachsanapi.Services
     }
     public class LoaiPhongRepository : ILoaiPhongRepository
     {
-        private readonly QuanLyKhachSanContext _context;
+        private readonly DataQlks113Nhom2Context _context;
         private readonly IWriteFileRepository _fileRepository;
         private readonly ILogger<DichVuRepository> _logger;
 
-        public LoaiPhongRepository(QuanLyKhachSanContext context, IWriteFileRepository fileRepository, ILogger<DichVuRepository> logger)
+        public LoaiPhongRepository(DataQlks113Nhom2Context context, IWriteFileRepository fileRepository, ILogger<DichVuRepository> logger)
         {
             _context = context;
             _fileRepository = fileRepository;

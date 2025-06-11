@@ -16,7 +16,7 @@ namespace be_quanlikhachsanapi.Controllers
     {
         private readonly IDatPhongRepository _datPhongRepo;
         private readonly ISendEmailServices _sendEmail;
-        private readonly QuanLyKhachSanContext _context;
+        private readonly DataQlks113Nhom2Context _context;
         private readonly INotificationService _notificationService;
 
         // Tạm lưu booking chưa xác nhận (bạn nên chuyển sang cache hoặc DB)
@@ -25,7 +25,7 @@ namespace be_quanlikhachsanapi.Controllers
         public DatPhongController(
             IDatPhongRepository datPhongRepo, 
             ISendEmailServices sendEmail,
-            QuanLyKhachSanContext context,
+            DataQlks113Nhom2Context context,
             INotificationService notificationService)
         {
             _datPhongRepo = datPhongRepo;

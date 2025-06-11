@@ -12,16 +12,17 @@ namespace be_quanlikhachsanapi.Services
         Task<JsonResult> CreateBaoCao(CreateBaoCaoDoanhThuDTO createBaoCao);
         Task<JsonResult> UpdateBaoCao(string MaBaoCao, UpdateBaoCaoDoanhThuDTO updateBaoCao);
         JsonResult DeleteBaoCao(string MaBaoCao);
+        
     }
 
     public class BaoCaoRepository : IBaoCaoRepository
     {
-        private readonly QuanLyKhachSanContext _context;
+        private readonly DataQlks113Nhom2Context _context;
         private readonly IWriteFileRepository _fileRepository;
         private readonly ILogger<DichVuRepository> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public BaoCaoRepository(QuanLyKhachSanContext context, IWriteFileRepository fileRepository, ILogger<DichVuRepository> logger, IHttpContextAccessor httpContextAccessor)
+        public BaoCaoRepository(DataQlks113Nhom2Context context, IWriteFileRepository fileRepository, ILogger<DichVuRepository> logger, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _fileRepository = fileRepository;

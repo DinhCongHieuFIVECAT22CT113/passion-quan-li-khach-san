@@ -10,8 +10,8 @@ using be_quanlikhachsanapi.Data;
 
 namespace be_quanlikhachsanapi.Migrations
 {
-    [DbContext(typeof(QuanLyKhachSanContext))]
-    partial class QuanLyKhachSanContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(DataQlks113Nhom2Context))]
+    partial class DataQlks113Nhom2ContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {

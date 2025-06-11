@@ -7,11 +7,11 @@ namespace be_quanlikhachsanapi.Services
 {
     public class PhongRepository : IPhongRepository
     {
-        private readonly QuanLyKhachSanContext _context;
+        private readonly DataQlks113Nhom2Context _context;
         private readonly IWriteFileRepository _fileRepository;
         private readonly INotificationService _notificationService;
         
-        public PhongRepository(QuanLyKhachSanContext context, IWriteFileRepository fileRepository, INotificationService notificationService)
+        public PhongRepository(DataQlks113Nhom2Context context, IWriteFileRepository fileRepository, INotificationService notificationService)
         {
             _context = context;
             _fileRepository = fileRepository;

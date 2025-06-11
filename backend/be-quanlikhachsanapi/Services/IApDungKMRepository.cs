@@ -16,9 +16,9 @@ namespace be_quanlikhachsanapi.Services
     }
     public class ApDungKMRepository : IApDungKMRepository
     {
-        private readonly QuanLyKhachSanContext _context;
+        private readonly DataQlks113Nhom2Context _context;
 
-        public ApDungKMRepository(QuanLyKhachSanContext context)
+        public ApDungKMRepository(DataQlks113Nhom2Context context)
         {
             _context = context;
         }

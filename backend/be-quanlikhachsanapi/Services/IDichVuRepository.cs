@@ -15,13 +15,13 @@ namespace be_quanlikhachsanapi.Services
     }
     public class DichVuRepository : IDichVuRepository
     {
-        private readonly QuanLyKhachSanContext _context;
+        private readonly DataQlks113Nhom2Context _context;
         private readonly IWriteFileRepository _fileRepository;
         private readonly ILogger<DichVuRepository> _logger;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public DichVuRepository(
-            QuanLyKhachSanContext context, 
+            DataQlks113Nhom2Context context, 
             IWriteFileRepository fileRepository, 
             ILogger<DichVuRepository> logger,
             IHttpContextAccessor httpContextAccessor)

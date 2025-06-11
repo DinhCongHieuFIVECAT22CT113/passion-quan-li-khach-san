@@ -11,7 +11,7 @@ using be_quanlikhachsanapi.Data;
 
 namespace be_quanlikhachsanapi.Migrations
 {
-    [DbContext(typeof(QuanLyKhachSanContext))]
+    [DbContext(typeof(DataQlks113Nhom2Context))]
     [Migration("20250421141458_InitialCreate")]
     partial class InitialCreate
     {

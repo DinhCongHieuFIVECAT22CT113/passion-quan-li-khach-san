@@ -8,10 +8,10 @@ namespace be_quanlikhachsanapi.Services
 {
     public class DatPhongRepository : IDatPhongRepository
     {
-        private readonly QuanLyKhachSanContext _context;
+        private readonly DataQlks113Nhom2Context _context;
         private readonly INotificationService _notificationService;
 
-        public DatPhongRepository(QuanLyKhachSanContext context, INotificationService notificationService)
+        public DatPhongRepository(DataQlks113Nhom2Context context, INotificationService notificationService)
         {
             _context = context;
             _notificationService = notificationService;

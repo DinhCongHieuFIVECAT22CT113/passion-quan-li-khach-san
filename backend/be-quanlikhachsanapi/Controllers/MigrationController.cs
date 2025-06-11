@@ -17,13 +17,13 @@ namespace be_quanlikhachsanapi.Controllers
     {
         private readonly IImageMigrationService _migrationService;
         private readonly ILogger<MigrationController> _logger;
-        private readonly QuanLyKhachSanContext _context;
+        private readonly DataQlks113Nhom2Context _context;
         private readonly ISupabaseStorageService _supabaseStorage;
 
         public MigrationController(
             IImageMigrationService migrationService, 
             ILogger<MigrationController> logger,
-            QuanLyKhachSanContext context,
+            DataQlks113Nhom2Context context,
             ISupabaseStorageService supabaseStorage)
         {
             _migrationService = migrationService;

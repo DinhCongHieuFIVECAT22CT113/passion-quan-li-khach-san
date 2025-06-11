@@ -15,11 +15,11 @@ namespace be_quanlikhachsanapi.Services
     }
     public class KhuyenMaiRepository : IKhuyenMaiRepository
     {
-        private readonly QuanLyKhachSanContext _context;
+        private readonly DataQlks113Nhom2Context _context;
         private readonly IWriteFileRepository _fileRepository;
         private readonly ILogger<KhuyenMaiRepository> _logger;
 
-        public KhuyenMaiRepository(QuanLyKhachSanContext context, IWriteFileRepository fileRepository, ILogger<KhuyenMaiRepository> logger)
+        public KhuyenMaiRepository(DataQlks113Nhom2Context context, IWriteFileRepository fileRepository, ILogger<KhuyenMaiRepository> logger)
         {
             _context = context;
             _fileRepository = fileRepository;

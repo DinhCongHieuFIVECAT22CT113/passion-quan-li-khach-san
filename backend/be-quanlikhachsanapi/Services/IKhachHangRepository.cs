@@ -23,14 +23,14 @@ namespace be_quanlikhachsanapi.Services
     }
     public class KhachHangRepository : IKhachHangRepository
     {
-        private readonly QuanLyKhachSanContext _context;
+        private readonly DataQlks113Nhom2Context _context;
         private readonly IPasswordHasher<KhachHang> _passwordHasher;
         private readonly ISendEmailServices _sendEmail;
         private readonly IConfiguration _confMail;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly ISupabaseStorageService _storageService;
 
-        public KhachHangRepository(QuanLyKhachSanContext context, IPasswordHasher<KhachHang> passwordHasher, ISendEmailServices sendEmail, IConfiguration confMail, IWebHostEnvironment webHostEnvironment, ISupabaseStorageService storageService)
+        public KhachHangRepository(DataQlks113Nhom2Context context, IPasswordHasher<KhachHang> passwordHasher, ISendEmailServices sendEmail, IConfiguration confMail, IWebHostEnvironment webHostEnvironment, ISupabaseStorageService storageService)
         {
             _context = context;
             _passwordHasher = passwordHasher;

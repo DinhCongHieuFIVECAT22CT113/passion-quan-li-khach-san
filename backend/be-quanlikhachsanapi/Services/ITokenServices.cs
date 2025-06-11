@@ -135,7 +135,7 @@ namespace be_quanlikhachsanapi.Services
             }
 
             using var scope = _serviceProvider.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<QuanLyKhachSanContext>();
+            var dbContext = scope.ServiceProvider.GetRequiredService<DataQlks113Nhom2Context>();
 
             if (refreshTokenDto.UserType == "KhachHang")
             {

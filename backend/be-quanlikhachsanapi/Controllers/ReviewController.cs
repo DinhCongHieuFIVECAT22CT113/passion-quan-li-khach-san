@@ -67,7 +67,7 @@ namespace be_quanlikhachsanapi.Controllers
                 return NotFound("Không tìm thấy đánh giá với ID đã cho.");
             }
             return Ok(review);
-        }   
+        }
         // Xóa đánh giá
         [HttpDelete("{maReview}")]
         [Authorize]
@@ -75,6 +75,19 @@ namespace be_quanlikhachsanapi.Controllers
         public IActionResult DeleteReview(string MaReview)
         {
             var review = _reviewRepo.DeleteReview(MaReview);
+            if (review == null)
+            {
+                return NotFound("Không tìm thấy đánh giá với ID đã cho.");
+            }
+            return Ok(review);
+        }
+        // Cập nhật trạng thái đánh giá
+        [HttpPut("update-trang-thai/{maReview}")]
+        [Authorize]
+        [RequireRole("R00")]
+        public IActionResult UpdateTrangThai(string MaReview, [FromBody] string TrangThai)
+        {
+            var review = _reviewRepo.UpdateTrangThai(MaReview, TrangThai);
             if (review == null)
             {
                 return NotFound("Không tìm thấy đánh giá với ID đã cho.");

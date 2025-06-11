@@ -15,7 +15,7 @@ using be_quanlikhachsanapi.Authorization;
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
-    private readonly QuanLyKhachSanContext _context;
+    private readonly DataQlks113Nhom2Context _context;
     private readonly ITokenService _tokenService;
     private readonly IPasswordHasher<KhachHang> _passwordHasherKh;
     private readonly IPasswordHasher<NhanVien> _passwordHasherNv;
@@ -23,7 +23,7 @@ public class AuthController : ControllerBase
     private readonly IConfiguration _confMail;
 
     public AuthController(
-        QuanLyKhachSanContext context,
+        DataQlks113Nhom2Context context,
         ITokenService tokenService,
         IPasswordHasher<KhachHang> passwordHasherKh,
         IPasswordHasher<NhanVien> passwordHasherNv,

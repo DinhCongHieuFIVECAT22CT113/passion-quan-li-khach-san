@@ -16,9 +16,9 @@ namespace be_quanlikhachsanapi.Services
     }
     public class SuDungDichVuRepository : ISuDungDichVuRepository
     {
-        private readonly QuanLyKhachSanContext _context;
+        private readonly DataQlks113Nhom2Context _context;
 
-        public SuDungDichVuRepository(QuanLyKhachSanContext context)
+        public SuDungDichVuRepository(DataQlks113Nhom2Context context)
         {
             _context = context;
         }

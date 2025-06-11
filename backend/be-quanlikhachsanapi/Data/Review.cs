@@ -13,6 +13,8 @@ public partial class Review
 
     public string BinhLuan { get; set; } = null!;
 
+    public string? TrangThai { get; set; }
+
     public DateTime? NgayTao { get; set; }
 
     public DateTime? NgaySua { get; set; }

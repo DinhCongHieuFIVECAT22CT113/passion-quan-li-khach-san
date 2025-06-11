@@ -8,9 +8,9 @@ namespace be_quanlikhachsanapi.Services
     public class NotificationService : INotificationService
     {
         private readonly IHubContext<NotificationHub> _hubContext;
-        private readonly QuanLyKhachSanContext _context;
+        private readonly DataQlks113Nhom2Context _context;
 
-        public NotificationService(IHubContext<NotificationHub> hubContext, QuanLyKhachSanContext context)
+        public NotificationService(IHubContext<NotificationHub> hubContext, DataQlks113Nhom2Context context)
         {
             _hubContext = hubContext;
             _context = context;
