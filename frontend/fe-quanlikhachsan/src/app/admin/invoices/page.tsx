@@ -308,7 +308,17 @@ export default function InvoiceManager() {
 
   // Xuất hóa đơn PDF
   const handleExportPDF = (invoice: Invoice) => {
-    window.open(`/admin/invoices/export?id=${invoice.MaHoaDon}`, '_blank');
+    const printContent = document.getElementById(`invoice-print-${invoice.MaHoaDon}`);
+    if (!printContent) return;
+    
+    const printWindow = window.open('', '', 'width=800,height=600');
+    if (!printWindow) return;
+    
+    printWindow.document.write('<html><head><title>Hóa đơn</title></head><body>' + printContent.innerHTML + '</body></html>');
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
   };
 
   // Lọc theo search
@@ -533,6 +543,42 @@ export default function InvoiceManager() {
           </div>
         </div>
       )}
+
+      {/* Thêm nội dung in hóa đơn */}
+      {invoices.map((invoice) => (
+        <div key={`print-${invoice.MaHoaDon}`} id={`invoice-print-${invoice.MaHoaDon}`} style={{display:'none'}}>
+          <div style={{padding:32, fontFamily:'Arial'}}>
+            <h2 style={{textAlign:'center', marginBottom:24}}>HÓA ĐƠN THANH TOÁN</h2>
+            <div>Mã hóa đơn: <b>{invoice.MaHoaDon || 'N/A'}</b></div>
+            <div>Ngày lập: <b>{invoice.NgayTao ? new Date(invoice.NgayTao).toLocaleDateString('vi-VN') : 'N/A'}</b></div>
+            <div>Khách hàng: <b>{invoice.tenKhachHang || 'N/A'}</b></div>
+            <div>Mã đặt phòng: <b>{invoice.MaDatPhong || 'N/A'}</b></div>
+            <div style={{margin:'18px 0', borderTop:'1px solid #ddd', paddingTop:10}}>
+              <div style={{fontWeight:'bold', marginBottom:10}}>Thông tin thanh toán:</div>
+              <table style={{width:'100%', borderCollapse:'collapse'}}>
+                <tr>
+                  <td style={{padding:'8px 0'}}>Tổng tiền:</td>
+                  <td style={{textAlign:'right', fontWeight:'bold'}}>{formatCurrency(invoice.TongTien)} VNĐ</td>
+                </tr>
+                {invoice.MaKM && (
+                  <tr>
+                    <td style={{padding:'8px 0'}}>Khuyến mãi ({invoice.TenKhuyenMai}):</td>
+                    <td style={{textAlign:'right', fontWeight:'bold'}}>{formatCurrency(invoice.GiamGiaLoaiKM || 0)} VNĐ</td>
+                  </tr>
+                )}
+
+                <tr style={{borderTop:'1px solid #ddd'}}>
+                  <td style={{padding:'8px 0', fontWeight:'bold'}}>Thành tiền:</td>
+                  <td style={{textAlign:'right', fontWeight:'bold'}}>{formatCurrency(invoice.TongTien)} VNĐ</td>
+                </tr>
+              </table>
+            </div>
+            <div style={{marginTop:30, textAlign:'center', fontSize:'0.9em', color:'#666'}}>
+              Cảm ơn quý khách đã sử dụng dịch vụ của chúng tôi!
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
