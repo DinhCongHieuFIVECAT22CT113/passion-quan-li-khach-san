@@ -31,6 +31,8 @@ namespace be_quanlikhachsanapi.DTOs
 
     public class UpdateKhachHangDto
     {
+        public string? HoKh { get; set; }
+        public string? TenKh { get; set; }
         public string Email { get; set; } = null!;
         public string Sdt { get; set; } = null!;
         public string? DiaChi { get; set; }

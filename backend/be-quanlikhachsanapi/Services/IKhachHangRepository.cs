@@ -56,6 +56,7 @@ namespace be_quanlikhachsanapi.Services
                 SoCccd = kh.SoCccd,
                 MaLoaiKh = kh.MaLoaiKh,
                 MaRole = kh.MaRole,
+                AnhDaiDien = kh.AnhDaiDien, // Thêm avatar URL
             }).ToList();
         }
 
@@ -81,6 +82,7 @@ namespace be_quanlikhachsanapi.Services
                 SoCccd = khachHang.SoCccd,
                 MaLoaiKh = khachHang.MaLoaiKh,
                 MaRole = khachHang.MaRole,
+                AnhDaiDien = khachHang.AnhDaiDien, // Thêm avatar URL
             };
             return new JsonResult(_khachHang);
         }
@@ -167,6 +169,10 @@ namespace be_quanlikhachsanapi.Services
                 };
             }
 
+            if (!string.IsNullOrEmpty(updateKhachHang.HoKh))
+                khachHang.HoKh = updateKhachHang.HoKh;
+            if (!string.IsNullOrEmpty(updateKhachHang.TenKh))
+                khachHang.TenKh = updateKhachHang.TenKh;
             khachHang.Email = updateKhachHang.Email;
             khachHang.Sdt = updateKhachHang.Sdt;
             khachHang.DiaChi = updateKhachHang.DiaChi;

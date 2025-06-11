@@ -4,6 +4,7 @@ import styles from './profile.module.css';
 import { API_BASE_URL } from '@/lib/config';
 import { getFormDataHeaders } from '@/lib/api';
 import { supabaseConfig } from '@/config/supabase';
+import { useAuth } from '@/lib/auth';
 
 interface AvatarUploadModalProps {
   onClose: () => void;
@@ -11,7 +12,7 @@ interface AvatarUploadModalProps {
 }
 
 const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({ onClose, onAvatarSelected }) => {
-  // Không sử dụng useTranslation nữa
+  const { updateUser } = useAuth();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -75,8 +76,16 @@ const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({ onClose, onAvatar
         // Lấy URL avatar từ response
         const responseData = await updateResponse.json();
         const avatarUrl = responseData.avatarUrl;
-        
+
+        // Cập nhật thông tin user trong context (cả hai field để tương thích)
+        updateUser({
+          avatarUrl,
+          anhDaiDien: avatarUrl
+        });
+
+        // Gọi callback để cập nhật UI
         onAvatarSelected(avatarUrl);
+
         alert('Upload avatar thành công!');
         onClose();
       } else {

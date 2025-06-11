@@ -190,6 +190,32 @@ export default function RoomsListPage() {
     fetchRoomsAndRoomType();
   }, [selectedLanguage, fetchRoomsAndRoomType]);
 
+  // Kiểm tra nếu đang quay lại từ guest-booking để chỉnh sửa
+  useEffect(() => {
+    const isEditingBooking = localStorage.getItem('editingBooking');
+    const savedBookingData = localStorage.getItem('bookingFormData');
+
+    if (isEditingBooking === 'true' && savedBookingData) {
+      try {
+        const bookingData = JSON.parse(savedBookingData);
+
+        // Tìm phòng tương ứng với dữ liệu đã lưu
+        const roomToEdit = rooms.find(room => room.maPhong === bookingData.roomData?.maPhong);
+
+        if (roomToEdit) {
+          setSelectedRoomForBooking(roomToEdit);
+          setShowBookingModal(true);
+
+          // Xóa flag để không mở lại modal khi refresh
+          localStorage.removeItem('editingBooking');
+        }
+      } catch (error) {
+        console.error('Lỗi khi parse dữ liệu booking để chỉnh sửa:', error);
+        localStorage.removeItem('editingBooking');
+      }
+    }
+  }, [rooms]); // Dependency vào rooms để đảm bảo rooms đã load xong
+
   const renderAmenityIcon = (amenity: string) => {
     const iconMap: Record<string, React.ReactNode> = {
       'WiFi': <FaWifi />,
@@ -248,6 +274,10 @@ export default function RoomsListPage() {
   const handleCloseBookingModal = () => {
     setShowBookingModal(false);
     setSelectedRoomForBooking(null);
+
+    // Xóa dữ liệu booking đã lưu khi đóng modal
+    localStorage.removeItem('bookingFormData');
+    localStorage.removeItem('editingBooking');
   };
 
   const pageTitle = roomType?.tenLoaiPhong ? `Phòng ${roomType.tenLoaiPhong} | Passion Horizon` : 'Danh sách phòng | Passion Horizon';
@@ -511,6 +541,7 @@ export default function RoomsListPage() {
           loaiPhong={roomType} // Pass the roomType details to the booking modal
           onClose={handleCloseBookingModal}
           selectedRoom={selectedRoomForBooking} // Pass the specific room selected
+          open={showBookingModal}
         />
       )}
     </div>

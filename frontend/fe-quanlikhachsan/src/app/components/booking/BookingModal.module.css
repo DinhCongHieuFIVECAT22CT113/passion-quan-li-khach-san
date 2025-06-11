@@ -1258,3 +1258,83 @@
     align-self: flex-end;
   }
 }
+
+/* Enhanced Success Step Styles */
+.successNote {
+  background: #e8f4fd;
+  border: 1px solid #bee5eb;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  display: flex;
+  gap: 1rem;
+  text-align: left;
+}
+
+.noteIcon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  margin-top: 0.2rem;
+}
+
+.noteContent h4 {
+  margin: 0 0 0.75rem 0;
+  color: #0c5460;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.noteContent ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: #0c5460;
+}
+
+.noteContent li {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.statusPending {
+  color: #f39c12 !important;
+  font-weight: 600;
+  background: #fef9e7;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid #f1c40f;
+}
+
+.continueBookingButton {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 0.5rem;
+}
+
+.continueBookingButton:hover {
+  background: #2980b9;
+  transform: translateY(-2px);
+}
+
+.backHomeButton {
+  background: #95a5a6;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 0.5rem;
+}
+
+.backHomeButton:hover {
+  background: #7f8c8d;
+  transform: translateY(-2px);
+}

@@ -8,7 +8,7 @@ import { getAuthHeaders, handleResponse, getBookingPromotions, getBookingService
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import styles from './bookings.module.css';
-import { FaCalendarAlt, FaBed, FaMoneyBillWave, FaCheckCircle, FaTimesCircle, FaSpinner, FaClock } from 'react-icons/fa';
+import { FaCalendarAlt, FaBed, FaMoneyBillWave, FaCheckCircle, FaTimesCircle, FaClock } from 'react-icons/fa';
 
 interface Booking {
   maDatPhong: string;
@@ -42,17 +42,52 @@ export default function MyBookingsPage() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [bookingPromotions, setBookingPromotions] = useState<any[]>([]);
   const [bookingServices, setBookingServices] = useState<any[]>([]);
+  const [newBookingId, setNewBookingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (authLoading) return;
-    
+
     if (!user) {
       router.push('/login?redirectUrl=/users/bookings');
       return;
     }
-    
+
     fetchBookings();
   }, [user, authLoading, router]);
+
+  // Auto-refresh để hiển thị phòng vừa đặt
+  useEffect(() => {
+    const handleFocus = () => {
+      // Refresh khi user quay lại trang (từ đặt phòng)
+      if (!isLoading && user) {
+        fetchBookings();
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [isLoading, user]);
+
+  // Kiểm tra có đặt phòng mới không (từ URL params hoặc localStorage)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const newBooking = urlParams.get('newBooking');
+    const savedNewBooking = localStorage.getItem('newBookingId');
+
+    if (newBooking || savedNewBooking) {
+      setNewBookingId(newBooking || savedNewBooking);
+
+      // Xóa khỏi localStorage sau khi đã hiển thị
+      if (savedNewBooking) {
+        localStorage.removeItem('newBookingId');
+      }
+
+      // Tự động xóa highlight sau 10 giây
+      setTimeout(() => {
+        setNewBookingId(null);
+      }, 10000);
+    }
+  }, []);
 
   const fetchBookings = async () => {
     try {
@@ -282,53 +317,66 @@ export default function MyBookingsPage() {
   };
 
   const getStatusClass = (status: string) => {
-    switch (status.toLowerCase()) {
+    const normalizedStatus = status.toLowerCase().trim();
+    switch (normalizedStatus) {
       case 'đã xác nhận':
       case 'đã thanh toán':
       case 'confirmed':
+      case 'xác nhận':
         return styles.confirmed;
       case 'đang chờ':
       case 'chờ xác nhận':
       case 'đã đặt':
       case 'pending':
+      case 'chờ':
         return styles.pending;
       case 'đã hủy':
       case 'cancelled':
+      case 'hủy':
         return styles.cancelled;
       case 'đã hoàn thành':
       case 'đã trả phòng':
       case 'completed':
+      case 'hoàn thành':
         return styles.completed;
       case 'đang ở':
       case 'checked-in':
+      case 'đã nhận phòng':
         return styles.checkedIn;
       default:
-        return styles.default;
+        // Mặc định cho trạng thái mới/chưa xác nhận
+        return styles.pending;
     }
   };
 
   const getStatusIcon = (status: string) => {
-    switch (status.toLowerCase()) {
+    const normalizedStatus = status.toLowerCase().trim();
+    switch (normalizedStatus) {
       case 'đã xác nhận':
       case 'đã thanh toán':
       case 'đã hoàn thành':
       case 'đã trả phòng':
       case 'confirmed':
       case 'completed':
+      case 'xác nhận':
+      case 'hoàn thành':
         return <FaCheckCircle />;
       case 'đang chờ':
       case 'chờ xác nhận':
       case 'đã đặt':
       case 'pending':
-        return <FaSpinner />;
+      case 'chờ':
+        return <FaClock className={styles.spinningIcon} />;
       case 'đã hủy':
       case 'cancelled':
+      case 'hủy':
         return <FaTimesCircle />;
       case 'đang ở':
       case 'checked-in':
+      case 'đã nhận phòng':
         return <FaBed />;
       default:
-        return <FaCalendarAlt />;
+        return <FaClock className={styles.spinningIcon} />;
     }
   };
 
@@ -453,7 +501,10 @@ export default function MyBookingsPage() {
         ) : (
           <div className={styles.bookingsList}>
             {filteredBookings.map(booking => (
-              <div key={booking.maDatPhong} className={styles.bookingCard}>
+              <div
+                key={booking.maDatPhong}
+                className={`${styles.bookingCard} ${newBookingId === booking.maDatPhong ? styles.newBookingHighlight : ''}`}
+              >
                 <div className={styles.bookingHeader}>
                   <div className={styles.bookingId}>
                     <span>Mã đặt phòng:</span> {booking.maDatPhong}

@@ -60,7 +60,7 @@ const ProfilePageContent: FC = () => {
     setIsClient(true);
   }, []);
 
-  // Fetch user profile and transaction history on page load
+  // Update user info when user context changes
   useEffect(() => {
     if (user) {
       setUserInfo({
@@ -72,8 +72,12 @@ const ProfilePageContent: FC = () => {
         phone: user.soDienThoai || '',
         idNumber: user.soCccd || '',
       });
-      setAvatarSrc(user.avatarUrl || null);
+      setAvatarSrc(user.anhDaiDien || user.avatarUrl || null);
     }
+  }, [user]); // Thêm dependency để re-render khi user thay đổi
+
+  // Fetch user profile and transaction history on page load
+  useEffect(() => {
 
     const fetchData = async () => {
       if (!user?.maNguoiDung) {
@@ -84,7 +88,7 @@ const ProfilePageContent: FC = () => {
       try {
         // Lấy thông tin chi tiết khách hàng từ API
         const token = localStorage.getItem('token');
-        const userResponse = await fetch(`${API_BASE_URL}/KhachHang/thong-tin`, {
+        const userResponse = await fetch(`${API_BASE_URL}/KhachHang/me`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -108,9 +112,9 @@ const ProfilePageContent: FC = () => {
             idNumber: userData.soCccd || '',
           });
           
-          // Cập nhật avatar nếu có
-          if (userData.avatarUrl) {
-            setAvatarSrc(userData.avatarUrl);
+          // Cập nhật avatar nếu có (backend trả về field anhDaiDien)
+          if (userData.anhDaiDien || userData.avatarUrl) {
+            setAvatarSrc(userData.anhDaiDien || userData.avatarUrl);
           }
         }
 
@@ -158,17 +162,20 @@ const ProfilePageContent: FC = () => {
     try {
       // Gọi API thực tế để đổi mật khẩu
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_BASE_URL}/TaiKhoan/doi-mat-khau`, {
-        method: 'POST',
+
+      // Tạo FormData cho multipart/form-data
+      const formData = new FormData();
+      formData.append('Password', currentPassword);
+      formData.append('NewPassword', newPassword);
+      formData.append('ConfirmPassword', confirmNewPassword);
+
+      const response = await fetch(`${API_BASE_URL}/Auth/change-password`, {
+        method: 'PUT', // Backend sử dụng PUT
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
+          // Không set Content-Type để browser tự động set cho FormData
         },
-        body: JSON.stringify({
-          matKhauCu: currentPassword,
-          matKhauMoi: newPassword,
-          xacNhanMatKhau: confirmNewPassword
-        }),
+        body: formData,
         credentials: 'include'
       });
 
@@ -230,7 +237,7 @@ const handleSaveProfile = async (data: any) => {
         hoKh: data.hokh,
         tenKh: data.tenkh,
         email: data.email,
-        soDienThoai: data.soDienThoai,
+        sdt: data.soDienThoai, // Backend sử dụng 'sdt' thay vì 'soDienThoai'
         soCccd: data.soCccd,
         diaChi: data.diaChi || '',
       }),

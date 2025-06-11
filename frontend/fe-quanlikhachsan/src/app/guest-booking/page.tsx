@@ -21,6 +21,7 @@ interface BookingData {
   soTreEm: number;
   roomData: {
     maPhong: string;
+    maLoaiPhong: string;
     tenPhong: string;
     tenLoaiPhong: string;
     giaMoiDem: number;
@@ -52,6 +53,8 @@ interface BookingData {
     discount: number;
     total: number;
   };
+  // Phương thức thanh toán đã chọn
+  phuongThucThanhToan?: string;
 }
 
 interface PaymentData {
@@ -79,6 +82,14 @@ export default function GuestBookingPage() {
       try {
         const parsedData = JSON.parse(savedBookingData);
         setBookingData(parsedData);
+
+        // Set phương thức thanh toán đã chọn từ BookingModal
+        if (parsedData.phuongThucThanhToan) {
+          setPaymentData(prev => ({
+            ...prev,
+            phuongThucThanhToan: parsedData.phuongThucThanhToan
+          }));
+        }
       } catch (error) {
         console.error('Lỗi khi parse dữ liệu booking:', error);
         router.push('/users/rooms');
@@ -113,14 +124,43 @@ export default function GuestBookingPage() {
     setError('');
   };
 
-  const validatePayment = (): boolean => {
-    if (!paymentData.phuongThucThanhToan) {
-      setError('Vui lòng chọn phương thức thanh toán');
+  const handleBackToEdit = () => {
+    if (!bookingData) return;
+
+    // Lưu trạng thái đang chỉnh sửa để modal mở lại
+    localStorage.setItem('editingBooking', 'true');
+
+    // Tạo slug cho room type để quay lại đúng trang room detail
+    const createRoomSlug = (roomName: string, roomId: string): string => {
+      const slug = roomName
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim();
+      return `${slug}-${roomId}`;
+    };
+
+    // Lấy thông tin room type từ bookingData
+    const roomTypeSlug = createRoomSlug(
+      bookingData.roomData.tenLoaiPhong,
+      bookingData.roomData.maLoaiPhong // Sử dụng mã loại phòng chính xác
+    );
+
+    // Quay lại trang room detail để mở modal BookingModal
+    router.push(`/rooms/${roomTypeSlug}`);
+  };
+
+  const validateBooking = (): boolean => {
+    if (!bookingData) {
+      setError('Không tìm thấy thông tin đặt phòng');
       return false;
     }
 
-    if (paymentData.phuongThucThanhToan !== 'cash' && !paymentData.loaiThe) {
-      setError('Vui lòng chọn loại thẻ');
+    if (!paymentData.phuongThucThanhToan) {
+      setError('Phương thức thanh toán chưa được chọn. Vui lòng quay lại bước trước.');
       return false;
     }
 
@@ -129,8 +169,14 @@ export default function GuestBookingPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!validatePayment() || !bookingData) {
+
+    if (!validateBooking()) {
+      return;
+    }
+
+    // Kiểm tra bookingData tồn tại
+    if (!bookingData) {
+      setError('Không tìm thấy thông tin đặt phòng. Vui lòng thử lại.');
       return;
     }
 
@@ -259,13 +305,13 @@ export default function GuestBookingPage() {
         <div className={styles.container}>
           <div className={styles.breadcrumb}>
             <span onClick={() => router.back()} className={styles.breadcrumbLink}>
-              Chọn phương thức
+              Thông tin đặt phòng
             </span>
             <span className={styles.breadcrumbSeparator}>/</span>
-            <span className={styles.breadcrumbCurrent}>Thanh toán</span>
+            <span className={styles.breadcrumbCurrent}>Xác nhận</span>
           </div>
 
-          <h1 className={styles.pageTitle}>Thanh toán đặt phòng</h1>
+          <h1 className={styles.pageTitle}>Xác nhận đặt phòng</h1>
 
           <div className={styles.contentGrid}>
             {/* Tóm tắt đặt phòng */}
@@ -327,6 +373,23 @@ export default function GuestBookingPage() {
                 </div>
               </div>
 
+              {/* Hiển thị phương thức thanh toán đã chọn */}
+              {bookingData.phuongThucThanhToan && (
+                <div className={styles.paymentInfo}>
+                  <h3>Phương thức thanh toán</h3>
+                  <div className={styles.infoItem}>
+                    <span>Đã chọn:</span>
+                    <span className={styles.paymentMethod}>
+                      {bookingData.phuongThucThanhToan === 'cash' && '💵 Thanh toán khi nhận phòng'}
+                      {bookingData.phuongThucThanhToan === 'card' && '💳 Thẻ tín dụng/Ghi nợ'}
+                      {bookingData.phuongThucThanhToan === 'transfer' && '🏦 Chuyển khoản ngân hàng'}
+                      {bookingData.phuongThucThanhToan === 'momo' && '📱 Ví MoMo'}
+                      {bookingData.phuongThucThanhToan === 'zalopay' && '💙 ZaloPay'}
+                    </span>
+                  </div>
+                </div>
+              )}
+
               <div className={styles.priceBreakdown}>
                 <h3>Chi tiết giá</h3>
                 <div className={styles.infoItem}>
@@ -371,10 +434,10 @@ export default function GuestBookingPage() {
               </div>
             </div>
 
-            {/* Form thanh toán */}
-            <div className={styles.paymentForm}>
-              <h2>Phương thức thanh toán</h2>
-              
+            {/* Form xác nhận */}
+            <div className={styles.confirmationForm}>
+              <h2>Xác nhận thông tin</h2>
+
               {error && (
                 <div className={styles.errorMessage}>
                   {error}
@@ -382,133 +445,85 @@ export default function GuestBookingPage() {
               )}
 
               <form onSubmit={handleSubmit}>
-                <div className={styles.paymentMethods}>
-                  <div 
-                    className={`${styles.paymentMethod} ${paymentData.phuongThucThanhToan === 'cash' ? styles.selected : ''}`}
-                    onClick={() => handlePaymentChange('phuongThucThanhToan', 'cash')}
-                  >
-                    <FaMoneyBillWave className={styles.paymentIcon} />
-                    <div className={styles.paymentInfo}>
-                      <h4>Thanh toán khi nhận phòng</h4>
-                      <p>Thanh toán bằng tiền mặt tại quầy lễ tân</p>
-                    </div>
-                    <div className={styles.radioButton}>
-                      <input
-                        type="radio"
-                        name="phuongThucThanhToan"
-                        value="cash"
-                        checked={paymentData.phuongThucThanhToan === 'cash'}
-                        onChange={() => handlePaymentChange('phuongThucThanhToan', 'cash')}
-                      />
-                    </div>
-                  </div>
-
-                  <div 
-                    className={`${styles.paymentMethod} ${paymentData.phuongThucThanhToan === 'card' ? styles.selected : ''}`}
-                    onClick={() => handlePaymentChange('phuongThucThanhToan', 'card')}
-                  >
-                    <FaCreditCard className={styles.paymentIcon} />
-                    <div className={styles.paymentInfo}>
-                      <h4>Thẻ tín dụng/Ghi nợ</h4>
-                      <p>Thanh toán an toàn với thẻ Visa, MasterCard</p>
-                    </div>
-                    <div className={styles.radioButton}>
-                      <input
-                        type="radio"
-                        name="phuongThucThanhToan"
-                        value="card"
-                        checked={paymentData.phuongThucThanhToan === 'card'}
-                        onChange={() => handlePaymentChange('phuongThucThanhToan', 'card')}
-                      />
+                {/* Hiển thị tóm tắt thông tin */}
+                <div className={styles.confirmationSummary}>
+                  <div className={styles.summarySection}>
+                    <h3>📋 Tóm tắt đặt phòng</h3>
+                    <div className={styles.summaryGrid}>
+                      <div className={styles.summaryItem}>
+                        <span>Khách hàng:</span>
+                        <span>{bookingData.hoTen}</span>
+                      </div>
+                      <div className={styles.summaryItem}>
+                        <span>Phòng:</span>
+                        <span>{bookingData.roomData.tenPhong} ({bookingData.roomData.tenLoaiPhong})</span>
+                      </div>
+                      <div className={styles.summaryItem}>
+                        <span>Thời gian:</span>
+                        <span>
+                          {new Date(bookingData.ngayNhanPhong).toLocaleDateString('vi-VN')} - {' '}
+                          {new Date(bookingData.ngayTraPhong).toLocaleDateString('vi-VN')} ({calculateNights()} đêm)
+                        </span>
+                      </div>
+                      <div className={styles.summaryItem}>
+                        <span>Thanh toán:</span>
+                        <span>
+                          {paymentData.phuongThucThanhToan === 'cash' && '💵 Thanh toán khi nhận phòng'}
+                          {paymentData.phuongThucThanhToan === 'card' && '💳 Thẻ tín dụng/Ghi nợ'}
+                          {paymentData.phuongThucThanhToan === 'transfer' && '🏦 Chuyển khoản ngân hàng'}
+                          {paymentData.phuongThucThanhToan === 'momo' && '📱 Ví MoMo'}
+                          {paymentData.phuongThucThanhToan === 'zalopay' && '💙 ZaloPay'}
+                        </span>
+                      </div>
+                      <div className={styles.summaryItem}>
+                        <span>Tổng tiền:</span>
+                        <span className={styles.totalAmount}>
+                          {(bookingData.priceBreakdown?.total || calculateTotalPrice()).toLocaleString()}đ
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  <div 
-                    className={`${styles.paymentMethod} ${paymentData.phuongThucThanhToan === 'transfer' ? styles.selected : ''}`}
-                    onClick={() => handlePaymentChange('phuongThucThanhToan', 'transfer')}
-                  >
-                    <FaUniversity className={styles.paymentIcon} />
-                    <div className={styles.paymentInfo}>
-                      <h4>Chuyển khoản ngân hàng</h4>
-                      <p>Chuyển khoản qua Internet Banking</p>
-                    </div>
-                    <div className={styles.radioButton}>
-                      <input
-                        type="radio"
-                        name="phuongThucThanhToan"
-                        value="transfer"
-                        checked={paymentData.phuongThucThanhToan === 'transfer'}
-                        onChange={() => handlePaymentChange('phuongThucThanhToan', 'transfer')}
-                      />
+                  {/* Ghi chú bổ sung */}
+                  <div className={styles.noteSection}>
+                    <label htmlFor="ghiChuBoSung">Ghi chú bổ sung (tùy chọn)</label>
+                    <textarea
+                      id="ghiChuBoSung"
+                      value={paymentData.ghiChuThanhToan}
+                      onChange={(e) => handlePaymentChange('ghiChuThanhToan', e.target.value)}
+                      placeholder="Nhập ghi chú bổ sung nếu có (yêu cầu đặc biệt, thời gian check-in sớm, v.v.)"
+                      rows={3}
+                    />
+                  </div>
+
+                  {/* Điều khoản */}
+                  <div className={styles.termsSection}>
+                    <div className={styles.termsBox}>
+                      <FaShieldAlt className={styles.securityIcon} />
+                      <div className={styles.termsContent}>
+                        <h4>Điều khoản đặt phòng</h4>
+                        <ul>
+                          <li>Thông tin đặt phòng sẽ được xác nhận qua email và SMS</li>
+                          <li>Vui lòng mang theo CCCD/Passport khi check-in</li>
+                          <li>Check-in: 14:00 | Check-out: 12:00</li>
+                          <li>Hủy phòng miễn phí trước 24h</li>
+                          {paymentData.phuongThucThanhToan === 'cash' && (
+                            <li>Thanh toán bằng tiền mặt tại quầy lễ tân khi nhận phòng</li>
+                          )}
+                        </ul>
+                      </div>
                     </div>
                   </div>
-                </div>
-
-                {paymentData.phuongThucThanhToan !== 'cash' && (
-                  <div className={styles.cardTypeSection}>
-                    <h3>Chọn loại thẻ</h3>
-                    <div className={styles.cardTypes}>
-                      <label className={styles.cardTypeOption}>
-                        <input
-                          type="radio"
-                          name="loaiThe"
-                          value="visa"
-                          checked={paymentData.loaiThe === 'visa'}
-                          onChange={(e) => handlePaymentChange('loaiThe', e.target.value)}
-                        />
-                        <span>Visa</span>
-                      </label>
-                      <label className={styles.cardTypeOption}>
-                        <input
-                          type="radio"
-                          name="loaiThe"
-                          value="mastercard"
-                          checked={paymentData.loaiThe === 'mastercard'}
-                          onChange={(e) => handlePaymentChange('loaiThe', e.target.value)}
-                        />
-                        <span>MasterCard</span>
-                      </label>
-                      <label className={styles.cardTypeOption}>
-                        <input
-                          type="radio"
-                          name="loaiThe"
-                          value="jcb"
-                          checked={paymentData.loaiThe === 'jcb'}
-                          onChange={(e) => handlePaymentChange('loaiThe', e.target.value)}
-                        />
-                        <span>JCB</span>
-                      </label>
-                    </div>
-                  </div>
-                )}
-
-                <div className={styles.noteSection}>
-                  <label htmlFor="ghiChuThanhToan">Ghi chú thanh toán (tùy chọn)</label>
-                  <textarea
-                    id="ghiChuThanhToan"
-                    value={paymentData.ghiChuThanhToan}
-                    onChange={(e) => handlePaymentChange('ghiChuThanhToan', e.target.value)}
-                    placeholder="Nhập ghi chú về thanh toán nếu có"
-                    rows={3}
-                  />
-                </div>
-
-                <div className={styles.securityNote}>
-                  <FaShieldAlt className={styles.securityIcon} />
-                  <p>
-                    Thông tin thanh toán của bạn được mã hóa và bảo mật tuyệt đối. 
-                    Chúng tôi không lưu trữ thông tin thẻ tín dụng.
-                  </p>
                 </div>
 
                 <div className={styles.formActions}>
                   <button
                     type="button"
-                    onClick={() => router.back()}
+                    onClick={handleBackToEdit}
                     className={styles.backButton}
                     disabled={isSubmitting}
                   >
-                    Quay lại
+                    Quay lại chỉnh sửa
                   </button>
                   <button
                     type="submit"

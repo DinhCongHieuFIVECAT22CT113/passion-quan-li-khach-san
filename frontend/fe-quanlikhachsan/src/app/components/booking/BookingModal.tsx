@@ -13,6 +13,7 @@ interface BookingModalProps {
   selectedRoom?: PhongDTO;
   loaiPhong: LoaiPhongDTO | null;
   onClose: () => void;
+  open?: boolean;
 }
 
 interface Promotion {
@@ -59,7 +60,7 @@ interface BookingErrors {
   [key: string]: string;
 }
 
-const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, onClose }) => {
+const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, onClose, open = true }) => {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const [step, setStep] = useState<'choice' | 'form' | 'payment' | 'success'>('choice');
@@ -90,12 +91,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
   const [showPromotions, setShowPromotions] = useState(false);
   const [showServices, setShowServices] = useState(false);
 
-  // Thêm state để lưu thông tin đặt phòng tạm thời
-  const [bookingData, setBookingData] = useState(() => {
-    // Kiểm tra xem có dữ liệu đặt phòng trong localStorage không
-    const savedData = localStorage.getItem('tempBookingData');
-    return savedData ? JSON.parse(savedData) : null;
-  });
+
 
   useEffect(() => {
     // Set default dates
@@ -141,6 +137,52 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
 
     loadPromotionsAndServices();
   }, []);
+
+  // Load dữ liệu đã lưu khi modal mở (để chỉnh sửa từ guest-booking)
+  useEffect(() => {
+    if (open) {
+      const savedBookingData = localStorage.getItem('bookingFormData');
+      if (savedBookingData) {
+        try {
+          const bookingData = JSON.parse(savedBookingData);
+
+          // Chỉ load nếu có dữ liệu form (tức là đang chỉnh sửa)
+          if (bookingData.hoTen) {
+            setFormData(prev => ({
+              ...prev,
+              hoTen: bookingData.hoTen || '',
+              soDienThoai: bookingData.soDienThoai || '',
+              email: bookingData.email || '',
+              ghiChu: bookingData.ghiChu || '',
+              ngayNhanPhong: bookingData.ngayNhanPhong || '',
+              ngayTraPhong: bookingData.ngayTraPhong || '',
+              thoiGianDen: bookingData.thoiGianDen || '14:00',
+              soNguoiLon: bookingData.soNguoiLon || 1,
+              soTreEm: bookingData.soTreEm || 0,
+              phuongThucThanhToan: bookingData.phuongThucThanhToan || 'cash'
+            }));
+
+            // Load lại khuyến mãi đã chọn
+            if (bookingData.selectedPromotion) {
+              setSelectedPromotion(bookingData.selectedPromotion);
+            }
+
+            // Load lại dịch vụ đã chọn
+            if (bookingData.selectedServices && Array.isArray(bookingData.selectedServices)) {
+              setSelectedServices(bookingData.selectedServices);
+            }
+
+            // Chuyển đến step form để chỉnh sửa
+            setStep('form');
+
+            console.log('Đã load lại dữ liệu booking để chỉnh sửa:', bookingData);
+          }
+        } catch (error) {
+          console.error('Lỗi khi load dữ liệu booking đã lưu:', error);
+        }
+      }
+    }
+  }, [open]);
 
   const calculateNights = (): number => {
     if (formData.ngayNhanPhong && formData.ngayTraPhong) {
@@ -371,6 +413,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
           ...bookingPayload,
           roomData: {
             maPhong: selectedRoom?.maPhong || '',
+            maLoaiPhong: loaiPhong?.maLoaiPhong || '',
             tenPhong: selectedRoom?.soPhong || `Phòng ${selectedRoom?.maPhong}`,
             tenLoaiPhong: loaiPhong?.tenLoaiPhong || '',
             giaMoiDem: loaiPhong?.giaMoiDem || 0,
@@ -380,7 +423,9 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
           // Thêm thông tin khuyến mãi và dịch vụ
           selectedPromotion: selectedPromotion,
           selectedServices: selectedServices,
-          priceBreakdown: calculatePriceBreakdown()
+          priceBreakdown: calculatePriceBreakdown(),
+          // Thêm phương thức thanh toán đã chọn
+          phuongThucThanhToan: formData.phuongThucThanhToan
         };
         
         // Lưu dữ liệu vào localStorage để trang guest-booking sử dụng
@@ -412,6 +457,12 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
 
       const result = await createDatPhong(bookingData);
       console.log('Booking result:', result);
+
+      // Lưu ID đặt phòng mới để highlight trong trang bookings
+      if (result && (result.datPhong || result.maDatPhong)) {
+        const newBookingId = result.datPhong || result.maDatPhong;
+        localStorage.setItem('newBookingId', newBookingId);
+      }
 
       // Nếu đặt phòng thành công và có khuyến mãi hoặc dịch vụ
       if (result && result.datPhong) {
@@ -1145,10 +1196,10 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
   const renderSuccessStep = () => (
     <div className={styles.stepContent}>
       <div className={styles.successContainer}>
-        <div className={styles.successIcon}>✓</div>
+        <div className={styles.successIcon}>🎉</div>
         <h2>Đặt phòng thành công!</h2>
         <p>Cảm ơn bạn đã đặt phòng. Chúng tôi đã gửi email xác nhận đến địa chỉ của bạn.</p>
-        
+
         <div className={styles.bookingInfo}>
           <div className={styles.infoItem}>
             <span>Mã đặt phòng:</span>
@@ -1156,26 +1207,87 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
           </div>
           <div className={styles.infoItem}>
             <span>Phòng:</span>
-            <span>{selectedRoom?.soPhong}</span>
+            <span>{selectedRoom?.soPhong} - {loaiPhong?.tenLoaiPhong}</span>
+          </div>
+          <div className={styles.infoItem}>
+            <span>Ngày nhận phòng:</span>
+            <span>{new Date(formData.ngayNhanPhong).toLocaleDateString('vi-VN')}</span>
+          </div>
+          <div className={styles.infoItem}>
+            <span>Ngày trả phòng:</span>
+            <span>{new Date(formData.ngayTraPhong).toLocaleDateString('vi-VN')}</span>
           </div>
           <div className={styles.infoItem}>
             <span>Tổng tiền:</span>
             <span className={styles.totalPrice}>{calculateTotalPrice().toLocaleString()}đ</span>
           </div>
+          <div className={styles.infoItem}>
+            <span>Trạng thái:</span>
+            <span className={styles.statusPending}>Chờ xác nhận</span>
+          </div>
+        </div>
+
+        <div className={styles.successNote}>
+          <div className={styles.noteIcon}>ℹ️</div>
+          <div className={styles.noteContent}>
+            <h4>Lưu ý quan trọng:</h4>
+            <ul>
+              <li>Đặt phòng của bạn đang <strong>chờ xác nhận</strong> từ khách sạn</li>
+              <li>Bạn sẽ nhận được email/SMS thông báo khi đặt phòng được xác nhận</li>
+              <li>Vui lòng mang theo CCCD/Passport khi check-in</li>
+              <li>Check-in: 14:00 | Check-out: 12:00</li>
+            </ul>
+          </div>
         </div>
 
         <div className={styles.successActions}>
-          <button onClick={onClose} className={styles.closeButton}>
-            Đóng
+          <button
+            onClick={() => {
+              onClose();
+              // Reset form để có thể đặt phòng mới
+              setStep('choice');
+              setFormData({
+                hoTen: user?.hoTen || '',
+                soDienThoai: user?.soDienThoai || '',
+                email: user?.email || '',
+                ghiChu: '',
+                ngayNhanPhong: '',
+                ngayTraPhong: '',
+                thoiGianDen: '14:00',
+                soNguoiLon: 1,
+                soTreEm: 0,
+                phuongThucThanhToan: 'cash'
+              });
+              setSelectedPromotion(null);
+              setSelectedServices([]);
+              setBookingResult(null);
+            }}
+            className={styles.continueBookingButton}
+          >
+            Đặt phòng khác
           </button>
+
           {user && (
-            <button 
-              onClick={() => router.push('/users/bookings')}
+            <button
+              onClick={() => {
+                onClose();
+                router.push('/users/bookings');
+              }}
               className={styles.viewBookingsButton}
             >
               Xem đặt phòng của tôi
             </button>
           )}
+
+          <button
+            onClick={() => {
+              onClose();
+              router.push('/users/home');
+            }}
+            className={styles.backHomeButton}
+          >
+            Về trang chủ
+          </button>
         </div>
       </div>
     </div>

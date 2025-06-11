@@ -442,6 +442,91 @@
   border: 1px solid #dee2e6;
 }
 
+/* Enhanced Status Styles */
+.spinningIcon {
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.pending {
+  background: #fff3cd !important;
+  color: #856404 !important;
+  border: 1px solid #ffeaa7 !important;
+  animation: pulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+  from {
+    opacity: 0.8;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.confirmed {
+  background: #d4edda !important;
+  color: #155724 !important;
+  border: 1px solid #c3e6cb !important;
+}
+
+.cancelled {
+  background: #f8d7da !important;
+  color: #721c24 !important;
+  border: 1px solid #f5c6cb !important;
+}
+
+.completed {
+  background: #d1ecf1 !important;
+  color: #0c5460 !important;
+  border: 1px solid #bee5eb !important;
+}
+
+.checkedIn {
+  background: #e2e3e5 !important;
+  color: #383d41 !important;
+  border: 1px solid #d6d8db !important;
+}
+
+/* New Booking Highlight */
+.newBookingHighlight {
+  border: 3px solid #28a745 !important;
+  box-shadow: 0 0 20px rgba(40, 167, 69, 0.3) !important;
+  animation: newBookingGlow 3s ease-in-out infinite alternate;
+  position: relative;
+}
+
+.newBookingHighlight::before {
+  content: "🎉 Mới đặt";
+  position: absolute;
+  top: -10px;
+  right: 10px;
+  background: #28a745;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  z-index: 10;
+}
+
+@keyframes newBookingGlow {
+  from {
+    box-shadow: 0 0 20px rgba(40, 167, 69, 0.3);
+  }
+  to {
+    box-shadow: 0 0 30px rgba(40, 167, 69, 0.6);
+  }
+}
+
 .bookingDetails {
   padding: 1.5rem;
   display: grid;

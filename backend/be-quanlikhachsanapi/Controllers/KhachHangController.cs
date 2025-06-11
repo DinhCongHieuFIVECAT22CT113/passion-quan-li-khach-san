@@ -128,5 +128,39 @@ namespace be_quanlikhachsanapi.Controllers
             return result;
         }
 
+        // Endpoint để lấy thông tin user hiện tại
+        [HttpGet("me")]
+        [RequireRole("R00", "R01", "R02", "R04")]
+        public IActionResult GetCurrentUser()
+        {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                return Unauthorized("Không thể xác định người dùng.");
+            }
+
+            var khachHang = _khachHangRepo.GetKhachHangById(currentUserId);
+            if (khachHang == null)
+            {
+                return NotFound("Không tìm thấy thông tin người dùng.");
+            }
+            return Ok(khachHang);
+        }
+
+        // Endpoint để cập nhật thông tin cá nhân
+        [HttpPut("cap-nhat-thong-tin")]
+        [RequireRole("R00", "R01", "R02", "R04")]
+        public IActionResult UpdatePersonalInfo([FromBody] UpdateKhachHangDto updateDto)
+        {
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(currentUserId))
+            {
+                return Unauthorized("Không thể xác định người dùng.");
+            }
+
+            var result = _khachHangRepo.UpdateKhachHang(currentUserId, updateDto);
+            return result;
+        }
+
     }
 }

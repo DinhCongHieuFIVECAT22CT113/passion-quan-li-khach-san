@@ -364,6 +364,7 @@ namespace be_quanlikhachsanapi.Services
         {
             return await _context.DatPhongs
                 .Where(dp => dp.MaKh == maKhachHang)
+                .OrderByDescending(dp => dp.NgayTao)
                 .ToListAsync();
         }
     }

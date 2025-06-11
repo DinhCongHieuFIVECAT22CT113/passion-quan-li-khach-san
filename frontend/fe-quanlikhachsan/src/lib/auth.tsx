@@ -137,6 +137,7 @@ export interface AuthUser {
   tenKh?: string;
   soCccd?: string;
   avatarUrl?: string;
+  anhDaiDien?: string; // Thêm field tương thích với backend
 }
 
 interface AuthContextType {
@@ -144,6 +145,7 @@ interface AuthContextType {
   loading: boolean;
   login: (token: string, refreshToken?: string) => void;
   logout: () => void;
+  updateUser: (updates: Partial<AuthUser>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -196,9 +198,16 @@ const loginUser = (token: string, refreshToken?: string) => {
     // Dừng auto-refresh và xóa tất cả tokens
     tokenManager.stopAutoRefresh();
     tokenManager.clearTokens();
-    
+
     setUser(null);
     // Không cần redirect ở đây, việc redirect sẽ do useLogout hoặc component gọi logout xử lý
+  };
+
+  const updateUser = (updates: Partial<AuthUser>) => {
+    setUser(prevUser => {
+      if (!prevUser) return null;
+      return { ...prevUser, ...updates };
+    });
   };
 
   useEffect(() => {
@@ -249,7 +258,7 @@ const loginUser = (token: string, refreshToken?: string) => {
   }, []); // Chỉ chạy một lần khi mount
 
   return (
-    <AuthContext.Provider value={{ user, loading, login: loginUser, logout: logoutUser }}>
+    <AuthContext.Provider value={{ user, loading, login: loginUser, logout: logoutUser, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

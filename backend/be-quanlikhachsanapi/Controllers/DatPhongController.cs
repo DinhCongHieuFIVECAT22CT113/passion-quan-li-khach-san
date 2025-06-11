@@ -339,7 +339,25 @@ namespace be_quanlikhachsanapi.Controllers
             }
 
             var datPhongs = await _datPhongRepo.GetDatPhongByKhachHang(maKh);
-            return Ok(datPhongs);
+
+            // Chuyển đổi sang DTO để tránh circular reference
+            var datPhongDtos = datPhongs.Select(dp => new
+            {
+                maDatPhong = dp.MaDatPhong,
+                maKh = dp.MaKh,
+                treEm = dp.TreEm,
+                nguoiLon = dp.NguoiLon,
+                ghiChu = dp.GhiChu,
+                soLuongPhong = dp.SoLuongPhong,
+                thoiGianDen = dp.ThoiGianDen,
+                ngayNhanPhong = dp.NgayNhanPhong,
+                ngayTraPhong = dp.NgayTraPhong,
+                trangThai = dp.TrangThai,
+                ngayTao = dp.NgayTao,
+                ngaySua = dp.NgaySua
+            }).ToList();
+
+            return Ok(datPhongDtos);
         }
     }
 }

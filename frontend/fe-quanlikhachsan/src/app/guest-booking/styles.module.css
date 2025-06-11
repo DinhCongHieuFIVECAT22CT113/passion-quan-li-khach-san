@@ -178,15 +178,17 @@
   font-weight: 700;
 }
 
-/* Payment Form */
-.paymentForm {
+/* Payment Form & Confirmation Form */
+.paymentForm,
+.confirmationForm {
   background: white;
   border-radius: 12px;
   padding: 2rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.paymentForm h2 {
+.paymentForm h2,
+.confirmationForm h2 {
   font-size: 1.5rem;
   font-weight: 600;
   color: #333;
@@ -493,4 +495,96 @@
   .paymentIcon {
     margin-right: 0;
   }
+}
+
+/* Confirmation Form Styles */
+.confirmationSummary {
+  margin-bottom: 2rem;
+}
+
+.summarySection {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #e9ecef;
+}
+
+.summarySection h3 {
+  margin: 0 0 1rem 0;
+  color: #2c3e50;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.summaryGrid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.summaryItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.summaryItem:last-child {
+  border-bottom: none;
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.summaryItem span:first-child {
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.summaryItem span:last-child {
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.totalAmount {
+  color: #28a745 !important;
+  font-size: 1.2rem !important;
+  font-weight: 700 !important;
+}
+
+.termsSection {
+  margin-top: 1.5rem;
+}
+
+.termsBox {
+  background: #e8f4fd;
+  border: 1px solid #bee5eb;
+  border-radius: 8px;
+  padding: 1.5rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.termsContent h4 {
+  margin: 0 0 0.75rem 0;
+  color: #0c5460;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.termsContent ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: #0c5460;
+}
+
+.termsContent li {
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.paymentInfo .paymentMethod {
+  font-weight: 600;
+  color: #28a745;
 }
