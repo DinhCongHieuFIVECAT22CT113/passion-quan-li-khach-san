@@ -67,7 +67,7 @@ export default function BookingManager() {
         const bookingsData = await getEmployeeBookings();
         
         // Lấy trạng thái đặt phòng từ localStorage nếu có
-        let savedBookingStatuses = {};
+        let savedBookingStatuses: Record<string, string> = {};
         if (typeof window !== 'undefined') {
           try {
             const savedData = localStorage.getItem('bookingStatuses');
@@ -174,6 +174,24 @@ export default function BookingManager() {
       // Validate form
       if (!form.customerName || !form.roomId || !form.checkInDate || !form.checkOutDate) {
         setFormError("Vui lòng điền đầy đủ thông tin bắt buộc");
+        return;
+      }
+
+      // Kiểm tra ngày nhận phòng không được là ngày trong quá khứ
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Đặt thời gian về 00:00:00
+      const checkInDate = new Date(form.checkInDate);
+      checkInDate.setHours(0, 0, 0, 0);
+
+      if (checkInDate < today) {
+        setFormError("Ngày nhận phòng không thể là ngày trong quá khứ");
+        return;
+      }
+
+      // Kiểm tra ngày trả phòng phải sau ngày nhận phòng
+      const checkOutDate = new Date(form.checkOutDate);
+      if (checkOutDate <= checkInDate) {
+        setFormError("Ngày trả phòng phải sau ngày nhận phòng");
         return;
       }
 

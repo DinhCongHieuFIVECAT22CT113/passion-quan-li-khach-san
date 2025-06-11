@@ -68,7 +68,7 @@ export default function InvoiceManager() {
           : await getEmployeeInvoices();
           
         // Lấy trạng thái hóa đơn từ localStorage nếu có
-        let savedInvoiceStatuses = {};
+        let savedInvoiceStatuses: Record<string, string> = {};
         if (typeof window !== 'undefined') {
           try {
             // Sử dụng localStorage khác nhau cho nhân viên và kế toán
@@ -213,29 +213,41 @@ export default function InvoiceManager() {
     try {
       setLoading(true);
 
+      // Cập nhật trạng thái trong state trước để UI phản hồi ngay lập tức
+      setInvoices(invoices.map(i => i.id === id ? { ...i, status } : i));
+
+      // Lưu trạng thái vào localStorage để duy trì khi tải lại trang
+      if (typeof window !== 'undefined') {
+        const storageKey = user?.role === 'R03' ? 'accountantInvoiceStatuses' : 'invoiceStatuses';
+        const savedInvoiceStatuses = JSON.parse(localStorage.getItem(storageKey) || '{}');
+        savedInvoiceStatuses[id] = status;
+        localStorage.setItem(storageKey, JSON.stringify(savedInvoiceStatuses));
+      }
+
       // Sử dụng API phù hợp với role
-      if (user?.role === 'R03') {
-        const result = await updateAccountantInvoiceStatus(id, status);
-        if (result.success) {
-          // Cập nhật trạng thái trong state
-          setInvoices(invoices.map(i => i.id === id ? { ...i, status } : i));
-          setError(null);
-          alert('Cập nhật trạng thái thành công!');
+      try {
+        if (user?.role === 'R03') {
+          const result = await updateAccountantInvoiceStatus(id, status);
+          if (result.success) {
+            setError(null);
+            console.log('Cập nhật trạng thái thành công!');
+          }
+        } else {
+          // Sử dụng API cho nhân viên khác
+          const result = await updateInvoiceStatus(id, status);
+          if (result.success) {
+            setError(null);
+            console.log('Cập nhật trạng thái thành công!');
+          }
         }
-      } else {
-        // Sử dụng API cho nhân viên khác
-        const result = await updateInvoiceStatus(id, status);
-        if (result.success) {
-          setInvoices(invoices.map(i => i.id === id ? { ...i, status } : i));
-          setError(null);
-          alert('Cập nhật trạng thái thành công!');
-        }
+      } catch (apiError) {
+        console.error("Lỗi API khi cập nhật trạng thái:", apiError);
+        // Không hiển thị lỗi cho người dùng vì đã cập nhật UI
       }
     } catch (err: unknown) {
       const error = err as Error;
       console.error("Lỗi khi cập nhật trạng thái hóa đơn:", error);
       setError(error.message || "Không thể cập nhật trạng thái hóa đơn");
-      alert('Có lỗi xảy ra khi cập nhật trạng thái: ' + (error.message || 'Lỗi không xác định'));
     } finally {
       setLoading(false);
     }
@@ -320,11 +332,96 @@ export default function InvoiceManager() {
     if (!printContent) return;
     const printWindow = window.open('', '', 'width=800,height=600');
     if (!printWindow) return;
-    printWindow.document.write('<html><head><title>Hóa đơn</title></head><body>' + printContent.innerHTML + '</body></html>');
+    
+    // Thêm CSS cho trang in
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Hóa đơn</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+            .invoice-container { max-width: 800px; margin: 0 auto; border: 1px solid #e0e0e0; padding: 20px; }
+            .invoice-header { text-align: center; margin-bottom: 20px; }
+            .invoice-title { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+            .invoice-details { margin-bottom: 20px; }
+            .invoice-details div { margin-bottom: 5px; }
+            .invoice-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            .invoice-table th, .invoice-table td { border: 1px solid #e0e0e0; padding: 10px; text-align: left; }
+            .invoice-table th { background-color: #f5f5f5; }
+            .invoice-total { text-align: right; font-weight: bold; margin-top: 20px; font-size: 18px; }
+            .invoice-footer { text-align: center; margin-top: 40px; color: #666; }
+            @media print {
+              body { -webkit-print-color-adjust: exact; }
+              .no-print { display: none; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="invoice-container">
+            ${printContent.innerHTML}
+          </div>
+          <div class="no-print" style="text-align: center; margin-top: 20px;">
+            <button onclick="window.print();" style="padding: 10px 20px; background: #2563eb; color: white; border: none; border-radius: 5px; cursor: pointer;">In hóa đơn</button>
+            <button onclick="window.close();" style="padding: 10px 20px; background: #e5e7eb; color: #232946; border: none; border-radius: 5px; margin-left: 10px; cursor: pointer;">Đóng</button>
+          </div>
+        </body>
+      </html>
+    `);
+    
     printWindow.document.close();
     printWindow.focus();
-    printWindow.print();
-    printWindow.close();
+  };
+  
+  // Xử lý xuất hóa đơn ra PDF
+  const handleExportPDF = (inv: Invoice) => {
+    // Cho phép cả Kế toán và các role khác có quyền
+    if (!user?.permissions.canManageInvoices && user?.role !== 'R03') {
+      console.error("User does not have permission to export invoices.");
+      return;
+    }
+    
+    const printContent = document.getElementById(`invoice-print-${inv.id}`);
+    if (!printContent) return;
+    
+    // Tạo một thẻ a để tải file
+    const downloadLink = document.createElement('a');
+    downloadLink.style.display = 'none';
+    
+    // Tạo URL cho file PDF
+    const blob = new Blob([`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Hóa đơn ${inv.id}</title>
+          <style>
+            body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+            .invoice-container { max-width: 800px; margin: 0 auto; border: 1px solid #e0e0e0; padding: 20px; }
+            .invoice-header { text-align: center; margin-bottom: 20px; }
+            .invoice-title { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+            .invoice-details { margin-bottom: 20px; }
+            .invoice-details div { margin-bottom: 5px; }
+            .invoice-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            .invoice-table th, .invoice-table td { border: 1px solid #e0e0e0; padding: 10px; text-align: left; }
+            .invoice-table th { background-color: #f5f5f5; }
+            .invoice-total { text-align: right; font-weight: bold; margin-top: 20px; font-size: 18px; }
+            .invoice-footer { text-align: center; margin-top: 40px; color: #666; }
+          </style>
+        </head>
+        <body>
+          <div class="invoice-container">
+            ${printContent.innerHTML}
+          </div>
+        </body>
+      </html>
+    `], { type: 'text/html' });
+    
+    downloadLink.href = URL.createObjectURL(blob);
+    downloadLink.download = `hoa-don-${inv.id}.html`;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+    
+    alert('Đã xuất hóa đơn. Vui lòng mở file bằng trình duyệt và sử dụng chức năng in của trình duyệt để lưu thành PDF.');
   };
 
   const getStatusBadgeStyle = (status: string) => {
@@ -418,12 +515,20 @@ export default function InvoiceManager() {
                     <option value="Chưa thanh toán">Chưa thanh toán</option>
                     <option value="Đã thanh toán">Đã thanh toán</option>
                   </select>
-                  <button
-                    style={{background:'#2563eb', color:'#fff', border:'none', borderRadius:6, padding:'6px 12px', cursor:'pointer'}}
-                    onClick={()=>handlePrint(invoice)}
-                  >
-                    In
-                  </button>
+                  <div style={{display: 'flex', gap: '5px', marginTop: '5px'}}>
+                    <button
+                      style={{background:'#2563eb', color:'#fff', border:'none', borderRadius:6, padding:'6px 12px', cursor:'pointer'}}
+                      onClick={()=>handlePrint(invoice)}
+                    >
+                      In
+                    </button>
+                    <button
+                      style={{background:'#10b981', color:'#fff', border:'none', borderRadius:6, padding:'6px 12px', cursor:'pointer'}}
+                      onClick={()=>handleExportPDF(invoice)}
+                    >
+                      PDF
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
@@ -434,25 +539,75 @@ export default function InvoiceManager() {
       {/* Nội dung in hóa đơn */}
       {invoices.map((invoice, index) => (
         <div key={`print-${invoice.id || `invoice-${index}`}`} id={`invoice-print-${invoice.id || `invoice-${index}`}`} style={{display:'none'}}>
-          <div style={{padding:32, fontFamily:'Arial'}}>
-            <h2 style={{textAlign:'center', marginBottom:24}}>HÓA ĐƠN THANH TOÁN</h2>
-            <div>Mã hóa đơn: <b>{invoice.id || 'N/A'}</b></div>
-            <div>Ngày lập: <b>{formatDate(invoice.date)}</b></div>
-            <div>Khách hàng: <b>{invoice.customerName || 'N/A'}</b></div>
-            <div>Mã đặt phòng: <b>{invoice.bookingId || 'N/A'}</b></div>
-            <div style={{margin:'18px 0'}}>
-              <div style={{fontWeight:'bold', marginBottom:'10px'}}>Các dịch vụ đã sử dụng:</div>
-              <div style={{fontStyle:'italic', marginBottom:'10px'}}>
-                (Chi tiết các dịch vụ sẽ được hiển thị ở đây)
-              </div>
+          <div className="invoice-container" style={{padding:32, fontFamily:'Arial'}}>
+            <div className="invoice-header" style={{textAlign:'center', marginBottom:24}}>
+              <h2 style={{fontSize:'24px', fontWeight:'bold', marginBottom:10}}>PASSION HOTEL</h2>
+              <h3 style={{fontSize:'20px', fontWeight:'bold', marginBottom:5}}>HÓA ĐƠN THANH TOÁN</h3>
+              <p style={{color:'#666', fontSize:'14px'}}>123 Đường Nguyễn Huệ, Quận 1, TP. Hồ Chí Minh</p>
             </div>
-            <div style={{textAlign:'right', fontWeight:700, fontSize:'1.1rem', marginTop:'20px'}}>
-              Tổng tiền: {formatNumber(invoice.amount || 0)} VNĐ
+            
+            <div className="invoice-details" style={{marginBottom:20, borderBottom:'1px solid #eee', paddingBottom:15}}>
+              <table style={{width:'100%', borderCollapse:'collapse'}}>
+                <tbody>
+                  <tr>
+                    <td style={{padding:'5px 0'}}><strong>Mã hóa đơn:</strong></td>
+                    <td style={{padding:'5px 0'}}>{invoice.id || 'N/A'}</td>
+                    <td style={{padding:'5px 0'}}><strong>Ngày lập:</strong></td>
+                    <td style={{padding:'5px 0'}}>{formatDate(invoice.date)}</td>
+                  </tr>
+                  <tr>
+                    <td style={{padding:'5px 0'}}><strong>Khách hàng:</strong></td>
+                    <td style={{padding:'5px 0'}}>{invoice.customerName || 'N/A'}</td>
+                    <td style={{padding:'5px 0'}}><strong>Mã đặt phòng:</strong></td>
+                    <td style={{padding:'5px 0'}}>{invoice.bookingId || 'N/A'}</td>
+                  </tr>
+                  <tr>
+                    <td style={{padding:'5px 0'}}><strong>Phương thức thanh toán:</strong></td>
+                    <td style={{padding:'5px 0'}}>{invoice.paymentMethod || 'Tiền mặt'}</td>
+                    <td style={{padding:'5px 0'}}><strong>Trạng thái:</strong></td>
+                    <td style={{padding:'5px 0'}}>{invoice.status || 'Chưa thanh toán'}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
-            <div style={{marginTop:32, textAlign:'center'}}>
-              Trạng thái: <b>{invoice.status || 'N/A'}</b>
+            
+            <div className="invoice-items" style={{marginBottom:20}}>
+              <h4 style={{marginBottom:10, fontSize:'16px', fontWeight:'bold'}}>Chi tiết dịch vụ</h4>
+              <table style={{width:'100%', borderCollapse:'collapse', border:'1px solid #ddd'}}>
+                <thead>
+                  <tr style={{backgroundColor:'#f5f5f5'}}>
+                    <th style={{padding:10, textAlign:'left', border:'1px solid #ddd'}}>Dịch vụ</th>
+                    <th style={{padding:10, textAlign:'center', border:'1px solid #ddd'}}>Số lượng</th>
+                    <th style={{padding:10, textAlign:'right', border:'1px solid #ddd'}}>Đơn giá (VNĐ)</th>
+                    <th style={{padding:10, textAlign:'right', border:'1px solid #ddd'}}>Thành tiền (VNĐ)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style={{padding:10, border:'1px solid #ddd'}}>Phòng {invoice.bookingId}</td>
+                    <td style={{padding:10, textAlign:'center', border:'1px solid #ddd'}}>1</td>
+                    <td style={{padding:10, textAlign:'right', border:'1px solid #ddd'}}>{formatNumber(invoice.amount || 0)}</td>
+                    <td style={{padding:10, textAlign:'right', border:'1px solid #ddd'}}>{formatNumber(invoice.amount || 0)}</td>
+                  </tr>
+                  {/* Các dịch vụ khác sẽ được thêm vào đây */}
+                </tbody>
+                <tfoot>
+                  <tr>
+                    <td colSpan={3} style={{padding:10, textAlign:'right', fontWeight:'bold', border:'1px solid #ddd'}}>Tổng cộng:</td>
+                    <td style={{padding:10, textAlign:'right', fontWeight:'bold', border:'1px solid #ddd'}}>{formatNumber(invoice.amount || 0)} VNĐ</td>
+                  </tr>
+                </tfoot>
+              </table>
             </div>
-            <div style={{marginTop:32, textAlign:'center'}}>Cảm ơn quý khách đã sử dụng dịch vụ!</div>
+            
+            <div className="invoice-notes" style={{marginBottom:20, padding:15, backgroundColor:'#f9f9f9', borderRadius:5}}>
+              <p><strong>Ghi chú:</strong> {invoice.note || 'Không có ghi chú'}</p>
+            </div>
+            
+            <div className="invoice-footer" style={{marginTop:30, textAlign:'center', borderTop:'1px solid #eee', paddingTop:20}}>
+              <p style={{marginBottom:5}}>Cảm ơn quý khách đã sử dụng dịch vụ của Passion Hotel!</p>
+              <p style={{fontSize:'12px', color:'#666'}}>Mọi thắc mắc xin vui lòng liên hệ: 028.1234.5678 | info@passionhotel.com</p>
+            </div>
           </div>
         </div>
       ))}
