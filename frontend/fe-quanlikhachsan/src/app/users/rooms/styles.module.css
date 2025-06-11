@@ -211,7 +211,13 @@
   padding: 1.5rem;
   background-color: white;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.filtersPanel:hover {
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
 }
 
 .filterGrid {
@@ -221,107 +227,184 @@
 }
 
 .filterCard {
-  padding: 1rem;
-  border-radius: 8px;
+  padding: 1.5rem;
+  border-radius: 10px;
   background-color: #f8f9fa;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.filterCard:hover {
+  background-color: #f0f2f5;
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
 }
 
 .filterHeader {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-  color: #555;
-  font-weight: 500;
+  gap: 0.8rem;
+  margin-bottom: 1.2rem;
+  color: #444;
+  font-weight: 600;
+  font-size: 1.05rem;
 }
 
 .filterIcon {
   color: #9c8250;
+  font-size: 1.2rem;
 }
 
 .filterSelect {
   width: 100%;
-  padding: 0.7rem;
+  padding: 0.9rem;
   border: 1px solid #e0e0e0;
   border-radius: 8px;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   outline: none;
   transition: all 0.3s ease;
-  background-color: #f8f9fa;
-  color: black;
+  background-color: white;
+  color: #333;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+  cursor: pointer;
+  font-family: inherit;
 }
 
 .filterSelect:focus {
   border-color: #9c8250;
+  box-shadow: 0 0 0 2px rgba(156, 130, 80, 0.2);
+}
+
+.filterSelect:hover {
+  border-color: #bbb;
 }
 
 .rangeSliderContainer {
   position: relative;
-  padding: 0.5rem 0;
+  padding: 0.8rem 0;
 }
 
 .rangeSlider {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 4px;
+  height: 6px;
   background: #e0e0e0;
-  border-radius: 4px;
+  border-radius: 6px;
   outline: none;
-  margin: 1rem 0;
+  margin: 1.2rem 0;
 }
 
 .rangeSlider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   background: #9c8250;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .rangeSlider::-webkit-slider-thumb:hover {
   transform: scale(1.2);
+  background: #8a7245;
+}
+
+.rangeSlider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #9c8250;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  border: none;
+}
+
+.rangeSlider::-moz-range-thumb:hover {
+  transform: scale(1.2);
+  background: #8a7245;
 }
 
 .priceLabels, .capacityLabels {
   display: flex;
   justify-content: space-between;
-  font-size: 0.8rem;
-  color: #666;
+  font-size: 0.9rem;
+  color: #555;
+  font-weight: 500;
 }
 
 .capacitySlider {
   -webkit-appearance: none;
   appearance: none;
   width: 100%;
-  height: 4px;
+  height: 6px;
   background: #e0e0e0;
-  border-radius: 4px;
+  border-radius: 6px;
   outline: none;
-  margin: 1rem 0;
+  margin: 1.2rem 0;
 }
 
 .capacitySlider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 18px;
-  height: 18px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
   background: #9c8250;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 .capacitySlider::-webkit-slider-thumb:hover {
   transform: scale(1.2);
+  background: #8a7245;
+}
+
+.capacitySlider::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #9c8250;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  border: none;
+}
+
+.capacitySlider::-moz-range-thumb:hover {
+  transform: scale(1.2);
+  background: #8a7245;
+}
+
+.applyButton {
+  width: 100%;
+  padding: 0.9rem;
+  background: linear-gradient(to right, #9c8250, #8a7245);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 10px rgba(156, 130, 80, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.applyButton:hover {
+  background: linear-gradient(to right, #8a7245, #76613c);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(156, 130, 80, 0.4);
 }
 
 /* ===== Main Content ===== */
 .mainContent {
-  max-width: 1600px; /* Tăng max-width để có thêm không gian */
+  max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
   flex: 1;
@@ -391,6 +474,11 @@
   scroll-behavior: smooth;
   -ms-overflow-style: none;
   scrollbar-width: none;
+  cursor: grab;
+}
+
+.roomGrid:active {
+  cursor: grabbing;
 }
 
 .roomGrid::-webkit-scrollbar {
@@ -405,10 +493,20 @@
   position: relative;
   padding: 0 40px; /* Space for navigation buttons */
   scrollbar-width: none; /* Hide scrollbar for Firefox */
+  cursor: grab;
+}
+
+.roomsContainer:active {
+  cursor: grabbing;
 }
 
 .roomsContainer::-webkit-scrollbar {
   display: none; /* Hide scrollbar for Chrome/Safari */
+}
+
+.roomsWrapper {
+  position: relative;
+  margin: 2rem 0;
 }
 
 /* Navigation buttons */
@@ -416,30 +514,32 @@
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
-  border: none;
-  border-radius: 50%;
   width: 40px;
   height: 40px;
+  border-radius: 50%;
+  background: white;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition: all 0.3s ease;
 }
 
 .navButton:hover {
-  background: rgba(0, 0, 0, 0.7);
+  background: #f8f9fa;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
 }
 
 .prevButton {
-  left: 0;
+  left: 10px;
 }
 
 .nextButton {
-  right: 0;
+  right: 10px;
 }
 
 /* Room Card */
@@ -626,6 +726,26 @@
   font-size: 0.95rem;
   color: #666;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.scrollIndicator svg {
+  animation: bounce 1.5s infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateX(0);
+  }
+  40% {
+    transform: translateX(-5px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
 }
 
 /* Navigation Controls */

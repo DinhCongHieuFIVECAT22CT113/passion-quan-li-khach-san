@@ -103,12 +103,11 @@ export default function AboutPage() {
         </div>
         <div className={styles.storyContent}>
           <div className={styles.storyImage}>
-            <Image 
-              src="/images/about/hotel-story.jpg" 
+            <img 
+              src="/images/h_logo.png" 
               alt="Passion Hotel Story" 
-              width={500} 
-              height={400}
               className={styles.storyImg}
+              style={{ width: '100%', height: 'auto', maxWidth: '500px' }}
             />
           </div>
           <div className={styles.storyText}>

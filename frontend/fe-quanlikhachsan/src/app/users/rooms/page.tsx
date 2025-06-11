@@ -1,10 +1,10 @@
 // trang Rooms
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, MouseEvent } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { FaStar, FaWifi, FaTv, FaSnowflake, FaBath, FaSearch, FaFilter, FaBed, FaDollarSign, FaUsers, FaChevronDown, FaChevronUp, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaStar, FaWifi, FaTv, FaSnowflake, FaBath, FaSearch, FaFilter, FaBed, FaDollarSign, FaUsers, FaChevronDown, FaChevronUp, FaChevronLeft, FaChevronRight, FaArrowLeft, FaArrowRight } from 'react-icons/fa';
 import styles from './styles.module.css';
 import { getRoomTypes, countAvailableRoomsByType } from '../../../lib/api';
 import { RoomType } from '../../../types/auth';
@@ -71,17 +71,50 @@ export default function RoomsPage() {
   const [checkOutDate, setCheckOutDate] = useState<string | null>(null);
   const [numberOfGuests, setNumberOfGuests] = useState<number>(2);
 
-  const scrollContainer = useRef(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [initialScrollLeft, setInitialScrollLeft] = useState(0);
+
+  const handleMouseDown = (e: MouseEvent) => {
+    if (!scrollContainerRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - scrollContainerRef.current.offsetLeft);
+    setInitialScrollLeft(scrollContainerRef.current.scrollLeft);
+    scrollContainerRef.current.style.cursor = 'grabbing';
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.style.cursor = 'grab';
+    }
+  };
+
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging || !scrollContainerRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - scrollContainerRef.current.offsetLeft;
+    const walk = (x - startX) * 2; // Scroll speed multiplier
+    scrollContainerRef.current.scrollLeft = initialScrollLeft - walk;
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.style.cursor = 'grab';
+    }
+  };
 
   const scrollLeft = () => {
-    if (scrollContainer.current) {
-      scrollContainer.current.scrollBy({ left: -300, behavior: 'smooth' });
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: -300, behavior: 'smooth' });
     }
   };
 
   const scrollRight = () => {
-    if (scrollContainer.current) {
-      scrollContainer.current.scrollBy({ left: 300, behavior: 'smooth' });
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: 300, behavior: 'smooth' });
     }
   };
 
@@ -371,7 +404,14 @@ export default function RoomsPage() {
                 <FaChevronLeft />
               </button>
               
-              <div className={styles.roomsContainer} ref={scrollContainer}>
+              <div 
+                className={styles.roomsContainer} 
+                ref={scrollContainerRef}
+                onMouseDown={handleMouseDown}
+                onMouseUp={handleMouseUp}
+                onMouseMove={handleMouseMove}
+                onMouseLeave={handleMouseLeave}
+              >
                 {sortedRoomTypes.map((roomType) => (
                   <div className={styles.roomCard} key={roomType.maLoaiPhong}>
                     <div className={styles.roomImageContainer}>
@@ -456,6 +496,10 @@ export default function RoomsPage() {
           </>
         )}
       </main>
+
+      <div className={styles.scrollIndicator}>
+        <FaArrowLeft /> Kéo để xem thêm phòng <FaArrowRight />
+      </div>
 
       <Footer />
     </div>
