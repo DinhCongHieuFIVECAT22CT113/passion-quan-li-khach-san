@@ -864,7 +864,7 @@ export default function BookingManager() {
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="thoiGianDen">Thời gian đến dự kiến</label>
-                <input type="text" id="thoiGianDen" name="thoiGianDen" value={form.thoiGianDen || ""} onChange={handleChange} placeholder="HH:mm" />
+                <input type="time" id="thoiGianDen" name="thoiGianDen" value={form.thoiGianDen || ""} onChange={handleChange} />
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="nguoiLon">Số người lớn</label>
@@ -919,7 +919,7 @@ export default function BookingManager() {
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="thoiGianDen_edit">Thời gian đến dự kiến</label>
-                <input type="text" id="thoiGianDen_edit" name="thoiGianDen" value={form.thoiGianDen || ""} onChange={handleChange} placeholder="HH:mm" />
+                <input type="time" id="thoiGianDen_edit" name="thoiGianDen" value={form.thoiGianDen || ""} onChange={handleChange} />
               </div>
               <div className={styles.formGroup}>
                 <label htmlFor="nguoiLon_edit">Số người lớn</label>

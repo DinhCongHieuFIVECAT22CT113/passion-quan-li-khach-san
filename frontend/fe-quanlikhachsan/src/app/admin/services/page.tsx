@@ -5,6 +5,7 @@ import { API_BASE_URL } from '@/lib/config';
 import { getValidImageSrc } from '@/config/supabase';
 import { getAuthHeaders, getFormDataHeaders, handleResponse } from '@/lib/api';
 import Image from 'next/image';
+import Pagination from "@/components/admin/Pagination";
 
 // Interface cho dữ liệu nhận từ BE (camelCase, khớp với log)
 interface ServiceBE {
@@ -38,6 +39,11 @@ export default function ServiceManager() {
   const [selectedThumbnailFile, setSelectedThumbnailFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -214,6 +220,21 @@ export default function ServiceManager() {
     }
   };
 
+  // Tính toán phân trang
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = services.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(services.length / itemsPerPage);
+
+  // Hàm chuyển trang
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+
+  // Hàm thay đổi số lượng hiển thị
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1); // Reset về trang 1 khi thay đổi số lượng hiển thị
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -226,6 +247,16 @@ export default function ServiceManager() {
       
       {!isLoading && !error && (
         <div style={{ overflowX: 'auto' }}>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            itemsPerPage={itemsPerPage}
+            totalItems={services.length}
+            onPageChange={paginate}
+            onItemsPerPageChange={handleItemsPerPageChange}
+            itemsPerPageOptions={[5, 10, 20, 50]}
+          />
+
           <table className={styles.table}>
             <thead>
               <tr>
@@ -238,8 +269,8 @@ export default function ServiceManager() {
               </tr>
             </thead>
             <tbody>
-              {services && services.length > 0 ? (
-                services.map((service) => ( // service ở đây là camelCase từ ServiceBE
+              {currentItems && currentItems.length > 0 ? (
+                currentItems.map((service) => ( // service ở đây là camelCase từ ServiceBE
                   <tr key={service.maDichVu}>
                     <td>{service.maDichVu || 'N/A'}</td>
                     <td>{service.tenDichVu || 'N/A'}</td>

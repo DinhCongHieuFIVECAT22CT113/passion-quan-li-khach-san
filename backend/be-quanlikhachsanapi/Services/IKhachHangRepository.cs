@@ -20,6 +20,8 @@ namespace be_quanlikhachsanapi.Services
         JsonResult UpdateLoaiKhachHang(string MaKh, string MaLoaiKh);
         JsonResult DeleteKhachHang(string MaKh);
         Task<JsonResult> UploadAvatarAsync(string userName, UploadAvatarDTO dto);
+        Task<JsonResult> UploadAvatarByIdAsync(string maKh, UploadAvatarDTO dto);
+        Task<JsonResult> UploadAvatarByIdAsync(string maKh, UploadAvatarDTO dto);
     }
     public class KhachHangRepository : IKhachHangRepository
     {
@@ -228,6 +230,78 @@ namespace be_quanlikhachsanapi.Services
                 var khachHang = await _context.KhachHangs.FirstOrDefaultAsync(kh => kh.UserName == userName);
                 if (khachHang == null)
                     return new JsonResult("Không tìm thấy khách hàng.") { StatusCode = 404 };
+
+                if (dto.AvatarFile == null || dto.AvatarFile.Length == 0)
+                    return new JsonResult("Vui lòng chọn file avatar.") { StatusCode = 400 };
+
+                // Xóa avatar cũ trên Supabase nếu có
+                if (!string.IsNullOrEmpty(khachHang.AnhDaiDien))
+                {
+                    await _storageService.DeleteFileAsync(khachHang.AnhDaiDien);
+                }
+
+                // Upload avatar mới lên Supabase
+                var avatarUrl = await _storageService.UploadFileAsync(dto.AvatarFile, "avatars");
+
+                // Cập nhật URL avatar trong database
+                khachHang.AnhDaiDien = avatarUrl;
+                await _context.SaveChangesAsync();
+
+                return new JsonResult(new
+                {
+                    message = "Cập nhật avatar thành công.",
+                    avatarUrl = khachHang.AnhDaiDien
+                }) { StatusCode = 200 };
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult($"Lỗi khi upload avatar: {ex.Message}") { StatusCode = 500 };
+            }
+        }
+        
+        public async Task<JsonResult> UploadAvatarByIdAsync(string maKh, UploadAvatarDTO dto)
+        {
+            try
+            {
+                var khachHang = await _context.KhachHangs.FirstOrDefaultAsync(kh => kh.MaKh == maKh);
+                if (khachHang == null)
+                    return new JsonResult("Không tìm thấy khách hàng với mã đã cho.") { StatusCode = 404 };
+
+                if (dto.AvatarFile == null || dto.AvatarFile.Length == 0)
+                    return new JsonResult("Vui lòng chọn file avatar.") { StatusCode = 400 };
+
+                // Xóa avatar cũ trên Supabase nếu có
+                if (!string.IsNullOrEmpty(khachHang.AnhDaiDien))
+                {
+                    await _storageService.DeleteFileAsync(khachHang.AnhDaiDien);
+                }
+
+                // Upload avatar mới lên Supabase
+                var avatarUrl = await _storageService.UploadFileAsync(dto.AvatarFile, "avatars");
+
+                // Cập nhật URL avatar trong database
+                khachHang.AnhDaiDien = avatarUrl;
+                await _context.SaveChangesAsync();
+
+                return new JsonResult(new
+                {
+                    message = "Cập nhật avatar thành công.",
+                    avatarUrl = khachHang.AnhDaiDien
+                }) { StatusCode = 200 };
+            }
+            catch (Exception ex)
+            {
+                return new JsonResult($"Lỗi khi upload avatar: {ex.Message}") { StatusCode = 500 };
+            }
+        }
+        
+        public async Task<JsonResult> UploadAvatarByIdAsync(string maKh, UploadAvatarDTO dto)
+        {
+            try
+            {
+                var khachHang = await _context.KhachHangs.FirstOrDefaultAsync(kh => kh.MaKh == maKh);
+                if (khachHang == null)
+                    return new JsonResult("Không tìm thấy khách hàng với mã đã cho.") { StatusCode = 404 };
 
                 if (dto.AvatarFile == null || dto.AvatarFile.Length == 0)
                     return new JsonResult("Vui lòng chọn file avatar.") { StatusCode = 400 };

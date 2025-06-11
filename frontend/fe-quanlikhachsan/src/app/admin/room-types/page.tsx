@@ -5,6 +5,7 @@ import { API_BASE_URL } from '@/lib/config';
 import { getAuthHeaders, handleResponse, getFormDataHeaders } from '@/lib/api';
 import { LoaiPhongDTO, CreateLoaiPhongDTO } from '@/lib/DTOs';
 import Image from 'next/image';
+import Pagination from "@/components/admin/Pagination";
 
 interface RoomTypeFormState {
   MaLoaiPhong?: string;
@@ -40,6 +41,11 @@ export default function RoomTypeManager() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedThumbnailFile, setSelectedThumbnailFile] = useState<File | null>(null);
+
+  // Phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
 
   useEffect(() => {
     fetchRoomTypes();
@@ -224,6 +230,21 @@ export default function RoomTypeManager() {
     return amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   };
 
+  // Tính toán phân trang
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = roomTypes.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(roomTypes.length / itemsPerPage);
+
+  // Hàm chuyển trang
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+
+  // Hàm thay đổi số lượng hiển thị
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1); // Reset về trang 1 khi thay đổi số lượng hiển thị
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -236,6 +257,16 @@ export default function RoomTypeManager() {
 
       {!isLoading && !error && (
         <div style={{ overflowX: 'auto' }}>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            itemsPerPage={itemsPerPage}
+            totalItems={roomTypes.length}
+            onPageChange={paginate}
+            onItemsPerPageChange={handleItemsPerPageChange}
+            itemsPerPageOptions={[5, 10, 20, 50]}
+          />
+
           <table className={styles.table}>
             <thead>
               <tr>
@@ -251,7 +282,7 @@ export default function RoomTypeManager() {
               </tr>
             </thead>
             <tbody>
-              {roomTypes.map(roomType => (
+              {currentItems.map(roomType => (
                 <tr key={roomType.maLoaiPhong}>
                   <td>{roomType.maLoaiPhong}</td>
                   <td>

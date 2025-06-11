@@ -16,6 +16,7 @@ interface BookingData {
   ghiChu: string;
   ngayNhanPhong: string;
   ngayTraPhong: string;
+  thoiGianDen: string; // Thêm thời gian đến
   soNguoiLon: number;
   soTreEm: number;
   roomData: {
@@ -119,11 +120,12 @@ export default function GuestBookingPage() {
         soDienThoai: bookingData.soDienThoai,
         email: bookingData.email,
         soCccd: '', // Khách vãng lai có thể không có CCCD
-        
+
         // Thông tin đặt phòng
         maPhong: bookingData.roomData.maPhong,
         ngayNhanPhong: bookingData.ngayNhanPhong,
         ngayTraPhong: bookingData.ngayTraPhong,
+        thoiGianDen: bookingData.thoiGianDen || '14:00',
         soNguoiLon: bookingData.soNguoiLon,
         soTreEm: bookingData.soTreEm,
         
@@ -285,6 +287,10 @@ export default function GuestBookingPage() {
                 <div className={styles.infoItem}>
                   <span>Ngày trả:</span>
                   <span>{new Date(bookingData.ngayTraPhong).toLocaleDateString('vi-VN')}</span>
+                </div>
+                <div className={styles.infoItem}>
+                  <span>Thời gian đến:</span>
+                  <span>{bookingData.thoiGianDen || '14:00'}</span>
                 </div>
                 <div className={styles.infoItem}>
                   <span>Số đêm:</span>

@@ -1,0 +1,90 @@
+TỔNG HỢP CHI TIẾT NHẤT DỰ ÁN DEV-FE-BE (QUẢN LÝ KHÁCH SẠN)
+
+1. MỤC TIÊU DỰ ÁN
+- Xây dựng hệ thống quản lý khách sạn toàn diện, phục vụ quản trị viên, nhân viên và khách hàng, tối ưu hóa vận hành, nâng cao trải nghiệm người dùng, hỗ trợ ra quyết định quản trị.
+- Đáp ứng đầy đủ các nghiệp vụ: đặt phòng, quản lý hóa đơn, khuyến mãi, đánh giá, quản lý nhân viên, người dùng, thông báo, báo cáo, phân quyền, bảo mật, kiểm soát truy cập, logging, kiểm thử, triển khai và vận hành.
+
+2. KIẾN TRÚC HỆ THỐNG
+- Kiến trúc đa lớp: Presentation (Frontend), Application (API), Business Logic (Service), Data Access (Repository), Database.
+- Backend: C# (.NET Core), RESTful API, SignalR cho realtime, Entity Framework cho ORM, mô hình Controller-Service-Repository, logging, kiểm so��t lỗi, bảo mật đa lớp.
+- Frontend: React (Next.js), TypeScript, chia module theo vai trò (admin, employee, user), sử dụng context, hooks, quản lý trạng thái, xác thực, routing động, responsive UI.
+- Database: Quan hệ, chuẩn hóa dữ liệu, ràng buộc khóa ngoại, chỉ mục tối ưu truy vấn.
+- Triển khai: Hỗ trợ CI/CD, môi trường dev/staging/prod, logging tập trung, backup dữ liệu định kỳ.
+
+3. PHÂN QUYỀN & XÁC THỰC
+- Ba vai trò: Admin (toàn quyền), Employee (nghiệp vụ), User (khách hàng).
+- Xác thực JWT, refresh token, lưu trữ token an toàn (httpOnly cookie), kiểm tra token mỗi request, tự động làm mới token khi hết hạn.
+- Phân quyền chi tiết từng API, từng chức năng, từng thao tác (CRUD), kiểm soát truy cập cả backend và frontend.
+- Kiểm soát truy cập động: Ẩn/hiện menu, nút, trang, thao tác theo role, context, trạng thái tài khoản.
+- Logging truy cập, ghi lại lịch sử thao tác, phát hiện truy cập bất thường.
+
+4. MODULE NGHIỆP VỤ CHI TIẾT
+- Đặt phòng (Booking): Tìm kiếm phòng theo tiêu chí, kiểm tra phòng trống, đặt phòng, cập nhật trạng thái (pending, confirmed, cancelled, completed), quản lý lịch sử đặt phòng, liên kết user, room, promotion.
+- Quản lý hóa đơn (Invoice): Tạo hóa đơn tự động khi booking xác nhận, cập nhật trạng thái thanh toán, xuất hóa đơn, chỉnh sửa, tra cứu, liên kết booking, user, lưu lịch sử thay đổi.
+- Quản lý khuyến mãi (Promotion): Thêm, sửa, xóa, kiểm soát điều kiện áp dụng (thời gian, số lượng, loại phòng, user), lưu lịch sử sử dụng, kiểm tra trùng code, trạng thái hiệu lực.
+- Quản lý đánh giá (Review): Gửi đánh giá sau khi hoàn thành booking, trạng thái (pending, approved, rejected), admin duyệt/xóa/phản hồi, hiển thị công khai, lưu lịch sử chỉnh sửa.
+- Quản lý nhân viên (Employee): Thêm, sửa, xóa, phân quyền động (lễ tân, kế toán, quản lý), kiểm soát truy cập API, cập nhật thông tin, trạng thái hoạt động.
+- Quản lý người dùng (User): Đăng ký, đăng nhập, xác thực email, cập nhật hồ sơ, đổi mật khẩu, quản lý thông tin cá nhân, trạng thái tài khoản (active, locked, deleted), bảo mật tài khoản.
+- Thông báo (Notification): Gửi, nhận thông báo realtime (SignalR), phân loại thông báo (hệ thống, booking, khuyến mãi), trạng thái đọc/chưa đọc, lưu lịch sử gửi/nhận.
+- Báo cáo (Report): Thống kê doanh thu, số lượng booking, hiệu quả khuyến mãi, đánh giá khách hàng, lọc theo thời gian, loại phòng, trạng thái, xuất file báo cáo, hiển thị biểu đồ trực quan.
+
+5. LOGIC NGHIỆP VỤ & QUY TRÌNH XỬ LÝ
+- Đăng ký/Đăng nhập: Kiểm tra hợp lệ, hash mật khẩu, sinh JWT, refresh token, lưu token, xác thực email, kiểm tra trạng thái tài khoản.
+- Đặt phòng: Kiểm tra phòng trống (truy vấn booking theo thời gian), tính giá động (theo loại phòng, khuyến mãi, số ngày), kiểm tra điều kiện khuyến mãi, tạo booking, cập nhật trạng thái, gửi thông báo.
+- Quản lý hóa đơn: Tạo hóa đơn khi booking xác nhận, kiểm tra trạng thái thanh toán, cập nhật trạng thái, lưu lịch sử thay đổi, gửi thông báo khi thanh toán thành công.
+- Quản lý khuyến mãi: Kiểm tra điều kiện áp dụng, trạng thái hiệu lực, số lần sử dụng, lưu lịch sử, cập nhật trạng thái tự động khi hết hạn.
+- Đánh giá: Kiểm tra quyền gửi đánh giá (chỉ user đã hoàn thành booking), lưu trạng thái chờ duyệt, admin duyệt/xóa/phản hồi, cập nhật trạng thái, hiển thị công khai.
+- Quản lý nhân viên: Phân quyền động, kiểm soát truy cập API, ghi log thao tác, cập nhật trạng thái hoạt động.
+- Thông báo: Đẩy thông báo realtime qua SignalR, lưu lịch sử gửi/nhận, phân loại, trạng thái đọc/chưa đọc, hiển thị trên frontend.
+- Báo cáo: Tổng hợp dữ liệu động, lọc theo nhiều tiêu chí, xuất file, hiển thị biểu đồ, lưu lịch sử truy vấn.
+
+6. THƯ VIỆN & THÀNH PHẦN KỸ THUẬT
+- @fortawesome/fontawesome-free, @fortawesome/react-fontawesome: Icon giao diện, trạng thái, menu, cảnh báo.
+- @microsoft/signalr: Kết nối realtime, thông báo, cập nhật trạng thái booking, hóa đơn.
+- chart.js, react-chartjs-2: Biểu đồ doanh thu, booking, khuyến mãi, đánh giá.
+- i18next, react-i18next, i18next-browser-languagedetector: Đa ngôn ngữ, tự động phát hiện, chuyển đổi giao diện.
+- js-cookie: Lưu, lấy, xóa token, session, thông tin user.
+- jwt-decode: Giải mã JWT, lấy thông tin user, role, thời gian hết hạn.
+- react-datepicker: Chọn ngày tháng, lọc dữ liệu, nhập liệu chính xác.
+- react-icons: Icon vector cho React, bổ sung icon cho các thành phần giao diện.
+- react-toastify: Thông báo toast, cảnh báo, xác nhận thao tác.
+- tailwindcss: CSS framework, responsive, dễ tùy biến.
+- eslint, eslint-config-next: Kiểm tra, chuẩn hóa code, phát hiện lỗi cú pháp.
+- typescript: Kiểm tra kiểu dữ liệu, giảm lỗi runtime, tăng độ an toàn.
+
+7. CẤU TRÚC DỮ LIỆU & QUAN HỆ
+- User: userId, username, passwordHash, email, role, info, trạng thái, ngày tạo, ngày cập nhật.
+- Employee: employeeId, userId, position, info, trạng thái, ngày vào làm, ngày nghỉ việc.
+- Room: roomId, type, status, price, info, số lượng, tiện nghi, trạng thái bảo trì.
+- Booking: bookingId, userId, roomId, checkIn, checkOut, status, price, promotionId, ngày tạo, ngày cập nhật, lịch sử trạng thái.
+- Invoice: invoiceId, bookingId, userId, amount, status, date, phương thức thanh toán, lịch sử thanh toán.
+- Promotion: promotionId, code, description, discount, startDate, endDate, condition, số lần sử dụng, trạng thái hiệu lực.
+- Review: reviewId, userId, bookingId, rating, comment, status, ngày gửi, ngày duyệt, lịch sử chỉnh sửa.
+- Notification: notificationId, userId, content, type, status, date, trạng thái đọc/chưa đọc, lịch sử gửi/nhận.
+
+8. LUỒNG HOẠT ĐỘNG & GIAO TIẾP
+- Frontend gửi request API kèm token, backend xác thực, kiểm tra quyền, xử lý logic, trả về dữ liệu hoặc lỗi.
+- SignalR thiết lập kết nối realtime, backend push sự kiện, frontend lắng nghe và hiển thị.
+- Logging ghi lại mọi thao tác, truy cập, lỗi, cảnh báo, phục vụ kiểm tra, audit, bảo mật.
+- Kiểm thử tự động (unit test, integration test), kiểm thử thủ công, kiểm thử bảo mật, kiểm thử hiệu năng.
+- Triển khai CI/CD, tự động build, test, deploy, rollback khi có lỗi.
+
+9. BẢO MẬT & KIỂM SOÁT LỖI
+- JWT mã hóa thông tin user, role, thời gian hết hạn, kiểm tra mỗi request.
+- Refresh token làm mới access token, lưu trữ an toàn, kiểm soát thời gian sống.
+- CORS chỉ cho phép domain frontend truy cập API, kiểm soát header, method.
+- Xác thực đầu vào, kiểm tra dữ liệu gửi lên, chống injection, XSS, CSRF.
+- Phân quyền chặt chẽ, kiểm tra quyền truy cập từng API, từng thao tác.
+- Mã hóa mật khẩu, không lưu plain text, sử dụng salt, hash mạnh.
+- Logging lỗi, cảnh báo, truy cập bất thường, gửi cảnh báo cho admin.
+- Backup dữ liệu định kỳ, kiểm soát quyền truy cập dữ liệu backup.
+
+10. ĐẶC ĐIỂM NỔI BẬT & YẾU TỐ MỞ RỘNG
+- Phân quyền động, bảo mật đa lớp, hỗ trợ realtime, giao diện hiện đại, responsive, đa ngôn ngữ.
+- Hệ thống báo cáo động, lọc đa chiều, xuất file, biểu đồ trực quan.
+- Dễ mở rộng module mới, tích hợp API bên ngoài, nâng cấp bảo mật, tối ưu hiệu năng.
+- Hỗ trợ logging tập trung, kiểm thử tự động, triển khai CI/CD, vận hành ổn định.
+- Logic nghiệp vụ kiểm soát chặt chẽ, mọi thao tác đều được xác thực, phân quyền, ghi log, kiểm soát lỗi.
+
+11. TỔNG KẾT
+- Dự án đáp ứng toàn diện nghiệp vụ quản lý khách sạn hiện đại, tối ưu hóa trải nghiệm người dùng và quản lý, bảo mật, dễ mở rộng, dễ tích hợp, vận hành ổn định, hỗ trợ phát triển lâu dài.

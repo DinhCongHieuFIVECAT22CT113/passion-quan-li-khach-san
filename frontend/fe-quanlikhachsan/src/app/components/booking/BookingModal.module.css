@@ -961,3 +961,35 @@
     text-align: center;
   }
 }
+
+/* Time Input Styles */
+.timeInput {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.timeInput:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.helpText {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: #6c757d;
+  line-height: 1.4;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .helpText {
+    font-size: 0.8rem;
+  }
+}

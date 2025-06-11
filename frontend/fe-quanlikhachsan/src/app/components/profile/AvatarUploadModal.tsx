@@ -1,9 +1,9 @@
 'use client';
 import React, { useState } from 'react';
 import styles from './profile.module.css';
-import { useTranslation } from 'react-i18next';
 import { API_BASE_URL } from '@/lib/config';
 import { getFormDataHeaders } from '@/lib/api';
+import { supabaseConfig } from '@/config/supabase';
 
 interface AvatarUploadModalProps {
   onClose: () => void;
@@ -11,7 +11,7 @@ interface AvatarUploadModalProps {
 }
 
 const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({ onClose, onAvatarSelected }) => {
-  const { t } = useTranslation();
+  // Không sử dụng useTranslation nữa
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -33,47 +33,53 @@ const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({ onClose, onAvatar
 
     setIsUploading(true);
     try {
-      // Lấy username từ localStorage hoặc context
+      // Lấy token từ localStorage
       const token = localStorage.getItem('token');
       if (!token) {
         alert('Bạn cần đăng nhập để upload avatar');
         return;
       }
 
-      // Decode token để lấy username (hoặc có thể lấy từ user context)
+      // Decode token để lấy thông tin người dùng
       const payload = JSON.parse(atob(token.split('.')[1]));
-      const username = payload.username;
+      
+      // Lấy thông tin từ token
+      const userId = payload.nameid;
+      const email = payload.email;
+      const Id);
+      console.log('Email from token:', email);
+      console.log('Name from token:', name);
 
-      console.log('Token payload:', payload);
-      console.log('Username from token:', username);
-
-      if (!username) {
-        alert('Không thể xác định username từ token');
+      if (!userId) {
+        alert('Không thể xác định ID người dùng từ token');
         return;
       }
 
+      // Tạo FormData để gửi file trực tiếp đến backend
       const formData = new FormData();
       formData.append('AvatarFile', selectedFile);
-
-      const headers = await getFormDataHeaders();
-      const uploadUrl = `${API_BASE_URL}/KhachHang/${username}/upload-avatar`;
-      console.log('Upload URL:', uploadUrl);
       
-      const response = await fetch(uploadUrl, {
+      // Thay đổi cách tiếp cận: Tạo một endpoint mới để upload avatar
+      const updateResponse = await fetch(`${API_BASE_URL}/KhachHang/upload-avatar-by-id/${userId}`, {
         method: 'POST',
-        headers: headers,
-        body: formData,
-        credentials: 'include',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        onAvatarSelected(result.avatarUrl);
+      if (updateResponse.ok) {
+        // Lấy URL avatar từ response
+        const responseData = await updateResponse.json();
+        const avatarUrl = responseData.avatarUrl;
+        
+        onAvatarSelected(avatarUrl);
         alert('Upload avatar thành công!');
         onClose();
       } else {
-        const errorData = await response.json();
-        alert(`Lỗi upload: ${errorData.message || 'Có lỗi xảy ra'}`);
+        const errorText = await updateResponse.text();
+        console.error('Error response:', errorText);
+        alert(`Lỗi khi cập nhật avatar: ${errorText}`);
       }
     } catch (error) {
       console.error('Error uploading avatar:', error);
@@ -86,10 +92,10 @@ const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({ onClose, onAvatar
   return (
     <div className={styles.modalBackdrop}>
       <div className={styles.modal}>
-        <h3>{t('profile.uploadAvatar')}</h3>
+        <h3>Chọn ảnh đại diện</h3>
 
         <div className={styles.inputGroup}>
-          <label>{t('profile.uploadFile')}</label>
+          <label>Chọn ảnh từ máy tính:</label>
           <input
             type="file"
             accept="image/*"
@@ -122,7 +128,7 @@ const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({ onClose, onAvatar
             onClick={onClose}
             disabled={isUploading}
           >
-            {t('profile.cancelUpload')}
+            Hủy
           </button>
         </div>
       </div>

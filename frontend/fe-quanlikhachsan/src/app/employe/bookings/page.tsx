@@ -45,6 +45,7 @@ export default function BookingManager() {
     roomId: string;
     checkInDate: string;
     checkOutDate: string;
+    arrivalTime: string; // Thêm thời gian đến
     note: string;
   }>({
     customerId: '',
@@ -54,6 +55,7 @@ export default function BookingManager() {
     roomId: '',
     checkInDate: '',
     checkOutDate: '',
+    arrivalTime: '14:00', // Mặc định 14:00
     note: ''
   });
 
@@ -126,6 +128,7 @@ export default function BookingManager() {
       roomId: '',
       checkInDate: '',
       checkOutDate: '',
+      arrivalTime: '14:00', // Reset về mặc định
       note: ''
     });
     setFormError(null);
@@ -209,7 +212,7 @@ export default function BookingManager() {
         treEm: 0,
         nguoiLon: 1,
         soLuongPhong: 1,
-        thoiGianDen: "14:00"
+        thoiGianDen: form.arrivalTime || "14:00"
       };
 
       // Gọi API để tạo đặt phòng mới
@@ -399,6 +402,20 @@ export default function BookingManager() {
                     style={{padding:'10px 12px',borderRadius:8,border:'1.5px solid #e5e7eb',fontSize:'1rem',background:'#f7fafc'}}
                   />
                 </div>
+              </div>
+
+              <div style={{display:'flex',flexDirection:'column',gap:6}}>
+                <label>Thời gian đến dự kiến</label>
+                <input
+                  name="arrivalTime"
+                  type="time"
+                  value={form.arrivalTime}
+                  onChange={handleInputChange}
+                  style={{padding:'10px 12px',borderRadius:8,border:'1.5px solid #e5e7eb',fontSize:'1rem',background:'#f7fafc'}}
+                />
+                <small style={{fontSize:'0.85rem',color:'#6c757d',fontStyle:'italic'}}>
+                  Thời gian check-in tiêu chuẩn: 14:00. Vui lòng liên hệ trước nếu đến sớm hơn 12:00.
+                </small>
               </div>
 
               <div style={{display:'flex',flexDirection:'column',gap:6}}>

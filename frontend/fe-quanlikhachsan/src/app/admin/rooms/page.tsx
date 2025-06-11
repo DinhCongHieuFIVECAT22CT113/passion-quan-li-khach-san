@@ -5,6 +5,7 @@ import { API_BASE_URL } from '@/lib/config';
 import { getAuthHeaders, handleResponse, getFormDataHeaders } from '@/lib/api';
 import { getSignalRConnection } from '@/lib/signalr';
 import Image from 'next/image';
+import Pagination from "@/components/admin/Pagination";
 
 interface PhongBE {
   maPhong: string;
@@ -62,6 +63,11 @@ export default function RoomManager() {
   const [error, setError] = useState<string | null>(null);
   const [selectedThumbnailFile, setSelectedThumbnailFile] = useState<File | null>(null);
   const [selectedHinhAnhFile, setSelectedHinhAnhFile] = useState<File | null>(null);
+
+  // Phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
 
   // Define possible room statuses
   const roomStatuses = ["Trống", "Đã đặt", "Đang dọn"]; // You might fetch these from an API or define them
@@ -307,6 +313,21 @@ export default function RoomManager() {
     return <span className={styles.status}>{status || "N/A"}</span>;
   };
 
+  // Tính toán phân trang
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = rooms.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(rooms.length / itemsPerPage);
+
+  // Hàm chuyển trang
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+
+  // Hàm thay đổi số lượng hiển thị
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1); // Reset về trang 1 khi thay đổi số lượng hiển thị
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -319,6 +340,16 @@ export default function RoomManager() {
 
       {!isLoading && !error && (
       <div style={{ overflowX: 'auto' }}>
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          itemsPerPage={itemsPerPage}
+          totalItems={rooms.length}
+          onPageChange={paginate}
+          onItemsPerPageChange={handleItemsPerPageChange}
+          itemsPerPageOptions={[5, 10, 20, 50]}
+        />
+
         <table className={styles.table}>
           <thead>
             <tr>
@@ -334,7 +365,7 @@ export default function RoomManager() {
             </tr>
           </thead>
           <tbody>
-            {rooms.map(room => (
+            {currentItems.map(room => (
               <tr key={room.maPhong}>
                 <td>{room.maPhong}</td>
                 <td>

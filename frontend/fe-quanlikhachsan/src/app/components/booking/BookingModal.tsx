@@ -22,6 +22,7 @@ interface BookingFormData {
   ghiChu: string;
   ngayNhanPhong: string;
   ngayTraPhong: string;
+  thoiGianDen: string; // Thêm field thời gian đến
   soNguoiLon: number;
   soTreEm: number;
   phuongThucThanhToan: string;
@@ -46,6 +47,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
     ghiChu: '',
     ngayNhanPhong: '',
     ngayTraPhong: '',
+    thoiGianDen: '14:00', // Mặc định 14:00 (2:00 PM)
     soNguoiLon: 1,
     soTreEm: 0,
     phuongThucThanhToan: '',
@@ -154,6 +156,11 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
       newErrors.soNguoiLon = 'Phải có ít nhất 1 người lớn';
     }
 
+    // Validation cho thời gian đến (tùy chọn, có thể bỏ qua nếu không bắt buộc)
+    if (formData.thoiGianDen && !/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(formData.thoiGianDen)) {
+      newErrors.thoiGianDen = 'Thời gian không hợp lệ (định dạng HH:MM)';
+    }
+
     if (step === 'payment' && !formData.phuongThucThanhToan) {
       newErrors.phuongThucThanhToan = 'Vui lòng chọn phương thức thanh toán';
     }
@@ -196,6 +203,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
         maPhong: selectedRoom?.maPhong || '',
         ngayNhanPhong: formData.ngayNhanPhong,
         ngayTraPhong: formData.ngayTraPhong,
+        thoiGianDen: formData.thoiGianDen,
         soNguoiLon: formData.soNguoiLon,
         soTreEm: formData.soTreEm,
         phuongThucThanhToan: formData.phuongThucThanhToan,
@@ -237,7 +245,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
         nguoiLon: formData.soNguoiLon || 1,
         ghiChu: formData.ghiChu || 'Đặt phòng qua website',
         soLuongPhong: 1,
-        thoiGianDen: '14:00',
+        thoiGianDen: formData.thoiGianDen || '14:00',
         ngayNhanPhong: formData.ngayNhanPhong,
         ngayTraPhong: formData.ngayTraPhong,
         phuongThucThanhToan: formData.phuongThucThanhToan,
@@ -250,6 +258,12 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
       const result = await createDatPhong(bookingData);
       setBookingResult(result);
       setStep('success');
+      
+      // Sau 2 giây, chuyển hướng đến trang xem đặt phòng
+      setTimeout(() => {
+        onClose();
+        router.push('/users/bookings');
+      }, 2000);
 
     } catch (error) {
       console.error('Lỗi khi đặt phòng:', error);
@@ -510,6 +524,24 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
             </div>
           </div>
 
+          <div className={styles.formGroup}>
+            <label>
+              <FaClock className={styles.inputIcon} />
+              Thời gian đến dự kiến
+            </label>
+            <input
+              type="time"
+              name="thoiGianDen"
+              value={formData.thoiGianDen}
+              onChange={handleInputChange}
+              className={`${styles.timeInput} ${errors.thoiGianDen ? styles.inputError : ''}`}
+            />
+            {errors.thoiGianDen && <span className={styles.errorText}>{errors.thoiGianDen}</span>}
+            <small className={styles.helpText}>
+              Thời gian check-in tiêu chuẩn: 14:00. Vui lòng liên hệ trước nếu đến sớm hơn 12:00.
+            </small>
+          </div>
+
           <div className={styles.formRow}>
             <div className={styles.formGroup}>
               <label>
@@ -678,6 +710,10 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
             <span>{new Date(formData.ngayTraPhong).toLocaleDateString('vi-VN')}</span>
           </div>
           <div className={styles.summaryItem}>
+            <span>Thời gian đến:</span>
+            <span>{formData.thoiGianDen}</span>
+          </div>
+          <div className={styles.summaryItem}>
             <span>Số đêm:</span>
             <span>{calculateNights()} đêm</span>
           </div>
@@ -739,7 +775,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
           </button>
           {user && (
             <button 
-              onClick={() => router.push('/users/profile?tab=bookings')}
+              onClick={() => router.push('/users/bookings')}
               className={styles.viewBookingsButton}
             >
               Xem đặt phòng của tôi

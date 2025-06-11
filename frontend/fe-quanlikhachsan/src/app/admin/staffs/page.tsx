@@ -7,6 +7,7 @@ import { getAuthHeaders, getFormDataHeaders, handleResponse } from '@/lib/api';
 // import Image from 'next/image'; // Xóa import Image không sử dụng
 import { withAuth, ROLES, useAuth } from '@/lib/auth'; // Import HOC và ROLES
 import { FaPlus, FaEdit, FaTrash, FaSearch } from "react-icons/fa";
+import Pagination from "@/components/admin/Pagination";
 
 interface Staff {
   maNV: string;
@@ -65,6 +66,11 @@ function StaffPage() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
 
     const fetchStaffs = async () => {
       setIsLoading(true);
@@ -340,6 +346,21 @@ function StaffPage() {
     (staff.soDienThoai || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Tính toán phân trang
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredStaffs.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredStaffs.length / itemsPerPage);
+
+  // Hàm chuyển trang
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+
+  // Hàm thay đổi số lượng hiển thị
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1); // Reset về trang 1 khi thay đổi số lượng hiển thị
+  };
+
   if (authLoading || isLoading) {
     return <p>Đang tải dữ liệu trang nhân viên...</p>;
   }
@@ -375,6 +396,16 @@ function StaffPage() {
         </div>
       ) : (
         <div className={styles.tableContainer}>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            itemsPerPage={itemsPerPage}
+            totalItems={filteredStaffs.length}
+            onPageChange={paginate}
+            onItemsPerPageChange={handleItemsPerPageChange}
+            itemsPerPageOptions={[5, 10, 20, 50]}
+          />
+
           <table className={styles.table}>
             <thead>
               <tr>
@@ -392,12 +423,12 @@ function StaffPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredStaffs.length === 0 ? (
+              {currentItems.length === 0 ? (
                 <tr>
                   <td colSpan={11} className={styles.emptyState}>Không có dữ liệu nhân viên</td>
                 </tr>
               ) : (
-                filteredStaffs.map((staff, index) => (
+                currentItems.map((staff, index) => (
                   <tr key={staff.maNV || `staff-${index}`}>
                     <td>{staff.maNV || 'N/A'}</td>
                     <td className={styles.nameCell}>{`${staff.hoNv || ''} ${staff.tenNv || ''}`.trim() || 'N/A'}</td>

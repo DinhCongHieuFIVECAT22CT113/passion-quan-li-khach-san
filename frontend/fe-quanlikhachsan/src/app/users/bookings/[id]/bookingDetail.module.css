@@ -1,0 +1,412 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  flex: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  width: 100%;
+}
+
+.pageHeader {
+  margin-bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.pageHeader h1 {
+  font-size: 2.5rem;
+  color: #2563eb;
+  margin-bottom: 0.5rem;
+}
+
+.bookingId {
+  font-size: 1.1rem;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+}
+
+.bookingId span {
+  font-weight: 600;
+  font-family: monospace;
+}
+
+.bookingStatus {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.5rem;
+  border-radius: 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.confirmed {
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.pending {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.cancelled {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.completed {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.loadingContainer, .errorContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top: 4px solid #2563eb;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.errorContainer p {
+  color: #ef4444;
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+}
+
+.bookingDetailContainer {
+  background-color: white;
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.roomSection {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.roomImage {
+  width: 100%;
+  height: 300px;
+  position: relative;
+}
+
+.roomPhoto {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.roomInfo {
+  padding: 1.5rem;
+}
+
+.roomInfo h2 {
+  font-size: 1.75rem;
+  color: #1e293b;
+  margin-bottom: 0.5rem;
+}
+
+.roomType, .roomNumber {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #64748b;
+  margin-bottom: 0.5rem;
+}
+
+.stayDetails {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.stayItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.stayItem svg {
+  color: #2563eb;
+  margin-top: 0.25rem;
+}
+
+.stayItem div {
+  display: flex;
+  flex-direction: column;
+}
+
+.stayItem span {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.stayItem strong {
+  font-size: 1.1rem;
+  color: #1e293b;
+}
+
+.stayItem small {
+  font-size: 0.875rem;
+  color: #94a3b8;
+}
+
+.detailsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  padding: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.guestSection h3, .paymentSection h3 {
+  font-size: 1.25rem;
+  color: #1e293b;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.guestInfo, .paymentInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.infoItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.infoItem svg {
+  color: #2563eb;
+  margin-top: 0.25rem;
+}
+
+.infoItem div {
+  display: flex;
+  flex-direction: column;
+}
+
+.infoItem span {
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.infoItem strong {
+  font-size: 1rem;
+  color: #1e293b;
+}
+
+.totalPrice {
+  color: #2563eb !important;
+  font-size: 1.25rem !important;
+}
+
+.notesSection {
+  padding: 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.notesSection h3 {
+  font-size: 1.25rem;
+  color: #1e293b;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.noteContent {
+  display: flex;
+  gap: 1rem;
+  color: #64748b;
+}
+
+.noteContent svg {
+  color: #2563eb;
+  margin-top: 0.25rem;
+}
+
+.actionButtons {
+  display: flex;
+  justify-content: space-between;
+  padding: 1.5rem;
+}
+
+.backButton, .cancelButton, .retryButton, .confirmCancelButton {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.backButton {
+  background-color: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+.backButton:hover {
+  background-color: #e2e8f0;
+}
+
+.cancelButton {
+  background-color: white;
+  color: #ef4444;
+  border: 1px solid #ef4444;
+}
+
+.cancelButton:hover {
+  background-color: #fee2e2;
+}
+
+.retryButton {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+}
+
+.retryButton:hover {
+  background-color: #1d4ed8;
+}
+
+.confirmCancelButton {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+}
+
+.confirmCancelButton:hover {
+  background-color: #dc2626;
+}
+
+.confirmCancelButton:disabled, .backButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modalContent {
+  background-color: white;
+  border-radius: 0.5rem;
+  padding: 2rem;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.modalContent h3 {
+  font-size: 1.5rem;
+  color: #1e293b;
+  margin-bottom: 1rem;
+}
+
+.modalContent p {
+  color: #64748b;
+  margin-bottom: 1.5rem;
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #1e293b;
+}
+
+.formGroup textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  resize: vertical;
+}
+
+.modalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .roomSection {
+    flex-direction: row;
+  }
+  
+  .roomImage {
+    width: 40%;
+    height: auto;
+  }
+  
+  .roomInfo {
+    width: 60%;
+  }
+}
+
+@media (max-width: 768px) {
+  .detailsGrid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .stayDetails {
+    grid-template-columns: 1fr;
+  }
+  
+  .actionButtons {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .backButton, .cancelButton {
+    width: 100%;
+  }
+}

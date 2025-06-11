@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import styles from "./InvoiceManager.module.css";
 import { getInvoices, getBookingHistory, getCustomerProfile, deleteInvoice, updateInvoiceStatus, getAuthHeaders, handleResponse } from "../../../lib/api";
 import { API_BASE_URL } from '../../../lib/config';
+import Pagination from "@/components/admin/Pagination";
 
 interface Invoice {
   MaHoaDon: string;
@@ -52,6 +53,11 @@ export default function InvoiceManager() {
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
 
   // Xử lý thay đổi input cho popup thêm hóa đơn
   const handleAddChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -395,6 +401,21 @@ export default function InvoiceManager() {
     inv.MaDatPhong.toLowerCase().includes(search.toLowerCase())
   );
 
+  // Tính toán phân trang
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filtered.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+
+  // Hàm chuyển trang
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+
+  // Hàm thay đổi số lượng hiển thị
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1); // Reset về trang 1 khi thay đổi số lượng hiển thị
+  };
+
   // Định dạng tiền tệ
   const formatCurrency = (amount: number) => {
     return amount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })
@@ -429,6 +450,16 @@ export default function InvoiceManager() {
 
       {!isLoading && !error && (
       <div style={{overflowX:'auto'}}>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        itemsPerPage={itemsPerPage}
+        totalItems={filtered.length}
+        onPageChange={paginate}
+        onItemsPerPageChange={handleItemsPerPageChange}
+        itemsPerPageOptions={[5, 10, 20, 50]}
+      />
+
       <table className={styles.table}>
         <thead>
           <tr>
@@ -444,9 +475,9 @@ export default function InvoiceManager() {
           </tr>
         </thead>
         <tbody>
-          {filtered.length === 0 ? (
+          {currentItems.length === 0 ? (
                 <tr><td colSpan={9} className={styles.noData}>Không có dữ liệu hóa đơn</td></tr>
-          ) : filtered.map(invoice => (
+          ) : currentItems.map(invoice => (
                 <tr key={invoice.MaHoaDon}>
                   <td style={{fontWeight: '600', color: '#2563eb'}}>{invoice.MaHoaDon}</td>
                   <td style={{fontWeight: '600', color: '#7c3aed'}}>{invoice.MaDatPhong}</td>

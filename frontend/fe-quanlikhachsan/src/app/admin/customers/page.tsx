@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import styles from "./CustomerManager.module.css";
 import { API_BASE_URL } from '@/lib/config';
 import { getAuthHeaders, getFormDataHeaders, handleResponse } from '@/lib/api';
+import Pagination from "@/components/admin/Pagination";
 
 interface Customer {
   MaKh: string;
@@ -33,6 +34,11 @@ export default function CustomerManager() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
 
   // Lấy danh sách khách hàng từ API
   useEffect(() => {
@@ -89,6 +95,21 @@ export default function CustomerManager() {
     c.Sdt.includes(search) ||
     c.SoCccd.includes(search)
   );
+
+  // Tính toán phân trang
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filtered.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+
+  // Hàm chuyển trang
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+
+  // Hàm thay đổi số lượng hiển thị
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1); // Reset về trang 1 khi thay đổi số lượng hiển thị
+  };
 
   const openAddModal = () => {
     setForm({ 
@@ -338,6 +359,16 @@ export default function CustomerManager() {
       
       {!isLoading && !error && (
         <div style={{overflowX:'auto'}}>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            itemsPerPage={itemsPerPage}
+            totalItems={filtered.length}
+            onPageChange={paginate}
+            onItemsPerPageChange={handleItemsPerPageChange}
+            itemsPerPageOptions={[5, 10, 20, 50]}
+          />
+
           <table className={styles.table}>
             <thead>
               <tr>
@@ -345,9 +376,9 @@ export default function CustomerManager() {
               </tr>
             </thead>
             <tbody>
-              {filtered.length === 0 ? (
+              {currentItems.length === 0 ? (
                 <tr><td colSpan={8} style={{textAlign:'center', color:'#888', fontStyle:'italic'}}>Không có dữ liệu</td></tr>
-              ) : filtered.map(customer => (
+              ) : currentItems.map(customer => (
                 <tr key={customer.MaKh}>
                   <td>{customer.MaKh}</td>
                   <td>{customer.userName || 'N/A'}</td>

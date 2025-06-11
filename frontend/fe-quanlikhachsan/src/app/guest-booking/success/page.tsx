@@ -20,6 +20,7 @@ interface BookingSuccessData {
   };
   ngayNhanPhong: string;
   ngayTraPhong: string;
+  thoiGianDen?: string; // Thêm thời gian đến
   soNguoiLon: number;
   soTreEm: number;
   tongTien: number;
@@ -259,7 +260,7 @@ export default function GuestBookingSuccessPage() {
             <h2>Lưu ý quan trọng</h2>
             <div className={styles.notesList}>
               <div className={styles.note}>
-                <strong>Thời gian nhận phòng:</strong> Từ 14:00 ngày {new Date(bookingData.ngayNhanPhong).toLocaleDateString('vi-VN')}
+                <strong>Thời gian nhận phòng:</strong> Từ {bookingData.thoiGianDen || '14:00'} ngày {new Date(bookingData.ngayNhanPhong).toLocaleDateString('vi-VN')}
               </div>
               <div className={styles.note}>
                 <strong>Thời gian trả phòng:</strong> Trước 12:00 ngày {new Date(bookingData.ngayTraPhong).toLocaleDateString('vi-VN')}
