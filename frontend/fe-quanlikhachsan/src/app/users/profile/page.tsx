@@ -7,7 +7,7 @@ import styles from './styles.module.css';
 import PersonalInfoForm from '../../../app/components/profile/PersonalInfoForm';
 import ChangePasswordModal from '../../../app/components/profile/ChangePasswordModal';
 import AvatarUploadModal from '../../../app/components/profile/AvatarUploadModal';
-import TransactionHistory, { Transaction } from '../../../app/components/profile/TransactionHistory';
+//import TransactionHistory, { Transaction } from '../../../app/components/profile/TransactionHistory';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import { useLogout } from '../../../lib/hooks';
@@ -38,7 +38,7 @@ const ProfilePageContent: FC = () => {
   });
 
   // Transaction History
-  const [transactionHistory, setTransactionHistory] = useState<Transaction[]>([]);
+  //const [transactionHistory, setTransactionHistory] = useState<Transaction[]>([]);
 
   // Loading state
   const [isLoading, setIsLoading] = useState(true);
@@ -119,14 +119,14 @@ const ProfilePageContent: FC = () => {
         }
 
         // Lấy lịch sử giao dịch
-        const transactionsResponse = await fetch(`/api/transactions?userId=${user.maNguoiDung}`);
-        if (transactionsResponse.ok) {
-          const { data } = await transactionsResponse.json();
-          setTransactionHistory(data || []);
-        } else {
-          console.error('Error fetching transactions:', await transactionsResponse.text());
-          setTransactionHistory([]);
-        }
+        //const transactionsResponse = await fetch(`/api/transactions?userId=${user.maNguoiDung}`);
+        //if (transactionsResponse.ok) {
+          //const { data } = await transactionsResponse.json();
+          //setTransactionHistory(data || []);
+        //} else {
+          //console.error('Error fetching transactions:', await transactionsResponse.text());
+          //setTransactionHistory([]);
+       // }
       } catch (error) {
         console.error('Error fetching page data:', error);
       } finally {
@@ -369,7 +369,7 @@ const handleSaveProfile = async (data: any) => {
             </div>
           </div>
 
-          <TransactionHistory transactions={transactionHistory} />
+          {/*<TransactionHistory transactions={transactionHistory} />*/}
         </div>
 
         {showChangePasswordModal && (
