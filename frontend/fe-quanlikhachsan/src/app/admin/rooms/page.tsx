@@ -323,6 +323,8 @@ export default function RoomManager() {
           <thead>
             <tr>
               <th>Mã phòng</th>
+              <th>Thumbnail</th>
+              <th>Ảnh chi tiết</th>
               <th>Số phòng</th>
               <th>Loại phòng</th>
               <th>Giá Đêm / Giờ (VNĐ)</th>
@@ -336,7 +338,7 @@ export default function RoomManager() {
               <tr key={room.maPhong}>
                 <td>{room.maPhong}</td>
                 <td>
-                  {room.thumbnail &&
+                  {room.thumbnail ? (
                     <Image
                       src={room.thumbnail}
                       alt={`Thumbnail ${room.soPhong}`}
@@ -344,9 +346,25 @@ export default function RoomManager() {
                       height={50}
                       className={styles.thumbnail}
                     />
-                  }
-                  {room.soPhong}
+                  ) : (
+                    <span style={{color:'#888', fontSize:12}}>Không có</span>
+                  )}
                 </td>
+                <td>
+                  {room.hinhAnh ? (
+                    <Image
+                      src={room.hinhAnh}
+                      alt={`Ảnh chi tiết ${room.soPhong}`}
+                      width={100}
+                      height={70}
+                      className={styles.imagePreview}
+                      style={{objectFit:'cover', borderRadius:8}}
+                    />
+                  ) : (
+                    <span style={{color:'#888', fontSize:12}}>Không có</span>
+                  )}
+                </td>
+                <td>{room.soPhong}</td>
                 <td>{room.tenLoaiPhong}</td>
                 <td>
                   {(room.donGia || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}

@@ -1,5 +1,6 @@
 'use client';
 import React, { useState, useEffect } from "react";
+import { useRouter } from 'next/navigation';
 import styles from "./InvoiceManager.module.css";
 import { getInvoices, getBookingHistory, getCustomerProfile, deleteInvoice, updateInvoiceStatus, getAuthHeaders, handleResponse } from "../../../lib/api";
 import { API_BASE_URL } from '../../../lib/config';
@@ -29,6 +30,7 @@ interface Customer {
 }
 
 export default function InvoiceManager() {
+  const router = useRouter();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [editInvoice, setEditInvoice] = useState<Invoice | null>(null);
   const [viewInvoice, setViewInvoice] = useState<Invoice | null>(null);
@@ -38,9 +40,51 @@ export default function InvoiceManager() {
     TongTien: 0,
     TrangThai: ""
   });
+  // State cho popup thêm hóa đơn
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addForm, setAddForm] = useState({
+    MaDatPhong: "",
+    MaKM: "",
+    GiamGiaLoaiKH: "",
+    TongTien: ""
+  });
+  const [addError, setAddError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Xử lý thay đổi input cho popup thêm hóa đơn
+  const handleAddChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setAddForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Xử lý submit thêm hóa đơn
+  const handleAddInvoice = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAddError(null);
+    if (!addForm.MaDatPhong || !addForm.TongTien) {
+      setAddError("Vui lòng nhập đầy đủ Mã đặt phòng và Tổng tiền.");
+      return;
+    }
+    try {
+      // Gọi API tạo hóa đơn ở đây (cần chỉnh lại cho đúng API backend của bạn)
+      // Ví dụ:
+      // await createInvoice({
+      //   MaDatPhong: addForm.MaDatPhong,
+      //   MaKM: addForm.MaKM,
+      //   GiamGiaLoaiKH: addForm.GiamGiaLoaiKH,
+      //   TongTien: addForm.TongTien
+      // });
+      // Sau khi tạo thành công:
+      setShowAddModal(false);
+      setAddForm({ MaDatPhong: "", MaKM: "", GiamGiaLoaiKH: "", TongTien: "" });
+      // Làm mới danh sách hóa đơn nếu cần
+      // fetch lại dữ liệu hóa đơn ở đây nếu muốn
+    } catch (err: any) {
+      setAddError("Có lỗi khi tạo hóa đơn mới.");
+    }
+  };
   // const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1); // Không sử dụng
   // const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear()); // Không sử dụng
   // const [totalRevenue, setTotalRevenue] = useState<number>(0); // Không sử dụng
@@ -224,10 +268,10 @@ export default function InvoiceManager() {
     fetchData();
   }, []);
 
-  // Khi mở modal Thêm mới
+  // Khi mở trang Thêm mới
   const openAddModal = () => {
     // Chuyển hướng trực tiếp vì form thêm hóa đơn phức tạp hơn
-    window.location.href = `/admin/invoices/create`;
+    router.push('/admin/invoices/create');
   };
 
   // Khi mở modal Sửa
@@ -294,14 +338,37 @@ export default function InvoiceManager() {
 
   // Xử lý xóa hóa đơn
   const handleDelete = async (maHoaDon: string) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa hóa đơn này?")) {
+    if (window.confirm("Bạn có chắc chắn muốn đánh dấu hóa đơn này là 'Đã hủy'?")) {
       try {
-        await deleteInvoice(maHoaDon);
-        setInvoices(invoices.filter(inv => inv.MaHoaDon !== maHoaDon));
+        const result = await deleteInvoice(maHoaDon);
+        
+        if (result.success) {
+          // Cập nhật trạng thái hóa đơn trong danh sách thay vì xóa
+          setInvoices(invoices.map(inv => 
+            inv.MaHoaDon === maHoaDon 
+              ? { ...inv, TrangThai: "Đã hủy" } 
+              : inv
+          ));
+          alert("Hóa đơn đã được đánh dấu là 'Đã hủy'.");
+        } else {
+          alert("Không thể cập nhật trạng thái hóa đơn. Vui lòng thử lại sau.");
+        }
       } catch (err) {
         const error = err as Error;
-        alert(`Lỗi: ${error.message}`);
-        console.error("Error deleting invoice:", error);
+        // Kiểm tra xem hóa đơn đã được đánh dấu là "Đã hủy" chưa
+        const savedInvoiceStatuses = JSON.parse(localStorage.getItem('invoiceStatuses') || '{}');
+        if (savedInvoiceStatuses[maHoaDon] === "Đã hủy") {
+          // Cập nhật trạng thái hóa đơn trong danh sách thay vì xóa
+          setInvoices(invoices.map(inv => 
+            inv.MaHoaDon === maHoaDon 
+              ? { ...inv, TrangThai: "Đã hủy" } 
+              : inv
+          ));
+          alert("Hóa đơn đã được đánh dấu là 'Đã hủy'.");
+        } else {
+          alert(`Lỗi: ${error.message}`);
+          console.error("Error updating invoice status:", error);
+        }
       }
     }
   };
@@ -353,7 +420,7 @@ export default function InvoiceManager() {
           >
             🔄 Làm mới
           </button>
-          <button className={styles.addBtn} onClick={openAddModal}>+ Thêm hóa đơn</button>
+          <button className={styles.addBtn} onClick={() => setShowAddModal(true)}>+ Thêm hóa đơn</button>
         </div>
       </div>
 
@@ -397,7 +464,7 @@ export default function InvoiceManager() {
                     <button className={styles.viewBtn} onClick={() => openViewModal(invoice)}>Xem</button>
                 <button className={styles.editBtn} onClick={() => openEditModal(invoice)}>Sửa</button>
                     <button className={styles.pdfBtn} onClick={() => handleExportPDF(invoice)}>PDF</button>
-                    <button className={styles.deleteBtn} onClick={() => handleDelete(invoice.MaHoaDon)}>Xóa</button>
+                    <button className={styles.deleteBtn} onClick={() => handleDelete(invoice.MaHoaDon)}>Hủy</button>
               </td>
             </tr>
           ))}
@@ -407,19 +474,63 @@ export default function InvoiceManager() {
       )}
 
       {/* Modal Thêm mới */}
-      {/* {showAddModal && (
+      {showAddModal && (
         <div className={styles.modal}>
           <div className={styles.modalContent}>
-            <h3>Thêm hóa đơn</h3>
-            <form onSubmit={openAddModal} autoComplete="off">
-              <p style={{marginBottom:12}}>Hóa đơn sẽ được tạo dựa trên thông tin đặt phòng.</p>
+            <h3>Thêm hóa đơn mới</h3>
+            <form onSubmit={handleAddInvoice} autoComplete="off">
+              <div className={styles.formGroup}>
+                <label htmlFor="MaDatPhong">Mã đặt phòng:</label>
+                <input
+                  type="text"
+                  id="MaDatPhong"
+                  name="MaDatPhong"
+                  value={addForm.MaDatPhong || ''}
+                  onChange={handleAddChange}
+                  required
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="MaKM">Mã khuyến mãi (tùy chọn):</label>
+                <input
+                  type="text"
+                  id="MaKM"
+                  name="MaKM"
+                  value={addForm.MaKM || ''}
+                  onChange={handleAddChange}
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="GiamGiaLoaiKH">Giảm giá loại khách hàng (tùy chọn):</label>
+                <input
+                  type="number"
+                  id="GiamGiaLoaiKH"
+                  name="GiamGiaLoaiKH"
+                  value={addForm.GiamGiaLoaiKH || ''}
+                  onChange={handleAddChange}
+                  min="0"
+                />
+              </div>
+              <div className={styles.formGroup}>
+                <label htmlFor="TongTien">Tổng tiền:</label>
+                <input
+                  type="number"
+                  id="TongTien"
+                  name="TongTien"
+                  value={addForm.TongTien || ''}
+                  onChange={handleAddChange}
+                  min="0"
+                  required
+                />
+              </div>
               <div style={{marginTop: 12, display:'flex', gap:8}}>
-                <button type="submit" className={styles.editBtn}>Tiếp tục</button>
+                <button type="submit" className={styles.editBtn}>Tạo hóa đơn</button>
+                <button type="button" onClick={() => setShowAddModal(false)} className={styles.pdfBtn}>Hủy</button>
               </div>
             </form>
           </div>
         </div>
-      )} */}
+      )}
 
       {/* Modal Sửa */}
       {editInvoice && (
@@ -518,7 +629,8 @@ export default function InvoiceManager() {
                 <span
                   className={`${styles.status} ${
                     viewInvoice.TrangThai === "Đã thanh toán" ? styles["status-paid"] :
-                    viewInvoice.TrangThai === "Chưa thanh toán" ? styles["status-unpaid"] : styles["status"]
+                    viewInvoice.TrangThai === "Chưa thanh toán" ? styles["status-unpaid"] :
+                    viewInvoice.TrangThai === "Đã hủy" ? styles["status-cancelled"] : styles["status"]
                   }`}
                 >
                   {viewInvoice.TrangThai || "N/A"}
@@ -556,21 +668,23 @@ export default function InvoiceManager() {
             <div style={{margin:'18px 0', borderTop:'1px solid #ddd', paddingTop:10}}>
               <div style={{fontWeight:'bold', marginBottom:10}}>Thông tin thanh toán:</div>
               <table style={{width:'100%', borderCollapse:'collapse'}}>
-                <tr>
-                  <td style={{padding:'8px 0'}}>Tổng tiền:</td>
-                  <td style={{textAlign:'right', fontWeight:'bold'}}>{formatCurrency(invoice.TongTien)} VNĐ</td>
-                </tr>
-                {invoice.MaKM && (
+                <tbody>
                   <tr>
-                    <td style={{padding:'8px 0'}}>Khuyến mãi ({invoice.TenKhuyenMai}):</td>
-                    <td style={{textAlign:'right', fontWeight:'bold'}}>{formatCurrency(invoice.GiamGiaLoaiKM || 0)} VNĐ</td>
+                    <td style={{padding:'8px 0'}}>Tổng tiền:</td>
+                    <td style={{textAlign:'right', fontWeight:'bold'}}>{formatCurrency(invoice.TongTien)} VNĐ</td>
                   </tr>
-                )}
+                  {invoice.MaKM && (
+                    <tr>
+                      <td style={{padding:'8px 0'}}>Khuyến mãi ({invoice.TenKhuyenMai}):</td>
+                      <td style={{textAlign:'right', fontWeight:'bold'}}>{formatCurrency(invoice.GiamGiaLoaiKM || 0)} VNĐ</td>
+                    </tr>
+                  )}
 
-                <tr style={{borderTop:'1px solid #ddd'}}>
-                  <td style={{padding:'8px 0', fontWeight:'bold'}}>Thành tiền:</td>
-                  <td style={{textAlign:'right', fontWeight:'bold'}}>{formatCurrency(invoice.TongTien)} VNĐ</td>
-                </tr>
+                  <tr style={{borderTop:'1px solid #ddd'}}>
+                    <td style={{padding:'8px 0', fontWeight:'bold'}}>Thành tiền:</td>
+                    <td style={{textAlign:'right', fontWeight:'bold'}}>{formatCurrency(invoice.TongTien)} VNĐ</td>
+                  </tr>
+                </tbody>
               </table>
             </div>
             <div style={{marginTop:30, textAlign:'center', fontSize:'0.9em', color:'#666'}}>

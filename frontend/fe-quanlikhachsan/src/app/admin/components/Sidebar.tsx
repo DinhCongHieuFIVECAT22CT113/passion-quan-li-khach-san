@@ -87,7 +87,6 @@ const Sidebar = () => {
     { path: '/admin/staffs', label: 'Nhân viên', icon: <FaUserTie /> },
     { path: '/admin/permissions', label: 'Phân Quyền', icon: <FaUserShield /> },
     { path: '/admin/reports', label: 'Báo cáo', icon: <FaChartBar /> },
-    { path: '/admin/languages', label: 'Ngôn Ngữ', icon: <FaGlobe /> },
   ];
 
   return (

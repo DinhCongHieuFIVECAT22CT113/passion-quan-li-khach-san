@@ -61,7 +61,7 @@ export default function RoomManager() {
         console.log("Dữ liệu loại phòng nhận được:", roomTypesData);
 
         // Lấy trạng thái phòng từ localStorage nếu có
-        let savedRoomStatuses = {};
+        let savedRoomStatuses: Record<string, any> = {};
         if (typeof window !== 'undefined') {
           try {
             const savedData = localStorage.getItem('roomStatuses');

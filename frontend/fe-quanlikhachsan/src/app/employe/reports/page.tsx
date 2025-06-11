@@ -258,10 +258,7 @@ export default function EmployeeReportPage() {
               color: 'white', 
               boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
               transition: 'transform 0.2s ease-in-out',
-              cursor: 'default',
-              ':hover': {
-                transform: 'translateY(-5px)'
-              }
+              cursor: 'default'
             }}>
               <h3 style={{margin: '0 0 10px 0', fontSize: '1.1rem', fontWeight: 500}}>Tổng doanh thu</h3>
               <div style={{fontSize: '1.7rem', fontWeight: 'bold', letterSpacing: '0.5px'}}>
