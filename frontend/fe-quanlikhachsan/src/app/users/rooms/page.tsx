@@ -224,9 +224,6 @@ export default function RoomsPage() {
           <div className={styles.heroSection}>
             <div className={styles.heroContent}>
               <h1>Khám phá không gian nghỉ dưỡng tuyệt vời</h1>
-              {/* <SearchBar variant="compact" /> */}
-              {/* Giữ nguyên SearchBar nếu nó là một component riêng và không gây lỗi */}
-              {/* Nếu SearchBar cũng gây lỗi tương tự, cần kiểm tra logic của nó */}
             </div>
           </div>
           <RoomGridSkeleton count={6} />
@@ -472,6 +469,11 @@ export default function RoomsPage() {
                           {new Intl.NumberFormat('vi-VN').format(roomType.giaMoiDem || 0)}đ
                           <span className={styles.perNight}>/đêm</span>
                         </div>
+                      </div>
+
+                      {/* Display available room count */}
+                      <div className={styles.availableRooms}>
+                        Phòng trống: <span className={styles.availableCount}>{availableRoomCounts[roomType.maLoaiPhong] || 0}</span>
                       </div>
                       
                       <Link
