@@ -264,9 +264,6 @@ const handleSaveProfile = async (data: any) => {
                   </div>
                 )}
               </div>
-              <button className={styles.logoutButton} onClick={handleLogout}>
-                {t('profile.logout')}
-              </button>
             </div>
           </div>
 
