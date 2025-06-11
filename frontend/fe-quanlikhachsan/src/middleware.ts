@@ -8,7 +8,7 @@ interface DecodedToken {
 }
 
 // Danh sách các đường dẫn công khai không yêu cầu token
-const PUBLIC_PATHS = ['/login', '/signup', '/users/home', '/users/about', '/users/explore', '/users/rooms', '/users/services', '/users/promotions', '/users/booking', '/users/booking-form', '/guest-booking', '/guest-booking/confirm', '/guest-booking/success'];
+const PUBLIC_PATHS = ['/login', '/signup', '/users/home', '/users/about', '/users/explore', '/users/rooms', '/users/services', '/users/promotions', '/users/booking', '/users/booking-form', '/guest-booking', '/guest-booking/confirm', '/guest-booking/success', '/users/privacy', '/users/terms', '/users/faq'];
 
 // Hàm kiểm tra đường dẫn công khai (bao gồm dynamic routes)
 const isPublicPath = (path: string): boolean => {
@@ -48,17 +48,26 @@ export function middleware(request: NextRequest) {
 
       // Chuyển hướng nếu đã login và vào trang login
       if (request.nextUrl.pathname.startsWith('/login')) {
-        if (userRole === 'R00' || userRole === 'R01') {
-            return NextResponse.redirect(new URL('/admin/dashboard', request.url));
-        } else if (userRole === 'R02') { // Nhân viên
-            return NextResponse.redirect(new URL('/employe/bookings', request.url));
-        } else if (userRole === 'R03') { // Kế toán
-            return NextResponse.redirect(new URL('/employe/invoices', request.url));
-        } else if (userRole === 'R04') { // Khách hàng
-            return NextResponse.redirect(new URL('/users/home', request.url));
+        // Lấy redirectUrl từ query params nếu có
+        const redirectUrl = request.nextUrl.searchParams.get('redirectUrl');
+        
+        if (redirectUrl && !redirectUrl.startsWith('/login') && !redirectUrl.startsWith('/signup')) {
+          // Nếu có redirectUrl hợp lệ, ưu tiên chuyển hướng đến đó
+          return NextResponse.redirect(new URL(redirectUrl, request.url));
         } else {
-            // Fallback cho các role khác nếu có, hoặc về trang unauthorized nếu không xác định được trang đích
+          // Nếu không có redirectUrl, sử dụng logic chuyển hướng mặc định theo role
+          if (userRole === 'R00' || userRole === 'R01') {
+            return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+          } else if (userRole === 'R02') { // Nhân viên
+            return NextResponse.redirect(new URL('/employe/bookings', request.url));
+          } else if (userRole === 'R03') { // Kế toán
+            return NextResponse.redirect(new URL('/employe/invoices', request.url));
+          } else if (userRole === 'R04') { // Khách hàng
+            return NextResponse.redirect(new URL('/users/home', request.url));
+          } else {
+            // Fallback cho các role khác
             return NextResponse.redirect(new URL('/', request.url));
+          }
         }
       }
 

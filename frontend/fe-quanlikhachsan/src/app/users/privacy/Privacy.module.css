@@ -3,55 +3,207 @@
   display: flex;
   flex-direction: column;
   padding-top: 80px;
-  background-color: #f8f9fa;
+  background-color: #f9f7f4;
+  position: relative;
 }
 
 .privacySection {
   padding: 4rem 5%;
-  max-width: 1200px;
-  margin: 0 auto;
-  background-color: #f8f9fa;
+  max-width: 1000px;
+  margin: 2rem auto 4rem;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(156, 130, 80, 0.1);
+}
+
+.privacySection::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: linear-gradient(90deg, #9c8250, #c0a978, #9c8250);
+  background-size: 200% 100%;
+  animation: gradientMove 8s ease infinite;
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .privacySection h1 {
-  font-size: 2.5rem;
-  color: #333;
+  font-size: 2.8rem;
+  color: #8B7355;
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 2.5rem;
+  font-weight: 700;
+  position: relative;
+  padding-bottom: 1rem;
+}
+
+.privacySection h1::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background-color: #9c8250;
+  border-radius: 3px;
 }
 
 .content {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 2.5rem;
 }
 
 .content h2 {
   font-size: 1.8rem;
   color: #333;
-  margin-bottom: 1rem;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid rgba(156, 130, 80, 0.2);
+  position: relative;
+}
+
+.content h2::before {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 50px;
+  height: 3px;
+  background-color: #9c8250;
+  border-radius: 3px;
 }
 
 .content p {
   font-size: 1.1rem;
-  line-height: 1.8;
-  color: #666;
+  line-height: 1.9;
+  color: #555;
+  text-align: justify;
+}
+
+.mapSection {
+  padding: 4rem 5%;
+  background-color: #f8f9fa;
+  text-align: center;
+  position: relative;
+}
+
+.mapSection::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(156, 130, 80, 0.3), transparent);
+}
+
+.mapSection h2 {
+  font-size: 2.2rem;
+  color: #8B7355;
+  margin-bottom: 2.5rem;
+  font-weight: 600;
+  position: relative;
+  display: inline-block;
+  padding-bottom: 1rem;
+}
+
+.mapSection h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background-color: #9c8250;
+  border-radius: 3px;
+}
+
+.mapSection iframe {
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
 @media (max-width: 768px) {
   .privacySection {
-    padding: 2rem 1rem;
+    padding: 3rem 2rem;
+    margin-top: 1.5rem;
+    margin-bottom: 3rem;
   }
 
   .privacySection h1 {
-    font-size: 2rem;
+    font-size: 2.2rem;
+    margin-bottom: 2rem;
   }
 
   .content h2 {
-    font-size: 1.5rem;
+    font-size: 1.6rem;
+    margin-bottom: 1rem;
   }
 
   .content p {
     font-size: 1rem;
+    line-height: 1.8;
+  }
+  
+  .mapSection {
+    padding: 3rem 2rem;
+  }
+  
+  .mapSection h2 {
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .privacySection {
+    padding: 2.5rem 1.5rem;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+    border-radius: 10px;
+  }
+
+  .privacySection h1 {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .privacySection h1::after {
+    width: 60px;
+  }
+
+  .content {
+    gap: 2rem;
+  }
+
+  .content h2 {
+    font-size: 1.4rem;
+  }
+
+  .content p {
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+  
+  .mapSection {
+    padding: 2.5rem 1.5rem;
+  }
+  
+  .mapSection h2 {
+    font-size: 1.6rem;
+    margin-bottom: 1.5rem;
   }
 }

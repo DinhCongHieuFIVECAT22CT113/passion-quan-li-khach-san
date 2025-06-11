@@ -191,7 +191,7 @@
 }
 
 .modalContent h3 {
-  margin: 0 0 16px 0;
+  margin: 0 0 24px 0;
   font-size: 1.5rem;
   font-weight: 700;
   color: #1e293b;
@@ -199,15 +199,25 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  border-bottom: 2px solid #f1f5f9;
+  padding-bottom: 12px;
 }
 
-.modalContent form {
+.formGroup {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
+  margin-bottom: 16px;
 }
 
-.modalContent input {
+.formGroup label {
+  font-weight: 600;
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+.modalContent input,
+.modalContent textarea {
   padding: 12px 16px;
   border-radius: 10px;
   border: 2px solid #e2e8f0;
@@ -215,9 +225,11 @@
   background: #f8fafc;
   transition: all 0.3s ease;
   font-weight: 500;
+  width: 100%;
 }
 
-.modalContent input:focus {
+.modalContent input:focus,
+.modalContent textarea:focus {
   outline: none;
   border-color: #3b82f6;
   background: #fff;
@@ -225,10 +237,86 @@
   transform: translateY(-1px);
 }
 
-.modalContent .buttonGroup {
+.modalContent textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.fileInput {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fileInputLabel {
+  display: inline-block;
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+  color: #475569;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: 2px solid #e2e8f0;
+  transition: all 0.3s ease;
+}
+
+.fileInputLabel:hover {
+  background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+  transform: translateY(-1px);
+}
+
+.thumbnailPreview {
+  margin-top: 12px;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #e2e8f0;
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+}
+
+.buttonGroup {
   display: flex;
   gap: 12px;
-  margin-top: 20px;
+  margin-top: 8px;
+  justify-content: flex-end;
+}
+
+.saveBtn {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.saveBtn:hover {
+  background: linear-gradient(135deg, #1d4ed8, #2563eb);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+}
+
+.cancelBtn {
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+  color: #475569;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancelBtn:hover {
+  background: linear-gradient(135deg, #e2e8f0, #cbd5e1);
+  transform: translateY(-2px);
 }
 /* Responsive Design */
 @media (max-width: 700px) {

@@ -55,6 +55,13 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
   const [errors, setErrors] = useState<BookingErrors>({});
   const [bookingResult, setBookingResult] = useState<any>(null);
 
+  // Thêm state để lưu thông tin đặt phòng tạm thời
+  const [bookingData, setBookingData] = useState(() => {
+    // Kiểm tra xem có dữ liệu đặt phòng trong localStorage không
+    const savedData = localStorage.getItem('tempBookingData');
+    return savedData ? JSON.parse(savedData) : null;
+  });
+
   useEffect(() => {
     // Set default dates
     const today = new Date();
@@ -252,7 +259,25 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
     }
   };
 
-
+  // Thêm hàm lưu thông tin đặt phòng trước khi chuyển đến trang đăng nhập
+  const saveBookingDataAndRedirect = () => {
+    // Lưu thông tin đặt phòng hiện tại vào localStorage
+    const dataToSave = {
+      roomId: selectedRoom?.maPhong,
+      roomName: selectedRoom?.soPhong,
+      checkIn: formData.ngayNhanPhong,
+      checkOut: formData.ngayTraPhong,
+      adults: formData.soNguoiLon,
+      children: formData.soTreEm,
+      // Thêm các thông tin khác nếu cần
+    };
+    
+    localStorage.setItem('tempBookingData', JSON.stringify(dataToSave));
+    
+    // Chuyển hướng đến trang đăng nhập với redirectUrl là URL hiện tại
+    const currentUrl = window.location.pathname + window.location.search;
+    router.push(`/login?redirectUrl=${encodeURIComponent(currentUrl)}`);
+  };
 
   const renderChoiceStep = () => (
     <div className={styles.stepContent}>
@@ -289,7 +314,10 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
           {!user && (
             <div className={styles.authSection}>
               <button 
-                onClick={(e) => { e.stopPropagation(); router.push('/login'); }}
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  saveBookingDataAndRedirect();
+                }}
                 className={styles.loginButton}
               >
                 Đăng nhập
@@ -335,7 +363,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
           Hủy
         </button>
         <button 
-          onClick={!user && bookingType === 'user' ? () => router.push('/login') : handleNextStep}
+          onClick={!user && bookingType === 'user' ? saveBookingDataAndRedirect : handleNextStep}
           className={styles.nextButton}
         >
           {!user && bookingType === 'user' ? 'Đăng nhập để tiếp tục' : 'Tiếp tục đặt phòng'}
