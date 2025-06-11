@@ -1,731 +1,422 @@
-.container {
-  min-height: 100vh;
+/* ===== Hero Image Section (Ảnh nền và tiêu đề bên trong) ===== */
+.heroImageContainer {
+  position: relative;
+  width: 100%;
+  height: 400px; 
+  margin-bottom: 2rem; 
+  background-image: url('/heros/room-hero.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex; 
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+
+.heroOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); /* Lớp phủ đen trong suốt để văn bản dễ đọc */
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 1rem 2rem;
+}
+
+.heroMainTitle {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 0.8rem;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8);
+  color: white;
+}
+
+.heroSubText {
+  font-size: 1.5rem;
+  font-weight: 400;
+  opacity: 0.9;
+  color: white;
+  max-width: 800px;
+  line-height: 1.4;
+}
+/* ===== Base Styles ===== */
+.pageContainer {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  font-family: 'Poppins', sans-serif;
+  color: #333;
   background-color: #f8f9fa;
 }
 
-/* Navigation */
-.nav {
+/* ===== Header Styles ===== */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: white;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+.headerContent {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  max-width: 1200px; /* Giữ nguyên max-width cho header để căn giữa */
+  margin: 0 auto;
   padding: 1rem 2rem;
-  background-color: #fff;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  position: sticky;
-  top: 0;
-  z-index: 100;
 }
 
-.navLinks {
+.logoContainer {
+  display: flex;
+  align-items: center;
+}
+
+.mainNav {
   display: flex;
   gap: 2rem;
 }
 
-.navLinks a {
-  color: #333;
+.mainNav a {
+  color: #555;
   text-decoration: none;
   font-weight: 500;
-  transition: color 0.3s ease;
+  font-size: 0.95rem;
+  padding: 0.5rem;
+  transition: all 0.3s ease;
 }
 
-.navLinks a:hover {
-  color: #007bff;
+.mainNav a:hover {
+  color: #9c8250;
 }
 
-.navRight {
+.mainNav a.active {
+  color: #9c8250;
+  border-bottom: 2px solid #9c8250;
+}
+
+.userActions {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
-.profileIcon {
+.profileIconLink {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: #f0f0f0;
-  color: #333;
-  text-decoration: none;
+  background-color: #f5f5f5;
   transition: all 0.3s ease;
 }
 
-.profileIcon:hover {
+.profileIconLink:hover {
   background-color: #e0e0e0;
+  transform: scale(1.05);
 }
 
-.bookNowBtn {
-  background-color: #007bff;
-  color: white;
-  padding: 0.5rem 1.5rem;
-  border-radius: 4px;
-  text-decoration: none;
-  font-weight: 500;
-  transition: background-color 0.3s ease;
+.userIcon {
+  color: #9c8250;
+  font-size: 1.2rem;
 }
 
-.bookNowBtn:hover {
-  background-color: #0069d9;
-}
-
-/* Main Content */
-.main {
-  flex: 1;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
+/* ===== Main Content (Điều chỉnh để hero image full-width) ===== */
+.mainContent {
   width: 100%;
+  margin: 0;
+  padding: 0;
+  flex: 1;
 }
 
-/* Breadcrumbs */
-.breadcrumbs {
-  margin-bottom: 1.5rem;
-  font-size: 0.9rem;
-  color: #666;
-}
-
-.breadcrumbs a {
-  color: #007bff;
-  text-decoration: none;
-}
-
-.breadcrumbs a:hover {
-  text-decoration: underline;
-}
-
-/* Room Header */
-.roomHeader {
-  margin-bottom: 2rem;
-}
-
-.roomHeader h1 {
-  font-size: 2.5rem;
-  margin-bottom: 0.5rem;
-  color: #333;
-}
-
-.roomRating {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.starFilled {
-  color: #ffb700;
-}
-
-.starEmpty {
-  color: #ddd;
-}
-
-.ratingValue {
-  font-weight: 600;
-  font-size: 1.1rem;
-  margin-left: 0.25rem;
-}
-
-.reviewCount {
-  color: #666;
-  font-size: 0.9rem;
-}
-
-/* Image Gallery */
-.imageGallery {
-  margin-bottom: 2rem;
-}
-
-.mainImageContainer {
+/* ===== Hero Image Section (Điều chỉnh cho full-width và chứa tiêu đề) ===== */
+.heroImageContainer {
   position: relative;
-  height: 500px;
-  border-radius: 8px;
+  width: 100%; 
+  height: 400px; 
+  margin: 0 auto 2rem auto; 
+  background-size: cover; 
+  background-position: center; 
+  background-repeat: no-repeat; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  color: white; 
+}
+
+.heroOverlay {
+  position: absolute; 
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5); 
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 1rem 2rem; 
+}
+
+.heroMainTitle {
+  font-size: 3rem; 
+  font-weight: 700;
+  margin-bottom: 0.8rem;
+  text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.8); 
+  color: white;
+}
+
+.heroSubText {
+  font-size: 1.5rem; 
+  font-weight: 400;
+  opacity: 0.9;
+  color: white;
+  max-width: 800px; 
+  line-height: 1.4;
+}
+
+/* ===== Room List (Căn giữa lại danh sách phòng) ===== */
+.roomsList {
+  max-width: 1200px; 
+  margin: 0 auto 2rem auto; 
+  padding: 0 1rem; 
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; 
+}
+
+.roomRow {
+  display: flex;
+  gap: 1rem;
+  background-color: white;
+  border-radius: 12px;
   overflow: hidden;
-  margin-bottom: 1rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: 1px solid #f0f0f0;
+}
+
+.roomRow:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.roomRowImage {
+  flex: 0 0 500px;
+}
+
+.rowImage {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 12px 0 0 12px;
+}
+
+.imageGallery {
+  position: relative;
 }
 
 .mainImage {
-  object-fit: cover;
-  cursor: pointer;
+  position: relative;
 }
 
-.galleryButton {
+.imageCount {
   position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background-color: rgba(255, 255, 255, 0.8);
-  border: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1rem;
-  color: #333;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  z-index: 5;
-}
-
-.galleryButton:hover {
-  background-color: rgba(255, 255, 255, 0.9);
-}
-
-.prevButton {
-  left: 20px;
-}
-
-.nextButton {
-  right: 20px;
-}
-
-.expandButton {
-  position: absolute;
-  bottom: 20px;
-  right: 20px;
-  background-color: rgba(255, 255, 255, 0.8);
-  border: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1rem;
-  color: #333;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  z-index: 5;
-}
-
-.expandButton:hover {
-  background-color: rgba(255, 255, 255, 0.9);
-}
-
-.thumbnailsContainer {
-  display: flex;
-  gap: 0.5rem;
-  overflow-x: auto;
-  padding-bottom: 0.5rem;
-}
-
-.thumbnail {
-  flex: 0 0 auto;
-  width: 100px;
-  height: 70px;
+  bottom: 8px;
+  right: 8px;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  padding: 4px 8px;
   border-radius: 4px;
-  overflow: hidden;
-  cursor: pointer;
-  opacity: 0.7;
-  transition: opacity 0.3s ease;
-  border: 2px solid transparent;
+  font-size: 0.8rem;
 }
 
-.thumbnail:hover {
-  opacity: 0.9;
+.thumbnailGrid {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
 }
 
-.activeThumbnail {
-  opacity: 1;
-  border-color: #007bff;
+.thumbnailItem {
+  flex: 1;
 }
 
 .thumbnailImage {
   width: 100%;
-  height: 100%;
+  height: 40px;
   object-fit: cover;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
-/* Room Content */
-.roomContent {
+.moreImages {
+  position: relative;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.viewAllButton {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  background-color: #9c8250;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.viewAllButton:hover {
+  background-color: #7d6942;
+}
+
+.roomRowContent {
+  flex: 1;
+  padding: 0.8rem 1rem;
   display: flex;
   flex-direction: column;
-  gap: 3rem;
+  gap: 0.8rem;
 }
 
-/* Room Details */
-.roomDetails {
+.roomRowContent h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 0.5rem;
+}
+
+.roomInfo {
   display: grid;
-  grid-template-columns: 1.5fr 1fr;
-  gap: 2rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.3rem;
+  margin-bottom: 0.5rem;
 }
 
-@media (max-width: 992px) {
-  .roomDetails {
-    grid-template-columns: 1fr;
-  }
+.feature {
+  display: flex;
+  flex-direction: column;
 }
 
-.roomDescription {
-  background-color: #fff;
-  border-radius: 8px;
-  padding: 2rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+.featureLabel {
+  font-size: 0.75rem;
+  color: #777;
 }
 
-.roomDescription h2 {
-  font-size: 1.8rem;
-  margin-bottom: 1rem;
+.featureValue {
+  font-size: 0.85rem;
   color: #333;
+}
+
+.roomDescription h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
 }
 
 .roomDescription p {
+  font-size: 0.85rem;
   color: #555;
-  line-height: 1.7;
-  margin-bottom: 2rem;
+  line-height: 1.4;
+  margin-bottom: 0.8rem;
 }
 
-.roomDescription h3 {
-  font-size: 1.4rem;
-  margin: 2rem 0 1rem;
-  color: #333;
-}
-
-/* Room Specifications */
-.roomSpecs {
+.roomSpecifications {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
-  margin-bottom: 2rem;
+  gap: 0.3rem;
+  padding: 0.5rem 0;
+  border-top: 1px solid #f0f0f0;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 0.8rem;
 }
 
 .specItem {
   display: flex;
-  align-items: flex-start;
-  gap: 1rem;
+  flex-direction: column;
 }
 
-.specIcon {
-  color: #007bff;
-  font-size: 1.5rem;
-  margin-top: 0.25rem;
+.specLabel {
+  font-size: 0.75rem;
+  color: #777;
 }
 
-.specItem h4 {
-  margin: 0 0 0.25rem;
-  font-size: 1rem;
-  font-weight: 600;
+.specValue {
+  font-size: 0.85rem;
   color: #333;
 }
 
-.specItem p {
-  margin: 0;
-  color: #666;
+.amenities h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
 }
 
-/* Amenities */
-.amenitiesGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
+/* Amenities List (chia 2 cột) */
+.amenitiesList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem; /* Khoảng cách giữa các hàng và cột */
+  justify-content: flex-start;
 }
 
 .amenityItem {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.5rem 0;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: #555;
+  /* Đảm bảo 2 cột */
+  flex-basis: calc(50% - 0.5rem); /* 50% trừ đi một nửa gap (1rem / 2) */
+  min-width: 120px; /* Đảm bảo đủ rộng cho nội dung */
 }
 
 .amenityIcon {
-  color: #007bff;
-  font-size: 1.1rem;
-}
-
-/* Booking Box */
-.bookingBox {
-  background-color: #fff;
-  border-radius: 8px;
-  padding: 2rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  height: fit-content;
-  position: sticky;
-  top: 100px;
-}
-
-.priceBox {
-  display: flex;
-  align-items: baseline;
-  margin-bottom: 1.5rem;
-}
-
-.price {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #333;
-}
-
-.perNight {
-  font-size: 1rem;
-  color: #666;
-  margin-left: 0.5rem;
-}
-
-.dateSelection h3 {
-  font-size: 1.2rem;
-  margin-bottom: 1rem;
-  color: #333;
-}
-
-.dateInputs {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.dateInput label {
-  display: block;
-  margin-bottom: 0.5rem;
+  color: #9c8250;
   font-size: 0.9rem;
-  color: #555;
-}
-
-.inputWithIcon {
-  position: relative;
-}
-
-.calendarIcon {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #666;
-}
-
-.dateInput input {
-  width: 100%;
-  padding: 0.75rem 0.75rem 0.75rem 2.5rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 0.9rem;
-}
-
-.availabilityInfo {
-  margin-bottom: 1.5rem;
-}
-
-.availabilityInfo h4 {
-  font-size: 1rem;
-  margin-bottom: 0.75rem;
-  color: #333;
-}
-
-.availabilityCalendar p {
-  font-size: 0.9rem;
-  color: #666;
-  margin-bottom: 0.75rem;
-}
-
-.calendarDays {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.calendarDay {
-  background-color: #f8f9fa;
-  padding: 0.5rem;
-  border-radius: 4px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  font-size: 0.8rem;
-}
-
-.dayLabel {
-  margin-bottom: 0.25rem;
-  color: #333;
-}
-
-.availableIcon {
-  color: #28a745;
-}
-
-.priceSummary {
-  margin-top: 1.5rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid #eee;
-}
-
-.summaryRow {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.75rem;
-  font-size: 0.95rem;
-  color: #555;
-}
-
-.totalRow {
-  font-weight: 600;
-  font-size: 1.1rem;
-  color: #333;
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #eee;
 }
 
 .roomActions {
-  margin-top: 1.5rem;
-  display: flex;
-  justify-content: center;
-}
-
-.viewDetailButton {
-  background: linear-gradient(135deg, #6366f1, #4f46e5);
-  color: white;
-  border: none;
-  padding: 0.75rem 2rem;
-  border-radius: 25px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
-}
-
-.viewDetailButton:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
-  background: linear-gradient(135deg, #4f46e5, #4338ca);
+  margin-top: auto;
+  padding-top: 0.5rem;
 }
 
 .bookNowButton {
-  background: linear-gradient(135deg, #10b981, #059669);
+  width: 50%;
+  background: linear-gradient(to right, #9c8250, #7d6942);
   color: white;
   border: none;
-  padding: 0.75rem 2rem;
-  border-radius: 25px;
-  font-size: 1rem;
+  padding: 0.7rem;
+  border-radius: 8px;
   font-weight: 600;
+  font-size: 0.9rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .bookNowButton:hover {
+  background: linear-gradient(to right, #7d6942, #6b5c38);
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
-  background: linear-gradient(135deg, #059669, #047857);
 }
 
-/* Image Gallery Styles */
-.imageGallery {
-  position: relative;
-  width: 100%;
-  height: 150px;
-}
-
-.mainImage {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.imageCount {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 4px 8px;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.thumbnailGrid {
-  position: absolute;
-  bottom: 8px;
-  left: 8px;
-  display: flex;
-  gap: 4px;
-}
-
-.thumbnailItem {
-  width: 40px;
-  height: 30px;
-  border-radius: 4px;
-  overflow: hidden;
-  border: 2px solid white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.thumbnailImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.moreImages {
-  width: 40px;
-  height: 30px;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  cursor: pointer;
-  border: 2px solid white;
-  transition: background 0.3s ease;
-}
-
-.moreImages:hover {
-  background: rgba(0, 0, 0, 0.9);
-}
-
-.viewAllButton {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  background: rgba(255, 255, 255, 0.9);
-  color: #333;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 16px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(4px);
-}
-
-.viewAllButton:hover {
-  background: white;
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.bookButton {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  width: 100%;
-  padding: 1rem;
-  border-radius: 4px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 1.5rem;
-  transition: background-color 0.3s ease;
-}
-
-.bookButton:hover {
-  background-color: #0069d9;
-}
-
-/* Reviews Section */
-.reviewsSection {
-  background-color: #fff;
-  border-radius: 8px;
-  padding: 2rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-}
-
-.reviewsSection h2 {
-  font-size: 1.8rem;
-  margin-bottom: 1.5rem;
-  color: #333;
-}
-
-.reviewsSummary {
-  display: flex;
-  align-items: center;
-  margin-bottom: 2rem;
-}
-
-.averageRating {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.ratingNumber {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #333;
-}
-
-.ratingStars {
-  display: flex;
-  gap: 0.25rem;
-  font-size: 1.2rem;
-}
-
-.totalReviews {
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.reviewsList {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.reviewCard {
-  border: 1px solid #eee;
-  border-radius: 8px;
-  padding: 1.5rem;
-}
-
-.reviewHeader {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-}
-
-.reviewUser {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.userAvatar {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #f0f0f0;
-  color: #333;
-  font-weight: 600;
-  font-size: 1.2rem;
-}
-
-.userInfo h4 {
-  margin: 0 0 0.25rem;
-  font-size: 1rem;
-  color: #333;
-}
-
-.reviewDate {
-  font-size: 0.85rem;
-  color: #777;
-}
-
-.reviewRating {
-  display: flex;
-  gap: 0.25rem;
-  font-size: 1rem;
-}
-
-.reviewComment {
-  color: #555;
-  line-height: 1.6;
-  margin: 0;
-}
-
-/* Full Image Modal */
+/* ===== Image Modal ===== */
 .fullImageModal {
   position: fixed;
   top: 0;
@@ -736,195 +427,153 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
-  overflow: hidden; /* Quan trọng để ảnh không tràn ra ngoài modal */
+  z-index: 2000;
 }
 
 .fullImageSliderContainer {
   position: relative;
-  width: 90%;
   max-width: 1200px;
-  height: 80vh; /* Đặt chiều cao tương đối để phù hợp với màn hình */
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  background-color: black; /* Nền đen để ảnh nổi bật */
-  border-radius: 8px;
-  padding: 20px;
-  box-sizing: border-box; /* Đảm bảo padding không làm tăng kích thước */
+  width: 90%;
 }
 
 .fullImageMain {
   width: 100%;
-  height: calc(100% - 100px); /* Để chừa chỗ cho thumbnail và padding */
-  object-fit: contain; /* Đảm bảo ảnh vừa vặn mà không bị cắt */
-  max-height: 700px; /* Giới hạn chiều cao ảnh chính */
-  transition: opacity 0.3s ease-in-out; /* Hiệu ứng mượt mà khi chuyển ảnh */
+  height: auto;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: 8px;
 }
 
-/* Nút điều hướng trong modal */
 .modalSliderNavButton {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(0, 0, 0, 0.6);
   color: white;
   border: none;
-  padding: 10px 15px;
-  border-radius: 50%;
+  padding: 1rem;
+  font-size: 1.5rem;
   cursor: pointer;
-  font-size: 1.8rem;
-  z-index: 10; /* Đảm bảo nằm trên ảnh */
-  transition: background-color 0.3s;
-}
-
-.modalSliderNavButton:hover {
-  background-color: rgba(255, 255, 255, 0.4);
+  border-radius: 50%;
 }
 
 .modalPrevButton {
-  left: 10px;
+  left: -50px;
 }
 
 .modalNextButton {
-  right: 10px;
+  right: -50px;
 }
 
-/* Thanh trượt thumbnail trong modal */
 .modalThumbnailsSlider {
   display: flex;
-  overflow-x: auto; /* Cho phép cuộn ngang */
-  gap: 10px;
-  padding: 10px 0;
-  margin-top: 15px;
-  width: 100%;
-  justify-content: center; /* Căn giữa các thumbnail */
-  flex-shrink: 0; /* Ngăn không cho co lại */
-
-  /* Custom scrollbar for Webkit browsers */
-  &::-webkit-scrollbar {
-    height: 8px;
-  }
-  &::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  &::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.3);
-    border-radius: 4px;
-  }
+  gap: 8px;
+  margin-top: 1rem;
+  justify-content: center;
 }
 
 .modalThumbnailImage {
-  width: 100px; /* Kích thước thumbnail trong modal */
+  width: 100px;
   height: 70px;
   object-fit: cover;
-  border-radius: 5px;
+  border-radius: 4px;
   cursor: pointer;
   opacity: 0.6;
-  transition: opacity 0.3s, border 0.3s;
-  border: 2px solid transparent;
-  flex-shrink: 0; /* Ngăn không cho co lại */
-}
-
-.modalThumbnailImage:hover {
-  opacity: 0.9;
 }
 
 .activeModalThumbnail {
   opacity: 1;
-  border-color: #007bff; /* Highlight ảnh đang được chọn */
+  border: 2px solid #9c8250;
 }
 
-/* Nút đóng modal (có thể giữ nguyên hoặc điều chỉnh vị trí) */
 .closeModalButton {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  background-color: rgba(255, 255, 255, 0.2);
+  top: -40px;
+  right: -40px;
+  background-color: rgba(0, 0, 0, 0.6);
   color: white;
   border: none;
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  font-size: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 0.5rem 1rem;
+  font-size: 1.5rem;
   cursor: pointer;
-  z-index: 11; /* Đảm bảo nằm trên mọi thứ */
-  transition: background-color 0.3s;
-}
-
-.closeModalButton:hover {
-  background-color: rgba(255, 255, 255, 0.4);
-}
-
-.fullImage {
-  object-fit: contain;
-}
-
-.fullImageButton {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
-  background-color: rgba(255, 255, 255, 0.2);
-  border: none;
-  width: 50px;
-  height: 50px;
   border-radius: 50%;
+}
+
+/* ===== Location Section ===== */
+.locationSection {
+  /* Cho phép max-width lớn hơn để bản đồ có thể rộng hơn */
+  max-width: 2000px; /* Đã cập nhật theo yêu cầu của bạn */
+  margin: 2rem auto; /* Căn giữa và khoảng cách */
+  padding: 0 1rem; /* Padding hai bên */
+}
+
+.locationSection h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1rem;
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
+  gap: 0.5rem;
+}
+
+.sectionIcon {
+  color: #9c8250;
+}
+
+.mapContainer {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  height: 450px; /* Chiều cao bản đồ tăng lên */
+}
+
+/* ===== No Rooms Found ===== */
+.noRoomsFound {
+  text-align: center;
+  padding: 3rem 0;
+  max-width: 1200px; /* Căn giữa nếu mainContent full-width */
+  margin: 2rem auto;
+}
+
+.noRoomsFound p {
+  font-size: 1.1rem;
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+.backButton {
+  background-color: #9c8250;
   color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.8rem 1.5rem;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
-  z-index: 5;
 }
 
-.fullImageButton:hover {
-  background-color: rgba(255, 255, 255, 0.3);
+.backButton:hover {
+  background-color: #7d6942;
 }
 
-.fullImagePrev {
-  left: 20px;
-}
-
-.fullImageNext {
-  right: 20px;
-}
-
-.imageCounter {
-  position: absolute;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.9rem;
-}
-
-/* Loading and Error States */
-.loadingContainer,
-.errorContainer {
+/* ===== Loading and Error States ===== */
+.loadingContainer, .errorContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 60vh;
+  min-height: 80vh;
   text-align: center;
   padding: 2rem;
 }
 
 .spinner {
-  border: 4px solid rgba(0, 0, 0, 0.1);
+  border: 4px solid rgba(156, 130, 80, 0.1);
   border-radius: 50%;
-  border-top: 4px solid #007bff;
-  width: 40px;
-  height: 40px;
+  border-top: 4px solid #9c8250;
+  width: 50px;
+  height: 50px;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
 }
@@ -935,82 +584,36 @@
 }
 
 .errorContainer h2 {
-  color: #dc3545;
+  color: #e53935;
   margin-bottom: 1rem;
 }
 
-.backButton {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 4px;
-  font-size: 1rem;
-  cursor: pointer;
-  margin-top: 1rem;
-  transition: background-color 0.3s ease;
-}
-
-.backButton:hover {
-  background-color: #0069d9;
-}
-
-/* Footer */
+/* ===== Footer ===== */
 .footer {
-  background-color: #222;
-  color: #fff;
-  padding: 3rem 2rem 1rem;
+  background-color: #303030;
+  color: white;
+  padding: 3rem 0 1rem;
 }
 
 .footerContent {
   max-width: 1200px;
   margin: 0 auto;
+  padding: 0 2rem;
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 2fr;
   gap: 3rem;
 }
 
-@media (max-width: 992px) {
-  .footerContent {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
-}
-
-.footerLeft h3 {
-  font-size: 1.2rem;
-  margin-bottom: 1rem;
-}
-
-.subscribeForm {
+.footerLogo {
   display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.subscribeForm input {
-  flex: 1;
-  padding: 0.75rem;
-  border: none;
-  border-radius: 4px 0 0 4px;
-}
-
-.subscribeButton {
-  background-color: #007bff;
-  color: white;
-  border: none;
-  padding: 0 1.5rem;
-  border-radius: 0 4px 4px 0;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.subscribeButton:hover {
-  background-color: #0069d9;
-}
-
-.footerCenter {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.footerLogo p {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  max-width: 250px;
 }
 
 .footerLinks {
@@ -1019,434 +622,82 @@
   gap: 2rem;
 }
 
-@media (max-width: 576px) {
-  .footerLinks {
-    grid-template-columns: 1fr;
-  }
-}
-
 .linkGroup h4 {
-  color: #fff;
-  margin-bottom: 1rem;
   font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1.2rem;
+  color: #f0f0f0;
 }
 
-.linkGroup a {
+.linkGroup a, .linkGroup p {
   display: block;
   color: #aaa;
-  margin-bottom: 0.5rem;
   text-decoration: none;
-  transition: color 0.3s ease;
+  margin-bottom: 0.8rem;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
 }
 
 .linkGroup a:hover {
-  color: #fff;
+  color: #9c8250;
 }
 
 .copyright {
-  max-width: 1200px;
-  margin: 0 auto;
   text-align: center;
   padding-top: 2rem;
+  color: #777;
+  font-size: 0.8rem;
   margin-top: 2rem;
   border-top: 1px solid #444;
-  color: #888;
 }
 
-/* Trang thông tin phòng */
-.roomInformationContainer {
-  width: 100%;
-  padding: 2rem 0;
-  background-color: white;
+/* ===== Responsive Design ===== */
+@media (max-width: 1024px) {
+  .footerContent {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .footerLogo {
+    text-align: center;
+    align-items: center;
+  }
+
+  .footerLogo p {
+    max-width: 100%;
+  }
+
+  .heroMainTitle {
+    font-size: 2.2rem; /* Giảm font size trên tablet */
+  }
+
+  .heroSubText {
+    font-size: 1.2rem;
+  }
 }
 
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 15px;
-}
-
-.roomTitle {
-  font-size: 2.5rem;
-  color: #333;
-  margin-bottom: 1.5rem;
-  text-align: center;
-}
-
-/* Loading và error */
-.loadingContainer {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 50vh;
-}
-
-.spinner {
-  border: 4px solid rgba(0, 0, 0, 0.1);
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border-left-color: #09f;
-  animation: spin 1s linear infinite;
-  margin-bottom: 1rem;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.errorContainer {
-  text-align: center;
-  padding: 2rem;
-}
-
-.backButton {
-  background-color: #0056b3;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1rem;
-  margin-top: 1rem;
-}
-
-.backButton:hover {
-  background-color: #003d7a;
-}
-
-/* Gallery */
-.roomGallery {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
-  grid-template-rows: 300px 150px;
-  gap: 10px;
-  margin-bottom: 2rem;
-}
-
-.mainImage {
-  grid-column: span 2;
-  grid-row: span 2;
-  height: 100%;
-  position: relative;
-}
-
-.thumbnailImage {
-  position: relative;
-  height: 100%;
-}
-
-.galleryImage {
-  object-fit: cover;
-  width: 100%;
-  height: 100%;
-  border-radius: 5px;
-}
-
-/* Room Details */
-.roomDetails {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 2rem;
-  margin-bottom: 2rem;
-}
-
-.roomInfo {
-  padding: 1rem;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-}
-
-.roomFeatures {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.feature {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #eee;
-}
-
-.featureLabel {
-  font-weight: 600;
-  color: #555;
-}
-
-.featureValue {
-  color: #333;
-}
-
-.roomDescription {
-  margin-top: 1.5rem;
-}
-
-.roomDescription h3 {
-  margin-bottom: 0.5rem;
-  font-size: 1.2rem;
-  color: #333;
-}
-
-.roomDescription p {
-  line-height: 1.6;
-  color: #555;
-}
-
-/* Amenities */
-.amenities {
-  padding: 1.5rem;
-  background-color: #fff;
-  border: 1px solid #eee;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-}
-
-.amenities h3 {
-  margin-bottom: 1rem;
-  font-size: 1.2rem;
-  color: #333;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 0.5rem;
-}
-
-.amenitiesList {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.amenityItem {
-  display: flex;
-  align-items: center;
-  margin-bottom: 0.8rem;
-}
-
-.amenityIcon {
-  color: #0056b3;
-  margin-right: 10px;
-  font-size: 1.1rem;
-}
-
-.amenityName {
-  color: #555;
-}
-
-/* Booking Section */
-.bookingSection {
-  text-align: center;
-  margin: 2rem 0;
-  padding: 1.5rem;
-  background-color: #f0f8ff;
-  border-radius: 8px;
-}
-
-.bookButton {
-  background-color: #0056b3;
-  color: white;
-  border: none;
-  padding: 0.8rem 2rem;
-  font-size: 1.1rem;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.bookButton:hover {
-  background-color: #003d7a;
-}
-
-/* Reviews Section */
-.reviewsSection {
-  margin: 2rem 0;
-}
-
-.reviewsSection h2 {
-  margin-bottom: 1.5rem;
-  font-size: 1.5rem;
-  color: #333;
-}
-
-.reviewItem {
-  background-color: #fff;
-  border: 1px solid #eee;
-  border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-}
-
-.reviewHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.reviewerInfo {
-  display: flex;
-  align-items: center;
-}
-
-.reviewerAvatar {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  object-fit: cover;
-  margin-right: 1rem;
-}
-
-.reviewerName {
-  font-weight: 600;
-  margin: 0;
-}
-
-.reviewDate {
-  color: #888;
-  font-size: 0.9rem;
-  margin: 0;
-}
-
-.reviewRating {
-  display: flex;
-}
-
-.starIcon {
-  color: #ffc107;
-  margin-right: 3px;
-}
-
-.starIconEmpty {
-  color: #e0e0e0;
-  margin-right: 3px;
-}
-
-.reviewContent p {
-  margin: 0;
-  line-height: 1.6;
-  color: #555;
-}
-
-/* Responsive */
 @media (max-width: 768px) {
-  .roomGallery {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto;
-  }
-  
-  .mainImage, .thumbnailImage {
-    grid-column: span 1;
-    grid-row: span 1;
-    height: 250px;
-  }
-  
-  .roomDetails {
-    grid-template-columns: 1fr;
-  }
-  
-  .roomFeatures {
-    grid-template-columns: 1fr;
-  }
-  
-  .reviewHeader {
+  .headerContent {
     flex-direction: column;
-    align-items: flex-start;
+    padding: 1rem;
   }
-  
-  .reviewRating {
-    margin-top: 1rem;
+
+  .mainNav {
+    margin: 1rem 0;
   }
-}
 
-/* Rooms List */
-.roomsList {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  margin-bottom: 2rem;
-}
+  .heroImageContainer {
+    height: 300px; /* Chiều cao nhỏ hơn trên mobile */
+  }
 
-.roomRow {
-  display: flex;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  padding: 1.5rem;
-  gap: 2rem;
-  align-items: flex-start;
-}
+  .heroMainTitle {
+    font-size: 1.8rem;
+  }
 
-.roomRowImage {
-  flex: 0 0 250px;
-}
+  .heroSubText {
+    font-size: 1rem;
+  }
 
-.rowImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 5px;
-}
-
-.roomRowContent {
-  flex: 1;
-}
-
-.roomRowContent h3 {
-  font-size: 1.8rem;
-  color: #333;
-  margin-bottom: 1rem;
-}
-
-.roomRowContent h4 {
-  font-size: 1.2rem;
-  color: #333;
-  margin-bottom: 0.5rem;
-}
-
-.roomRowActions {
-  flex: 0 0 200px;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-/* Room Info */
-.roomInfo {
-  margin-bottom: 1.5rem;
-}
-
-.roomFeatures {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.feature {
-  flex: 1 1 45%;
-  display: flex;
-  justify-content: space-between;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #eee;
-}
-
-/* Amenities */
-.amenitiesList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.amenityItem {
-  flex: 1 1 45%;
-}
-
-/* Responsive */
-@media (max-width: 992px) {
   .roomRow {
     flex-direction: column;
   }
@@ -1454,116 +705,65 @@
   .roomRowImage {
     flex: none;
     width: 100%;
-    max-height: 200px;
   }
 
-  .roomRowActions {
-    flex: none;
-    width: 100%;
-    flex-direction: row;
-    justify-content: flex-end;
+  .rowImage {
+    border-radius: 12px 12px 0 0;
   }
 
-  .feature {
-    flex: 1 1 100%;
+  .footerLinks {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .mainNav {
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .mainNav a {
+    font-size: 0.85rem;
+  }
+
+  .heroImageContainer {
+    height: 200px; /* Chiều cao nhỏ hơn nữa trên điện thoại */
+  }
+
+  .heroMainTitle {
+    font-size: 1.5rem;
+  }
+
+  .heroSubText {
+    font-size: 0.9rem;
+  }
+
+  .roomInfo, .roomSpecifications {
+    grid-template-columns: 1fr;
+  }
+
+  .modalSliderNavButton {
+    padding: 0.5rem;
+    font-size: 1rem;
+  }
+
+  .modalPrevButton {
+    left: -30px;
+  }
+
+  .modalNextButton {
+    right: -30px;
+  }
+
+  .closeModalButton {
+    top: -30px;
+    right: -30px;
+    padding: 0.3rem 0.8rem;
   }
 
   .amenityItem {
-    flex: 1 1 100%;
+    flex-basis: 100%; /* Trên mobile, mỗi tiện nghi 1 hàng để dễ đọc */
   }
-}
-
-/* Card Buttons */
-.cardButtons {
-  display: flex;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.viewImagesButton {
-  background-color: #28a745;
-  color: white;
-  border: none;
-  padding: 0.8rem 1.5rem;
-  font-size: 1rem;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.viewImagesButton:hover {
-  background-color: #218838;
-}
-
-/* Full Image Modal */
-.fullImageModal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.9);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  overflow-y: auto;
-}
-
-.fullImageContainer {
-  position: relative;
-  width: 90%;
-  max-width: 1200px;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 2rem;
-}
-
-.fullImage {
-  width: 100%;
-  height: auto;
-  max-height: 500px;
-  object-fit: contain;
-  border-radius: 8px;
-}
-
-.closeModalButton {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: none;
-  border: none;
-  color: white;
-  font-size: 2rem;
-  cursor: pointer;
-  z-index: 10;
-}
-
-.roomSpecifications {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-top: 1rem;
-}
-
-.specItem {
-  flex: 1 1 45%;
-  display: flex;
-  justify-content: space-between;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #eee;
-}
-
-.specLabel {
-  font-weight: bold;
-  color: #333;
-}
-
-.specValue {
-  color: #555;
-}
-
-.stars{
-  color: #ffc107;
 }
