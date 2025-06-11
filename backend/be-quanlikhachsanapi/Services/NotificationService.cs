@@ -152,9 +152,46 @@ namespace be_quanlikhachsanapi.Services
                 }
             };
 
-            // Gửi thông báo đến tất cả admin và nhân viên
+            // Gửi thông báo đến tất cả admin, nhân viên và kế toán
             await _hubContext.Clients.Groups("admin").SendAsync("ReceiveNotification", notification);
             await _hubContext.Clients.Groups("staff").SendAsync("ReceiveNotification", notification);
+            await _hubContext.Clients.Groups("accountant").SendAsync("ReceiveNotification", notification);
+        }
+
+        // Thêm phương thức thông báo khi hóa đơn được cập nhật
+        public async Task NotifyInvoiceStatusChanged(string maHoaDon, string trangThai)
+        {
+            var hoaDon = _context.HoaDons.FirstOrDefault(hd => hd.MaHoaDon == maHoaDon);
+            if (hoaDon == null) return;
+
+            // Lấy thông tin đặt phòng liên quan
+            var datPhong = _context.DatPhongs.FirstOrDefault(dp => dp.MaDatPhong == hoaDon.MaDatPhong);
+            
+            var notification = new
+            {
+                type = "invoice_status_changed",
+                data = new
+                {
+                    maHoaDon = maHoaDon,
+                    maDatPhong = hoaDon.MaDatPhong,
+                    maKhachHang = datPhong?.MaKh,
+                    tongTien = hoaDon.TongTien,
+                    trangThaiCu = hoaDon.TrangThai,
+                    trangThaiMoi = trangThai,
+                    thoiGianCapNhat = DateTime.Now
+                }
+            };
+
+            // Gửi thông báo đến tất cả admin, nhân viên và kế toán
+            await _hubContext.Clients.Groups("admin").SendAsync("ReceiveNotification", notification);
+            await _hubContext.Clients.Groups("staff").SendAsync("ReceiveNotification", notification);
+            await _hubContext.Clients.Groups("accountant").SendAsync("ReceiveNotification", notification);
+
+            // Nếu khách hàng có ID, gửi thông báo đến khách hàng đó
+            if (datPhong != null && !string.IsNullOrEmpty(datPhong.MaKh))
+            {
+                await _hubContext.Clients.Group($"customer_{datPhong.MaKh}").SendAsync("ReceiveNotification", notification);
+            }
         }
     }
 }

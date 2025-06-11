@@ -16,10 +16,12 @@ namespace be_quanlikhachsanapi.Controllers
     public class HoaDonController : ControllerBase
     {
         private readonly IHoaDonRepository _hoaDonRepo;
+        private readonly INotificationService _notificationService;
 
-        public HoaDonController(IHoaDonRepository hoaDonRepo)
+        public HoaDonController(IHoaDonRepository hoaDonRepo, INotificationService notificationService)
         {
             _hoaDonRepo = hoaDonRepo;
+            _notificationService = notificationService;
         }
 
         /// <summary>
@@ -136,6 +138,10 @@ namespace be_quanlikhachsanapi.Controllers
             {
                 return NotFound($"Không tìm thấy hóa đơn với mã {maHoaDon}");
             }
+            
+            // Gửi thông báo real-time về việc cập nhật trạng thái hóa đơn
+            await _notificationService.NotifyInvoiceStatusChanged(maHoaDon, trangThaiDto.TrangThai);
+            
             var hoaDon = await _hoaDonRepo.GetByIdAsync(maHoaDon);
             return Ok(hoaDon);
         }

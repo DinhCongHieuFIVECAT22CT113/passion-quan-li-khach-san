@@ -676,48 +676,36 @@ export const createInvoice = async (invoiceData: InvoiceData) => {
   }
 };
 
-// API cập nhật hóa đơn (CHỈ CẬP NHẬT TRẠNG THÁI)
+// API cập nhật trạng thái hóa đơn (thống nhất cho cả nhân viên và kế toán)
 export const updateInvoiceStatus = async (invoiceId: string, status: string) => {
   console.log(`Đang gọi API cập nhật trạng thái hóa đơn: ${API_BASE_URL}/HoaDon/trangthai/${invoiceId}`);
   
-  // Lưu trạng thái vào localStorage ngay lập tức để UI luôn được cập nhật
-  if (typeof window !== 'undefined') {
-    const savedInvoiceStatuses = JSON.parse(localStorage.getItem('invoiceStatuses') || '{}');
-    savedInvoiceStatuses[invoiceId] = status;
-    localStorage.setItem('invoiceStatuses', JSON.stringify(savedInvoiceStatuses));
-  }
-  
   try {
-    // Thử phương thức 1: Gọi API cập nhật trạng thái trực tiếp
-    try {
-      const authHeaders = await getAuthHeaders('PUT');
-      const response = await fetch(`${API_BASE_URL}/HoaDon/trangthai/${invoiceId}`, {
-        method: 'PUT',
-        headers: {
-          ...authHeaders,
-          'Content-Type': 'application/json'
-        },
-        credentials: 'include',
-        body: JSON.stringify({ TrangThai: status })
-      });
+    // Gọi API cập nhật trạng thái
+    const authHeaders = await getAuthHeaders('PUT');
+    const response = await fetch(`${API_BASE_URL}/HoaDon/trangthai/${invoiceId}`, {
+      method: 'PUT',
+      headers: {
+        ...authHeaders,
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify({ TrangThai: status })
+    });
 
-      if (response.ok) {
-        const result = await handleResponse(response);
-        return { success: true, message: 'Cập nhật trạng thái thành công', data: result };
-      } else {
-        console.log(`API trả về lỗi ${response.status}: ${response.statusText}`);
-      }
-    } catch (statusError) {
-      console.log('Không thể cập nhật bằng API trạng thái trực tiếp, thử phương thức thay thế:', statusError);
-    }
-
-    // Phương thức 2: Cập nhật trực tiếp bằng formData
-    try {
+    if (response.ok) {
+      const result = await handleResponse(response);
+      return { success: true, message: 'Cập nhật trạng thái thành công', data: result };
+    } else {
+      // Nếu API chính thất bại, thử phương thức thay thế
+      console.log(`API trả về lỗi ${response.status}: ${response.statusText}`);
+      
+      // Phương thức thay thế: Cập nhật trực tiếp bằng formData
       const formData = new FormData();
       formData.append('TrangThai', status);
       
       const headers = await getFormDataHeaders();
-      const response = await fetch(`${API_BASE_URL}/HoaDon/${invoiceId}`, {
+      const altResponse = await fetch(`${API_BASE_URL}/HoaDon/${invoiceId}`, {
         method: 'PUT',
         mode: 'cors',
         credentials: 'include',
@@ -725,37 +713,16 @@ export const updateInvoiceStatus = async (invoiceId: string, status: string) => 
         headers: headers,
       });
 
-      if (response.ok) {
-        const result = await handleResponse(response);
+      if (altResponse.ok) {
+        const result = await handleResponse(altResponse);
         return { success: true, message: 'Cập nhật trạng thái thành công', data: result };
       } else {
-        console.log(`API PUT trả về lỗi ${response.status}: ${response.statusText}`);
+        throw new Error(`Không thể cập nhật trạng thái hóa đơn: ${altResponse.status} ${altResponse.statusText}`);
       }
-    } catch (putError) {
-      console.log('Không thể cập nhật bằng PUT trực tiếp:', putError);
     }
-    
-    // Phương thức 3: Giả lập thành công nếu cả hai phương thức trên đều thất bại
-    console.log('Cả hai phương thức cập nhật đều thất bại, trả về thành công giả lập');
-    return { 
-      success: true, 
-      message: 'Đã lưu trạng thái cục bộ', 
-      data: { 
-        maHoaDon: invoiceId, 
-        trangThai: status 
-      } 
-    };
   } catch (error) {
-    console.error('Lỗi khi gọi API updateInvoiceStatus:', error);
-    // Vẫn trả về thành công vì đã lưu vào localStorage
-    return { 
-      success: true, 
-      message: 'Đã lưu trạng thái cục bộ', 
-      data: { 
-        maHoaDon: invoiceId, 
-        trangThai: status 
-      } 
-    };
+    console.error('Lỗi khi cập nhật trạng thái hóa đơn:', error);
+    throw error;
   }
 };
 
@@ -764,20 +731,8 @@ export const deleteInvoice = async (invoiceId: string) => {
   try {
     console.log(`Đánh dấu hóa đơn #${invoiceId} là "Đã hủy" thay vì xóa`);
     
-    // Cập nhật trạng thái hóa đơn thành "Đã hủy"
+    // Cập nhật trạng thái hóa đơn thành "Đã hủy" sử dụng API thống nhất
     const statusResult = await updateInvoiceStatus(invoiceId, "Đã hủy");
-    
-    // Lưu trạng thái vào localStorage
-    if (typeof window !== 'undefined') {
-      const savedInvoiceStatuses = JSON.parse(localStorage.getItem('invoiceStatuses') || '{}');
-      savedInvoiceStatuses[invoiceId] = "Đã hủy";
-      localStorage.setItem('invoiceStatuses', JSON.stringify(savedInvoiceStatuses));
-      
-      // Lưu cả vào accountantInvoiceStatuses để đồng bộ giữa các role
-      const accountantStatuses = JSON.parse(localStorage.getItem('accountantInvoiceStatuses') || '{}');
-      accountantStatuses[invoiceId] = "Đã hủy";
-      localStorage.setItem('accountantInvoiceStatuses', JSON.stringify(accountantStatuses));
-    }
     
     return {
       success: true,
@@ -786,18 +741,6 @@ export const deleteInvoice = async (invoiceId: string) => {
     };
   } catch (error) {
     console.error(`Lỗi khi đánh dấu hóa đơn #${invoiceId} là "Đã hủy":`, error);
-    
-    // Trả về thành công giả lập nếu đã cập nhật trạng thái thành "Đã hủy" trong localStorage
-    if (typeof window !== 'undefined') {
-      const savedInvoiceStatuses = JSON.parse(localStorage.getItem('invoiceStatuses') || '{}');
-      if (savedInvoiceStatuses[invoiceId] === "Đã hủy") {
-        return {
-          success: true,
-          message: "Hóa đơn đã được đánh dấu là đã hủy",
-          data: { MaHoaDon: invoiceId, TrangThai: "Đã hủy" }
-        };
-      }
-    }
     
     // Nếu không thể cập nhật trạng thái, thử một lần nữa với phương thức khác
     try {
@@ -815,13 +758,6 @@ export const deleteInvoice = async (invoiceId: string) => {
       });
       
       if (response.ok) {
-        // Lưu trạng thái vào localStorage
-        if (typeof window !== 'undefined') {
-          const savedInvoiceStatuses = JSON.parse(localStorage.getItem('invoiceStatuses') || '{}');
-          savedInvoiceStatuses[invoiceId] = "Đã hủy";
-          localStorage.setItem('invoiceStatuses', JSON.stringify(savedInvoiceStatuses));
-        }
-        
         return {
           success: true,
           message: "Hóa đơn đã được đánh dấu là đã hủy",
@@ -1360,74 +1296,80 @@ export const createEmployeeBooking = async (bookingData: BookingData) => {
   return handleResponse(response);
 };
 
-// API lấy danh sách hóa đơn cho nhân viên
+// API lấy danh sách hóa đơn (thống nhất cho cả nhân viên và kế toán)
 export const getEmployeeInvoices = async () => {
-  console.log(`Đang gọi API lấy danh sách hóa đơn cho nhân viên: ${API_BASE_URL}/HoaDon`);
+  console.log(`Đang gọi API lấy danh sách hóa đơn: ${API_BASE_URL}/HoaDon`);
 
-  const headers = await getAuthHeaders('GET');
-  const response = await fetch(`${API_BASE_URL}/HoaDon`, {
-    method: 'GET',
-    mode: 'cors',
-    credentials: 'include',
-    headers: headers,
-  });
-
-  const invoicesData = await handleResponse(response);
-
-  // Lấy thông tin đặt phòng
-  const bookingsHeaders = await getAuthHeaders('GET');
-  const bookingsResponse = await fetch(`${API_BASE_URL}/DatPhong`, {
-    method: 'GET',
-    mode: 'cors',
-    credentials: 'include',
-    headers: bookingsHeaders,
-  });
-
-  const bookingsData = await handleResponse(bookingsResponse);
-  const bookings = Array.isArray(bookingsData) ? bookingsData : [];
-
-  // Lấy thông tin khách hàng
-  const customersHeaders2 = await getAuthHeaders('GET');
-  const customersResponse = await fetch(`${API_BASE_URL}/KhachHang`, {
-    method: 'GET',
-    mode: 'cors',
-    credentials: 'include',
-    headers: customersHeaders2,
-  });
-
-  const customersData = await handleResponse(customersResponse);
-  const customers = Array.isArray(customersData) ? customersData : [];
-
-  // Chuyển đổi từ định dạng backend sang định dạng frontend
-  if (Array.isArray(invoicesData)) {
-    return invoicesData.map((invoice, index) => {
-      console.log('Processing invoice:', invoice);
-
-      // Tìm booking theo mã đặt phòng
-      const booking = bookings.find(b =>
-        (b.maDatPhong || b.MaDatPhong) === (invoice.maDatPhong || invoice.MaDatPhong)
-      ) || {};
-
-      // Tìm customer theo mã khách hàng
-      const customer = customers.find(c =>
-        (c.maKh || c.MaKh) === (booking.maKH || booking.MaKH)
-      ) || {};
-
-      return {
-        id: invoice.maHoaDon || invoice.MaHoaDon || invoice.invoiceId || `HD${index + 1}`,
-        bookingId: invoice.maDatPhong || invoice.MaDatPhong || booking.maDatPhong || '',
-        customerId: booking.maKH || booking.MaKH || '',
-        customerName: customer ? `${customer.hoKh || customer.HoKh || ''} ${customer.tenKh || customer.TenKh || ''}`.trim() : 'Không xác định',
-        amount: parseFloat(invoice.tongTien || invoice.TongTien || invoice.totalAmount || 0),
-        date: invoice.ngayLap || invoice.NgayLap || invoice.issueDate || new Date().toISOString(),
-        paymentMethod: invoice.phuongThucThanhToan || invoice.PhuongThucThanhToan || invoice.paymentMethodId || 'Tiền mặt',
-        status: invoice.trangThai || invoice.TrangThai || invoice.status || 'Chưa thanh toán',
-        note: invoice.ghiChu || invoice.GhiChu || invoice.notes || ''
-      };
+  try {
+    const headers = await getAuthHeaders('GET');
+    const response = await fetch(`${API_BASE_URL}/HoaDon`, {
+      method: 'GET',
+      mode: 'cors',
+      credentials: 'include',
+      headers: headers,
     });
-  }
 
-  return [];
+    const invoicesData = await handleResponse(response);
+
+    // Lấy thông tin đặt phòng và khách hàng
+    const [bookingsData, customersData, paymentsData] = await Promise.all([
+      fetch(`${API_BASE_URL}/DatPhong`, {
+        method: 'GET',
+        mode: 'cors',
+        credentials: 'include',
+        headers: await getAuthHeaders('GET')
+      }).then(res => res.ok ? handleResponse(res) : []).catch(() => []),
+      
+      fetch(`${API_BASE_URL}/KhachHang`, {
+        method: 'GET',
+        mode: 'cors',
+        credentials: 'include',
+        headers: await getAuthHeaders('GET')
+      }).then(res => res.ok ? handleResponse(res) : []).catch(() => []),
+      
+      fetch(`${API_BASE_URL}/PhuongThucThanhToan`, {
+        method: 'GET',
+        mode: 'cors',
+        credentials: 'include',
+        headers: await getAuthHeaders('GET')
+      }).then(res => res.ok ? handleResponse(res) : []).catch(() => [])
+    ]);
+
+    const bookings = Array.isArray(bookingsData) ? bookingsData : [];
+    const customers = Array.isArray(customersData) ? customersData : [];
+
+    // Chuyển đổi từ định dạng backend sang định dạng frontend
+    if (Array.isArray(invoicesData)) {
+      return invoicesData.map((invoice, index) => {
+        // Tìm booking theo mã đặt phòng
+        const booking = bookings.find(b =>
+          (b.maDatPhong || b.MaDatPhong) === (invoice.maDatPhong || invoice.MaDatPhong)
+        ) || {};
+
+        // Tìm customer theo mã khách hàng
+        const customer = customers.find(c =>
+          (c.maKh || c.MaKh) === (booking.maKH || booking.MaKH)
+        ) || {};
+
+        return {
+          id: invoice.maHoaDon || invoice.MaHoaDon || invoice.invoiceId || `HD${index + 1}`,
+          bookingId: invoice.maDatPhong || invoice.MaDatPhong || booking.maDatPhong || '',
+          customerId: booking.maKH || booking.MaKH || '',
+          customerName: customer ? `${customer.hoKh || customer.HoKh || ''} ${customer.tenKh || customer.TenKh || ''}`.trim() : 'Không xác định',
+          amount: parseFloat(invoice.tongTien || invoice.TongTien || invoice.totalAmount || 0),
+          date: invoice.ngayLap || invoice.NgayLap || invoice.issueDate || new Date().toISOString(),
+          paymentMethod: invoice.phuongThucThanhToan || invoice.PhuongThucThanhToan || invoice.paymentMethodId || 'Tiền mặt',
+          status: invoice.trangThai || invoice.TrangThai || invoice.status || 'Chưa thanh toán',
+          note: invoice.ghiChu || invoice.GhiChu || invoice.notes || ''
+        };
+      });
+    }
+
+    return [];
+  } catch (error) {
+    console.error('Lỗi khi lấy danh sách hóa đơn:', error);
+    throw error;
+  }
 };
 
 // API tạo hóa đơn mới cho nhân viên
@@ -2002,12 +1944,13 @@ export const getAccountantInvoices = async () => {
   }
 };
 
-// API lấy dữ liệu báo cáo cho kế toán
+// API lấy dữ liệu báo cáo cho kế toán (sử dụng API thống nhất)
 export const getAccountantReports = async (startDate?: string, endDate?: string) => {
   try {
     console.log(`Đang gọi API báo cáo cho kế toán từ ${startDate} đến ${endDate}`);
 
-    const invoices = await getAccountantInvoices();
+    // Sử dụng API thống nhất để lấy danh sách hóa đơn
+    const invoices = await getEmployeeInvoices();
 
     // Lọc theo ngày nếu có
     let filteredInvoices = invoices;

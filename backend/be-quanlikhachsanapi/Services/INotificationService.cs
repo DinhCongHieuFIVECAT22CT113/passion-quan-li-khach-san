@@ -9,5 +9,6 @@ namespace be_quanlikhachsanapi.Services
         Task NotifyBookingUpdated(DatPhong datPhong);
         Task NotifyBookingStatusChanged(string maDatPhong, string trangThai);
         Task NotifyRoomStatusChanged(string maPhong, string trangThai);
+        Task NotifyInvoiceStatusChanged(string maHoaDon, string trangThai);
     }
 }

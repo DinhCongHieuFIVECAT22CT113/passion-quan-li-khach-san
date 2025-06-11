@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { getEmployeeInvoices, createEmployeeInvoice, updateInvoiceStatus, getEmployeeBookings, getServices, getAccountantInvoices, updateAccountantInvoiceStatus } from '../../../lib/api';
+import { getEmployeeInvoices, createEmployeeInvoice, updateInvoiceStatus, getEmployeeBookings, getServices } from '../../../lib/api';
 import { useAuth } from '../../../lib/auth';
 
 interface Invoice {
@@ -62,33 +62,11 @@ export default function InvoiceManager() {
       try {
         setLoading(true);
 
-        // Lấy danh sách hóa đơn - sử dụng API phù hợp với role
-        const invoicesData = user?.role === 'R03'
-          ? await getAccountantInvoices()
-          : await getEmployeeInvoices();
-          
-        // Lấy trạng thái hóa đơn từ localStorage nếu có
-        let savedInvoiceStatuses: Record<string, string> = {};
-        if (typeof window !== 'undefined') {
-          try {
-            // Sử dụng localStorage khác nhau cho nhân viên và kế toán
-            const storageKey = user?.role === 'R03' ? 'accountantInvoiceStatuses' : 'invoiceStatuses';
-            const savedData = localStorage.getItem(storageKey);
-            if (savedData) {
-              savedInvoiceStatuses = JSON.parse(savedData);
-            }
-          } catch (e) {
-            console.error('Lỗi khi parse trạng thái hóa đơn từ localStorage:', e);
-          }
-        }
+        // Sử dụng API thống nhất cho cả nhân viên và kế toán
+        const invoicesData = await getEmployeeInvoices();
         
-        // Áp dụng trạng thái đã lưu
-        const updatedInvoices = invoicesData.map(invoice => {
-          const savedStatus = savedInvoiceStatuses[invoice.id];
-          return savedStatus ? { ...invoice, status: savedStatus } : invoice;
-        });
-        
-        setInvoices(updatedInvoices);
+        // Cập nhật state với dữ liệu từ API
+        setInvoices(invoicesData);
 
         // Chỉ lấy services và bookings nếu không phải kế toán (kế toán chỉ cần hóa đơn)
         if (user?.role !== 'R03') {
@@ -216,33 +194,26 @@ export default function InvoiceManager() {
       // Cập nhật trạng thái trong state trước để UI phản hồi ngay lập tức
       setInvoices(invoices.map(i => i.id === id ? { ...i, status } : i));
 
-      // Lưu trạng thái vào localStorage để duy trì khi tải lại trang
-      if (typeof window !== 'undefined') {
-        const storageKey = user?.role === 'R03' ? 'accountantInvoiceStatuses' : 'invoiceStatuses';
-        const savedInvoiceStatuses = JSON.parse(localStorage.getItem(storageKey) || '{}');
-        savedInvoiceStatuses[id] = status;
-        localStorage.setItem(storageKey, JSON.stringify(savedInvoiceStatuses));
-      }
-
-      // Sử dụng API phù hợp với role
+      // Sử dụng API thống nhất để cập nhật trạng thái
       try {
-        if (user?.role === 'R03') {
-          const result = await updateAccountantInvoiceStatus(id, status);
-          if (result.success) {
-            setError(null);
-            console.log('Cập nhật trạng thái thành công!');
-          }
-        } else {
-          // Sử dụng API cho nhân viên khác
-          const result = await updateInvoiceStatus(id, status);
-          if (result.success) {
-            setError(null);
-            console.log('Cập nhật trạng thái thành công!');
-          }
+        const result = await updateInvoiceStatus(id, status);
+        if (result.success) {
+          setError(null);
+          console.log('Cập nhật trạng thái thành công!');
+          
+          // Làm mới danh sách hóa đơn để đảm bảo đồng bộ
+          const refreshedInvoices = await getEmployeeInvoices();
+          setInvoices(refreshedInvoices);
         }
       } catch (apiError) {
         console.error("Lỗi API khi cập nhật trạng thái:", apiError);
-        // Không hiển thị lỗi cho người dùng vì đã cập nhật UI
+        // Làm mới dữ liệu từ server để đảm bảo đồng bộ
+        try {
+          const refreshedInvoices = await getEmployeeInvoices();
+          setInvoices(refreshedInvoices);
+        } catch (refreshError) {
+          console.error("Không thể làm mới dữ liệu:", refreshError);
+        }
       }
     } catch (err: unknown) {
       const error = err as Error;

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import styles from "./BookingManager.module.css";
 import { API_BASE_URL } from '@/lib/config';
 import { getAuthHeaders, getFormDataHeaders, handleResponse } from '@/lib/api';
+import Pagination from "@/components/admin/Pagination";
 
 // Interface cho dữ liệu Đặt phòng từ BE (camelCase, khớp với JSON response)
 interface BookingBE {
@@ -93,6 +94,11 @@ export default function BookingManager() {
   const [rooms, setRooms] = useState<RoomInfoBE[]>([]); // Cập nhật để chứa RoomInfoBE
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [roomTypes, setRoomTypes] = useState<RoomTypeBE[]>([]); // State cho loại phòng
+  
+  // Phân trang
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
 
   // Hàm format tiền tệ
   const formatCurrency = (amount?: number) => {
@@ -461,7 +467,7 @@ export default function BookingManager() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    if (checkInDate < today) {
+    if (checkInDate < today && !editBooking) {
       setError('Ngày nhận phòng không thể là ngày trong quá khứ');
       setIsLoading(false);
       return;
@@ -487,6 +493,36 @@ export default function BookingManager() {
       setError(`Không tìm thấy phòng với mã: ${form.maPhong.trim()}`);
       setIsLoading(false);
       return;
+    }
+
+    // Nếu đang chỉnh sửa và có thay đổi trạng thái, sử dụng API cập nhật trạng thái riêng
+    if (editBooking && form.trangThai !== editBooking.trangThai) {
+      try {
+        console.log(`Cập nhật trạng thái đặt phòng ${editBooking.maDatPhong} từ ${editBooking.trangThai} thành ${form.trangThai}`);
+        
+        const statusHeaders = await getAuthHeaders('PUT');
+        const statusResponse = await fetch(`${API_BASE_URL}/DatPhong/${editBooking.maDatPhong}/trangthai`, {
+          method: 'PUT',
+          headers: {
+            ...statusHeaders,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ trangThai: form.trangThai }),
+          credentials: 'include'
+        });
+
+        if (!statusResponse.ok) {
+          const errorText = await statusResponse.text();
+          throw new Error(`Lỗi khi cập nhật trạng thái: ${errorText}`);
+        }
+        
+        console.log('Cập nhật trạng thái thành công');
+      } catch (error) {
+        console.error('Lỗi khi cập nhật trạng thái:', error);
+        setError(`Lỗi khi cập nhật trạng thái: ${(error as Error).message}`);
+        setIsLoading(false);
+        return;
+      }
     }
 
     const formData = new FormData();
@@ -527,7 +563,7 @@ export default function BookingManager() {
       if (form.nguoiLon !== undefined) formData.append('NguoiLon', String(form.nguoiLon));
       if (form.soLuongPhong !== undefined) formData.append('SoLuongPhong', String(form.soLuongPhong));
       if (form.thoiGianDen !== undefined) formData.append('ThoiGianDen', form.thoiGianDen);
-      if (form.trangThai) formData.append('TrangThai', form.trangThai); // Cho phép cập nhật trạng thái
+      // Không gửi trạng thái qua form này nữa vì đã xử lý riêng ở trên
     }
 
     try {
@@ -678,6 +714,21 @@ export default function BookingManager() {
     (b.maKH || '').toLowerCase().includes(search.toLowerCase()) ||
     (b.maPhong || '').toLowerCase().includes(search.toLowerCase()) // Thêm tìm kiếm theo maPhong
   );
+  
+  // Tính toán phân trang
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filtered.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  
+  // Hàm chuyển trang
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  
+  // Hàm thay đổi số lượng hiển thị
+  const handleItemsPerPageChange = (newItemsPerPage: number) => {
+    setItemsPerPage(newItemsPerPage);
+    setCurrentPage(1); // Reset về trang 1 khi thay đổi số lượng hiển thị
+  };
 
   console.log("Rendering Bookings state:", JSON.stringify(bookings, null, 2));
   console.log("Rendering filtered Bookings:", JSON.stringify(filtered, null, 2));
@@ -711,6 +762,16 @@ export default function BookingManager() {
 
       {!isLoading && !error && (
       <div style={{overflowX:'auto'}}>
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        itemsPerPage={itemsPerPage}
+        totalItems={filtered.length}
+        onPageChange={paginate}
+        onItemsPerPageChange={handleItemsPerPageChange}
+        itemsPerPageOptions={[5, 10, 20, 50]}
+      />
+      
       <table className={styles.table}>
         <thead>
           <tr>
@@ -728,7 +789,7 @@ export default function BookingManager() {
           {filtered.length === 0 ? (
             <tr><td colSpan={8} style={{textAlign:'center', color:'#888', fontStyle:'italic'}}>Không có dữ liệu</td></tr>
           ) : (
-            filtered.map(booking => {
+            currentItems.map(booking => {
               const maDatPhongDisplay = booking.maDatPhong;
               const tenKhachHangDisplay = booking.tenKhachHang || booking.maKH;
               const tenPhongDisplay = booking.tenPhongDisplay;
@@ -877,8 +938,8 @@ export default function BookingManager() {
                 <textarea id="ghiChu_edit" name="ghiChu" value={form.ghiChu || ""} onChange={handleChange} rows={3} />
               </div>
               <div className={styles.formGroup}>
-                <label htmlFor="trangThai_edit">Trạng thái (Chỉ hiển thị - Không sửa qua form này)</label>
-                <select id="trangThai_edit" name="trangThai" value={form.trangThai} onChange={handleChange} disabled>
+                <label htmlFor="trangThai_edit">Trạng thái</label>
+                <select id="trangThai_edit" name="trangThai" value={form.trangThai} onChange={handleChange}>
                   {Object.entries(statusMap).map(([key, value]) => (
                     <option key={key} value={key}>{value.label}</option>
                   ))}

@@ -333,6 +333,85 @@
   font-style: italic;
 }
 
+/* Pagination styles */
+.paginationControls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background: #f8fafc;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.itemsPerPageControl {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #475569;
+  font-size: 0.9rem;
+}
+
+.itemsPerPageSelect {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  font-size: 0.9rem;
+  color: #1e293b;
+  cursor: pointer;
+}
+
+.paginationInfo {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  background: #f8fafc;
+  border-bottom-left-radius: 12px;
+  border-bottom-right-radius: 12px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.paginationButton {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #1e293b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+  min-width: 40px;
+}
+
+.paginationButton:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+
+.paginationButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.activePage {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.activePage:hover {
+  background: #2563eb !important;
+  border-color: #2563eb !important;
+}
+
 /* Modal styles */
 .modal {
   position: fixed;
@@ -461,14 +540,14 @@
   cursor: pointer;
 }
 
-.formActions {
+.formActions, .modalActions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
   margin-top: 12px;
 }
 
-.submitBtn {
+.submitBtn, .saveBtn {
   background: linear-gradient(135deg, #2563eb, #3b82f6);
   color: white;
   border: none;
@@ -481,7 +560,7 @@
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
 }
 
-.submitBtn:hover {
+.submitBtn:hover, .saveBtn:hover {
   background: linear-gradient(135deg, #1d4ed8, #2563eb);
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
