@@ -129,9 +129,8 @@ const ProfilePageContent: FC = () => {
     if (!currentPassword) errors.current = t('profile.currentPasswordRequired');
     if (!newPassword) {
       errors.new = t('profile.newPasswordRequired');
-    } else if (!/^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$/.test(newPassword)) {
-      errors.new = t('profile.newPasswordInvalid');
     }
+
     if (newPassword !== confirmNewPassword) errors.confirm = t('profile.confirmPasswordMismatch');
 
     setPasswordErrors(errors);
