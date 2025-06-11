@@ -2,8 +2,8 @@
  * Cấu hình chung cho ứng dụng
  */
 
-// URL của API backend - gọi trực tiếp đến backend thay vì qua proxy Next.js
-export const API_BASE_URL = 'http://localhost:5009/api';
+// URL của API backend - sử dụng biến môi trường hoặc fallback về localhost
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5009/api';
 
 // Các cấu hình khác
 export const APP_CONFIG = {

@@ -93,7 +93,11 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowCredentials",
         builder =>
         {
-            builder.WithOrigins("http://localhost:3000")
+            // Lấy danh sách origins từ cấu hình hoặc sử dụng giá trị mặc định
+            var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? 
+                                new[] { "http://localhost:3000", "https://your-frontend-domain.vercel.app" };
+            
+            builder.WithOrigins(allowedOrigins)
                    .AllowAnyMethod()
                    .AllowAnyHeader()
                    .WithExposedHeaders("Content-Disposition", "Content-Length", "Content-Type")
