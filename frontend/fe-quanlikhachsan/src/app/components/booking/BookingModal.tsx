@@ -532,14 +532,20 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
         </div>
       </div>
 
-      <div className={styles.stepActions}>
+    <div className={styles.stepActions}>
+      {bookingType === 'user' && user ? ( // Kiểm tra nếu là người dùng đã đăng nhập
+        <button onClick={onClose} className={styles.backButton}>
+          Hủy
+        </button>
+      ) : (
         <button onClick={() => setStep('choice')} className={styles.backButton}>
           Quay lại
         </button>
-        <button onClick={handleNextStep} className={styles.nextButton}>
-          Tiếp tục
-        </button>
-      </div>
+      )}
+      <button onClick={handleNextStep} className={styles.nextButton}>
+        Tiếp tục
+      </button>
+    </div>
     </div>
   );
 
@@ -721,9 +727,6 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
       <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
         <div className={styles.modalHeader}>
           <h1>Đặt phòng {selectedRoom?.soPhong}</h1>
-          <button onClick={onClose} className={styles.closeButton}>
-            <FaTimes />
-          </button>
         </div>
 
         <div className={styles.stepIndicator}>
