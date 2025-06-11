@@ -32,17 +32,20 @@ function DashboardPage() {
       try {
         setLoading(true);
         // Gọi song song các API nhỏ để tổng hợp dữ liệu dashboard
-        const [roomsRes, bookingsRes, invoicesRes, customersRes] = await Promise.all([
+        const [roomsRes, bookingsRes, invoicesRes, customersRes, roomTypesRes] = await Promise.all([
           fetch(`${API_BASE_URL}/Phong`, { headers: await getAuthHeaders() }),
           fetch(`${API_BASE_URL}/DatPhong`, { headers: await getAuthHeaders() }),
           fetch(`${API_BASE_URL}/HoaDon`, { headers: await getAuthHeaders() }),
-          fetch(`${API_BASE_URL}/KhachHang`, { headers: await getAuthHeaders() })
+          fetch(`${API_BASE_URL}/KhachHang`, { headers: await getAuthHeaders() }),
+          fetch(`${API_BASE_URL}/LoaiPhong`, { headers: await getAuthHeaders() })
         ]);
-        const [rooms, bookings, invoices, customers] = await Promise.all([
+        
+        const [rooms, bookings, invoices, customers, roomTypes] = await Promise.all([
           handleResponse(roomsRes),
           handleResponse(bookingsRes),
           handleResponse(invoicesRes),
-          handleResponse(customersRes)
+          handleResponse(customersRes),
+          handleResponse(roomTypesRes)
         ]);
 
         // Tổng số khách hàng
@@ -79,7 +82,11 @@ function DashboardPage() {
         const roomOccupancy = Array.isArray(rooms)
           ? Object.values(
               rooms.reduce((acc: Record<string, {type: string, total: number, occupied: number}>, r: any) => {
-                const type = r.TenLoaiPhong || r.tenLoaiPhong || r.LoaiPhong || r.loaiPhong || r.MaLoaiPhong || r.maLoaiPhong || 'Không rõ';
+                // Use tenLoaiPhong instead of maLoaiPhong for display
+                const roomType = roomTypes.find((rt: any) => rt.maLoaiPhong === (r.MaLoaiPhong || r.maLoaiPhong));
+                const type = roomType ? (roomType.tenLoaiPhong || roomType.TenLoaiPhong) : 
+                           (r.TenLoaiPhong || r.tenLoaiPhong || r.LoaiPhong || r.loaiPhong || 'Không xác định');
+                
                 if (!acc[type]) acc[type] = { type, total: 0, occupied: 0 };
                 acc[type].total += 1;
                 if ((r.TrangThai || r.trangThai || r.status) !== 'Trống') acc[type].occupied += 1;

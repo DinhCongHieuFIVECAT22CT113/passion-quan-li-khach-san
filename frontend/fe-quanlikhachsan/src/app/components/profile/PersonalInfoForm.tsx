@@ -196,9 +196,6 @@ const validateFields = () => {
             {t('profile.cancel')}
           </button>
         )}
-        <button className={styles.actionBtn} onClick={onPaymentOptions}>
-          {t('profile.paymentOptions')}
-        </button>
       </div>
 
       {showSaveSuccess && (

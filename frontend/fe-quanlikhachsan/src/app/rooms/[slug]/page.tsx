@@ -165,7 +165,7 @@ export default function RoomsListPage() {
           }));
         setRooms(roomsWithDetails);
         if (roomsWithDetails.length === 0 && phongResponse.ok) {
-          setError(`Hiện tại không có phòng trống nào thuộc loại này.`);
+          setError(`Hiện tại không có phòng nào còn trống, đang được dọn hoặc đã được đặt trước.`);
         }
       }
 
@@ -279,7 +279,7 @@ export default function RoomsListPage() {
       <div className={styles.pageContainer}>
         <Header />
         <div className={styles.errorContainer}>
-          <h2>Có lỗi xảy ra</h2>
+          <h2>Xin lỗi vì sự bất tiện</h2>
           <p>{error}</p>
           <button onClick={() => router.back()} className={styles.backButton}>
             Quay lại

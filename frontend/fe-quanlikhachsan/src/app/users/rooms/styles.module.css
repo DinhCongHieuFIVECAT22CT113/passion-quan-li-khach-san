@@ -1020,3 +1020,17 @@
   cursor: not-allowed;
   transform: none;
 }
+
+.availableRooms {
+  margin-top: 10px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.availableCount {
+  font-weight: 700;
+  color: #9c8250;
+  font-size: 1.1rem;
+}

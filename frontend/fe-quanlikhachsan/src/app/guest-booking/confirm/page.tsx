@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import styles from '../styles.module.css';
+import styles from './styles.module.css';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import { API_BASE_URL } from '@/lib/config';

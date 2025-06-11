@@ -12,7 +12,7 @@ interface PhongBE {
   soPhong: string;
   thumbnail?: string;
   hinhAnh?: string;
-  trangThai: string;
+  trangThai: string; // Ensure this is always present
   tang?: number;
 }
 
@@ -44,6 +44,7 @@ interface RoomFormState {
   Thumbnail?: string | File;
   HinhAnh?: string | File;
   Tang?: number;
+  TrangThai: string; // Add TrangThai to the form state
 }
 
 export default function RoomManager() {
@@ -55,11 +56,15 @@ export default function RoomManager() {
     SoPhong: "",
     MaLoaiPhong: "",
     Tang: 1,
+    TrangThai: "Trống", // Default status for new rooms
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedThumbnailFile, setSelectedThumbnailFile] = useState<File | null>(null);
   const [selectedHinhAnhFile, setSelectedHinhAnhFile] = useState<File | null>(null);
+
+  // Define possible room statuses
+  const roomStatuses = ["Trống", "Đã đặt", "Đang dọn"]; // You might fetch these from an API or define them
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -109,22 +114,22 @@ export default function RoomManager() {
 
   useEffect(() => {
     fetchData();
-    
+
     // Đăng ký lắng nghe sự kiện từ SignalR
     const connection = getSignalRConnection();
-    
+
     // Khi nhận được thông báo về thay đổi trạng thái phòng, làm mới dữ liệu
     const handleRoomStatusChanged = (notification: any) => {
-      if (notification.type === 'room_status_changed' || 
-          notification.type === 'booking_created' || 
+      if (notification.type === 'room_status_changed' ||
+          notification.type === 'booking_created' ||
           notification.type === 'booking_status_changed') {
         console.log('Room data changed, refreshing...', notification);
         fetchData();
       }
     };
-    
+
     connection.on('ReceiveNotification', handleRoomStatusChanged);
-    
+
     // Cleanup
     return () => {
       connection.off('ReceiveNotification', handleRoomStatusChanged);
@@ -138,6 +143,7 @@ export default function RoomManager() {
       Tang: 1,
       Thumbnail: undefined,
       HinhAnh: undefined,
+      TrangThai: "Trống", // Default status for new rooms
     });
     setSelectedThumbnailFile(null);
     setSelectedHinhAnhFile(null);
@@ -153,6 +159,7 @@ export default function RoomManager() {
       Tang: room.tang,
       Thumbnail: room.thumbnail,
       HinhAnh: room.hinhAnh,
+      TrangThai: room.trangThai, // Set current status for editing
     });
     setSelectedThumbnailFile(null);
     setSelectedHinhAnhFile(null);
@@ -163,7 +170,7 @@ export default function RoomManager() {
   const closeModal = () => {
     setShowModal(false);
     setEditingRoom(null);
-    setForm({ SoPhong: "", MaLoaiPhong: "", Tang: 1 });
+    setForm({ SoPhong: "", MaLoaiPhong: "", Tang: 1, TrangThai: "Trống" }); // Reset status on close
     setSelectedThumbnailFile(null);
     setSelectedHinhAnhFile(null);
   };
@@ -182,12 +189,11 @@ export default function RoomManager() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
 
-    // Nếu thay đổi loại phòng, tự động cập nhật hình ảnh từ loại phòng
+    // If changing room type, automatically update thumbnail from room type if no new file is selected
     if (name === 'MaLoaiPhong') {
       const selectedRoomType = roomTypes.find(rt => rt.maLoaiPhong === value);
       if (selectedRoomType && selectedRoomType.thumbnail) {
-        // Chỉ cập nhật hình ảnh nếu người dùng chưa chọn file mới
-        if (!selectedThumbnailFile) {
+        if (!selectedThumbnailFile) { // Only update if user hasn't selected a new file
           setForm(prevForm => ({
             ...prevForm,
             [name]: value,
@@ -242,29 +248,38 @@ export default function RoomManager() {
       if (form.Tang !== undefined) {
         formData.append('Tang', String(form.Tang));
       }
+      formData.append('TrangThai', form.TrangThai); // Append the status to formData
 
       if (selectedThumbnailFile) {
         formData.append('ThumbnailFile', selectedThumbnailFile);
+      } else if (editingRoom && typeof form.Thumbnail === 'string') {
+        // If no new file selected but there's an existing URL, send it to preserve it
+        formData.append('ThumbnailUrl', form.Thumbnail);
       }
       if (selectedHinhAnhFile) {
         formData.append('HinhAnhFile', selectedHinhAnhFile);
+      } else if (editingRoom && typeof form.HinhAnh === 'string') {
+          // If no new file selected but there's an existing URL, send it to preserve it
+          formData.append('HinhAnhUrl', form.HinhAnh);
       }
+
 
       let response;
       const maPhongBeingEdited = editingRoom?.maPhong;
 
-      const headers = await getFormDataHeaders();
+      const headers = await getFormDataHeaders(); // Ensure this handles FormData correctly, typically you don't set 'Content-Type' for FormData manually as fetch does it.
+
       if (maPhongBeingEdited) {
         response = await fetch(`${API_BASE_URL}/Phong/${maPhongBeingEdited}`, {
           method: 'PUT',
-          headers: headers,
+          headers: headers, // Headers might not need 'Content-Type' for FormData, let browser set it.
           body: formData,
           credentials: 'include',
         });
       } else {
         response = await fetch(`${API_BASE_URL}/Phong`, {
           method: 'POST',
-          headers: headers,
+          headers: headers, // Headers might not need 'Content-Type' for FormData, let browser set it.
           body: formData,
           credentials: 'include',
         });
@@ -272,23 +287,8 @@ export default function RoomManager() {
 
       await handleResponse(response);
 
-      const roomsHeaders = await getAuthHeaders('GET');
-      const roomsResponse = await fetch(`${API_BASE_URL}/Phong`, {
-        method: 'GET',
-        headers: roomsHeaders,
-        credentials: 'include'
-      });
-      const roomsData: PhongBE[] = await handleResponse(roomsResponse);
-      const roomsWithDetails = roomsData.map((phong): RoomDisplay => {
-        const loaiPhong = roomTypes.find(lp => lp.maLoaiPhong === phong.maLoaiPhong);
-        return {
-          ...phong,
-          tenLoaiPhong: loaiPhong?.tenLoaiPhong || "Không xác định",
-          donGia: loaiPhong?.giaMoiDem || 0,
-          giaGio: loaiPhong?.giaMoiGio || 0,
-        };
-      });
-      setRooms(roomsWithDetails);
+      // Re-fetch data to update the table with the latest changes
+      fetchData(); // Call fetchData to get fresh data including updated status
 
       closeModal();
       alert(editingRoom ? "Cập nhật phòng thành công!" : "Thêm phòng thành công!");
@@ -370,7 +370,7 @@ export default function RoomManager() {
           <div className={styles.modalContent}>
             <h3>{editingRoom ? 'Sửa phòng' : 'Thêm phòng'}</h3>
             <form onSubmit={handleSubmit}>
-              <div>
+              <div className={styles.formGroup}> {/* Add formGroup class */}
                 <label>Số phòng:</label>
                 <input
                   name="SoPhong"
@@ -380,7 +380,7 @@ export default function RoomManager() {
                   required
                 />
               </div>
-              <div>
+              <div className={styles.formGroup}> {/* Add formGroup class */}
                 <label>Loại phòng:</label>
                 <select
                   name="MaLoaiPhong"
@@ -396,7 +396,7 @@ export default function RoomManager() {
                   ))}
                 </select>
               </div>
-              <div>
+              <div className={styles.formGroup}> {/* Add formGroup class */}
                 <label>Tầng:</label>
                 <input
                   name="Tang"
@@ -408,7 +408,22 @@ export default function RoomManager() {
                   required
                 />
               </div>
-              <div>
+              <div className={styles.formGroup}> {/* Add formGroup class for status */}
+                <label>Trạng thái:</label>
+                <select
+                  name="TrangThai"
+                  value={form.TrangThai}
+                  onChange={handleChange}
+                  required
+                >
+                  {roomStatuses.map(status => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className={styles.formGroup}> {/* Add formGroup class */}
                 <label htmlFor="Thumbnail">Thumbnail:</label>
                 <input type="file" id="Thumbnail" name="Thumbnail" onChange={(e) => handleFileChange(e, 'thumbnail')} />
 
@@ -433,7 +448,7 @@ export default function RoomManager() {
                   <p className={styles.autoImageNote}>📷 Tự động sử dụng hình ảnh từ loại phòng</p>
                 )}
               </div>
-              <div>
+              <div className={styles.formGroup}> {/* Add formGroup class */}
                 <label htmlFor="HinhAnh">Ảnh chi tiết:</label>
                 <input type="file" id="HinhAnh" name="HinhAnh" onChange={(e) => handleFileChange(e, 'hinhAnh')} />
                 {editingRoom && editingRoom.hinhAnh && typeof editingRoom.hinhAnh === 'string' && (
@@ -450,9 +465,9 @@ export default function RoomManager() {
                 )}
               </div>
 
-              <div className={styles.buttonGroup}>
-                <button type="submit" className={styles.addBtn}>{editingRoom ? 'Lưu' : 'Thêm'}</button>
-                <button type="button" onClick={closeModal} className={styles.deleteBtn}>Hủy</button>
+              <div className={styles.buttonGroup}> {/* Use buttonGroup (or .formActions) */}
+                <button type="submit" className={styles.submitBtn}>{editingRoom ? 'Lưu' : 'Thêm'}</button>
+                <button type="button" onClick={closeModal} className={styles.cancelBtn}>Hủy</button>
               </div>
             </form>
           </div>

@@ -120,7 +120,7 @@ const SignupForm: React.FC = () => {
     <div className="form-section">
       <button 
         className="back-btn" 
-        onClick={() => router.push('/home')}
+        onClick={() => router.push('/users/home')}
       >
         ×
       </button>

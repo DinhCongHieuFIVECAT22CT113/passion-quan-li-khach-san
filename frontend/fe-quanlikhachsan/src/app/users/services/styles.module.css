@@ -240,13 +240,6 @@
   margin-bottom: 0.8rem;
 }
 
-.servicePrice::before {
-  content: '₫';
-  font-size: 0.9rem;
-  margin-right: 2px;
-  font-weight: 400;
-}
-
 .viewDetailsBtn {
   background-color: transparent;
   border: 2px solid #9c8250;
