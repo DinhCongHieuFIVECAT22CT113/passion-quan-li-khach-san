@@ -44,6 +44,10 @@ export default function PrivacyPage() {
           <p>{t('privacy.contactText')}</p>
         </div>
       </section>
+      
+      {/* Map Section - Same as in home page */}
+
+      
       <Footer />
     </div>
   );
