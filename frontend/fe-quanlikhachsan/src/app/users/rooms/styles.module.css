@@ -406,7 +406,7 @@
 .mainContent {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 2rem 1rem;
   flex: 1;
 }
 
@@ -468,9 +468,9 @@
 /* ===== Room Grid ===== */
 .roomGrid {
   display: flex;
-  gap: 25px;
+  gap: 20px;
   overflow-x: auto;
-  padding: 25px 5px;
+  padding: 20px 5px;
   scroll-behavior: smooth;
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -494,6 +494,7 @@
   padding: 0 40px; /* Space for navigation buttons */
   scrollbar-width: none; /* Hide scrollbar for Firefox */
   cursor: grab;
+  gap: 20px;
 }
 
 .roomsContainer:active {
@@ -544,8 +545,8 @@
 
 /* Room Card */
 .roomCard {
-  width: 300px;
-  min-width: 300px;
+  width: 280px;
+  min-width: 280px;
   background-color: white;
   border-radius: 12px;
   overflow: hidden;
@@ -566,7 +567,7 @@
 
 .roomImageContainer {
   position: relative;
-  height: 200px;
+  height: 180px;
   overflow: hidden;
 }
 
@@ -581,55 +582,39 @@
   transform: scale(1.08);
 }
 
-.ratingBadge {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background-color: rgba(255, 255, 255, 0.9);
-  color: #333;
-  padding: 5px 10px;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.starIcon {
-  color: #FFD700;
-}
-
 .roomContent {
-  padding: 20px;
+  padding: 15px;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
 }
 
 .roomTitle {
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   color: #222;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .roomDescription {
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   color: #555;
-  margin-bottom: 15px;
-  line-height: 1.5;
+  margin-bottom: 12px;
+  line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  height: 2.8rem;
 }
 
 .amenities {
   display: flex;
-  gap: 20px;
-  margin-bottom: 15px;
+  gap: 15px;
+  margin-bottom: 12px;
   flex-wrap: wrap;
   justify-content: space-between;
 }
@@ -638,21 +623,21 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
-  font-size: 0.85rem;
+  gap: 4px;
+  font-size: 0.8rem;
   color: #555;
 }
 
 .amenity svg {
   color: #9c8250;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
 }
 
 .roomSpecs {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 20px;
-  padding: 12px 0;
+  margin-bottom: 15px;
+  padding: 10px 0;
   border-top: 1px solid #f0f0f0;
   border-bottom: 1px solid #f0f0f0;
 }
@@ -665,35 +650,35 @@
 }
 
 .specLabel {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   color: #777;
-  margin-bottom: 5px;
+  margin-bottom: 3px;
 }
 
 .specValue {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
   color: #333;
 }
 
 .priceContainer {
   margin-top: auto;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
   text-align: center;
   background: linear-gradient(to right, #f8f9fa, #ffffff, #f8f9fa);
-  padding: 10px;
+  padding: 8px;
   border-radius: 8px;
 }
 
 .price {
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   font-weight: 800;
   color: #9c8250;
   text-shadow: 0 1px 1px rgba(0,0,0,0.1);
 }
 
 .perNight {
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: #777;
   font-weight: normal;
 }
@@ -704,10 +689,10 @@
   background: linear-gradient(to right, #4F46E5, #6366F1);
   color: white;
   text-align: center;
-  padding: 12px;
+  padding: 10px;
   border-radius: 8px;
   font-weight: 600;
-  font-size: 1rem;
+  font-size: 0.95rem;
   text-decoration: none;
   transition: all 0.3s;
   box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);

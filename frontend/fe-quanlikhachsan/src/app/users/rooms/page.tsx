@@ -418,8 +418,8 @@ export default function RoomsPage() {
                       <Image
                         src={getValidImageSrc(roomType.thumbnail)}
                         alt={roomType.tenLoaiPhong}
-                        width={400}
-                        height={250}
+                        width={280}
+                        height={180}
                         className={styles.roomImage}
                       />
                       <div className={styles.ratingBadge}>
