@@ -1,0 +1,162 @@
+/* Enhanced Search Bar Styles */
+.enhancedSearchContainer {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.enhancedSearchContainer:hover {
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
+}
+
+.searchBarWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .searchBarWrapper {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.searchInputGroup {
+  display: flex;
+  flex-wrap: wrap;
+  flex: 1;
+  gap: 12px;
+  align-items: center;
+}
+
+.searchLocation, .searchDate, .searchGuests, .searchFilters {
+  display: flex;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 12px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+.searchLocation:hover, .searchDate:hover, .searchGuests:hover, .searchFilters:hover {
+  border-color: #d1d5db;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.searchLocation {
+  flex: 1;
+  min-width: 180px;
+}
+
+.searchDateGroup {
+  display: flex;
+  gap: 8px;
+  flex: 2;
+}
+
+.searchDate {
+  flex: 1;
+  position: relative;
+  min-width: 140px;
+}
+
+.searchGuests {
+  flex: 1;
+  min-width: 120px;
+}
+
+.searchFilters {
+  flex: 0 0 auto;
+}
+
+.locationSelect, .dateInput, .guestSelect {
+  border: none;
+  background: transparent;
+  font-size: 0.95rem;
+  color: #374151;
+  width: 100%;
+  margin-left: 8px;
+  outline: none;
+}
+
+.dateLabel {
+  position: absolute;
+  top: 4px;
+  left: 36px;
+  font-size: 0.7rem;
+  color: #6b7280;
+  pointer-events: none;
+}
+
+.filterButton {
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #4b5563;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.searchButton {
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 24px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  min-width: 140px;
+}
+
+.searchButton:hover {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+}
+
+/* Add Font Awesome icons */
+.searchLocation i, .searchDate i, .searchGuests i, .filterButton i, .searchButton i {
+  color: #6b7280;
+  font-size: 1rem;
+  min-width: 20px;
+}
+
+.searchButton i {
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .searchInputGroup {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .searchLocation, .searchDate, .searchGuests, .searchFilters {
+    width: 100%;
+  }
+  
+  .searchDateGroup {
+    flex-direction: column;
+    width: 100%;
+  }
+}

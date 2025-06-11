@@ -1,8 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
-import { FaStar, FaQuoteLeft, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import React, { useState, useEffect, useRef } from 'react';
+import { FaStar, FaChevronLeft, FaChevronRight, FaThumbsUp } from 'react-icons/fa';
 import { useTranslation } from 'react-i18next';
 import { SkeletonTestimonialGrid } from '../ui/SkeletonLoader';
 import styles from './TestimonialsSection.module.css';
@@ -36,6 +35,7 @@ const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isAutoPlaying, setIsAutoPlaying] = useState(autoPlay);
+  const sliderRef = useRef<HTMLDivElement>(null);
 
   // Mock testimonials data - In real app, this would come from API
   const mockTestimonials: Testimonial[] = [
@@ -136,23 +136,25 @@ const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
     if (!isAutoPlaying || testimonials.length <= 3) return;
 
     const interval = setInterval(() => {
-      setCurrentIndex(prev => (prev + 1) % Math.max(1, testimonials.length - 2));
+      handleNext();
     }, 5000);
 
     return () => clearInterval(interval);
   }, [isAutoPlaying, testimonials.length]);
 
   const handlePrevious = () => {
-    setCurrentIndex(prev => 
-      prev === 0 ? Math.max(0, testimonials.length - 3) : prev - 1
-    );
+    if (sliderRef.current) {
+      const cardWidth = 400; // Approximate width of a card + gap
+      sliderRef.current.scrollBy({ left: -cardWidth, behavior: 'smooth' });
+    }
     setIsAutoPlaying(false);
   };
 
   const handleNext = () => {
-    setCurrentIndex(prev => 
-      prev >= testimonials.length - 3 ? 0 : prev + 1
-    );
+    if (sliderRef.current) {
+      const cardWidth = 400; // Approximate width of a card + gap
+      sliderRef.current.scrollBy({ left: cardWidth, behavior: 'smooth' });
+    }
     setIsAutoPlaying(false);
   };
 
@@ -160,7 +162,7 @@ const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
     return Array.from({ length: 5 }, (_, index) => (
       <FaStar
         key={index}
-        className={index < rating ? styles.starFilled : styles.starEmpty}
+        className={index < rating ? styles.star : styles.emptyStar}
       />
     ));
   };
@@ -186,8 +188,8 @@ const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
       <section className={styles.testimonialsSection}>
         <div className={styles.container}>
           <div className={styles.sectionHeader}>
-            <h2>{t('testimonials.title')}</h2>
-            <p>{t('testimonials.subtitle')}</p>
+            <h2>{t('testimonials.title', 'Khách hàng nói gì về chúng tôi')}</h2>
+            <p>{t('testimonials.subtitle', 'Những đánh giá chân thực từ khách hàng đã trải nghiệm dịch vụ của chúng tôi')}</p>
           </div>
           <SkeletonTestimonialGrid />
         </div>
@@ -199,8 +201,8 @@ const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
     <section className={styles.testimonialsSection}>
       <div className={styles.container}>
         <div className={styles.sectionHeader}>
-          <h2>{t('testimonials.title')}</h2>
-          <p>{t('testimonials.subtitle')}</p>
+          <h2>{t('testimonials.title', 'Khách hàng nói gì về chúng tôi')}</h2>
+          <p>{t('testimonials.subtitle', 'Những đánh giá chân thực từ khách hàng đã trải nghiệm dịch vụ của chúng tôi')}</p>
           <div className={styles.stats}>
             <div className={styles.stat}>
               <span className={styles.statNumber}>4.8</span>
@@ -220,96 +222,56 @@ const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
           </div>
         </div>
 
-        <div className={styles.testimonialsContainer}>
-          {showNavigation && testimonials.length > 3 && (
-            <button
-              className={`${styles.navButton} ${styles.prevButton}`}
-              onClick={handlePrevious}
-              aria-label="Previous testimonials"
+        <div className={styles.testimonialSlider} ref={sliderRef}>
+          {testimonials.map((testimonial, index) => (
+            <div key={testimonial.id} className={styles.testimonialCard}>
+              <div className={styles.userInfo}>
+                <div className={styles.avatar}>
+                  <img 
+                    src={getValidAvatarSrc(testimonial.avatar)} 
+                    alt={testimonial.name}
+                  />
+                </div>
+                <div className={styles.userDetails}>
+                  <h4 className={styles.userName}>{testimonial.name}</h4>
+                  <p className={styles.userLocation}>{testimonial.location}</p>
+                  <div className={styles.rating}>
+                    {renderStars(testimonial.rating)}
+                  </div>
+                </div>
+              </div>
+              
+              <div className={styles.content}>
+                <p>{testimonial.review}</p>
+              </div>
+              
+              <div className={styles.footer}>
+                <span className={styles.date}>{formatDate(testimonial.date)}</span>
+                <span className={styles.helpful}>
+                  <FaThumbsUp className={styles.helpfulIcon} />
+                  {testimonial.helpful} người thấy hữu ích
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        {showNavigation && (
+          <div className={styles.navigation}>
+            <button 
+              onClick={handlePrevious} 
+              className={styles.navButton}
+              aria-label="Previous"
             >
               <FaChevronLeft />
             </button>
-          )}
-
-          <div className={styles.testimonialsGrid}>
-            <div 
-              className={styles.testimonialsTrack}
-              style={{
-                transform: `translateX(-${currentIndex * (100 / 3)}%)`,
-                width: `${(testimonials.length / 3) * 100}%`
-              }}
-            >
-              {testimonials.map((testimonial) => (
-                <div key={testimonial.id} className={styles.testimonialCard}>
-                  <div className={styles.testimonialHeader}>
-                    <div className={styles.userInfo}>
-                      <div className={styles.avatarContainer}>
-                        <Image
-                          src={getValidAvatarSrc(testimonial.avatar)}
-                          alt={testimonial.name}
-                          width={60}
-                          height={60}
-                          className={styles.avatar}
-                        />
-                        {testimonial.verified && (
-                          <div className={styles.verifiedBadge}>✓</div>
-                        )}
-                      </div>
-                      <div className={styles.userDetails}>
-                        <h4 className={styles.userName}>{testimonial.name}</h4>
-                        <p className={styles.userLocation}>{testimonial.location}</p>
-                        <p className={styles.roomType}>{testimonial.roomType}</p>
-                      </div>
-                    </div>
-                    <div className={styles.rating}>
-                      {renderStars(testimonial.rating)}
-                    </div>
-                  </div>
-
-                  <div className={styles.testimonialContent}>
-                    <FaQuoteLeft className={styles.quoteIcon} />
-                    <p className={styles.reviewText}>{testimonial.review}</p>
-                  </div>
-
-                  <div className={styles.testimonialFooter}>
-                    <span className={styles.reviewDate}>
-                      {formatDate(testimonial.date)}
-                    </span>
-                    <div className={styles.helpful}>
-                      <span>👍 {testimonial.helpful} người thấy hữu ích</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {showNavigation && testimonials.length > 3 && (
-            <button
-              className={`${styles.navButton} ${styles.nextButton}`}
-              onClick={handleNext}
-              aria-label="Next testimonials"
+            <button 
+              onClick={handleNext} 
+              className={styles.navButton}
+              aria-label="Next"
             >
               <FaChevronRight />
             </button>
-          )}
-        </div>
-
-        {testimonials.length > 3 && (
-          <div className={styles.indicators}>
-            {Array.from({ length: Math.max(1, testimonials.length - 2) }, (_, index) => (
-              <button
-                key={index}
-                className={`${styles.indicator} ${
-                  index === currentIndex ? styles.active : ''
-                }`}
-                onClick={() => {
-                  setCurrentIndex(index);
-                  setIsAutoPlaying(false);
-                }}
-                aria-label={`Go to testimonial group ${index + 1}`}
-              />
-            ))}
           </div>
         )}
       </div>

@@ -121,12 +121,63 @@ export default function Home() {
           <p>{t('home.description')}</p>
           
           {/* Enhanced Search Form */}
-          <EnhancedSearchBar variant="hero" showAdvancedFilters={true} />
+          <div className={styles.searchContainer}>
+            <div className={styles.searchRow}>
+              <div className={styles.searchField}>
+                <i className={`fas fa-map-marker-alt ${styles.searchIcon}`}></i>
+                <select defaultValue="Chọn tỉnh thành">
+                  <option value="Chọn tỉnh thành">Chọn tỉnh thành</option>
+                  <option value="Hà Nội">Hà Nội</option>
+                  <option value="TP. Hồ Chí Minh">TP. Hồ Chí Minh</option>
+                  <option value="Đà Nẵng">Đà Nẵng</option>
+                  <option value="Nha Trang">Nha Trang</option>
+                  <option value="Phú Quốc">Phú Quốc</option>
+                </select>
+              </div>
+              
+              <div className={styles.searchField}>
+                <i className={`far fa-calendar-alt ${styles.searchIcon}`}></i>
+                <span className={styles.dateLabel}>Nhận phòng</span>
+                <input 
+                  type="date" 
+                  defaultValue="2023-11-06" 
+                  min={new Date().toISOString().split('T')[0]}
+                />
+              </div>
+              
+              <div className={styles.searchField}>
+                <i className={`far fa-calendar-alt ${styles.searchIcon}`}></i>
+                <span className={styles.dateLabel}>Trả phòng</span>
+                <input 
+                  type="date" 
+                  defaultValue="2023-11-07" 
+                  min={new Date().toISOString().split('T')[0]}
+                />
+              </div>
+              
+              <div className={styles.searchField}>
+                <i className={`fas fa-user-friends ${styles.searchIcon}`}></i>
+                <select defaultValue="2 khách">
+                  <option value="1 khách">1 khách</option>
+                  <option value="2 khách">2 khách</option>
+                  <option value="3 khách">3 khách</option>
+                  <option value="4 khách">4 khách</option>
+                  <option value="5+ khách">5+ khách</option>
+                </select>
+              </div>
+            </div>
+            
+            <button className={styles.searchButton}>
+              <i className="fas fa-search"></i>
+              Tìm kiếm
+            </button>
+          </div>
           
           <div className={styles.heroActions}>
-            <Link href="/users/rooms" className={styles.heroButton}>
+            {/* Xóa dòng Link bên dưới */}
+            {/* <Link href="/users/rooms" className={styles.heroButton}>
               {t('home.viewRooms')}
-            </Link>
+            </Link> */}
           </div>
         </div>
       </section>
@@ -234,7 +285,13 @@ export default function Home() {
         )}
       </section>
 
-      {/* Map Section */}
+
+
+      {/* Testimonials Section */}
+      <TestimonialsSection limit={6} showNavigation={true} autoPlay={true} />
+
+      {/* Footer */}
+            {/* Map Section */}
       <section className={styles.mapSection}>
         <h2>{t('home.location')}</h2>
         <iframe
@@ -246,12 +303,8 @@ export default function Home() {
           loading="lazy"
         ></iframe>
       </section>
-
-      {/* Testimonials Section */}
-      <TestimonialsSection limit={6} showNavigation={true} autoPlay={true} />
-
-      {/* Footer */}
       <Footer />
     </div>
   );
 }
+  
