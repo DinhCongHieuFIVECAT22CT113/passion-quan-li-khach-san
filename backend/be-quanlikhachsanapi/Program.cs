@@ -94,15 +94,32 @@ builder.Services.AddCors(options =>
     var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? 
                         new[] { "http://localhost:3000", "https://your-frontend-domain.vercel.app" };
     
-    options.AddPolicy("AllowCredentials",
-        corsBuilder =>
-        {
-            corsBuilder.WithOrigins(allowedOrigins)
-                   .AllowAnyMethod()
-                   .AllowAnyHeader()
-                   .WithExposedHeaders("Content-Disposition", "Content-Length", "Content-Type")
-                   .AllowCredentials();
-        });
+    if (builder.Environment.IsDevelopment())
+    {
+        // Trong môi trường phát triển, cho phép tất cả các nguồn với credentials
+        options.AddPolicy("AllowCredentials",
+            corsBuilder =>
+            {
+                corsBuilder.SetIsOriginAllowed(_ => true) // Cho phép tất cả các nguồn
+                       .AllowAnyMethod()
+                       .AllowAnyHeader()
+                       .WithExposedHeaders("Content-Disposition", "Content-Length", "Content-Type")
+                       .AllowCredentials();
+            });
+    }
+    else
+    {
+        // Trong môi trường production, chỉ cho phép các nguồn cụ thể
+        options.AddPolicy("AllowCredentials",
+            corsBuilder =>
+            {
+                corsBuilder.WithOrigins(allowedOrigins)
+                       .AllowAnyMethod()
+                       .AllowAnyHeader()
+                       .WithExposedHeaders("Content-Disposition", "Content-Length", "Content-Type")
+                       .AllowCredentials();
+            });
+    }
 });
 
 // Add Memory Cache
@@ -202,6 +219,7 @@ if (app.Environment.IsDevelopment())
 }
 app.UseStaticFiles(); // phải có để đọc wwwroot
 
+// Sử dụng CORS policy với credentials cho SignalR
 app.UseCors("AllowCredentials");
 app.UseHttpsRedirection();
 

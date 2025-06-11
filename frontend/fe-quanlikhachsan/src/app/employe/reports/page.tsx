@@ -231,51 +231,122 @@ export default function EmployeeReportPage() {
         <div style={{padding:'24px', color:'red', textAlign:'center'}}>Lỗi: {error}</div>
       ) : (
         <>
-          <div style={{marginBottom:24, maxHeight:400, padding:'16px 0'}}>
+          <div style={{
+            marginBottom: 32, 
+            maxHeight: 400, 
+            padding: '24px 16px',
+            background: '#fff',
+            borderRadius: 12,
+            boxShadow: '0 2px 10px rgba(0, 0, 0, 0.08)'
+          }}>
             <Line
               options={options}
               data={chartData}
             />
           </div>
 
-          <div style={{display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(240px, 1fr))', gap:20}}>
-            <div style={{background:'linear-gradient(135deg, #4fd1c5 0%, #38b2ac 100%)', padding:20, borderRadius:8, color:'white', boxShadow:'0 4px 6px rgba(0, 0, 0, 0.1)'}}>
-              <h3 style={{margin:'0 0 10px 0', fontSize:'1rem'}}>Tổng doanh thu</h3>
-              <div style={{fontSize:'1.6rem', fontWeight:'bold'}}>
+          <div style={{
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', 
+            gap: 20,
+            marginBottom: 20
+          }}>
+            <div style={{
+              background: 'linear-gradient(135deg, #4fd1c5 0%, #38b2ac 100%)', 
+              padding: 20, 
+              borderRadius: 12, 
+              color: 'white', 
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+              transition: 'transform 0.2s ease-in-out',
+              cursor: 'default',
+              ':hover': {
+                transform: 'translateY(-5px)'
+              }
+            }}>
+              <h3 style={{margin: '0 0 10px 0', fontSize: '1.1rem', fontWeight: 500}}>Tổng doanh thu</h3>
+              <div style={{fontSize: '1.7rem', fontWeight: 'bold', letterSpacing: '0.5px'}}>
                 {totalRevenue.toLocaleString('vi-VN')}đ
               </div>
             </div>
 
-            <div style={{background:'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', padding:20, borderRadius:8, color:'white', boxShadow:'0 4px 6px rgba(0, 0, 0, 0.1)'}}>
-              <h3 style={{margin:'0 0 10px 0', fontSize:'1rem'}}>Doanh thu trung bình/ngày</h3>
-              <div style={{fontSize:'1.6rem', fontWeight:'bold'}}>
+            <div style={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
+              padding: 20, 
+              borderRadius: 12, 
+              color: 'white', 
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+              transition: 'transform 0.2s ease-in-out',
+              cursor: 'default'
+            }}>
+              <h3 style={{margin: '0 0 10px 0', fontSize: '1.1rem', fontWeight: 500}}>Doanh thu trung bình/ngày</h3>
+              <div style={{fontSize: '1.7rem', fontWeight: 'bold', letterSpacing: '0.5px'}}>
                 {Math.round(averageRevenue).toLocaleString('vi-VN')}đ
               </div>
             </div>
 
-            <div style={{background:'linear-gradient(135deg, #f6ad55 0%, #ed8936 100%)', padding:20, borderRadius:8, color:'white', boxShadow:'0 4px 6px rgba(0, 0, 0, 0.1)'}}>
-              <h3 style={{margin:'0 0 10px 0', fontSize:'1rem'}}>Doanh thu cao nhất</h3>
-              <div style={{fontSize:'1.6rem', fontWeight:'bold'}}>
+            <div style={{
+              background: 'linear-gradient(135deg, #f6ad55 0%, #ed8936 100%)', 
+              padding: 20, 
+              borderRadius: 12, 
+              color: 'white', 
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+              transition: 'transform 0.2s ease-in-out',
+              cursor: 'default'
+            }}>
+              <h3 style={{margin: '0 0 10px 0', fontSize: '1.1rem', fontWeight: 500}}>Doanh thu cao nhất</h3>
+              <div style={{fontSize: '1.7rem', fontWeight: 'bold', letterSpacing: '0.5px'}}>
                 {maxRevenue.toLocaleString('vi-VN')}đ
               </div>
             </div>
           </div>
 
           <div style={{marginTop:32}}>
-            <h3 style={{margin:'0 0 16px 0', fontSize:'1.2rem', fontWeight:600}}>Chi tiết doanh thu</h3>
-            <div style={{overflowX:'auto'}}>
-              <table style={{width:'100%', borderCollapse:'collapse', background:'#fff', fontSize:'1rem'}}>
+            <h3 style={{margin:'0 0 16px 0', fontSize:'1.3rem', fontWeight:600, color:'#1f2937'}}>Chi tiết doanh thu</h3>
+            <div style={{overflowX:'auto', borderRadius:12, boxShadow:'0 2px 10px rgba(0, 0, 0, 0.08)'}}>
+              <table style={{
+                width:'100%', 
+                borderCollapse:'separate', 
+                borderSpacing:0, 
+                background:'#fff', 
+                fontSize:'1rem',
+                borderRadius:12,
+                overflow:'hidden'
+              }}>
                 <thead>
                   <tr>
-                    <th style={{padding:'12px 10px', background:'#f3f4f6', fontWeight:600}}>Ngày</th>
-                    <th style={{padding:'12px 10px', background:'#f3f4f6', fontWeight:600}}>Doanh thu (VNĐ)</th>
+                    <th style={{
+                      padding:'16px 20px', 
+                      background:'#f8fafc', 
+                      fontWeight:600, 
+                      textAlign:'left',
+                      borderBottom:'2px solid #e2e8f0',
+                      color:'#334155'
+                    }}>Ngày</th>
+                    <th style={{
+                      padding:'16px 20px', 
+                      background:'#f8fafc', 
+                      fontWeight:600, 
+                      textAlign:'right',
+                      borderBottom:'2px solid #e2e8f0',
+                      color:'#334155'
+                    }}>Doanh thu (VNĐ)</th>
                   </tr>
                 </thead>
                 <tbody>
                   {revenueData.map((data, index) => (
-                    <tr key={index} style={{borderBottom:'1px solid #e5e7eb'}}>
-                      <td style={{padding:'12px 10px'}}>{new Date(data.date).toLocaleDateString('vi-VN')}</td>
-                      <td style={{padding:'12px 10px'}}>{data.amount.toLocaleString('vi-VN')}đ</td>
+                    <tr key={index} style={{
+                      borderBottom: index === revenueData.length - 1 ? 'none' : '1px solid #e5e7eb',
+                      background: index % 2 === 0 ? '#fff' : '#f9fafb'
+                    }}>
+                      <td style={{padding:'14px 20px'}}>{new Date(data.date).toLocaleDateString('vi-VN')}</td>
+                      <td style={{
+                        padding:'14px 20px', 
+                        textAlign:'right', 
+                        fontWeight: data.amount > 0 ? 500 : 400,
+                        color: data.amount > 0 ? '#047857' : '#6b7280'
+                      }}>
+                        {data.amount.toLocaleString('vi-VN')}đ
+                      </td>
                     </tr>
                   ))}
                 </tbody>

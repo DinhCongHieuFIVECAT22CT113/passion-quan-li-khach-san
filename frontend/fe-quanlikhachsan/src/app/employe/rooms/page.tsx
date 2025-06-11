@@ -60,12 +60,28 @@ export default function RoomManager() {
         console.log("Dữ liệu phòng nhận được:", roomsData);
         console.log("Dữ liệu loại phòng nhận được:", roomTypesData);
 
-        // Kết hợp giá từ room types vào rooms
+        // Lấy trạng thái phòng từ localStorage nếu có
+        let savedRoomStatuses = {};
+        if (typeof window !== 'undefined') {
+          try {
+            const savedData = localStorage.getItem('roomStatuses');
+            if (savedData) {
+              savedRoomStatuses = JSON.parse(savedData);
+            }
+          } catch (e) {
+            console.error('Lỗi khi parse trạng thái phòng từ localStorage:', e);
+          }
+        }
+
+        // Kết hợp giá từ room types vào rooms và áp dụng trạng thái đã lưu
         const roomsWithPrices = roomsData.map(room => {
           const roomType = roomTypesData.find(rt => rt.maLoaiPhong === room.type);
+          // Áp dụng trạng thái từ localStorage nếu có
+          const savedStatus = savedRoomStatuses[room.id];
           return {
             ...room,
-            price: roomType ? roomType.giaMoiDem : 0
+            price: roomType ? roomType.giaMoiDem : 0,
+            status: savedStatus || room.status // Ưu tiên trạng thái đã lưu
           };
         });
 

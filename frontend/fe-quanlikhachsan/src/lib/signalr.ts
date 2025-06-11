@@ -6,12 +6,15 @@ let connection: signalR.HubConnection | null = null;
 
 export const getSignalRConnection = () => {
   if (!connection) {
+    // Lấy base URL không bao gồm phần /api
+    const baseUrl = API_BASE_URL.replace('/api', '');
+    
     connection = new signalR.HubConnectionBuilder()
-      .withUrl(`${API_BASE_URL}/notificationHub`, {
-        skipNegotiation: true,
+      .withUrl(`${baseUrl}/notificationHub`, {
+        skipNegotiation: false, // Cho phép negotiation để tăng độ tin cậy
         transport: signalR.HttpTransportType.WebSockets
       })
-      .withAutomaticReconnect()
+      .withAutomaticReconnect([0, 2000, 5000, 10000, 30000]) // Thử kết nối lại với thời gian chờ tăng dần
       .configureLogging(signalR.LogLevel.Information)
       .build();
   }

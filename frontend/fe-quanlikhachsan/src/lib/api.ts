@@ -545,6 +545,49 @@ export const getServices = async () => {
   }
 };
 
+// API lưu dịch vụ sử dụng
+export const saveServiceUsage = async (serviceUsage: any) => {
+  try {
+    console.log(`Đang gọi API lưu dịch vụ sử dụng: ${API_BASE_URL}/DichVuSuDung`);
+    
+    const headers = await getAuthHeaders('POST');
+    const response = await fetch(`${API_BASE_URL}/DichVuSuDung`, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify(serviceUsage),
+      credentials: 'include'
+    });
+    
+    // Lưu vào localStorage để duy trì dữ liệu khi tải lại trang
+    if (typeof window !== 'undefined') {
+      try {
+        const savedServices = JSON.parse(localStorage.getItem('usedServices') || '[]');
+        savedServices.push(serviceUsage);
+        localStorage.setItem('usedServices', JSON.stringify(savedServices));
+      } catch (e) {
+        console.error('Lỗi khi lưu dịch vụ vào localStorage:', e);
+      }
+    }
+    
+    return await handleResponse(response);
+  } catch (error) {
+    console.error('Lỗi khi lưu dịch vụ sử dụng:', error);
+    
+    // Vẫn lưu vào localStorage ngay cả khi API gặp lỗi
+    if (typeof window !== 'undefined') {
+      try {
+        const savedServices = JSON.parse(localStorage.getItem('usedServices') || '[]');
+        savedServices.push(serviceUsage);
+        localStorage.setItem('usedServices', JSON.stringify(savedServices));
+      } catch (e) {
+        console.error('Lỗi khi lưu dịch vụ vào localStorage:', e);
+      }
+    }
+    
+    throw error;
+  }
+};
+
 // API lấy danh sách khuyến mãi
 export const getPromotions = async () => {
   console.log(`Đang gọi API lấy danh sách khuyến mãi: ${API_BASE_URL}/KhuyenMai`);
@@ -637,19 +680,76 @@ export const createInvoice = async (invoiceData: InvoiceData) => {
 export const updateInvoiceStatus = async (invoiceId: string, status: string) => {
   console.log(`Đang gọi API cập nhật trạng thái hóa đơn: ${API_BASE_URL}/HoaDon/${invoiceId}/trangthai`);
   try {
-    const authHeaders = await getAuthHeaders('PUT');
-    const response = await fetch(`${API_BASE_URL}/HoaDon/${invoiceId}/trangthai`, {
-      method: 'PUT',
-      headers: {
-        ...authHeaders,
-        'Content-Type': 'application/json'
-      },
+    // Thử phương thức 1: Gọi API cập nhật trạng thái trực tiếp
+    try {
+      const authHeaders = await getAuthHeaders('PUT');
+      const response = await fetch(`${API_BASE_URL}/HoaDon/${invoiceId}/trangthai`, {
+        method: 'PUT',
+        headers: {
+          ...authHeaders,
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ TrangThai: status })
+      });
+
+      if (response.ok) {
+        // Lưu trạng thái vào localStorage để duy trì khi tải lại trang
+        if (typeof window !== 'undefined') {
+          const savedInvoiceStatuses = JSON.parse(localStorage.getItem('invoiceStatuses') || '{}');
+          savedInvoiceStatuses[invoiceId] = status;
+          localStorage.setItem('invoiceStatuses', JSON.stringify(savedInvoiceStatuses));
+        }
+
+        const result = await handleResponse(response);
+        return { success: true, message: 'Cập nhật trạng thái thành công', data: result };
+      }
+    } catch (statusError) {
+      console.log('Không thể cập nhật bằng API trạng thái trực tiếp, thử phương thức thay thế:', statusError);
+    }
+
+    // Phương thức 2: Lấy thông tin hóa đơn hiện tại và cập nhật toàn bộ
+    const getHeaders = await getAuthHeaders('GET');
+    const getResponse = await fetch(`${API_BASE_URL}/HoaDon/${invoiceId}`, {
+      method: 'GET',
+      mode: 'cors',
       credentials: 'include',
-      body: JSON.stringify({ TrangThai: status })
+      headers: getHeaders,
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    const invoiceData = await handleResponse(getResponse);
+    if (!invoiceData) {
+      throw new Error('Không tìm thấy thông tin hóa đơn');
+    }
+
+    // Cập nhật trạng thái
+    const formData = new FormData();
+    
+    // Sử dụng tất cả thuộc tính từ invoiceData
+    Object.entries(invoiceData).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) {
+        formData.append(key, String(value));
+      }
+    });
+    
+    // Ghi đè trạng thái mới - thử cả hai trường hợp tên trường
+    formData.set('trangThai', status);
+    formData.set('TrangThai', status);
+    
+    const headers = await getFormDataHeaders();
+    const response = await fetch(`${API_BASE_URL}/HoaDon/${invoiceId}`, {
+      method: 'PUT',
+      mode: 'cors',
+      credentials: 'include',
+      body: formData,
+      headers: headers,
+    });
+
+    // Lưu trạng thái vào localStorage để duy trì khi tải lại trang
+    if (typeof window !== 'undefined') {
+      const savedInvoiceStatuses = JSON.parse(localStorage.getItem('invoiceStatuses') || '{}');
+      savedInvoiceStatuses[invoiceId] = status;
+      localStorage.setItem('invoiceStatuses', JSON.stringify(savedInvoiceStatuses));
     }
 
     const result = await handleResponse(response);
@@ -891,22 +991,84 @@ export const getEmployeeRooms = async () => {
 
 // API cập nhật trạng thái phòng cho nhân viên
 export const updateRoomStatus = async (roomId: string, status: string) => {
-  console.log(`Đang gọi API cập nhật trạng thái phòng: ${API_BASE_URL}/Phong/${roomId}`);
+  console.log(`Đang gọi API cập nhật trạng thái phòng: ${API_BASE_URL}/Phong/${roomId}/trangthai`);
 
-  const formData = new FormData();
-  formData.append('roomId', roomId);
-  formData.append('status', status);
+  try {
+    // Đầu tiên lấy thông tin phòng hiện tại
+    const getHeaders = await getAuthHeaders('GET');
+    const getResponse = await fetch(`${API_BASE_URL}/Phong/${roomId}`, {
+      method: 'GET',
+      mode: 'cors',
+      credentials: 'include',
+      headers: getHeaders,
+    });
 
-  const headers = await getFormDataHeaders();
-  const response = await fetch(`${API_BASE_URL}/Phong/${roomId}`, {
-    method: 'PUT',
-    mode: 'cors',
-    credentials: 'include',
-    body: formData,
-    headers: headers,
-  });
+    const roomData = await handleResponse(getResponse);
+    if (!roomData) {
+      throw new Error('Không tìm thấy thông tin phòng');
+    }
 
-  return handleResponse(response);
+    // Cập nhật trạng thái - Thử phương thức 1: Gọi API cập nhật trạng thái trực tiếp
+    try {
+      const statusHeaders = await getAuthHeaders('PUT');
+      const statusResponse = await fetch(`${API_BASE_URL}/Phong/${roomId}/trangthai`, {
+        method: 'PUT',
+        mode: 'cors',
+        credentials: 'include',
+        headers: {
+          ...statusHeaders,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ trangThai: status })
+      });
+
+      if (statusResponse.ok) {
+        // Lưu trạng thái vào localStorage để duy trì khi tải lại trang
+        if (typeof window !== 'undefined') {
+          const savedRoomStatuses = JSON.parse(localStorage.getItem('roomStatuses') || '{}');
+          savedRoomStatuses[roomId] = status;
+          localStorage.setItem('roomStatuses', JSON.stringify(savedRoomStatuses));
+        }
+        return handleResponse(statusResponse);
+      }
+    } catch (statusError) {
+      console.log('Không thể cập nhật bằng API trạng thái trực tiếp, thử phương thức thay thế:', statusError);
+    }
+
+    // Phương thức 2: Cập nhật toàn bộ thông tin phòng
+    const formData = new FormData();
+    
+    // Sử dụng tất cả thuộc tính từ roomData
+    Object.entries(roomData).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) {
+        formData.append(key, String(value));
+      }
+    });
+    
+    // Ghi đè trạng thái mới
+    formData.set('trangThai', status);
+    
+    const headers = await getFormDataHeaders();
+    const response = await fetch(`${API_BASE_URL}/Phong/${roomId}`, {
+      method: 'PUT',
+      mode: 'cors',
+      credentials: 'include',
+      body: formData,
+      headers: headers,
+    });
+
+    // Lưu trạng thái vào localStorage để duy trì khi tải lại trang
+    if (typeof window !== 'undefined') {
+      const savedRoomStatuses = JSON.parse(localStorage.getItem('roomStatuses') || '{}');
+      savedRoomStatuses[roomId] = status;
+      localStorage.setItem('roomStatuses', JSON.stringify(savedRoomStatuses));
+    }
+
+    return handleResponse(response);
+  } catch (error) {
+    console.error(`Lỗi khi cập nhật trạng thái phòng ${roomId}:`, error);
+    throw error;
+  }
 };
 
 // API lấy danh sách đặt phòng cho nhân viên
@@ -984,46 +1146,86 @@ export const getEmployeeBookings = async () => {
 
 // API cập nhật trạng thái đặt phòng cho nhân viên
 export const updateBookingStatus = async (bookingId: string, status: string) => {
-  console.log(`Đang gọi API cập nhật trạng thái đặt phòng: ${API_BASE_URL}/DatPhong/${bookingId}`);
+  console.log(`Đang gọi API cập nhật trạng thái đặt phòng: ${API_BASE_URL}/DatPhong/${bookingId}/trangthai`);
 
-  // Đầu tiên lấy thông tin đặt phòng hiện tại
-  const getHeaders = await getAuthHeaders('GET');
-  const getResponse = await fetch(`${API_BASE_URL}/DatPhong/${bookingId}`, {
-    method: 'GET',
-    mode: 'cors',
-    credentials: 'include',
-    headers: getHeaders,
-  });
+  try {
+    // Thử phương thức 1: Gọi API cập nhật trạng thái trực tiếp
+    try {
+      const statusHeaders = await getAuthHeaders('PUT');
+      const statusResponse = await fetch(`${API_BASE_URL}/DatPhong/${bookingId}/trangthai`, {
+        method: 'PUT',
+        mode: 'cors',
+        credentials: 'include',
+        headers: {
+          ...statusHeaders,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ trangThai: status })
+      });
 
-  const bookingData = await handleResponse(getResponse);
-
-  if (!bookingData) {
-    throw new Error('Không tìm thấy thông tin đặt phòng');
-  }
-
-  // Cập nhật trạng thái
-  const formData = new FormData();
-
-  // Sử dụng forEach để thêm tất cả thuộc tính từ bookingData vào formData
-  Object.entries(bookingData as Record<string, any>).forEach(([key, value]) => {
-    if (value !== null && value !== undefined) {
-      formData.append(key, String(value));
+      if (statusResponse.ok) {
+        // Lưu trạng thái vào localStorage để duy trì khi tải lại trang
+        if (typeof window !== 'undefined') {
+          const savedBookingStatuses = JSON.parse(localStorage.getItem('bookingStatuses') || '{}');
+          savedBookingStatuses[bookingId] = status;
+          localStorage.setItem('bookingStatuses', JSON.stringify(savedBookingStatuses));
+        }
+        return handleResponse(statusResponse);
+      }
+    } catch (statusError) {
+      console.log('Không thể cập nhật bằng API trạng thái trực tiếp, thử phương thức thay thế:', statusError);
     }
-  });
 
-  // Ghi đè trạng thái mới
-  formData.set('status', status);
+    // Phương thức 2: Lấy thông tin đặt phòng hiện tại và cập nhật toàn bộ
+    const getHeaders = await getAuthHeaders('GET');
+    const getResponse = await fetch(`${API_BASE_URL}/DatPhong/${bookingId}`, {
+      method: 'GET',
+      mode: 'cors',
+      credentials: 'include',
+      headers: getHeaders,
+    });
 
-  const headers = await getFormDataHeaders();
-  const response = await fetch(`${API_BASE_URL}/DatPhong/${bookingId}`, {
-    method: 'PUT',
-    mode: 'cors',
-    credentials: 'include',
-    body: formData,
-    headers: headers,
-  });
+    const bookingData = await handleResponse(getResponse);
 
-  return handleResponse(response);
+    if (!bookingData) {
+      throw new Error('Không tìm thấy thông tin đặt phòng');
+    }
+
+    // Cập nhật trạng thái
+    const formData = new FormData();
+
+    // Sử dụng forEach để thêm tất cả thuộc tính từ bookingData vào formData
+    Object.entries(bookingData as Record<string, any>).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) {
+        formData.append(key, String(value));
+      }
+    });
+
+    // Ghi đè trạng thái mới - thử cả hai trường hợp tên trường
+    formData.set('status', status);
+    formData.set('trangThai', status);
+
+    const headers = await getFormDataHeaders();
+    const response = await fetch(`${API_BASE_URL}/DatPhong/${bookingId}`, {
+      method: 'PUT',
+      mode: 'cors',
+      credentials: 'include',
+      body: formData,
+      headers: headers,
+    });
+
+    // Lưu trạng thái vào localStorage để duy trì khi tải lại trang
+    if (typeof window !== 'undefined') {
+      const savedBookingStatuses = JSON.parse(localStorage.getItem('bookingStatuses') || '{}');
+      savedBookingStatuses[bookingId] = status;
+      localStorage.setItem('bookingStatuses', JSON.stringify(savedBookingStatuses));
+    }
+
+    return handleResponse(response);
+  } catch (error) {
+    console.error(`Lỗi khi cập nhật trạng thái đặt phòng ${bookingId}:`, error);
+    throw error;
+  }
 };
 
 // API tạo đặt phòng mới cho nhân viên
@@ -1711,19 +1913,76 @@ export const updateAccountantInvoiceStatus = async (invoiceId: string, status: s
   try {
     console.log(`Đang cập nhật trạng thái hóa đơn ${invoiceId} thành ${status}`);
 
-    const authHeaders = await getAuthHeaders('PUT');
-    const response = await fetch(`${API_BASE_URL}/HoaDon/${invoiceId}/trangthai`, {
-      method: 'PUT',
-      headers: {
-        ...authHeaders,
-        'Content-Type': 'application/json'
-      },
+    // Thử phương thức 1: Gọi API cập nhật trạng thái trực tiếp
+    try {
+      const authHeaders = await getAuthHeaders('PUT');
+      const response = await fetch(`${API_BASE_URL}/HoaDon/${invoiceId}/trangthai`, {
+        method: 'PUT',
+        headers: {
+          ...authHeaders,
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include',
+        body: JSON.stringify({ TrangThai: status })
+      });
+
+      if (response.ok) {
+        // Lưu trạng thái vào localStorage để duy trì khi tải lại trang
+        if (typeof window !== 'undefined') {
+          const savedInvoiceStatuses = JSON.parse(localStorage.getItem('accountantInvoiceStatuses') || '{}');
+          savedInvoiceStatuses[invoiceId] = status;
+          localStorage.setItem('accountantInvoiceStatuses', JSON.stringify(savedInvoiceStatuses));
+        }
+
+        const result = await handleResponse(response);
+        return { success: true, message: 'Cập nhật trạng thái thành công', data: result };
+      }
+    } catch (statusError) {
+      console.log('Không thể cập nhật bằng API trạng thái trực tiếp, thử phương thức thay thế:', statusError);
+    }
+
+    // Phương thức 2: Lấy thông tin hóa đơn hiện tại và cập nhật toàn bộ
+    const getHeaders = await getAuthHeaders('GET');
+    const getResponse = await fetch(`${API_BASE_URL}/HoaDon/${invoiceId}`, {
+      method: 'GET',
+      mode: 'cors',
       credentials: 'include',
-      body: JSON.stringify({ TrangThai: status })
+      headers: getHeaders,
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    const invoiceData = await handleResponse(getResponse);
+    if (!invoiceData) {
+      throw new Error('Không tìm thấy thông tin hóa đơn');
+    }
+
+    // Cập nhật trạng thái
+    const formData = new FormData();
+    
+    // Sử dụng tất cả thuộc tính từ invoiceData
+    Object.entries(invoiceData).forEach(([key, value]) => {
+      if (value !== null && value !== undefined) {
+        formData.append(key, String(value));
+      }
+    });
+    
+    // Ghi đè trạng thái mới - thử cả hai trường hợp tên trường
+    formData.set('trangThai', status);
+    formData.set('TrangThai', status);
+    
+    const headers = await getFormDataHeaders();
+    const response = await fetch(`${API_BASE_URL}/HoaDon/${invoiceId}`, {
+      method: 'PUT',
+      mode: 'cors',
+      credentials: 'include',
+      body: formData,
+      headers: headers,
+    });
+
+    // Lưu trạng thái vào localStorage để duy trì khi tải lại trang
+    if (typeof window !== 'undefined') {
+      const savedInvoiceStatuses = JSON.parse(localStorage.getItem('accountantInvoiceStatuses') || '{}');
+      savedInvoiceStatuses[invoiceId] = status;
+      localStorage.setItem('accountantInvoiceStatuses', JSON.stringify(savedInvoiceStatuses));
     }
 
     const result = await handleResponse(response);

@@ -66,7 +66,29 @@ export default function InvoiceManager() {
         const invoicesData = user?.role === 'R03'
           ? await getAccountantInvoices()
           : await getEmployeeInvoices();
-        setInvoices(invoicesData);
+          
+        // Lấy trạng thái hóa đơn từ localStorage nếu có
+        let savedInvoiceStatuses = {};
+        if (typeof window !== 'undefined') {
+          try {
+            // Sử dụng localStorage khác nhau cho nhân viên và kế toán
+            const storageKey = user?.role === 'R03' ? 'accountantInvoiceStatuses' : 'invoiceStatuses';
+            const savedData = localStorage.getItem(storageKey);
+            if (savedData) {
+              savedInvoiceStatuses = JSON.parse(savedData);
+            }
+          } catch (e) {
+            console.error('Lỗi khi parse trạng thái hóa đơn từ localStorage:', e);
+          }
+        }
+        
+        // Áp dụng trạng thái đã lưu
+        const updatedInvoices = invoicesData.map(invoice => {
+          const savedStatus = savedInvoiceStatuses[invoice.id];
+          return savedStatus ? { ...invoice, status: savedStatus } : invoice;
+        });
+        
+        setInvoices(updatedInvoices);
 
         // Chỉ lấy services và bookings nếu không phải kế toán (kế toán chỉ cần hóa đơn)
         if (user?.role !== 'R03') {

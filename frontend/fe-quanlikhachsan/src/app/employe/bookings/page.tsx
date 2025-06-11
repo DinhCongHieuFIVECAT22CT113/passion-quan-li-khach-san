@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { getEmployeeBookings, getEmployeeRooms, bookRoom } from '../../../lib/api';
+import { getEmployeeBookings, getEmployeeRooms, bookRoom, updateBookingStatus } from '../../../lib/api';
 import { useAuth } from '../../../lib/auth';
 import styles from './BookingManager.module.css';
 
@@ -65,7 +65,27 @@ export default function BookingManager() {
 
         // Lấy danh sách đặt phòng
         const bookingsData = await getEmployeeBookings();
-        setBookings(bookingsData);
+        
+        // Lấy trạng thái đặt phòng từ localStorage nếu có
+        let savedBookingStatuses = {};
+        if (typeof window !== 'undefined') {
+          try {
+            const savedData = localStorage.getItem('bookingStatuses');
+            if (savedData) {
+              savedBookingStatuses = JSON.parse(savedData);
+            }
+          } catch (e) {
+            console.error('Lỗi khi parse trạng thái đặt phòng từ localStorage:', e);
+          }
+        }
+        
+        // Áp dụng trạng thái đã lưu
+        const updatedBookings = bookingsData.map(booking => {
+          const savedStatus = savedBookingStatuses[booking.id];
+          return savedStatus ? { ...booking, status: savedStatus } : booking;
+        });
+        
+        setBookings(updatedBookings);
 
         // Lấy danh sách phòng
         const roomsData = await getEmployeeRooms();
@@ -122,8 +142,8 @@ export default function BookingManager() {
   const handleStatusChange = async (id: string, status: string) => {
     try {
       setLoading(true);
-      // Tạm thời comment vì chưa có API updateBookingStatus
-      // await updateBookingStatus(id, status);
+      // Gọi API để cập nhật trạng thái đặt phòng
+      await updateBookingStatus(id, status);
 
       // Cập nhật trạng thái trong state
       setBookings(bookings.map(b => b.id === id ? { ...b, status } : b));

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { getServices, getEmployeeBookings, getEmployeeRooms } from '../../../lib/api';
+import { getServices, getEmployeeBookings, getEmployeeRooms, saveServiceUsage } from '../../../lib/api';
 import styles from './ServiceManager.module.css';
 
 interface Service {
@@ -105,6 +105,22 @@ export default function ServiceManager() {
         const roomsData = await getEmployeeRooms();
         setRooms(roomsData);
 
+        // Lấy dịch vụ đã sử dụng từ localStorage
+        if (typeof window !== 'undefined') {
+          const savedServices = localStorage.getItem('usedServices');
+          if (savedServices) {
+            try {
+              const parsedServices = JSON.parse(savedServices);
+              if (Array.isArray(parsedServices)) {
+                setUsedServices(parsedServices);
+              }
+            } catch (e) {
+              console.error('Lỗi khi parse dịch vụ từ localStorage:', e);
+              localStorage.removeItem('usedServices');
+            }
+          }
+        }
+
         setError(null);
       } catch (err: unknown) {
         const error = err as Error;
@@ -182,17 +198,17 @@ export default function ServiceManager() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const serviceObj = services.find(s => s.maDv === form.serviceId);
     if (!serviceObj) return;
 
-    // Trong triển khai thực tế, bạn sẽ gọi API để lưu dịch vụ sử dụng
-    // Ở đây chúng ta chỉ lưu vào state
-    setUsedServices([
-      ...usedServices,
-      {
+    try {
+      setLoading(true);
+      
+      // Tạo đối tượng dịch vụ sử dụng
+      const usedService = {
         id: usedServices.length ? Math.max(...usedServices.map(u => u.id)) + 1 : 1,
         customerId: form.customerId,
         customerName: form.customerName,
@@ -203,9 +219,33 @@ export default function ServiceManager() {
         quantity: form.quantity,
         total: form.quantity * serviceObj.giaTien,
         date: new Date().toISOString()
+      };
+      
+      // Lưu vào localStorage để duy trì dữ liệu khi tải lại trang
+      const savedServices = JSON.parse(localStorage.getItem('usedServices') || '[]');
+      savedServices.push(usedService);
+      localStorage.setItem('usedServices', JSON.stringify(savedServices));
+      
+      // Cập nhật state
+      setUsedServices([...usedServices, usedService]);
+      
+      // Gọi API để lưu dịch vụ sử dụng
+      try {
+        await saveServiceUsage(usedService);
+        console.log('Đã lưu dịch vụ sử dụng thành công');
+      } catch (apiError) {
+        console.error('Lỗi khi gọi API lưu dịch vụ:', apiError);
+        // Vẫn tiếp tục vì đã lưu vào localStorage
       }
-    ]);
-    closeModal();
+      
+      closeModal();
+    } catch (err) {
+      const error = err as Error;
+      console.error("Lỗi khi gọi dịch vụ:", error);
+      setError(error.message || "Không thể gọi dịch vụ");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Format tiền theo định dạng VND
