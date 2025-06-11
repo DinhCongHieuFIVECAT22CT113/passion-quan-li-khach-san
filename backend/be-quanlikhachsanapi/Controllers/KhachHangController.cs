@@ -127,15 +127,6 @@ namespace be_quanlikhachsanapi.Controllers
             var result = await _khachHangRepo.UploadAvatarByIdAsync(maKh, dto);
             return result;
         }
-        
-        [HttpPost("upload-avatar-by-id/{maKh}")]
-        [Consumes("multipart/form-data")]
-        [RequireRole("R00", "R01", "R02", "R04")]
-        public async Task<IActionResult> UploadAvatarById(string maKh, [FromForm] UploadAvatarDTO dto)
-        {
-            var result = await _khachHangRepo.UploadAvatarByIdAsync(maKh, dto);
-            return result;
-        }
 
     }
 }

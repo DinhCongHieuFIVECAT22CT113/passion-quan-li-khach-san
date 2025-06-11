@@ -46,7 +46,10 @@ const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({ onClose, onAvatar
       // Lấy thông tin từ token
       const userId = payload.nameid;
       const email = payload.email;
-      const Id);
+      const name = payload.name;
+      
+      console.log('Token payload:', payload);
+      console.log('User ID from token:', userId);
       console.log('Email from token:', email);
       console.log('Name from token:', name);
 

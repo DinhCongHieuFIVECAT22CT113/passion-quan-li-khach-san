@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import styles from "./BookingManager.module.css";
 import { API_BASE_URL } from '@/lib/config';
-import { getAuthHeaders, getFormDataHeaders, handleResponse } from '@/lib/api';
+import { getAuthHeaders, getFormDataHeaders, handleResponse, getBookingPromotions, getBookingServices } from '@/lib/api';
 import Pagination from "@/components/admin/Pagination";
 
 // Interface cho dữ liệu Đặt phòng từ BE (camelCase, khớp với JSON response)
@@ -87,6 +87,8 @@ export default function BookingManager() {
     thoiGianDen: "14:00"
   });
   const [historyBooking, setHistoryBooking] = useState<BookingDisplay | null>(null);
+  const [bookingPromotions, setBookingPromotions] = useState<any[]>([]);
+  const [bookingServices, setBookingServices] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -424,6 +426,27 @@ export default function BookingManager() {
       thoiGianDen: booking.thoiGianDen || "14:00",
     });
     setEditBooking(booking);
+  };
+
+  // Hàm load chi tiết đặt phòng bao gồm khuyến mãi và dịch vụ
+  const loadBookingDetails = async (booking: BookingDisplay) => {
+    setHistoryBooking(booking);
+
+    try {
+      // Load khuyến mãi và dịch vụ song song
+      const [promotions, services] = await Promise.all([
+        getBookingPromotions(booking.maDatPhong),
+        getBookingServices(booking.maDatPhong)
+      ]);
+
+      setBookingPromotions(promotions);
+      setBookingServices(services);
+      console.log('Loaded booking details:', { promotions, services });
+    } catch (error) {
+      console.error('Error loading booking details:', error);
+      setBookingPromotions([]);
+      setBookingServices([]);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -816,7 +839,7 @@ export default function BookingManager() {
                   <td><span className={statusMap[trangThaiDisplay]?.className || styles.status}>{statusMap[trangThaiDisplay]?.label || trangThaiDisplay}</span></td>
                   <td style={{whiteSpace:'nowrap'}}>
                     <button className={styles.editBtn} onClick={() => openEditModal(booking)}>Sửa</button>
-                    <button className={styles.historyBtn} onClick={() => setHistoryBooking(booking)}>Chi tiết</button>
+                    <button className={styles.historyBtn} onClick={() => loadBookingDetails(booking)}>Chi tiết</button>
                     <button className={styles.deleteBtn} onClick={() => handleDelete(booking.maDatPhong)}>Xóa</button>
                   </td>
                 </tr>
@@ -1011,9 +1034,113 @@ export default function BookingManager() {
                 <span className={styles.detailLabel}>Ghi chú:</span>
                 <span className={styles.detailValue}>{historyBooking.ghiChu || '(Không có)'}</span>
               </div>
+
+              {/* Khuyến mãi đã áp dụng */}
+              {bookingPromotions.length > 0 && (
+                <div className={styles.detailSection}>
+                  <h4 style={{color: '#e74c3c', marginBottom: '1rem'}}>🏷️ Khuyến mãi đã áp dụng</h4>
+                  {bookingPromotions.map((promotion, index) => (
+                    <div key={index} className={styles.promotionItem}>
+                      <div className={styles.detailRow}>
+                        <span className={styles.detailLabel}>Tên khuyến mãi:</span>
+                        <span className={styles.detailValue}>{promotion.tenKhuyenMai || promotion.TenKhuyenMai || 'N/A'}</span>
+                      </div>
+                      <div className={styles.detailRow}>
+                        <span className={styles.detailLabel}>Mã giảm giá:</span>
+                        <span className={styles.detailValue}>{promotion.maGiamGia || promotion.MaGiamGia || 'N/A'}</span>
+                      </div>
+                      <div className={styles.detailRow}>
+                        <span className={styles.detailLabel}>Số tiền giảm:</span>
+                        <span className={styles.detailValue} style={{color: '#e74c3c', fontWeight: '600'}}>
+                          -{(promotion.soTienGiam || promotion.SoTienGiam || 0).toLocaleString()}đ
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Dịch vụ đã sử dụng */}
+              {bookingServices.length > 0 && (
+                <div className={styles.detailSection}>
+                  <h4 style={{color: '#3498db', marginBottom: '1rem'}}>🛎️ Dịch vụ đã sử dụng</h4>
+                  {bookingServices.map((service, index) => (
+                    <div key={index} className={styles.serviceItem}>
+                      <div className={styles.detailRow}>
+                        <span className={styles.detailLabel}>Tên dịch vụ:</span>
+                        <span className={styles.detailValue}>{service.tenDichVu || service.TenDichVu || 'N/A'}</span>
+                      </div>
+                      <div className={styles.detailRow}>
+                        <span className={styles.detailLabel}>Số lượng:</span>
+                        <span className={styles.detailValue}>{service.soLuong || service.SoLuong || 0}</span>
+                      </div>
+                      <div className={styles.detailRow}>
+                        <span className={styles.detailLabel}>Đơn giá:</span>
+                        <span className={styles.detailValue}>{(service.donGia || service.DonGia || 0).toLocaleString()}đ</span>
+                      </div>
+                      <div className={styles.detailRow}>
+                        <span className={styles.detailLabel}>Thành tiền:</span>
+                        <span className={styles.detailValue} style={{color: '#27ae60', fontWeight: '600'}}>
+                          {((service.soLuong || service.SoLuong || 0) * (service.donGia || service.DonGia || 0)).toLocaleString()}đ
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Tổng kết chi phí */}
+              {(bookingPromotions.length > 0 || bookingServices.length > 0) && (
+                <div className={styles.detailSection}>
+                  <h4 style={{color: '#2c3e50', marginBottom: '1rem'}}>💰 Tổng kết chi phí</h4>
+                  <div className={styles.detailRow}>
+                    <span className={styles.detailLabel}>Tiền phòng gốc:</span>
+                    <span className={styles.detailValue}>{historyBooking.tongTienDisplay}</span>
+                  </div>
+                  {bookingServices.length > 0 && (
+                    <div className={styles.detailRow}>
+                      <span className={styles.detailLabel}>Tổng tiền dịch vụ:</span>
+                      <span className={styles.detailValue} style={{color: '#3498db'}}>
+                        +{bookingServices.reduce((total, service) =>
+                          total + ((service.soLuong || service.SoLuong || 0) * (service.donGia || service.DonGia || 0)), 0
+                        ).toLocaleString()}đ
+                      </span>
+                    </div>
+                  )}
+                  {bookingPromotions.length > 0 && (
+                    <div className={styles.detailRow}>
+                      <span className={styles.detailLabel}>Tổng giảm giá:</span>
+                      <span className={styles.detailValue} style={{color: '#e74c3c'}}>
+                        -{bookingPromotions.reduce((total, promotion) =>
+                          total + (promotion.soTienGiam || promotion.SoTienGiam || 0), 0
+                        ).toLocaleString()}đ
+                      </span>
+                    </div>
+                  )}
+                  <div className={styles.detailRow} style={{borderTop: '2px solid #dee2e6', paddingTop: '0.5rem', marginTop: '0.5rem'}}>
+                    <span className={styles.detailLabel} style={{fontWeight: '700', fontSize: '1.1rem'}}>Tổng thanh toán:</span>
+                    <span className={styles.detailValue} style={{fontWeight: '700', fontSize: '1.1rem', color: '#27ae60'}}>
+                      {(
+                        // Tiền phòng + dịch vụ - khuyến mãi
+                        parseFloat(historyBooking.tongTienDisplay?.replace(/[^\d]/g, '') || '0') +
+                        bookingServices.reduce((total, service) =>
+                          total + ((service.soLuong || service.SoLuong || 0) * (service.donGia || service.DonGia || 0)), 0
+                        ) -
+                        bookingPromotions.reduce((total, promotion) =>
+                          total + (promotion.soTienGiam || promotion.SoTienGiam || 0), 0
+                        )
+                      ).toLocaleString()}đ
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
             <div className={styles.buttonGroup}>
-            <button onClick={() => setHistoryBooking(null)} className={styles.editBtn}>Đóng</button>
+            <button onClick={() => {
+              setHistoryBooking(null);
+              setBookingPromotions([]);
+              setBookingServices([]);
+            }} className={styles.editBtn}>Đóng</button>
             </div>
           </div>
         </div>

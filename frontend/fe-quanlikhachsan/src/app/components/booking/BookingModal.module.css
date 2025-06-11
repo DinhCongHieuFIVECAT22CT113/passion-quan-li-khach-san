@@ -993,3 +993,268 @@
     font-size: 0.8rem;
   }
 }
+
+/* Styles cho khuyến mãi và dịch vụ */
+.extrasSection {
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+}
+
+.extrasSection h3 {
+  margin: 0 0 1.5rem 0;
+  color: #2c3e50;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.promotionSection,
+.servicesSection {
+  margin-bottom: 2rem;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.sectionHeader h4 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #34495e;
+  font-size: 1.1rem;
+}
+
+.sectionIcon {
+  color: #3498db;
+}
+
+.toggleButton {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.toggleButton:hover {
+  background: #2980b9;
+}
+
+.selectedPromotion,
+.selectedServices {
+  margin-bottom: 1rem;
+}
+
+.promotionCard,
+.serviceItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+
+.promotionInfo h5,
+.serviceInfo h5 {
+  margin: 0 0 0.25rem 0;
+  color: #2c3e50;
+  font-size: 1rem;
+}
+
+.promotionInfo p,
+.serviceInfo p {
+  margin: 0;
+  color: #6c757d;
+  font-size: 0.875rem;
+}
+
+.promotionDiscount {
+  background: #e74c3c;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+  display: inline-block;
+}
+
+.servicePrice {
+  color: #27ae60 !important;
+  font-weight: 600 !important;
+}
+
+.serviceControls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.quantityButton,
+.addButton {
+  background: #3498db;
+  color: white;
+  border: none;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quantityButton:hover,
+.addButton:hover {
+  background: #2980b9;
+}
+
+.quantity {
+  min-width: 2rem;
+  text-align: center;
+  font-weight: 600;
+}
+
+.removeButton {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.2rem;
+  transition: all 0.2s;
+}
+
+.removeButton:hover {
+  background: #c0392b;
+}
+
+.promotionsList,
+.servicesList {
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  background: white;
+}
+
+.promotionOption,
+.serviceOption {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #f1f3f4;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.promotionOption:hover,
+.serviceOption:hover {
+  background: #f8f9fa;
+}
+
+.promotionOption.selected {
+  background: #e3f2fd;
+  border-color: #2196f3;
+}
+
+.promotionContent h5,
+.serviceContent h5 {
+  margin: 0 0 0.25rem 0;
+  color: #2c3e50;
+}
+
+.promotionContent p,
+.serviceContent p {
+  margin: 0 0 0.5rem 0;
+  color: #6c757d;
+  font-size: 0.875rem;
+}
+
+.promotionValue {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #e74c3c;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.priceBreakdown {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.priceBreakdown h4 {
+  margin: 0 0 1rem 0;
+  color: #2c3e50;
+}
+
+.priceItem {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  color: #6c757d;
+}
+
+.priceTotal {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 0.5rem;
+  border-top: 1px solid #e9ecef;
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #2c3e50;
+}
+
+.noItems {
+  text-align: center;
+  color: #6c757d;
+  padding: 2rem;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .extrasSection {
+    padding: 1rem;
+  }
+
+  .sectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .promotionCard,
+  .serviceItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .serviceControls {
+    align-self: flex-end;
+  }
+}

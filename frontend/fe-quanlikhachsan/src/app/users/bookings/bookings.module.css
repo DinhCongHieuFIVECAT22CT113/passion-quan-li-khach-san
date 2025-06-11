@@ -420,6 +420,28 @@
   }
 }
 
+/* Styles cho khuyến mãi và dịch vụ trong modal chi tiết */
+.promotionCard,
+.serviceCard {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border-left: 4px solid #e74c3c;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.serviceCard {
+  border-left-color: #3498db;
+}
+
+.priceBreakdown {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
 .bookingDetails {
   padding: 1.5rem;
   display: grid;

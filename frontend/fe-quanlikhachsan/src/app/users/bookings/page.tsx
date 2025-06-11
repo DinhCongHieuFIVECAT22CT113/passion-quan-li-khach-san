@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../../lib/auth';
 import { API_BASE_URL } from '../../../lib/config';
-import { getAuthHeaders, handleResponse } from '../../../lib/api';
+import { getAuthHeaders, handleResponse, getBookingPromotions, getBookingServices } from '../../../lib/api';
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import styles from './bookings.module.css';
@@ -40,6 +40,8 @@ export default function MyBookingsPage() {
   const [activeTab, setActiveTab] = useState('all'); // 'all', 'upcoming', 'past', 'cancelled'
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [bookingPromotions, setBookingPromotions] = useState<any[]>([]);
+  const [bookingServices, setBookingServices] = useState<any[]>([]);
 
   useEffect(() => {
     if (authLoading) return;
@@ -356,15 +358,33 @@ export default function MyBookingsPage() {
   const filteredBookings = filterBookings();
 
   // Hàm mở popup chi tiết
-  const openDetailModal = (booking: Booking) => {
+  const openDetailModal = async (booking: Booking) => {
     setSelectedBooking(booking);
     setShowDetailModal(true);
+
+    try {
+      // Load khuyến mãi và dịch vụ song song
+      const [promotions, services] = await Promise.all([
+        getBookingPromotions(booking.maDatPhong),
+        getBookingServices(booking.maDatPhong)
+      ]);
+
+      setBookingPromotions(promotions);
+      setBookingServices(services);
+      console.log('Loaded user booking details:', { promotions, services });
+    } catch (error) {
+      console.error('Error loading user booking details:', error);
+      setBookingPromotions([]);
+      setBookingServices([]);
+    }
   };
 
   // Hàm đóng popup chi tiết
   const closeDetailModal = () => {
     setSelectedBooking(null);
     setShowDetailModal(false);
+    setBookingPromotions([]);
+    setBookingServices([]);
   };
 
   return (
@@ -613,6 +633,111 @@ export default function MyBookingsPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Khuyến mãi đã áp dụng */}
+              {bookingPromotions.length > 0 && (
+                <div className={styles.detailSection}>
+                  <h3 style={{color: '#e74c3c'}}>🏷️ Khuyến mãi đã áp dụng</h3>
+                  {bookingPromotions.map((promotion, index) => (
+                    <div key={index} className={styles.promotionCard}>
+                      <div className={styles.detailGrid}>
+                        <div className={styles.detailItem}>
+                          <span className={styles.detailLabel}>Tên khuyến mãi:</span>
+                          <span className={styles.detailValue}>{promotion.tenKhuyenMai || promotion.TenKhuyenMai || 'N/A'}</span>
+                        </div>
+                        <div className={styles.detailItem}>
+                          <span className={styles.detailLabel}>Mã giảm giá:</span>
+                          <span className={styles.detailValue}>{promotion.maGiamGia || promotion.MaGiamGia || 'N/A'}</span>
+                        </div>
+                        <div className={styles.detailItem}>
+                          <span className={styles.detailLabel}>Số tiền giảm:</span>
+                          <span className={styles.detailValue} style={{color: '#e74c3c', fontWeight: '700'}}>
+                            -{formatCurrency(promotion.soTienGiam || promotion.SoTienGiam || 0)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Dịch vụ đã sử dụng */}
+              {bookingServices.length > 0 && (
+                <div className={styles.detailSection}>
+                  <h3 style={{color: '#3498db'}}>🛎️ Dịch vụ đã sử dụng</h3>
+                  {bookingServices.map((service, index) => (
+                    <div key={index} className={styles.serviceCard}>
+                      <div className={styles.detailGrid}>
+                        <div className={styles.detailItem}>
+                          <span className={styles.detailLabel}>Tên dịch vụ:</span>
+                          <span className={styles.detailValue}>{service.tenDichVu || service.TenDichVu || 'N/A'}</span>
+                        </div>
+                        <div className={styles.detailItem}>
+                          <span className={styles.detailLabel}>Số lượng:</span>
+                          <span className={styles.detailValue}>{service.soLuong || service.SoLuong || 0}</span>
+                        </div>
+                        <div className={styles.detailItem}>
+                          <span className={styles.detailLabel}>Đơn giá:</span>
+                          <span className={styles.detailValue}>{formatCurrency(service.donGia || service.DonGia || 0)}</span>
+                        </div>
+                        <div className={styles.detailItem}>
+                          <span className={styles.detailLabel}>Thành tiền:</span>
+                          <span className={styles.detailValue} style={{color: '#27ae60', fontWeight: '700'}}>
+                            {formatCurrency((service.soLuong || service.SoLuong || 0) * (service.donGia || service.DonGia || 0))}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Tổng kết chi phí nếu có khuyến mãi hoặc dịch vụ */}
+              {(bookingPromotions.length > 0 || bookingServices.length > 0) && (
+                <div className={styles.detailSection}>
+                  <h3 style={{color: '#2c3e50'}}>💰 Tổng kết chi phí</h3>
+                  <div className={styles.priceBreakdown}>
+                    <div className={styles.detailItem}>
+                      <span className={styles.detailLabel}>Tiền phòng gốc:</span>
+                      <span className={styles.detailValue}>{formatCurrency(selectedBooking.giaGoc || selectedBooking.tongTien)}</span>
+                    </div>
+                    {bookingServices.length > 0 && (
+                      <div className={styles.detailItem}>
+                        <span className={styles.detailLabel}>Tổng tiền dịch vụ:</span>
+                        <span className={styles.detailValue} style={{color: '#3498db'}}>
+                          +{formatCurrency(bookingServices.reduce((total, service) =>
+                            total + ((service.soLuong || service.SoLuong || 0) * (service.donGia || service.DonGia || 0)), 0
+                          ))}
+                        </span>
+                      </div>
+                    )}
+                    {bookingPromotions.length > 0 && (
+                      <div className={styles.detailItem}>
+                        <span className={styles.detailLabel}>Tổng giảm giá:</span>
+                        <span className={styles.detailValue} style={{color: '#e74c3c'}}>
+                          -{formatCurrency(bookingPromotions.reduce((total, promotion) =>
+                            total + (promotion.soTienGiam || promotion.SoTienGiam || 0), 0
+                          ))}
+                        </span>
+                      </div>
+                    )}
+                    <div className={styles.detailItem} style={{borderTop: '2px solid #dee2e6', paddingTop: '1rem', marginTop: '1rem'}}>
+                      <span className={styles.detailLabel} style={{fontWeight: '700', fontSize: '1.1rem'}}>Tổng thanh toán:</span>
+                      <span className={styles.detailValue} style={{fontWeight: '700', fontSize: '1.1rem', color: '#27ae60'}}>
+                        {formatCurrency(
+                          (selectedBooking.giaGoc || selectedBooking.tongTien) +
+                          bookingServices.reduce((total, service) =>
+                            total + ((service.soLuong || service.SoLuong || 0) * (service.donGia || service.DonGia || 0)), 0
+                          ) -
+                          bookingPromotions.reduce((total, promotion) =>
+                            total + (promotion.soTienGiam || promotion.SoTienGiam || 0), 0
+                          )
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {selectedBooking.ghiChu && (
                 <div className={styles.detailSection}>

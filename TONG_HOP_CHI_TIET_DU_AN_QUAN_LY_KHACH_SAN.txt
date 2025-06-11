@@ -6,7 +6,7 @@ TỔNG HỢP CHI TIẾT NHẤT DỰ ÁN DEV-FE-BE (QUẢN LÝ KHÁCH SẠN)
 
 2. KIẾN TRÚC HỆ THỐNG
 - Kiến trúc đa lớp: Presentation (Frontend), Application (API), Business Logic (Service), Data Access (Repository), Database.
-- Backend: C# (.NET Core), RESTful API, SignalR cho realtime, Entity Framework cho ORM, mô hình Controller-Service-Repository, logging, kiểm so��t lỗi, bảo mật đa lớp.
+- Backend: C# (.NET Core), RESTful API, SignalR cho realtime, Entity Framework cho ORM, mô hình Controller-Service-Repository, logging, kiểm soát lỗi, bảo mật đa lớp.
 - Frontend: React (Next.js), TypeScript, chia module theo vai trò (admin, employee, user), sử dụng context, hooks, quản lý trạng thái, xác thực, routing động, responsive UI.
 - Database: Quan hệ, chuẩn hóa dữ liệu, ràng buộc khóa ngoại, chỉ mục tối ưu truy vấn.
 - Triển khai: Hỗ trợ CI/CD, môi trường dev/staging/prod, logging tập trung, backup dữ liệu định kỳ.
@@ -20,7 +20,7 @@ TỔNG HỢP CHI TIẾT NHẤT DỰ ÁN DEV-FE-BE (QUẢN LÝ KHÁCH SẠN)
 
 4. MODULE NGHIỆP VỤ CHI TIẾT
 - Đặt phòng (Booking): Tìm kiếm phòng theo tiêu chí, kiểm tra phòng trống, đặt phòng, cập nhật trạng thái (pending, confirmed, cancelled, completed), quản lý lịch sử đặt phòng, liên kết user, room, promotion.
-- Quản lý hóa đơn (Invoice): Tạo hóa đơn tự động khi booking xác nhận, cập nhật trạng thái thanh toán, xuất hóa đơn, chỉnh sửa, tra cứu, liên kết booking, user, lưu lịch sử thay đổi.
+- Qu���n lý hóa đơn (Invoice): Tạo hóa đơn tự động khi booking xác nhận, cập nhật trạng thái thanh toán, xuất hóa đơn, chỉnh sửa, tra cứu, liên kết booking, user, lưu lịch sử thay đổi.
 - Quản lý khuyến mãi (Promotion): Thêm, sửa, xóa, kiểm soát điều kiện áp dụng (thời gian, số lượng, loại phòng, user), lưu lịch sử sử dụng, kiểm tra trùng code, trạng thái hiệu lực.
 - Quản lý đánh giá (Review): Gửi đánh giá sau khi hoàn thành booking, trạng thái (pending, approved, rejected), admin duyệt/xóa/phản hồi, hiển thị công khai, lưu lịch sử chỉnh sửa.
 - Quản lý nhân viên (Employee): Thêm, sửa, xóa, phân quyền động (lễ tân, kế toán, quản lý), kiểm soát truy cập API, cập nhật thông tin, trạng thái hoạt động.
@@ -82,9 +82,61 @@ TỔNG HỢP CHI TIẾT NHẤT DỰ ÁN DEV-FE-BE (QUẢN LÝ KHÁCH SẠN)
 10. ĐẶC ĐIỂM NỔI BẬT & YẾU TỐ MỞ RỘNG
 - Phân quyền động, bảo mật đa lớp, hỗ trợ realtime, giao diện hiện đại, responsive, đa ngôn ngữ.
 - Hệ thống báo cáo động, lọc đa chiều, xuất file, biểu đồ trực quan.
-- Dễ mở rộng module mới, tích hợp API bên ngoài, nâng cấp bảo mật, tối ưu hiệu năng.
+- Dễ mở rộng module mới, tích h���p API bên ngoài, nâng cấp bảo mật, tối ưu hiệu năng.
 - Hỗ trợ logging tập trung, kiểm thử tự động, triển khai CI/CD, vận hành ổn định.
 - Logic nghiệp vụ kiểm soát chặt chẽ, mọi thao tác đều được xác thực, phân quyền, ghi log, kiểm soát lỗi.
 
 11. TỔNG KẾT
 - Dự án đáp ứng toàn diện nghiệp vụ quản lý khách sạn hiện đại, tối ưu hóa trải nghiệm người dùng và quản lý, bảo mật, dễ mở rộng, dễ tích hợp, vận hành ổn định, hỗ trợ phát triển lâu dài.
+
+
+12. PHÂN QUYỀN CHI TIẾT THEO VAI TRÒ
+| Chức năng         | Admin | Employee | User |
+|-------------------|:-----:|:--------:|:----:|
+| Quản lý phòng     |   x   |    x     |      |
+| Đặt phòng         |   x   |    x     |  x   |
+| Quản lý hóa đơn   |   x   |    x     |      |
+| Xem hóa đơn       |   x   |    x     |  x   |
+| Quản lý khuyến mãi|   x   |          |      |
+| Sử dụng khuyến mãi|   x   |    x     |  x   |
+| Quản lý đánh giá  |   x   |          |      |
+| Gửi đánh giá      |       |          |  x   |
+| Quản lý nhân viên |   x   |          |      |
+| Quản lý người dùng|   x   |    x     |  x   |
+| Xem báo cáo       |   x   |    x     |      |
+| Nhận thông báo    |   x   |    x     |  x   |
+
+- Admin: Toàn quyền, truy cập và thao tác mọi chức năng, API, trang quản trị, báo cáo, phân quyền động cho nhân viên.
+- Employee: Thực hiện nghiệp vụ (quản lý phòng, hóa đơn, booking, hỗ trợ khách hàng), không truy cập phân quyền, báo cáo tổng hợp.
+- User: Đặt phòng, xem lịch sử, sử dụng khuyến mãi, gửi đánh giá, cập nhật hồ sơ, nhận thông báo.
+
+13. LUỒNG HOẠT ĐỘNG CHI TIẾT THEO VAI TRÒ
+- Admin:
+  + Đăng nhập → Dashboard quản trị → Quản lý phòng/nhân viên/khuyến mãi/đánh giá → Xem báo cáo → Phân quyền nhân viên → Quản lý người dùng → Theo dõi log, nhận cảnh báo.
+- Employee:
+  + Đăng nhập → Dashboard nghiệp vụ → Quản lý phòng/booking/hóa đơn → Hỗ trợ khách hàng → Xem thông báo → Cập nhật trạng thái phòng, hóa đơn.
+- User:
+  + Đăng ký/Đăng nhập → Tìm kiếm phòng → Đặt phòng → Sử dụng khuyến mãi → Thanh toán → Nhận thông báo → Xem lịch sử booking/hóa đơn → Gửi đánh giá → Cập nhật hồ sơ.
+
+14. LUỒNG HOẠT ĐỘNG API & BẢO MẬT
+- Mọi request API đều kèm JWT token, backend xác thực, kiểm tra role, kiểm tra quyền truy cập endpoint.
+- Nếu token hết hạn, frontend tự động gọi refresh token, nhận token mới, retry request.
+- Nếu không đủ quyền, trả về lỗi 403 Forbidden, frontend hiển thị thông báo.
+- Logging mọi request, response, lỗi, truy cập bất thường.
+- Ví dụ luồng đặt phòng:
+  + User gửi POST /api/bookings (kèm token) → Backend xác thực, kiểm tra phòng trống, kiểm tra khuyến mãi → Tạo booking → Gửi thông báo realtime → Trả về bookingId, trạng thái.
+
+15. LUỒNG HOẠT ĐỘNG TRANG GIAO DIỆN
+- Trang đăng nhập/đăng ký: Xác thực, chuyển hướng dashboard theo vai trò.
+- Trang dashboard admin: Thống kê tổng quan, truy cập nhanh các module quản trị.
+- Trang quản lý phòng: Danh sách, thêm/sửa/xóa phòng, lọc theo trạng thái, loại phòng.
+- Trang booking user: Tìm kiếm phòng, chọn ngày, chọn loại phòng, nhập thông tin, áp dụng khuyến mãi, xác nhận đặt phòng.
+- Trang hóa đơn: Xem chi tiết, trạng thái thanh toán, xuất file, lịch sử giao dịch.
+- Trang đánh giá: Gửi đánh giá, xem trạng thái duyệt, admin duyệt/xóa/phản hồi.
+- Trang báo cáo: Lọc dữ liệu, xem biểu đồ, xuất file, xem chi tiết từng chỉ số.
+- Trang thông báo: Hiển thị realtime, phân loại, đánh dấu đã đọc/chưa đọc.
+
+16. LƯU Ý VẬN HÀNH & MỞ RỘNG
+- Có thể mở rộng thêm vai trò (quản lý, lễ tân, kế toán), thêm module mới (quản lý dịch vụ, tích hợp thanh toán online, quản lý sự kiện,...).
+- Hệ thống hỗ trợ logging tập trung, kiểm thử tự động, backup định kỳ, dễ dàng nâng cấp, bảo trì.
+- Đảm bảo b��o mật đa lớp, kiểm soát truy cập chặt chẽ, mọi thao tác đều được ghi log, kiểm soát lỗi, cảnh báo realtime.

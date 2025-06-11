@@ -5,14 +5,39 @@ import { useRouter } from 'next/navigation';
 import { PhongDTO, LoaiPhongDTO } from '../../../lib/DTOs';
 import { useAuth } from '../../../lib/auth';
 import { API_BASE_URL } from '../../../lib/config';
-import { createDatPhong } from '../../../lib/api';
-import { FaTimes, FaUser, FaUserPlus, FaClock, FaCalendarAlt, FaUsers, FaPhone, FaEnvelope, FaStickyNote, FaCreditCard, FaMoneyBillWave, FaUniversity } from 'react-icons/fa';
+import { createDatPhong, getActivePromotions, getAvailableServices, applyPromotionToBooking, addServiceToBooking } from '../../../lib/api';
+import { FaTimes, FaUser, FaUserPlus, FaClock, FaCalendarAlt, FaUsers, FaPhone, FaEnvelope, FaStickyNote, FaCreditCard, FaMoneyBillWave, FaUniversity, FaTag, FaServicestack, FaPlus, FaMinus, FaPercent } from 'react-icons/fa';
 import styles from './BookingModal.module.css';
 
 interface BookingModalProps {
   selectedRoom?: PhongDTO;
   loaiPhong: LoaiPhongDTO | null;
   onClose: () => void;
+}
+
+interface Promotion {
+  maKm: string;
+  tenKhuyenMai: string;
+  moTa: string;
+  maGiamGia: string;
+  phanTramGiam: number;
+  soTienGiam: number;
+  ngayBatDau: string;
+  ngayKetThuc: string;
+  thumbnail?: string;
+}
+
+interface Service {
+  maDichVu: string;
+  tenDichVu: string;
+  moTa: string;
+  donGia: number;
+  thumbnail?: string;
+}
+
+interface SelectedService {
+  service: Service;
+  quantity: number;
 }
 
 interface BookingFormData {
@@ -57,6 +82,14 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
   const [errors, setErrors] = useState<BookingErrors>({});
   const [bookingResult, setBookingResult] = useState<any>(null);
 
+  // State cho khuyến mãi và dịch vụ
+  const [availablePromotions, setAvailablePromotions] = useState<Promotion[]>([]);
+  const [selectedPromotion, setSelectedPromotion] = useState<Promotion | null>(null);
+  const [availableServices, setAvailableServices] = useState<Service[]>([]);
+  const [selectedServices, setSelectedServices] = useState<SelectedService[]>([]);
+  const [showPromotions, setShowPromotions] = useState(false);
+  const [showServices, setShowServices] = useState(false);
+
   // Thêm state để lưu thông tin đặt phòng tạm thời
   const [bookingData, setBookingData] = useState(() => {
     // Kiểm tra xem có dữ liệu đặt phòng trong localStorage không
@@ -88,6 +121,27 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
     }
   }, [user, authLoading, step]);
 
+  // Load khuyến mãi và dịch vụ khi component mount
+  useEffect(() => {
+    const loadPromotionsAndServices = async () => {
+      try {
+        // Load khuyến mãi đang hoạt động
+        const promotions = await getActivePromotions();
+        setAvailablePromotions(promotions);
+        console.log('Loaded promotions:', promotions);
+
+        // Load dịch vụ có sẵn
+        const services = await getAvailableServices();
+        setAvailableServices(services);
+        console.log('Loaded services:', services);
+      } catch (error) {
+        console.error('Error loading promotions and services:', error);
+      }
+    };
+
+    loadPromotionsAndServices();
+  }, []);
+
   const calculateNights = (): number => {
     if (formData.ngayNhanPhong && formData.ngayTraPhong) {
       const checkIn = new Date(formData.ngayNhanPhong);
@@ -101,7 +155,104 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
 
   const calculateTotalPrice = (): number => {
     const nights = calculateNights();
-    return nights * (loaiPhong?.giaMoiDem || 0);
+    const roomPrice = nights * (loaiPhong?.giaMoiDem || 0);
+
+    // Tính tổng tiền dịch vụ
+    const servicesTotal = selectedServices.reduce((total, selectedService) => {
+      return total + (selectedService.service.donGia * selectedService.quantity);
+    }, 0);
+
+    // Tính tổng trước khi áp dụng khuyến mãi
+    const subtotal = roomPrice + servicesTotal;
+
+    // Áp dụng khuyến mãi
+    let discount = 0;
+    if (selectedPromotion) {
+      if (selectedPromotion.phanTramGiam > 0) {
+        // Giảm theo phần trăm
+        discount = (subtotal * selectedPromotion.phanTramGiam) / 100;
+      } else if (selectedPromotion.soTienGiam > 0) {
+        // Giảm theo số tiền cố định
+        discount = selectedPromotion.soTienGiam;
+      }
+    }
+
+    return Math.max(0, subtotal - discount);
+  };
+
+  // Hàm tính chi tiết giá
+  const calculatePriceBreakdown = () => {
+    const nights = calculateNights();
+    const roomPrice = nights * (loaiPhong?.giaMoiDem || 0);
+    const servicesTotal = selectedServices.reduce((total, selectedService) => {
+      return total + (selectedService.service.donGia * selectedService.quantity);
+    }, 0);
+    const subtotal = roomPrice + servicesTotal;
+
+    let discount = 0;
+    if (selectedPromotion) {
+      if (selectedPromotion.phanTramGiam > 0) {
+        discount = (subtotal * selectedPromotion.phanTramGiam) / 100;
+      } else if (selectedPromotion.soTienGiam > 0) {
+        discount = selectedPromotion.soTienGiam;
+      }
+    }
+
+    return {
+      nights,
+      roomPrice,
+      servicesTotal,
+      subtotal,
+      discount,
+      total: Math.max(0, subtotal - discount)
+    };
+  };
+
+  // Hàm xử lý chọn khuyến mãi
+  const handleSelectPromotion = (promotion: Promotion) => {
+    setSelectedPromotion(promotion);
+    setShowPromotions(false);
+  };
+
+  // Hàm xử lý bỏ chọn khuyến mãi
+  const handleRemovePromotion = () => {
+    setSelectedPromotion(null);
+  };
+
+  // Hàm xử lý thêm dịch vụ
+  const handleAddService = (service: Service) => {
+    const existingService = selectedServices.find(s => s.service.maDichVu === service.maDichVu);
+    if (existingService) {
+      setSelectedServices(prev =>
+        prev.map(s =>
+          s.service.maDichVu === service.maDichVu
+            ? { ...s, quantity: s.quantity + 1 }
+            : s
+        )
+      );
+    } else {
+      setSelectedServices(prev => [...prev, { service, quantity: 1 }]);
+    }
+  };
+
+  // Hàm xử lý cập nhật số lượng dịch vụ
+  const handleUpdateServiceQuantity = (maDichVu: string, quantity: number) => {
+    if (quantity <= 0) {
+      setSelectedServices(prev => prev.filter(s => s.service.maDichVu !== maDichVu));
+    } else {
+      setSelectedServices(prev =>
+        prev.map(s =>
+          s.service.maDichVu === maDichVu
+            ? { ...s, quantity }
+            : s
+        )
+      );
+    }
+  };
+
+  // Hàm xử lý xóa dịch vụ
+  const handleRemoveService = (maDichVu: string) => {
+    setSelectedServices(prev => prev.filter(s => s.service.maDichVu !== maDichVu));
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -225,7 +376,11 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
             giaMoiDem: loaiPhong?.giaMoiDem || 0,
             thumbnail: selectedRoom?.thumbnail || loaiPhong?.thumbnail || '',
             moTa: loaiPhong?.moTa || '',
-          }
+          },
+          // Thêm thông tin khuyến mãi và dịch vụ
+          selectedPromotion: selectedPromotion,
+          selectedServices: selectedServices,
+          priceBreakdown: calculatePriceBreakdown()
         };
         
         // Lưu dữ liệu vào localStorage để trang guest-booking sử dụng
@@ -256,6 +411,33 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
       console.log('Booking data being sent:', bookingData);
 
       const result = await createDatPhong(bookingData);
+      console.log('Booking result:', result);
+
+      // Nếu đặt phòng thành công và có khuyến mãi hoặc dịch vụ
+      if (result && result.datPhong) {
+        const maDatPhong = result.datPhong;
+
+        try {
+          // Áp dụng khuyến mãi nếu có
+          if (selectedPromotion) {
+            const discountAmount = calculatePriceBreakdown().discount;
+            await applyPromotionToBooking(maDatPhong, selectedPromotion.maKm, discountAmount);
+            console.log('Applied promotion:', selectedPromotion.tenKhuyenMai);
+          }
+
+          // Thêm dịch vụ nếu có
+          if (selectedServices.length > 0) {
+            for (const selectedService of selectedServices) {
+              await addServiceToBooking(maDatPhong, selectedService.service.maDichVu, selectedService.quantity);
+              console.log('Added service:', selectedService.service.tenDichVu, 'x', selectedService.quantity);
+            }
+          }
+        } catch (serviceError) {
+          console.error('Error adding services/promotions:', serviceError);
+          // Không throw error vì đặt phòng đã thành công
+        }
+      }
+
       setBookingResult(result);
       setStep('success');
       
@@ -592,6 +774,188 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
         </div>
       </div>
 
+      {/* Phần khuyến mãi và dịch vụ */}
+      <div className={styles.extrasSection}>
+        <h3>Khuyến mãi & Dịch vụ</h3>
+
+        {/* Khuyến mãi */}
+        <div className={styles.promotionSection}>
+          <div className={styles.sectionHeader}>
+            <h4>
+              <FaTag className={styles.sectionIcon} />
+              Khuyến mãi
+            </h4>
+            <button
+              type="button"
+              onClick={() => setShowPromotions(!showPromotions)}
+              className={styles.toggleButton}
+            >
+              {showPromotions ? 'Ẩn' : 'Xem khuyến mãi'}
+            </button>
+          </div>
+
+          {selectedPromotion && (
+            <div className={styles.selectedPromotion}>
+              <div className={styles.promotionCard}>
+                <div className={styles.promotionInfo}>
+                  <h5>{selectedPromotion.tenKhuyenMai}</h5>
+                  <p>{selectedPromotion.moTa}</p>
+                  <div className={styles.promotionDiscount}>
+                    {selectedPromotion.phanTramGiam > 0
+                      ? `Giảm ${selectedPromotion.phanTramGiam}%`
+                      : `Giảm ${selectedPromotion.soTienGiam.toLocaleString()}đ`
+                    }
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleRemovePromotion}
+                  className={styles.removeButton}
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+          )}
+
+          {showPromotions && (
+            <div className={styles.promotionsList}>
+              {availablePromotions.length > 0 ? (
+                availablePromotions.map(promotion => (
+                  <div
+                    key={promotion.maKm}
+                    className={`${styles.promotionOption} ${selectedPromotion?.maKm === promotion.maKm ? styles.selected : ''}`}
+                    onClick={() => handleSelectPromotion(promotion)}
+                  >
+                    <div className={styles.promotionContent}>
+                      <h5>{promotion.tenKhuyenMai}</h5>
+                      <p>{promotion.moTa}</p>
+                      <div className={styles.promotionValue}>
+                        <FaPercent />
+                        {promotion.phanTramGiam > 0
+                          ? `${promotion.phanTramGiam}% OFF`
+                          : `${promotion.soTienGiam.toLocaleString()}đ OFF`
+                        }
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className={styles.noItems}>Hiện tại không có khuyến mãi nào</p>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Dịch vụ */}
+        <div className={styles.servicesSection}>
+          <div className={styles.sectionHeader}>
+            <h4>
+              <FaServicestack className={styles.sectionIcon} />
+              Dịch vụ thêm
+            </h4>
+            <button
+              type="button"
+              onClick={() => setShowServices(!showServices)}
+              className={styles.toggleButton}
+            >
+              {showServices ? 'Ẩn' : 'Xem dịch vụ'}
+            </button>
+          </div>
+
+          {selectedServices.length > 0 && (
+            <div className={styles.selectedServices}>
+              {selectedServices.map(selectedService => (
+                <div key={selectedService.service.maDichVu} className={styles.serviceItem}>
+                  <div className={styles.serviceInfo}>
+                    <h5>{selectedService.service.tenDichVu}</h5>
+                    <p className={styles.servicePrice}>
+                      {selectedService.service.donGia.toLocaleString()}đ/lần
+                    </p>
+                  </div>
+                  <div className={styles.serviceControls}>
+                    <button
+                      type="button"
+                      onClick={() => handleUpdateServiceQuantity(selectedService.service.maDichVu, selectedService.quantity - 1)}
+                      className={styles.quantityButton}
+                    >
+                      <FaMinus />
+                    </button>
+                    <span className={styles.quantity}>{selectedService.quantity}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleUpdateServiceQuantity(selectedService.service.maDichVu, selectedService.quantity + 1)}
+                      className={styles.quantityButton}
+                    >
+                      <FaPlus />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveService(selectedService.service.maDichVu)}
+                      className={styles.removeButton}
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {showServices && (
+            <div className={styles.servicesList}>
+              {availableServices.length > 0 ? (
+                availableServices.map(service => (
+                  <div
+                    key={service.maDichVu}
+                    className={styles.serviceOption}
+                    onClick={() => handleAddService(service)}
+                  >
+                    <div className={styles.serviceContent}>
+                      <h5>{service.tenDichVu}</h5>
+                      <p>{service.moTa}</p>
+                      <div className={styles.servicePrice}>
+                        {service.donGia.toLocaleString()}đ
+                      </div>
+                    </div>
+                    <button type="button" className={styles.addButton}>
+                      <FaPlus />
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <p className={styles.noItems}>Hiện tại không có dịch vụ nào</p>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Tóm tắt giá */}
+        <div className={styles.priceBreakdown}>
+          <h4>Chi tiết giá</h4>
+          <div className={styles.priceItem}>
+            <span>Phòng ({calculateNights()} đêm):</span>
+            <span>{(calculateNights() * (loaiPhong?.giaMoiDem || 0)).toLocaleString()}đ</span>
+          </div>
+          {selectedServices.length > 0 && (
+            <div className={styles.priceItem}>
+              <span>Dịch vụ:</span>
+              <span>{selectedServices.reduce((total, s) => total + (s.service.donGia * s.quantity), 0).toLocaleString()}đ</span>
+            </div>
+          )}
+          {selectedPromotion && (
+            <div className={styles.priceItem} style={{color: '#e74c3c'}}>
+              <span>Khuyến mãi:</span>
+              <span>-{calculatePriceBreakdown().discount.toLocaleString()}đ</span>
+            </div>
+          )}
+          <div className={styles.priceTotal}>
+            <span>Tổng cộng:</span>
+            <span>{calculateTotalPrice().toLocaleString()}đ</span>
+          </div>
+        </div>
+      </div>
+
     <div className={styles.stepActions}>
       {bookingType === 'user' && user ? ( // Kiểm tra nếu là người dùng đã đăng nhập
         <button onClick={onClose} className={styles.backButton}>
@@ -721,6 +1085,37 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
             <span>Số khách:</span>
             <span>{formData.soNguoiLon + formData.soTreEm} người</span>
           </div>
+
+          {/* Chi tiết giá */}
+          <div style={{borderTop: '1px solid #dee2e6', paddingTop: '1rem', marginTop: '1rem'}}>
+            <div className={styles.summaryItem}>
+              <span>Phòng ({calculateNights()} đêm):</span>
+              <span>{(calculateNights() * (loaiPhong?.giaMoiDem || 0)).toLocaleString()}đ</span>
+            </div>
+
+            {selectedServices.length > 0 && (
+              <>
+                <div className={styles.summaryItem} style={{fontWeight: '600', color: '#2c3e50', marginTop: '0.5rem'}}>
+                  <span>Dịch vụ:</span>
+                  <span></span>
+                </div>
+                {selectedServices.map(selectedService => (
+                  <div key={selectedService.service.maDichVu} className={styles.summaryItem} style={{fontSize: '0.9rem', paddingLeft: '1rem'}}>
+                    <span>{selectedService.service.tenDichVu} x{selectedService.quantity}:</span>
+                    <span>{(selectedService.service.donGia * selectedService.quantity).toLocaleString()}đ</span>
+                  </div>
+                ))}
+              </>
+            )}
+
+            {selectedPromotion && (
+              <div className={styles.summaryItem} style={{color: '#e74c3c'}}>
+                <span>Khuyến mãi ({selectedPromotion.tenKhuyenMai}):</span>
+                <span>-{calculatePriceBreakdown().discount.toLocaleString()}đ</span>
+              </div>
+            )}
+          </div>
+
           <div className={styles.summaryTotal}>
             <span>Tổng tiền:</span>
             <span className={styles.totalPrice}>{calculateTotalPrice().toLocaleString()}đ</span>

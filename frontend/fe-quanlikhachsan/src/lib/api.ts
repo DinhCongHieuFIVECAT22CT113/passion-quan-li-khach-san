@@ -1770,6 +1770,176 @@ export const countAvailableRoomsByType = async (maLoaiPhong: string): Promise<nu
   }
 };
 
+// ===== PROMOTIONS APIs =====
+
+// API lấy danh sách khuyến mãi đang hoạt động
+export const getActivePromotions = async () => {
+  console.log(`Đang gọi API lấy danh sách khuyến mãi: ${API_BASE_URL}/KhuyenMai`);
+  try {
+    const headers = await getAuthHeaders('GET');
+    const response = await fetch(`${API_BASE_URL}/KhuyenMai`, {
+      method: 'GET',
+      headers: headers,
+      credentials: 'include'
+    });
+
+    const data = await handleResponse(response);
+    console.log('Dữ liệu khuyến mãi từ API:', data);
+
+    if (Array.isArray(data)) {
+      // Lọc chỉ lấy khuyến mãi đang hoạt động
+      const now = new Date();
+      return data.filter(promotion => {
+        const startDate = new Date(promotion.ngayBatDau || promotion.NgayBatDau);
+        const endDate = new Date(promotion.ngayKetThuc || promotion.NgayKetThuc);
+        return startDate <= now && now <= endDate &&
+               (promotion.trangThai || promotion.TrangThai) !== 'Đã hết hạn';
+      }).map(promotion => ({
+        maKm: promotion.maKm || promotion.MaKm,
+        tenKhuyenMai: promotion.tenKhuyenMai || promotion.TenKhuyenMai,
+        moTa: promotion.moTa || promotion.MoTa,
+        maGiamGia: promotion.maGiamGia || promotion.MaGiamGia,
+        phanTramGiam: promotion.phanTramGiam || promotion.PhanTramGiam || 0,
+        soTienGiam: promotion.soTienGiam || promotion.SoTienGiam || 0,
+        ngayBatDau: promotion.ngayBatDau || promotion.NgayBatDau,
+        ngayKetThuc: promotion.ngayKetThuc || promotion.NgayKetThuc,
+        thumbnail: promotion.thumbnail || promotion.Thumbnail
+      }));
+    }
+    return [];
+  } catch (error) {
+    console.error('Lỗi khi gọi API getActivePromotions:', error);
+    return [];
+  }
+};
+
+// API áp dụng khuyến mãi cho đặt phòng
+export const applyPromotionToBooking = async (maDatPhong: string, maKm: string, soTienGiam: number) => {
+  console.log(`Đang áp dụng khuyến mãi ${maKm} cho đặt phòng ${maDatPhong}`);
+  try {
+    const headers = await getAuthHeaders('POST');
+    const formData = new FormData();
+    formData.append('MaKM', maKm);
+    formData.append('MaDatPhong', maDatPhong);
+    formData.append('SoTienGiam', soTienGiam.toString());
+
+    const response = await fetch(`${API_BASE_URL}/ApDungKM`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        ...(headers.Authorization ? { Authorization: headers.Authorization } : {}),
+      },
+      body: formData,
+      credentials: 'include'
+    });
+
+    return await handleResponse(response);
+  } catch (error) {
+    console.error('Lỗi khi áp dụng khuyến mãi:', error);
+    throw error;
+  }
+};
+
+// ===== SERVICES APIs =====
+
+// API lấy danh sách dịch vụ
+export const getAvailableServices = async () => {
+  console.log(`Đang gọi API lấy danh sách dịch vụ: ${API_BASE_URL}/DichVu`);
+  try {
+    const response = await fetch(`${API_BASE_URL}/DichVu`, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
+      credentials: 'include'
+    });
+
+    const data = await handleResponse(response);
+    console.log('Dữ liệu dịch vụ từ API:', data);
+
+    if (Array.isArray(data)) {
+      return data.map(service => ({
+        maDichVu: service.maDichVu || service.MaDichVu,
+        tenDichVu: service.tenDichVu || service.TenDichVu,
+        moTa: service.moTa || service.MoTa,
+        donGia: service.donGia || service.DonGia || 0,
+        thumbnail: service.thumbnail || service.Thumbnail
+      }));
+    }
+    return [];
+  } catch (error) {
+    console.error('Lỗi khi gọi API getAvailableServices:', error);
+    return [];
+  }
+};
+
+// API thêm dịch vụ vào đặt phòng
+export const addServiceToBooking = async (maDatPhong: string, maDichVu: string, soLuong: number) => {
+  console.log(`Đang thêm dịch vụ ${maDichVu} vào đặt phòng ${maDatPhong}`);
+  try {
+    const headers = await getAuthHeaders('POST');
+    const formData = new FormData();
+    formData.append('MaDatPhong', maDatPhong);
+    formData.append('MaDichVu', maDichVu);
+    formData.append('SoLuong', soLuong.toString());
+
+    const response = await fetch(`${API_BASE_URL}/SuDungDichVu`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        ...(headers.Authorization ? { Authorization: headers.Authorization } : {}),
+      },
+      body: formData,
+      credentials: 'include'
+    });
+
+    return await handleResponse(response);
+  } catch (error) {
+    console.error('Lỗi khi thêm dịch vụ:', error);
+    throw error;
+  }
+};
+
+// API lấy khuyến mãi đã áp dụng cho đặt phòng
+export const getBookingPromotions = async (maDatPhong: string) => {
+  console.log(`Đang lấy khuyến mãi cho đặt phòng ${maDatPhong}`);
+  try {
+    const headers = await getAuthHeaders('GET');
+    const response = await fetch(`${API_BASE_URL}/ApDungKM/theo-dat-phong/${maDatPhong}`, {
+      method: 'GET',
+      headers,
+      credentials: 'include'
+    });
+
+    const data = await handleResponse(response);
+    console.log('Khuyến mãi đặt phòng:', data);
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.error('Lỗi khi lấy khuyến mãi đặt phòng:', error);
+    return [];
+  }
+};
+
+// API lấy dịch vụ đã sử dụng cho đặt phòng
+export const getBookingServices = async (maDatPhong: string) => {
+  console.log(`Đang lấy dịch vụ cho đặt phòng ${maDatPhong}`);
+  try {
+    const headers = await getAuthHeaders('GET');
+    const response = await fetch(`${API_BASE_URL}/SuDungDichVu/theo-dat-phong/${maDatPhong}`, {
+      method: 'GET',
+      headers,
+      credentials: 'include'
+    });
+
+    const data = await handleResponse(response);
+    console.log('Dịch vụ đặt phòng:', data);
+    return Array.isArray(data) ? data : [];
+  } catch (error) {
+    console.error('Lỗi khi lấy dịch vụ đặt phòng:', error);
+    return [];
+  }
+};
+
 // ===== MANAGER APIs =====
 
 // API lấy danh sách đặt phòng cho manager

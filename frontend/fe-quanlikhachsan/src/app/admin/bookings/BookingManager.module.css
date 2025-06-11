@@ -471,3 +471,47 @@
     margin-bottom: 0;
   }
 }
+
+/* Styles cho khuyến mãi và dịch vụ trong chi tiết đặt phòng */
+.detailSection {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 2px solid #e9ecef;
+}
+
+.detailSection h4 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.promotionItem,
+.serviceItem {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border-left: 4px solid #e74c3c;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.serviceItem {
+  border-left-color: #3498db;
+}
+
+.promotionItem .detailRow,
+.serviceItem .detailRow {
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.promotionItem .detailRow:last-child,
+.serviceItem .detailRow:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}

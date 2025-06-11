@@ -27,6 +27,31 @@ interface BookingData {
     thumbnail: string;
     moTa?: string;
   };
+  // Thêm khuyến mãi và dịch vụ
+  selectedPromotion?: {
+    maKm: string;
+    tenKhuyenMai: string;
+    moTa: string;
+    phanTramGiam: number;
+    soTienGiam: number;
+  };
+  selectedServices?: Array<{
+    service: {
+      maDichVu: string;
+      tenDichVu: string;
+      moTa: string;
+      donGia: number;
+    };
+    quantity: number;
+  }>;
+  priceBreakdown?: {
+    nights: number;
+    roomPrice: number;
+    servicesTotal: number;
+    subtotal: number;
+    discount: number;
+    total: number;
+  };
 }
 
 interface PaymentData {
@@ -305,12 +330,43 @@ export default function GuestBookingPage() {
               <div className={styles.priceBreakdown}>
                 <h3>Chi tiết giá</h3>
                 <div className={styles.infoItem}>
-                  <span>{bookingData.roomData.giaMoiDem?.toLocaleString()}đ × {calculateNights()} đêm</span>
-                  <span>{calculateTotalPrice().toLocaleString()}đ</span>
+                  <span>Phòng ({calculateNights()} đêm):</span>
+                  <span>{(calculateNights() * (bookingData.roomData.giaMoiDem || 0)).toLocaleString()}đ</span>
                 </div>
+
+                {/* Hiển thị dịch vụ nếu có */}
+                {bookingData.selectedServices && bookingData.selectedServices.length > 0 && (
+                  <>
+                    <div className={styles.servicesSection}>
+                      <h4 style={{color: '#3498db', margin: '1rem 0 0.5rem 0'}}>🛎️ Dịch vụ đã chọn</h4>
+                      {bookingData.selectedServices.map((selectedService: any, index: number) => (
+                        <div key={index} className={styles.infoItem}>
+                          <span>{selectedService.service.tenDichVu} x{selectedService.quantity}:</span>
+                          <span>{(selectedService.service.donGia * selectedService.quantity).toLocaleString()}đ</span>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+                )}
+
+                {/* Hiển thị khuyến mãi nếu có */}
+                {bookingData.selectedPromotion && (
+                  <div className={styles.promotionSection}>
+                    <h4 style={{color: '#e74c3c', margin: '1rem 0 0.5rem 0'}}>🏷️ Khuyến mãi</h4>
+                    <div className={styles.infoItem}>
+                      <span>{bookingData.selectedPromotion.tenKhuyenMai}:</span>
+                      <span style={{color: '#e74c3c'}}>
+                        -{(bookingData.priceBreakdown?.discount || 0).toLocaleString()}đ
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 <div className={styles.totalPrice}>
                   <span>Tổng cộng:</span>
-                  <span className={styles.price}>{calculateTotalPrice().toLocaleString()}đ</span>
+                  <span className={styles.price}>
+                    {(bookingData.priceBreakdown?.total || calculateTotalPrice()).toLocaleString()}đ
+                  </span>
                 </div>
               </div>
             </div>

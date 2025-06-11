@@ -4,8 +4,6 @@ using Microsoft.AspNetCore.Authorization;
 using be_quanlikhachsanapi.Authorization;
 using be_quanlikhachsanapi.Data;
 using Microsoft.EntityFrameworkCore;
-using be_quanlikhachsanapi.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace be_quanlikhachsanapi.Controllers
 {
