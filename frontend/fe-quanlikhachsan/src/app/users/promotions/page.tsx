@@ -385,7 +385,7 @@ export default function PromotionsPage() {
               ) : (
                 <div className={styles.noPromotions}>
                   <Image 
-                    src="/images/no-promotions.png" 
+                    src="/images/no-results.png" 
                     alt="Không có khuyến mãi" 
                     width={200} 
                     height={200} 
