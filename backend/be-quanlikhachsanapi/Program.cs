@@ -6,35 +6,39 @@ using System.Text;
 using be_quanlikhachsanapi.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.OpenApi.Models;
-using System.Data.SqlClient;
 using System.Text.Json;
 using be_quanlikhachsanapi.Helpers;
-using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using be_quanlikhachsanapi.Configuration;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Serialization;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using be_quanlikhachsanapi.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Đọc connection string từ appsettings.json
+// Ép Kestrel sử dụng đúng cổng 8080 (Render yêu cầu)
+builder.WebHost.ConfigureKestrel(serverOptions =>
+{
+    serverOptions.ListenAnyIP(8080);
+});
+
+// Đọc connection string
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 Console.WriteLine($"Đang thử kết nối đến: {connectionString}");
 
-// Cấu hình API Controllers
+// Cấu hình Controllers
 builder.Services.AddControllers()
-    .AddNewtonsoftJson(options => {
+    .AddNewtonsoftJson(options =>
+    {
         options.SerializerSettings.Converters.Add(new StringEnumConverter());
         options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
     });
 
 builder.Services.AddEndpointsApiExplorer();
 
-// Cấu hình Swagger để gửi Token
+// Swagger + JWT
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -44,8 +48,7 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "JWT Authorization header using the Bearer scheme.\\n\\n" +
-                      "Enter your token in the text input below (the 'Bearer ' prefix will be added automatically if not present)."
+        Description = "Nhập token vào đây (không cần chữ 'Bearer ')"
     });
 
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -63,90 +66,65 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 });
-
 builder.Services.AddSwaggerGenNewtonsoftSupport();
-
-// Cấu hình XML comments cho Swagger
 builder.Services.Configure<SwaggerGenOptions>(options => {
     options.CustomSchemaIds(type => type.FullName);
 });
 
-// Add DbContext - sử dụng connection string từ appsettings.json
+// DbContext
 builder.Services.AddDbContext<DataQlks113Nhom2Context>(options =>
     options.UseSqlServer(connectionString));
 
-// Add CORS
+// CORS (bao gồm AllowCredentials)
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll",
-        builder =>
-        {
-            builder.AllowAnyOrigin()
-                   .AllowAnyMethod()
-                   .AllowAnyHeader();
-        });
-});
+    var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ??
+                         new[] { "http://localhost:3000", "https://passion-quan-li-khach-san-git-main-conghieus-projects.vercel.app" };
 
-// THÊM CORS policy mới với credentials
-builder.Services.AddCors(options =>
-{
-    // Lấy danh sách origins từ cấu hình hoặc sử dụng giá trị mặc định
-    var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? 
-                        new[] { "http://localhost:3000", "https://passion-quan-li-khach-san-git-main-conghieus-projects.vercel.app/users/home" };
-    
     if (builder.Environment.IsDevelopment())
     {
-        // Trong môi trường phát triển, cho phép tất cả các nguồn với credentials
-        options.AddPolicy("AllowCredentials",
-            corsBuilder =>
-            {
-                corsBuilder.SetIsOriginAllowed(_ => true) // Cho phép tất cả các nguồn
-                       .AllowAnyMethod()
-                       .AllowAnyHeader()
-                       .WithExposedHeaders("Content-Disposition", "Content-Length", "Content-Type")
-                       .AllowCredentials();
-            });
+        options.AddPolicy("AllowCredentials", cors =>
+        {
+            cors.SetIsOriginAllowed(_ => true)
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials()
+                .WithExposedHeaders("Content-Disposition", "Content-Length", "Content-Type");
+        });
     }
     else
     {
-        // Trong môi trường production, chỉ cho phép các nguồn cụ thể
-        options.AddPolicy("AllowCredentials",
-            corsBuilder =>
-            {
-                corsBuilder.WithOrigins(allowedOrigins)
-                       .AllowAnyMethod()
-                       .AllowAnyHeader()
-                       .WithExposedHeaders("Content-Disposition", "Content-Length", "Content-Type")
-                       .AllowCredentials();
-            });
+        options.AddPolicy("AllowCredentials", cors =>
+        {
+            cors.WithOrigins(allowedOrigins)
+                .AllowAnyMethod()
+                .AllowAnyHeader()
+                .AllowCredentials()
+                .WithExposedHeaders("Content-Disposition", "Content-Length", "Content-Type");
+        });
     }
 });
 
-// Add Memory Cache
 builder.Services.AddMemoryCache();
-
-// Add SignalR for realtime updates
 builder.Services.AddSignalR();
-
-// Add HttpContextAccessor
 builder.Services.AddHttpContextAccessor();
 
-// Add Supabase
+// Supabase
 builder.Services.AddSingleton<Supabase.Client>(provider =>
 {
-    var configuration = provider.GetRequiredService<IConfiguration>();
-    var url = configuration["Supabase:Url"] ?? throw new InvalidOperationException("Supabase URL not found");
-    var key = configuration["Supabase:ServiceKey"] ?? throw new InvalidOperationException("Supabase Service Key not found");
-    
+    var config = provider.GetRequiredService<IConfiguration>();
+    var url = config["Supabase:Url"] ?? throw new InvalidOperationException("Supabase URL not found");
+    var key = config["Supabase:ServiceKey"] ?? throw new InvalidOperationException("Supabase Service Key not found");
+
     var options = new Supabase.SupabaseOptions
     {
         AutoConnectRealtime = false
     };
-    
+
     return new Supabase.Client(url, key, options);
 });
 
-// Add custom services
+// Đăng ký services
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<ISendEmailServices, SendEmailServices>();
@@ -167,17 +145,14 @@ builder.Services.AddScoped<IKhachHangRepository, KhachHangRepository>();
 builder.Services.AddScoped<INhanVienRepository, NhanVienRepository>();
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<ILoaiKhachHangRepository, LoaiKhachHangRepository>();
-// Thêm vào phần đăng ký services
 builder.Services.AddScoped<IDatPhongRepository, DatPhongRepository>();
 builder.Services.AddScoped<IChiTietDatPhongRepository, ChiTietDatPhongRepository>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
 builder.Services.AddScoped<IBaoCaoRepository, BaoCaoRepository>();
-
 builder.Services.AddScoped<IPasswordHasher<KhachHang>, PasswordHasher<KhachHang>>();
 builder.Services.AddScoped<IPasswordHasher<NhanVien>, PasswordHasher<NhanVien>>();
 
-
-// Add Authentication
+// JWT
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -193,7 +168,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
-// Kiểm tra kết nối cơ sở dữ liệu
+// Kiểm tra kết nối DB
 try
 {
     using var scope = app.Services.CreateScope();
@@ -207,30 +182,29 @@ catch (Exception ex)
     Console.WriteLine($"Lỗi kết nối cơ sở dữ liệu: {ex.Message}");
 }
 
-// Configure the HTTP request pipeline.
+// Middleware
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c => {
+    app.UseSwaggerUI(c =>
+    {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "QuanLyKhachSan API v1");
         c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.None);
-        c.DefaultModelsExpandDepth(-1); // Ẩn schema mặc định ở phía dưới trang
+        c.DefaultModelsExpandDepth(-1);
         c.DisplayRequestDuration();
     });
 }
-app.UseStaticFiles(); // phải có để đọc wwwroot
 
-// Sử dụng CORS policy với credentials cho SignalR
+app.UseStaticFiles();
 app.UseCors("AllowCredentials");
-app.UseHttpsRedirection();
+
+// ❌ KHÔNG dùng redirect HTTPS trên Render
+// app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
-// Map SignalR hub
 app.MapHub<NotificationHub>("/notificationHub");
 
 app.Run();
-
