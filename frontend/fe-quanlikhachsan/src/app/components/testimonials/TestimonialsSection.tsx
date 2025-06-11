@@ -9,7 +9,6 @@ import styles from './TestimonialsSection.module.css';
 interface Testimonial {
   id: string;
   name: string;
-  avatar: string;
   location: string;
   rating: number;
   review: string;
@@ -42,7 +41,6 @@ const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
     {
       id: '1',
       name: 'Nguyễn Minh Anh',
-      avatar: '/images/avatars/user1.jpg',
       location: 'Hà Nội, Việt Nam',
       rating: 5,
       review: 'Khách sạn tuyệt vời với dịch vụ chuyên nghiệp. Phòng sạch sẽ, view đẹp và nhân viên rất thân thiện. Tôi sẽ quay lại lần sau!',
@@ -54,7 +52,6 @@ const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
     {
       id: '2',
       name: 'Trần Văn Hùng',
-      avatar: '/images/avatars/user2.jpg',
       location: 'TP.HCM, Việt Nam',
       rating: 5,
       review: 'Kỳ nghỉ hoàn hảo cùng gia đình. Hồ bơi rộng rãi, bữa sáng phong phú và đặc biệt là dịch vụ spa rất tuyệt vời.',
@@ -66,7 +63,6 @@ const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
     {
       id: '3',
       name: 'Lê Thị Mai',
-      avatar: '/images/avatars/user3.jpg',
       location: 'Đà Nẵng, Việt Nam',
       rating: 4,
       review: 'Vị trí thuận tiện, gần biển và trung tâm thành phố. Phòng thoáng mát, sạch sẽ. Giá cả hợp lý cho chất lượng dịch vụ.',
@@ -78,7 +74,6 @@ const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
     {
       id: '4',
       name: 'Phạm Đức Thành',
-      avatar: '/images/avatars/user4.jpg',
       location: 'Hải Phòng, Việt Nam',
       rating: 5,
       review: 'Chuyến công tác tuyệt vời. WiFi nhanh, không gian làm việc thoải mái. Nhân viên hỗ trợ rất nhiệt tình.',
@@ -90,7 +85,6 @@ const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
     {
       id: '5',
       name: 'Hoàng Thị Lan',
-      avatar: '/images/avatars/user5.jpg',
       location: 'Cần Thơ, Việt Nam',
       rating: 5,
       review: 'Honeymoon tuyệt vời! Phòng được trang trí lãng mạn, dịch vụ chu đáo. Bữa tối tại nhà hàng rất ngon.',
@@ -102,7 +96,6 @@ const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
     {
       id: '6',
       name: 'Vũ Minh Tuấn',
-      avatar: '/images/avatars/user6.jpg',
       location: 'Nha Trang, Việt Nam',
       rating: 4,
       review: 'Khách sạn đẹp, view biển tuyệt vời. Dịch vụ tốt nhưng có thể cải thiện thêm về tốc độ phục vụ.',
@@ -226,12 +219,7 @@ const TestimonialsSection: React.FC<TestimonialsSectionProps> = ({
           {testimonials.map((testimonial, index) => (
             <div key={testimonial.id} className={styles.testimonialCard}>
               <div className={styles.userInfo}>
-                <div className={styles.avatar}>
-                  <img 
-                    src={getValidAvatarSrc(testimonial.avatar)} 
-                    alt={testimonial.name}
-                  />
-                </div>
+
                 <div className={styles.userDetails}>
                   <h4 className={styles.userName}>{testimonial.name}</h4>
                   <p className={styles.userLocation}>{testimonial.location}</p>
