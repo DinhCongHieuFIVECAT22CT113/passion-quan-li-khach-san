@@ -124,16 +124,21 @@ export default function ExplorePage() {
       <Header />
 
       {/* Hero Section */}
-      <section className={styles.hero}>
-        <div className={styles.heroContent}>
-          <h1>{t('explore.title')}</h1>
-          <p>{t('explore.description')}</p>
-          <button className={styles.playButton}>
-            <FaPlay />
-            <span>{t('explore.playButton')}</span>
-          </button>
-        </div>
-      </section>
+<section className={styles.hero}>
+  <div className={styles.heroContent}>
+    <h1>{t('explore.title')}</h1>
+    <p>{t('explore.description')}</p>
+    <a
+      href="https://www.youtube.com/watch?v=yBNODeR00rA"
+      target="_blank"
+      rel="noopener noreferrer"
+      className={styles.playButton}
+    >
+      <FaPlay />
+      <span>{t('explore.playButton')}</span>
+    </a>
+  </div>
+</section>
 
       {/* Features Section */}
       <section className={styles.features}>
