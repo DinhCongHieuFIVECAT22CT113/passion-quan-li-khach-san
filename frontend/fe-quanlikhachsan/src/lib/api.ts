@@ -1009,6 +1009,46 @@ export const approveReview = async (reviewId: string, isApproved: boolean) => {
   }
 };
 
+// API cập nhật đánh giá
+export const updateReview = async (reviewId: string, reviewData: any) => {
+  try {
+    // Nếu backend yêu cầu FormData, hãy chuyển đổi dữ liệu
+    const formData = new FormData();
+    for (const key in reviewData) {
+      if (reviewData[key] !== undefined && reviewData[key] !== null) {
+        formData.append(key, String(reviewData[key]));
+      }
+    }
+    const headers = await getFormDataHeaders();
+    const response = await fetch(`${API_BASE_URL}/Review/${reviewId}`, {
+      method: 'PUT',
+      headers: headers, // KHÔNG set Content-Type khi dùng FormData
+      body: formData,
+      credentials: 'include'
+    });
+    return await handleResponse(response);
+  } catch (error) {
+    console.error(`Lỗi khi cập nhật đánh giá #${reviewId}:`, error);
+    throw error;
+  }
+};
+
+// API xóa đánh giá
+export const deleteReview = async (reviewId: string) => {
+  try {
+    const headers = await getAuthHeaders('DELETE');
+    const response = await fetch(`${API_BASE_URL}/Review/${reviewId}`, {
+      method: 'DELETE',
+      headers: headers,
+      credentials: 'include'
+    });
+    return await handleResponse(response);
+  } catch (error) {
+    console.error(`Lỗi khi xóa đánh giá #${reviewId}:`, error);
+    throw error;
+  }
+};
+
 // API để lấy và cập nhật trạng thái phòng cho nhân viên
 export const getEmployeeRooms = async () => {
   console.log(`Đang gọi API lấy danh sách phòng cho nhân viên: ${API_BASE_URL}/Phong`);

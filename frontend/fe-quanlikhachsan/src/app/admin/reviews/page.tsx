@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect } from "react";
 import styles from "./ReviewManager.module.css";
-import { getReviews, approveReview, getBookingDetails } from "../../../lib/api";
+import { getReviews, approveReview, updateReview, deleteReview, getBookingDetails } from "../../../lib/api";
 import { FaSearch, FaFilter, FaStar, FaCheck, FaEye, FaEyeSlash, FaPencilAlt, FaTrashAlt } from 'react-icons/fa';
 
 interface Review {
@@ -98,15 +98,23 @@ export default function ReviewManager() {
 
   const handleApprove = async (maDG: string) => {
     try {
-      // Tạm thời comment out API call vì backend chưa có endpoint này
-      // await approveReview(maDG, true);
-
-      // Cập nhật state trực tiếp (mock approval)
-      setReviews(reviews.map(review =>
-        review.maDG === maDG ? { ...review, trangThai: 'Đã duyệt' } : review
+      const review = reviews.find(r => r.maDG === maDG);
+      if (!review) return;
+      // Map đúng trường backend
+      const reviewData = {
+        MaReview: review.maDG,
+        MaDatPhong: review.maDatPhong,
+        MaKH: review.maKH,
+        DanhGia: review.danhGia,
+        BinhLuan: review.noiDung,
+        NgayTao: review.ngayTao,
+        TrangThai: 'Đã duyệt',
+        AnHien: review.anHien
+      };
+      await updateReview(maDG, reviewData);
+      setReviews(reviews.map(r =>
+        r.maDG === maDG ? { ...r, trangThai: 'Đã duyệt' } : r
       ));
-
-      console.log(`Mock approved review ${maDG}`);
     } catch (err) {
       const error = err as Error;
       alert(`Lỗi khi duyệt đánh giá: ${error.message}`);
@@ -116,21 +124,21 @@ export default function ReviewManager() {
 
   const handleHide = async (review: Review) => {
     try {
-      // Tạo đối tượng để cập nhật trạng thái ẩn/hiện
-      const updatedReview = {
-        ...review,
-        anHien: !review.anHien
+      // Map đúng trường backend
+      const reviewData = {
+        MaReview: review.maDG,
+        MaDatPhong: review.maDatPhong,
+        MaKH: review.maKH,
+        DanhGia: review.danhGia,
+        BinhLuan: review.noiDung,
+        NgayTao: review.ngayTao,
+        TrangThai: review.trangThai,
+        AnHien: !review.anHien
       };
-
-      // Tạm thời comment out API call vì backend chưa có endpoint này
-      // await updateReview(updatedReview);
-
-      // Cập nhật state trực tiếp (mock hide/show)
+      await updateReview(review.maDG, reviewData);
       setReviews(reviews.map(r =>
-        r.maDG === review.maDG ? updatedReview : r
+        r.maDG === review.maDG ? { ...review, anHien: !review.anHien } : r
       ));
-
-      console.log(`Mock ${updatedReview.anHien ? 'hidden' : 'shown'} review ${review.maDG}`);
     } catch (err) {
       const error = err as Error;
       alert(`Lỗi khi thay đổi trạng thái hiển thị: ${error.message}`);
@@ -147,12 +155,8 @@ export default function ReviewManager() {
   const handleDelete = async (maDG: string) => {
     if (window.confirm('Bạn có chắc chắn muốn xóa đánh giá này?')) {
       try {
-        // Tạm thời comment out API call vì backend chưa có endpoint này
-        // await deleteReview(maDG);
-
-        // Cập nhật state trực tiếp (mock delete)
+        await deleteReview(maDG);
         setReviews(reviews.filter(review => review.maDG !== maDG));
-        console.log(`Mock deleted review ${maDG}`);
       } catch (err) {
         const error = err as Error;
         alert(`Lỗi khi xóa đánh giá: ${error.message}`);
@@ -165,16 +169,22 @@ export default function ReviewManager() {
     e.preventDefault();
     try {
       if (editingReview) {
-        // Tạm thời comment out API call vì backend chưa có endpoint này
-        // await updateReview(formData);
-
-        // Cập nhật state trực tiếp (mock update)
+        // Map đúng trường backend
+        const reviewData = {
+          MaReview: editingReview.maDG,
+          MaDatPhong: editingReview.maDatPhong,
+          MaKH: editingReview.maKH,
+          DanhGia: formData.danhGia,
+          BinhLuan: formData.noiDung,
+          NgayTao: editingReview.ngayTao,
+          TrangThai: formData.trangThai,
+          AnHien: formData.anHien
+        };
+        await updateReview(editingReview.maDG, reviewData);
         setReviews(reviews.map(review =>
           review.maDG === editingReview.maDG ? { ...review, ...formData } : review
         ));
-        console.log(`Mock updated review ${editingReview.maDG}`, formData);
       } else {
-        // Thêm đánh giá mới (thường không cần thiết vì đánh giá do khách hàng tạo)
         alert("Chức năng thêm đánh giá không được hỗ trợ. Đánh giá thường do khách hàng tạo.");
       }
       setShowModal(false);
