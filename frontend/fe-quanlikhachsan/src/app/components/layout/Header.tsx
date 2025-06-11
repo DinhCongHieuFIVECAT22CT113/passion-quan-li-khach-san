@@ -22,66 +22,22 @@ export default function Header() {
   const { user, loading: authLoading } = useAuth();
   const handleLogout = useLogout();
 
+  // Ngăn render trước khi client mount
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // Đồng bộ ngôn ngữ
   useEffect(() => {
     if (i18n.language !== selectedLanguage) {
-      i18n.changeLanguage(selectedLanguage).then(() => {
-        setIsReady(true);
-      });
+      i18n.changeLanguage(selectedLanguage).then(() => setIsReady(true));
     } else {
       setIsReady(true);
     }
   }, [selectedLanguage]);
 
-  // Don't render during SSR to avoid hydration mismatch
-  if (!mounted) {
-    return (
-      <header className={styles.header}>
-        <div className={styles.headerContent}>
-          <div className={styles.logoContainer}>
-            <Link href="/" className={styles.logo}>
-              <Image 
-                src="/images/logo-clean.png" 
-                alt="Passion Hotel" 
-                width={120} 
-                height={60} 
-                priority
-              />
-            </Link>
-          </div>
-          <nav className={styles.mainNav}></nav>
-          <div className={styles.userActions}></div>
-        </div>
-      </header>
-    );
-  }
-
-  if (authLoading) {
-    return (
-      <header className={styles.header}>
-        <div className={styles.headerContent}>
-          <div className={styles.logoContainer}>
-            <Link href="/" className={styles.logo}>
-              <Image 
-                src="/images/logo-clean.png" 
-                alt="Passion Hotel" 
-                width={120} 
-                height={60} 
-                priority
-              />
-            </Link>
-          </div>
-          <nav className={styles.mainNav}></nav>
-          <div className={styles.userActions}></div>
-        </div>
-      </header>
-    );
-  }
-
-  if (!isReady) return null;
+  // ⚠️ Không render gì nếu auth chưa sẵn sàng
+  if (!mounted || authLoading || !isReady) return null;
 
   return (
     <header className={styles.header}>
@@ -91,6 +47,7 @@ export default function Header() {
             <Image src="/images/h_logo.png" alt="Hotel Logo" width={70} height={70} />
           </Link>
         </div>
+
         <nav className={styles.mainNav}>
           <Link href="/users/home" className={pathname === '/users/home' ? styles.active : ''}>
             {t('profile.home')}
@@ -111,6 +68,7 @@ export default function Header() {
             {t('profile.promotions')}
           </Link>
         </nav>
+
         <div className={styles.userActions}>
           {user ? (
             <>
@@ -124,12 +82,9 @@ export default function Header() {
             </>
           ) : (
             <>
-              <a 
-                href="/login" 
-                className={styles.authButton || "login-button"}
-              >
-                Đăng nhập
-              </a>
+              <Link href="/login" className={`${styles.authLink} ${styles.loginButton}`}>
+                {t('profile.login', 'Đăng nhập')}
+              </Link>
               <Link href="/signup" className={`${styles.authLink} ${styles.signupButton}`}>
                 {t('profile.signup', 'Đăng ký')}
               </Link>
@@ -140,3 +95,4 @@ export default function Header() {
     </header>
   );
 }
+
