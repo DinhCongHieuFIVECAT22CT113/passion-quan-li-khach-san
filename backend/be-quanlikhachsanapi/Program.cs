@@ -90,14 +90,14 @@ builder.Services.AddCors(options =>
 // THÊM CORS policy mới với credentials
 builder.Services.AddCors(options =>
 {
+    // Lấy danh sách origins từ cấu hình hoặc sử dụng giá trị mặc định
+    var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? 
+                        new[] { "http://localhost:3000", "https://your-frontend-domain.vercel.app" };
+    
     options.AddPolicy("AllowCredentials",
-        builder =>
+        corsBuilder =>
         {
-            // Lấy danh sách origins từ cấu hình hoặc sử dụng giá trị mặc định
-            var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? 
-                                new[] { "http://localhost:3000", "https://your-frontend-domain.vercel.app" };
-            
-            builder.WithOrigins(allowedOrigins)
+            corsBuilder.WithOrigins(allowedOrigins)
                    .AllowAnyMethod()
                    .AllowAnyHeader()
                    .WithExposedHeaders("Content-Disposition", "Content-Length", "Content-Type")
