@@ -26,6 +26,7 @@ interface BookingFormData {
   soTreEm: number;
   phuongThucThanhToan: string;
   loaiThe?: string;
+  tenNganHang?: string; // Add this new field
 }
 
 interface BookingErrors {
@@ -49,6 +50,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
     soTreEm: 0,
     phuongThucThanhToan: '',
     loaiThe: '',
+    tenNganHang: '', // Initialize new field
   });
   const [errors, setErrors] = useState<BookingErrors>({});
   const [bookingResult, setBookingResult] = useState<any>(null);
@@ -149,8 +151,12 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
       newErrors.phuongThucThanhToan = 'Vui lòng chọn phương thức thanh toán';
     }
 
-    if (step === 'payment' && formData.phuongThucThanhToan !== 'cash' && !formData.loaiThe) {
+    if (step === 'payment' && formData.phuongThucThanhToan === 'card' && !formData.loaiThe) {
       newErrors.loaiThe = 'Vui lòng chọn loại thẻ';
+    }
+
+    if (step === 'payment' && formData.phuongThucThanhToan === 'transfer' && !formData.tenNganHang) {
+      newErrors.tenNganHang = 'Vui lòng chọn ngân hàng';
     }
 
     setErrors(newErrors);
@@ -187,6 +193,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
         soTreEm: formData.soTreEm,
         phuongThucThanhToan: formData.phuongThucThanhToan,
         loaiThe: formData.loaiThe,
+        tenNganHang: formData.tenNganHang, // Include bank name
         ghiChu: formData.ghiChu,
         tongTien: calculateTotalPrice(),
         isGuestBooking: bookingType === 'guest',
@@ -226,6 +233,9 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
         thoiGianDen: '14:00',
         ngayNhanPhong: formData.ngayNhanPhong,
         ngayTraPhong: formData.ngayTraPhong,
+        phuongThucThanhToan: formData.phuongThucThanhToan,
+        loaiThe: formData.loaiThe,
+        tenNganHang: formData.tenNganHang,
       };
 
       console.log('Booking data being sent:', bookingData);
@@ -541,7 +551,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
         <div className={styles.paymentMethods}>
           <div 
             className={`${styles.paymentMethod} ${formData.phuongThucThanhToan === 'cash' ? styles.selected : ''}`}
-            onClick={() => setFormData(prev => ({ ...prev, phuongThucThanhToan: 'cash' }))}
+            onClick={() => setFormData(prev => ({ ...prev, phuongThucThanhToan: 'cash', loaiThe: '', tenNganHang: '' }))} // Clear other payment specific fields
           >
             <FaMoneyBillWave className={styles.paymentIcon} />
             <div className={styles.paymentInfo}>
@@ -552,7 +562,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
 
           <div 
             className={`${styles.paymentMethod} ${formData.phuongThucThanhToan === 'card' ? styles.selected : ''}`}
-            onClick={() => setFormData(prev => ({ ...prev, phuongThucThanhToan: 'card' }))}
+            onClick={() => setFormData(prev => ({ ...prev, phuongThucThanhToan: 'card', tenNganHang: '' }))} // Clear bank name
           >
             <FaCreditCard className={styles.paymentIcon} />
             <div className={styles.paymentInfo}>
@@ -563,7 +573,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
 
           <div 
             className={`${styles.paymentMethod} ${formData.phuongThucThanhToan === 'transfer' ? styles.selected : ''}`}
-            onClick={() => setFormData(prev => ({ ...prev, phuongThucThanhToan: 'transfer' }))}
+            onClick={() => setFormData(prev => ({ ...prev, phuongThucThanhToan: 'transfer', loaiThe: '' }))} // Clear card type
           >
             <FaUniversity className={styles.paymentIcon} />
             <div className={styles.paymentInfo}>
@@ -572,7 +582,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
             </div>
           </div>
 
-          {formData.phuongThucThanhToan !== 'cash' && (
+          {formData.phuongThucThanhToan === 'card' && ( // Only show for card
             <div className={styles.cardTypes}>
               <h4>Chọn loại thẻ</h4>
               <div className={styles.cardTypeGrid}>
@@ -590,6 +600,27 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
                 ))}
               </div>
               {errors.loaiThe && <span className={styles.errorText}>{errors.loaiThe}</span>}
+            </div>
+          )}
+
+          {formData.phuongThucThanhToan === 'transfer' && ( // Only show for bank transfer
+            <div className={styles.cardTypes}> {/* Reusing cardTypes class, consider renaming for clarity if more distinct styles are needed */}
+              <h4>Chọn ngân hàng</h4>
+              <div className={styles.cardTypeGrid}>
+                {['MB Bank', 'VietcomBank', 'TechcomBank'].map((bank) => (
+                  <label key={bank} className={styles.cardTypeOption}>
+                    <input
+                      type="radio"
+                      name="tenNganHang"
+                      value={bank}
+                      checked={formData.tenNganHang === bank}
+                      onChange={handleInputChange}
+                    />
+                    <span>{bank}</span>
+                  </label>
+                ))}
+              </div>
+              {errors.tenNganHang && <span className={styles.errorText}>{errors.tenNganHang}</span>}
             </div>
           )}
         </div>
