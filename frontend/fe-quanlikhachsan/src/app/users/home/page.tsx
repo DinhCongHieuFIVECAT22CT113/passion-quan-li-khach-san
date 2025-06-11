@@ -140,7 +140,7 @@ export default function Home() {
                 <span className={styles.dateLabel}>Nhận phòng</span>
                 <input 
                   type="date" 
-                  defaultValue="2023-11-06" 
+                  defaultValue="2025-11-06" 
                   min={new Date().toISOString().split('T')[0]}
                 />
               </div>
@@ -150,7 +150,7 @@ export default function Home() {
                 <span className={styles.dateLabel}>Trả phòng</span>
                 <input 
                   type="date" 
-                  defaultValue="2023-11-07" 
+                  defaultValue="2025-11-07" 
                   min={new Date().toISOString().split('T')[0]}
                 />
               </div>
@@ -167,10 +167,32 @@ export default function Home() {
               </div>
             </div>
             
-            <button className={styles.searchButton}>
+            <Link href="/users/rooms" className={styles.searchButton}>
               <i className="fas fa-search"></i>
               Tìm kiếm
-            </button>
+            </Link>
+            
+            <div className={styles.roomsContainer}>
+              {/* Room list content will be here */}
+            </div>
+            
+            <div className={styles.navigationControls}>
+              <button 
+                className={`${styles.navButton}`} 
+                onClick={() => document.querySelector('.roomsContainer')?.scrollBy({left: -300, behavior: 'smooth'})}
+                aria-label="Previous rooms"
+              >
+                <i className="fas fa-chevron-left"></i>
+              </button>
+              
+              <button 
+                className={`${styles.navButton}`} 
+                onClick={() => document.querySelector('.roomsContainer')?.scrollBy({left: 300, behavior: 'smooth'})}
+                aria-label="Next rooms"
+              >
+                <i className="fas fa-chevron-right"></i>
+              </button>
+            </div>
           </div>
           
           <div className={styles.heroActions}>

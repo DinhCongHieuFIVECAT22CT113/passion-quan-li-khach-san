@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { FaUser, FaSignOutAlt } from 'react-icons/fa';
 import styles from './Header.module.css';
 import { useTranslation } from 'react-i18next';
@@ -14,6 +14,7 @@ import { useLogout } from '../../../lib/hooks';
 
 export default function Header() {
   const pathname = usePathname();
+  const router = useRouter();
   const { t } = useTranslation();
   const { selectedLanguage } = useLanguage();
   const [isReady, setIsReady] = useState(false);
@@ -123,9 +124,12 @@ export default function Header() {
             </>
           ) : (
             <>
-              <Link href="/login" className={styles.authLink}>
-                {t('profile.login', 'Đăng nhập')}
-              </Link>
+              <a 
+                href="/login" 
+                className={styles.authButton || "login-button"}
+              >
+                Đăng nhập
+              </a>
               <Link href="/signup" className={`${styles.authLink} ${styles.signupButton}`}>
                 {t('profile.signup', 'Đăng ký')}
               </Link>

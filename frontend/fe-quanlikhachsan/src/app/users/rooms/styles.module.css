@@ -397,6 +397,51 @@
   display: none;
 }
 
+/* Add horizontal scrolling container */
+.roomsContainer {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  position: relative;
+  padding: 0 40px; /* Space for navigation buttons */
+  scrollbar-width: none; /* Hide scrollbar for Firefox */
+}
+
+.roomsContainer::-webkit-scrollbar {
+  display: none; /* Hide scrollbar for Chrome/Safari */
+}
+
+/* Navigation buttons */
+.navButton {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.3s ease;
+}
+
+.navButton:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.prevButton {
+  left: 0;
+}
+
+.nextButton {
+  right: 0;
+}
+
 /* Room Card */
 .roomCard {
   width: 300px;

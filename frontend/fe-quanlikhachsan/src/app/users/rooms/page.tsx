@@ -15,6 +15,7 @@ import Breadcrumb from '../../components/navigation/Breadcrumb';
 import EnhancedSearchBar from '../../components/search/EnhancedSearchBar';
 import { RoomGridSkeleton, LoadingSpinner } from '../../components/ui/LoadingStates';
 import { NetworkError } from '../../components/ui/ErrorBoundary';
+import { useSearchParams } from 'next/navigation';
 
 // Hàm hỗ trợ để đảm bảo đường dẫn hình ảnh hợp lệ
 const getValidImageSrc = (imagePath: string | undefined): string => {
@@ -35,6 +36,20 @@ const getValidImageSrc = (imagePath: string | undefined): string => {
 };
 
 export default function RoomsPage() {
+  const searchParams = useSearchParams();
+  const location = searchParams?.get('location') || '';
+  const checkIn = searchParams?.get('checkIn') || '';
+  const checkOut = searchParams?.get('checkOut') || '';
+  const guestsParam = searchParams?.get('guests') || '';
+
+  // Sử dụng các tham số này để lọc phòng nếu cần
+  useEffect(() => {
+    if (location || checkIn || checkOut || guestsParam) {
+      // Có thể thêm logic lọc phòng dựa trên các tham số tìm kiếm ở đây
+      console.log('Search params:', { location, checkIn, checkOut, guestsParam });
+    }
+  }, [location, checkIn, checkOut, guestsParam]);
+
   const [roomTypes, setRoomTypes] = useState<RoomType[]>([]);
   const [availableRoomCounts, setAvailableRoomCounts] = useState<{[key: string]: number}>({});
   const [loading, setLoading] = useState(true);
@@ -56,17 +71,17 @@ export default function RoomsPage() {
   const [checkOutDate, setCheckOutDate] = useState<string | null>(null);
   const [numberOfGuests, setNumberOfGuests] = useState<number>(2);
 
-  const roomGridRef = useRef<HTMLDivElement>(null);
+  const scrollContainer = useRef(null);
 
   const scrollLeft = () => {
-    if (roomGridRef.current) {
-      roomGridRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+    if (scrollContainer.current) {
+      scrollContainer.current.scrollBy({ left: -300, behavior: 'smooth' });
     }
   };
 
   const scrollRight = () => {
-    if (roomGridRef.current) {
-      roomGridRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+    if (scrollContainer.current) {
+      scrollContainer.current.scrollBy({ left: 300, behavior: 'smooth' });
     }
   };
 
@@ -229,7 +244,7 @@ export default function RoomsPage() {
           <p>Tìm kiếm phòng phù hợp cho kì nghỉ hoàn hảo của bạn</p>
           
           {/* Enhanced Search Form */}
-          <EnhancedSearchBar variant="page" showAdvancedFilters={true} />
+          <EnhancedSearchBar variant="hero" showAdvancedFilters={false} />
         </div>
       </section>
 
@@ -347,84 +362,94 @@ export default function RoomsPage() {
           </div>
         ) : (
           <>
-            <div className={styles.roomGrid} ref={roomGridRef}>
-              {sortedRoomTypes.map((roomType) => (
-                <div className={styles.roomCard} key={roomType.maLoaiPhong}>
-                  <div className={styles.roomImageContainer}>
-                    <Image
-                      src={getValidImageSrc(roomType.thumbnail)}
-                      alt={roomType.tenLoaiPhong}
-                      width={400}
-                      height={250}
-                      className={styles.roomImage}
-                    />
-                    <div className={styles.ratingBadge}>
-                      <FaStar className={styles.starIcon} /> 5.0
-                    </div>
-                  </div>
-                  
-                  <div className={styles.roomContent}>
-                    <h3 className={styles.roomTitle}>{roomType.tenLoaiPhong}</h3>
-                    <p className={styles.roomDescription}>
-                      {roomType.moTa || 'Phòng với thiết kế hiện đại, đầy đủ tiện nghi cao cấp.'}
-                    </p>
-                    
-                    <div className={styles.amenities}>
-                      <div className={styles.amenity}>
-                        <FaWifi />
-                        <span>WiFi</span>
-                      </div>
-                      <div className={styles.amenity}>
-                        <FaTv />
-                        <span>Smart TV</span>
-                      </div>
-                      <div className={styles.amenity}>
-                        <FaSnowflake />
-                        <span>Điều hòa</span>
-                      </div>
-                      <div className={styles.amenity}>
-                        <FaBath />
-                        <span>Phòng tắm</span>
-                      </div>
-                    </div>
-                    
-                    <div className={styles.roomSpecs}>
-                      <div className={styles.spec}>
-                        <span className={styles.specLabel}>Diện tích</span>
-                        <span className={styles.specValue}>{roomType.kichThuocPhong}m²</span>
-                      </div>
-                      <div className={styles.spec}>
-                        <span className={styles.specLabel}>Giường</span>
-                        <span className={styles.specValue}>{roomType.soGiuongNgu}</span>
-                      </div>
-                      <div className={styles.spec}>
-                        <span className={styles.specLabel}>Khách</span>
-                        <span className={styles.specValue}>{roomType.sucChua}</span>
-                      </div>
-                    </div>
-                    
-                    <div className={styles.priceContainer}>
-                      <div className={styles.price}>
-                        {new Intl.NumberFormat('vi-VN').format(roomType.giaMoiDem || 0)}đ
-                        <span className={styles.perNight}>/đêm</span>
-                      </div>
-                    </div>
-                    
-                    <Link
-                      href={`/rooms/${createRoomSlug(roomType.tenLoaiPhong, roomType.maLoaiPhong)}`}
-                      className={styles.viewDetailButton}
-                    >
-                      Xem chi tiết
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className={styles.navigationButtons}>
-              <button className={styles.navButton} onClick={scrollLeft}>
+            <div className={styles.roomsWrapper}>
+              <button 
+                className={`${styles.navButton} ${styles.prevButton}`} 
+                onClick={scrollLeft}
+                aria-label="Previous rooms"
+              >
                 <FaChevronLeft />
               </button>
-              <button className={styles.navButton} onClick={scrollRight}>
+              
+              <div className={styles.roomsContainer} ref={scrollContainer}>
+                {sortedRoomTypes.map((roomType) => (
+                  <div className={styles.roomCard} key={roomType.maLoaiPhong}>
+                    <div className={styles.roomImageContainer}>
+                      <Image
+                        src={getValidImageSrc(roomType.thumbnail)}
+                        alt={roomType.tenLoaiPhong}
+                        width={400}
+                        height={250}
+                        className={styles.roomImage}
+                      />
+                      <div className={styles.ratingBadge}>
+                        <FaStar className={styles.starIcon} /> 5.0
+                      </div>
+                    </div>
+                    
+                    <div className={styles.roomContent}>
+                      <h3 className={styles.roomTitle}>{roomType.tenLoaiPhong}</h3>
+                      <p className={styles.roomDescription}>
+                        {roomType.moTa || 'Phòng với thiết kế hiện đại, đầy đủ tiện nghi cao cấp.'}
+                      </p>
+                      
+                      <div className={styles.amenities}>
+                        <div className={styles.amenity}>
+                          <FaWifi />
+                          <span>WiFi</span>
+                        </div>
+                        <div className={styles.amenity}>
+                          <FaTv />
+                          <span>Smart TV</span>
+                        </div>
+                        <div className={styles.amenity}>
+                          <FaSnowflake />
+                          <span>Điều hòa</span>
+                        </div>
+                        <div className={styles.amenity}>
+                          <FaBath />
+                          <span>Phòng tắm</span>
+                        </div>
+                      </div>
+                      
+                      <div className={styles.roomSpecs}>
+                        <div className={styles.spec}>
+                          <span className={styles.specLabel}>Diện tích</span>
+                          <span className={styles.specValue}>{roomType.kichThuocPhong}m²</span>
+                        </div>
+                        <div className={styles.spec}>
+                          <span className={styles.specLabel}>Giường</span>
+                          <span className={styles.specValue}>{roomType.soGiuongNgu}</span>
+                        </div>
+                        <div className={styles.spec}>
+                          <span className={styles.specLabel}>Khách</span>
+                          <span className={styles.specValue}>{roomType.sucChua}</span>
+                        </div>
+                      </div>
+                      
+                      <div className={styles.priceContainer}>
+                        <div className={styles.price}>
+                          {new Intl.NumberFormat('vi-VN').format(roomType.giaMoiDem || 0)}đ
+                          <span className={styles.perNight}>/đêm</span>
+                        </div>
+                      </div>
+                      
+                      <Link
+                        href={`/rooms/${createRoomSlug(roomType.tenLoaiPhong, roomType.maLoaiPhong)}`}
+                        className={styles.viewDetailButton}
+                      >
+                        Xem chi tiết
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <button 
+                className={`${styles.navButton} ${styles.nextButton}`} 
+                onClick={scrollRight}
+                aria-label="Next rooms"
+              >
                 <FaChevronRight />
               </button>
             </div>
