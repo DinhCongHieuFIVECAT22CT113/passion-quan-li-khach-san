@@ -247,8 +247,9 @@ export default function RevenueReport() {
         beginAtZero: true,
         grid: {
           color: 'rgba(226, 232, 240, 0.5)',
-          drawBorder: false
+          
         },
+        border: { display: false },
         ticks: {
           font: {
             size: 12
