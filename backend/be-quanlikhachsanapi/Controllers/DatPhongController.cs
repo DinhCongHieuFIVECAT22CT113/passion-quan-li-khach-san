@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using be_quanlikhachsanapi.Authorization;
 using System.Security.Claims;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace be_quanlikhachsanapi.Controllers
 {
@@ -18,20 +19,23 @@ namespace be_quanlikhachsanapi.Controllers
         private readonly ISendEmailServices _sendEmail;
         private readonly DataQlks113Nhom2Context _context;
         private readonly INotificationService _notificationService;
+        private readonly IMemoryCache _cache;
 
         // Tạm lưu booking chưa xác nhận (bạn nên chuyển sang cache hoặc DB)
         private static readonly Dictionary<string, PendingGuestBooking> _pendingBookings = new();
 
         public DatPhongController(
-            IDatPhongRepository datPhongRepo, 
+            IDatPhongRepository datPhongRepo,
             ISendEmailServices sendEmail,
             DataQlks113Nhom2Context context,
-            INotificationService notificationService)
+            INotificationService notificationService,
+            IMemoryCache cache)
         {
             _datPhongRepo = datPhongRepo;
             _sendEmail = sendEmail;
             _context = context;
             _notificationService = notificationService;
+            _cache = cache;
         }
 
         [HttpGet]
@@ -94,11 +98,11 @@ namespace be_quanlikhachsanapi.Controllers
             }
         }
 
-        // ✅ API công khai cho khách vãng lai đặt phòng trực tiếp
+        // ✅ API đặt phòng trực tiếp cho khách vãng lai (không cần xác nhận email)
         [HttpPost("Guest")]
         [AllowAnonymous]
         [Consumes("multipart/form-data")]
-        public IActionResult CreateGuestBooking([FromForm] CreateDatPhongDTO createDatPhong)
+        public IActionResult CreateGuestBooking([FromForm] CreateGuestBookingDTO createGuestBooking)
         {
             try
             {
@@ -115,16 +119,77 @@ namespace be_quanlikhachsanapi.Controllers
                     });
                 }
 
-                var datPhong = _datPhongRepo.CreateDatPhong(createDatPhong);
-                if (datPhong == null)
+                // Tạo hoặc tìm khách hàng dựa trên email/số điện thoại
+                var khachHang = _context.KhachHangs.FirstOrDefault(kh =>
+                    kh.Email == createGuestBooking.Email || kh.Sdt == createGuestBooking.SoDienThoai);
+
+                string maKhachHang;
+                if (khachHang == null)
                 {
-                    return BadRequest(new { message = "Không thể tạo thông tin đặt phòng mới." });
+                    // Tạo khách hàng mới cho khách vãng lai
+                    var lastKhachHang = _context.KhachHangs
+                        .OrderByDescending(kh => kh.MaKh)
+                        .FirstOrDefault();
+
+                    int nextNumber = 1;
+                    if (lastKhachHang != null && lastKhachHang.MaKh.StartsWith("KH"))
+                    {
+                        if (int.TryParse(lastKhachHang.MaKh.Substring(2), out int currentNumber))
+                        {
+                            nextNumber = currentNumber + 1;
+                        }
+                    }
+
+                    maKhachHang = $"KH{nextNumber:D3}";
+
+                    // Tách họ và tên từ họ tên đầy đủ
+                    var hoTenParts = createGuestBooking.HoTen.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    var ho = hoTenParts.Length > 0 ? hoTenParts[0] : "";
+                    var ten = hoTenParts.Length > 1 ? string.Join(" ", hoTenParts.Skip(1)) : "";
+
+                    var newKhachHang = new KhachHang
+                    {
+                        MaKh = maKhachHang,
+                        UserName = createGuestBooking.Email,
+                        PasswordHash = "GuestUser123", // Mật khẩu mặc định cho khách vãng lai
+                        HoKh = ho,
+                        TenKh = ten,
+                        Email = createGuestBooking.Email,
+                        Sdt = createGuestBooking.SoDienThoai,
+                        SoCccd = "000000000000", // CCCD mặc định
+                        MaLoaiKh = "LKH001", // Loại khách hàng thường
+                        NgayTao = DateTime.Now,
+                        NgaySua = DateTime.Now
+                    };
+
+                    _context.KhachHangs.Add(newKhachHang);
+                    _context.SaveChanges();
                 }
-                return Ok(datPhong);
+                else
+                {
+                    maKhachHang = khachHang.MaKh;
+                }
+
+                // Tạo DTO để đặt phòng
+                var createDatPhong = new CreateDatPhongDTO
+                {
+                    MaKH = maKhachHang,
+                    MaPhong = createGuestBooking.MaPhong,
+                    NgayNhanPhong = createGuestBooking.NgayNhanPhong,
+                    NgayTraPhong = createGuestBooking.NgayTraPhong,
+                    TreEm = createGuestBooking.SoTreEm,
+                    NguoiLon = createGuestBooking.SoNguoiLon,
+                    GhiChu = createGuestBooking.GhiChu ?? "Đặt phòng khách vãng lai",
+                    SoLuongPhong = 1,
+                    ThoiGianDen = createGuestBooking.ThoiGianDen ?? "14:00"
+                };
+
+                var result = _datPhongRepo.CreateDatPhong(createDatPhong);
+                return result;
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new { message = $"Lỗi khi đặt phòng: {ex.Message}" });
             }
         }
 
@@ -239,18 +304,23 @@ namespace be_quanlikhachsanapi.Controllers
                     newMaKhachHang = "KH" + (soHienTai + 1).ToString("D3");
                 }
                 
+                // Tách họ và tên từ họ tên đầy đủ
+                var hoTenParts = booking.HoTen.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                var ho = hoTenParts.Length > 0 ? hoTenParts[0] : "";
+                var ten = hoTenParts.Length > 1 ? string.Join(" ", hoTenParts.Skip(1)) : "";
+
                 // Tạo khách hàng mới
                 var newKhachHang = new KhachHang
                 {
                     MaKh = newMaKhachHang,
-                    HoKh = booking.HoTen.Split(' ')[0],
-                    TenKh = booking.HoTen.Contains(' ') ? booking.HoTen.Substring(booking.HoTen.IndexOf(' ') + 1) : booking.HoTen,
+                    UserName = booking.Email,
+                    PasswordHash = "GuestUser123", // Mật khẩu mặc định cho khách vãng lai
+                    HoKh = ho,
+                    TenKh = ten,
                     Email = booking.Email,
                     Sdt = booking.SoDienThoai,
+                    SoCccd = "000000000000", // CCCD mặc định
                     MaLoaiKh = "LKH001", // Loại khách hàng thường
-                    UserName = booking.Email,
-                    PasswordHash = "DefaultPassword123", // Mật khẩu mặc định, nên được hash trong thực tế
-                    SoCccd = "000000000000", // Giá trị mặc định
                     NgayTao = DateTime.Now,
                     NgaySua = DateTime.Now
                 };

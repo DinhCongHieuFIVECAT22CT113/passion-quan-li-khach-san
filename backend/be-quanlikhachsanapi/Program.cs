@@ -18,17 +18,17 @@ using be_quanlikhachsanapi.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Ép Kestrel sử dụng đúng cổng 8080 (Render yêu cầu)
-builder.WebHost.ConfigureKestrel(serverOptions =>
+// ✅ Cấu hình Kestrel đúng cổng Render yêu cầu
+builder.WebHost.ConfigureKestrel(options =>
 {
-    serverOptions.ListenAnyIP(8080);
+    options.ListenAnyIP(8080);
 });
 
-// Đọc connection string
+// ✅ Connection String
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 Console.WriteLine($"Đang thử kết nối đến: {connectionString}");
 
-// Cấu hình Controllers
+// ✅ Cấu hình Controller với NewtonsoftJson
 builder.Services.AddControllers()
     .AddNewtonsoftJson(options =>
     {
@@ -37,8 +37,6 @@ builder.Services.AddControllers()
     });
 
 builder.Services.AddEndpointsApiExplorer();
-
-// Swagger + JWT
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -48,7 +46,7 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Nhập token vào đây (không cần chữ 'Bearer ')"
+        Description = "Nhập JWT token vào đây (không cần chữ 'Bearer ')"
     });
 
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -67,49 +65,34 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 builder.Services.AddSwaggerGenNewtonsoftSupport();
-builder.Services.Configure<SwaggerGenOptions>(options => {
-    options.CustomSchemaIds(type => type.FullName);
-});
+builder.Services.Configure<SwaggerGenOptions>(opt => opt.CustomSchemaIds(type => type.FullName));
 
-// DbContext
-builder.Services.AddDbContext<DataQlks113Nhom2Context>(options =>
-    options.UseSqlServer(connectionString));
+// ✅ Cấu hình EF DbContext
+builder.Services.AddDbContext<DataQlks113Nhom2Context>(opt =>
+    opt.UseSqlServer(connectionString));
 
-// CORS (bao gồm AllowCredentials)
+// ✅ CORS
 builder.Services.AddCors(options =>
 {
     var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ??
                          new[] { "http://localhost:3000", "https://passion-quan-li-khach-san-git-main-conghieus-projects.vercel.app" };
 
-    if (builder.Environment.IsDevelopment())
+    options.AddPolicy("AllowCredentials", cors =>
     {
-        options.AddPolicy("AllowCredentials", cors =>
-        {
-            cors.SetIsOriginAllowed(_ => true)
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowCredentials()
-                .WithExposedHeaders("Content-Disposition", "Content-Length", "Content-Type");
-        });
-    }
-    else
-    {
-        options.AddPolicy("AllowCredentials", cors =>
-        {
-            cors.WithOrigins(allowedOrigins)
-                .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowCredentials()
-                .WithExposedHeaders("Content-Disposition", "Content-Length", "Content-Type");
-        });
-    }
+        cors.WithOrigins(allowedOrigins)
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials()
+            .WithExposedHeaders("Content-Disposition", "Content-Length", "Content-Type");
+    });
 });
 
+// ✅ SignalR, Cache, HTTP Accessor
 builder.Services.AddMemoryCache();
 builder.Services.AddSignalR();
 builder.Services.AddHttpContextAccessor();
 
-// Supabase
+// ✅ Supabase
 builder.Services.AddSingleton<Supabase.Client>(provider =>
 {
     var config = provider.GetRequiredService<IConfiguration>();
@@ -124,7 +107,7 @@ builder.Services.AddSingleton<Supabase.Client>(provider =>
     return new Supabase.Client(url, key, options);
 });
 
-// Đăng ký services
+// ✅ DI các repository/service
 builder.Services.AddScoped<IRefreshTokenService, RefreshTokenService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<ISendEmailServices, SendEmailServices>();
@@ -152,7 +135,7 @@ builder.Services.AddScoped<IBaoCaoRepository, BaoCaoRepository>();
 builder.Services.AddScoped<IPasswordHasher<KhachHang>, PasswordHasher<KhachHang>>();
 builder.Services.AddScoped<IPasswordHasher<NhanVien>, PasswordHasher<NhanVien>>();
 
-// JWT
+// ✅ JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -168,21 +151,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
-// Kiểm tra kết nối DB
+// ✅ Kiểm tra kết nối DB
 try
 {
     using var scope = app.Services.CreateScope();
     var dbContext = scope.ServiceProvider.GetRequiredService<DataQlks113Nhom2Context>();
     dbContext.Database.OpenConnection();
-    Console.WriteLine("Kết nối cơ sở dữ liệu thành công!");
+    Console.WriteLine("✅ Kết nối cơ sở dữ liệu thành công!");
     dbContext.Database.CloseConnection();
 }
 catch (Exception ex)
 {
-    Console.WriteLine($"Lỗi kết nối cơ sở dữ liệu: {ex.Message}");
+    Console.WriteLine($"❌ Lỗi kết nối CSDL: {ex.Message}");
 }
 
-// Middleware
+// ✅ Middleware pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -197,13 +180,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseStaticFiles();
 app.UseCors("AllowCredentials");
-
-// ❌ KHÔNG dùng redirect HTTPS trên Render
+// KHÔNG bật HTTPS redirect vì Render không cần
 // app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 app.MapHub<NotificationHub>("/notificationHub");
 

@@ -170,6 +170,10 @@ const loginUser = (token: string, refreshToken?: string) => {
     const tenKh = nameParts.length > 0 ? nameParts[nameParts.length - 1] : ''; // "Tín"
     const hoKh = nameParts.length > 1 ? nameParts.slice(0, -1).join(' ') : ''; // "Trương Trung"
 
+    // Lấy avatar từ localStorage nếu có (để persist qua F5)
+    const savedAvatarUrl = localStorage.getItem('userAvatarUrl');
+    const avatarUrl = savedAvatarUrl || decodedToken.picture || undefined;
+
     const currentUser: AuthUser = {
       maNguoiDung: decodedToken.nameid, // "KH023"
       hoTen: decodedToken.name, // "Trương Trung Tín"
@@ -181,7 +185,7 @@ const loginUser = (token: string, refreshToken?: string) => {
       hoKh, // "Trương Trung"
       tenKh, // "Tín"
       soCccd: decodedToken.cccd, // "122001042210"
-      avatarUrl: decodedToken.picture, // undefined
+      avatarUrl, // Từ localStorage hoặc token
     };
     setUser(currentUser);
     
@@ -198,6 +202,9 @@ const loginUser = (token: string, refreshToken?: string) => {
     // Dừng auto-refresh và xóa tất cả tokens
     tokenManager.stopAutoRefresh();
     tokenManager.clearTokens();
+
+    // Xóa avatar URL khỏi localStorage
+    localStorage.removeItem('userAvatarUrl');
 
     setUser(null);
     // Không cần redirect ở đây, việc redirect sẽ do useLogout hoặc component gọi logout xử lý

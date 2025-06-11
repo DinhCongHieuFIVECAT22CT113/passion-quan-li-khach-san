@@ -45,7 +45,8 @@ namespace be_quanlikhachsanapi.Services
                 new Claim("mobilephone", khachHang.Sdt ?? string.Empty),
                 new Claim("username", khachHang.UserName ?? string.Empty),
                 new Claim("cccd", khachHang.SoCccd ?? string.Empty),
-                new Claim("address", khachHang.DiaChi ?? string.Empty)
+                new Claim("address", khachHang.DiaChi ?? string.Empty),
+                new Claim("picture", khachHang.AnhDaiDien ?? string.Empty)
             };
 
             var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);

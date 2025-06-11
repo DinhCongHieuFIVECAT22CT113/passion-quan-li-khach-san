@@ -36,7 +36,34 @@ namespace be_quanlikhachsanapi.DTOs
 
         [Required(ErrorMessage = "Ngày trả phòng là bắt buộc")]
         public DateTime NgayTraPhong { get; set; }
+    }
 
+    // DTO cho khách vãng lai đặt phòng
+    public class CreateGuestBookingDTO
+    {
+        [Required(ErrorMessage = "Họ tên là bắt buộc")]
+        public string HoTen { get; set; }
+
+        [Required(ErrorMessage = "Email là bắt buộc")]
+        [EmailAddress(ErrorMessage = "Email không hợp lệ")]
+        public string Email { get; set; }
+
+        [Required(ErrorMessage = "Số điện thoại là bắt buộc")]
+        public string SoDienThoai { get; set; }
+
+        [Required(ErrorMessage = "Mã phòng là bắt buộc")]
+        public string MaPhong { get; set; }
+
+        [Required(ErrorMessage = "Ngày nhận phòng là bắt buộc")]
+        public DateTime NgayNhanPhong { get; set; }
+
+        [Required(ErrorMessage = "Ngày trả phòng là bắt buộc")]
+        public DateTime NgayTraPhong { get; set; }
+
+        public int SoNguoiLon { get; set; } = 1;
+        public int SoTreEm { get; set; } = 0;
+        public string? GhiChu { get; set; }
+        public string? ThoiGianDen { get; set; } = "14:00";
     }
 
     public class UpdateDatPhongDTO

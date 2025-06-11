@@ -190,15 +190,24 @@ const ProfilePageContent: FC = () => {
           setConfirmNewPassword('');
         }, 3000);
       } else {
-        const errorData = await response.json();
-        if (errorData.errors) {
-          setPasswordErrors({
-            current: errorData.errors.oldPassword || errorData.errors.OldPassword,
-            new: errorData.errors.newPassword || errorData.errors.NewPassword,
-            confirm: errorData.errors.confirmPassword || errorData.errors.ConfirmPassword
-          });
-        } else {
-          window.alert(errorData.message || 'Đổi mật khẩu thất bại. Vui lòng thử lại.');
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+        console.error('Response status:', response.status);
+
+        try {
+          const errorData = JSON.parse(errorText);
+          if (errorData.errors) {
+            setPasswordErrors({
+              current: errorData.errors.Password || errorData.errors.password,
+              new: errorData.errors.NewPassword || errorData.errors.newPassword,
+              confirm: errorData.errors.ConfirmPassword || errorData.errors.confirmPassword
+            });
+          } else {
+            window.alert(errorData.message || errorText || 'Đổi mật khẩu thất bại. Vui lòng thử lại.');
+          }
+        } catch (parseError) {
+          // Response không phải JSON
+          window.alert(errorText || 'Đổi mật khẩu thất bại. Vui lòng thử lại.');
         }
       }
     } catch (error) {

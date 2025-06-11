@@ -113,7 +113,9 @@ export default function MyBookingsPage() {
         if (Array.isArray(data) && user?.maNguoiDung) {
           const originalLength = data.length;
           data = data.filter(booking => {
-            const bookingMaKH = booking.maKH || booking.MaKH;
+            // API trả về field 'maKh' (chữ thường)
+            const bookingMaKH = booking.maKh || booking.maKH || booking.MaKH;
+            console.log(`So sánh booking: ${bookingMaKH} === ${user.maNguoiDung}`);
             return bookingMaKH === user.maNguoiDung;
           });
           console.log(`Lọc từ ${originalLength} xuống ${data.length} đặt phòng cho user ${user.maNguoiDung}`);
@@ -134,7 +136,8 @@ export default function MyBookingsPage() {
           // Lọc chỉ lấy đặt phòng của user hiện tại
           if (Array.isArray(allBookings) && user?.maNguoiDung) {
             data = allBookings.filter(booking => {
-              const bookingMaKH = booking.maKH || booking.MaKH;
+              // API trả về field 'maKh' (chữ thường)
+              const bookingMaKH = booking.maKh || booking.maKH || booking.MaKH;
               console.log(`So sánh: ${bookingMaKH} === ${user.maNguoiDung}`);
               return bookingMaKH === user.maNguoiDung;
             });
@@ -284,7 +287,7 @@ export default function MyBookingsPage() {
         console.log('Số lượng dữ liệu gốc:', Array.isArray(data) ? data.length : 'Không phải mảng');
         if (Array.isArray(data) && data.length > 0) {
           console.log('Mẫu đặt phòng đầu tiên:', data[0]);
-          console.log('Các mã khách hàng trong dữ liệu:', data.map(b => b.maKH || b.MaKH));
+          console.log('Các mã khách hàng trong dữ liệu:', data.map(b => b.maKh || b.maKH || b.MaKH));
         }
       } else {
         console.log('=== DEBUG: Tìm thấy đặt phòng ===');

@@ -86,6 +86,9 @@ const AvatarUploadModal: React.FC<AvatarUploadModalProps> = ({ onClose, onAvatar
         // Gọi callback để cập nhật UI
         onAvatarSelected(avatarUrl);
 
+        // Lưu avatar URL vào localStorage để persist qua F5
+        localStorage.setItem('userAvatarUrl', avatarUrl);
+
         alert('Upload avatar thành công!');
         onClose();
       } else {
