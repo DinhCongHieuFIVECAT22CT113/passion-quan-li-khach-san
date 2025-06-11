@@ -346,22 +346,13 @@ export default function RoomsListPage() {
 
       <main className={styles.mainContent}>
         <div className={styles.container}>
-          {/* Room Header */}
-          <div className={styles.roomHeader}>
-            <div className={styles.roomTitle}>
-              <h1>Danh sách phòng {roomType?.tenLoaiPhong ? `(Loại: ${roomType.tenLoaiPhong})` : ''}</h1>
-              <p className={styles.roomType}>{'Các phòng có sẵn.'}</p>
-            </div>
-            <div className={styles.roomRating}>
-              <div className={styles.stars}>
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <FaStar key={star} className={styles.starActive} />
-                ))}
-              </div>
-              <span className={styles.ratingText}>5.0 (128 đánh giá)</span>
+          <div className={styles.heroImageContainer}>
+            {/*Image ở đây*/}
+            <div className={styles.heroOverlay}>
+              <h1 className={styles.heroMainTitle}>Danh sách phòng {roomType?.tenLoaiPhong} còn trống</h1>
+              <p className={styles.heroSubText}>Với đầy đủ tiện nghi và không gian thoải mái</p>
             </div>
           </div>
-
           <div className={styles.roomsList}>
             {rooms.length > 0 ? (
               rooms.map((room) => (
@@ -513,84 +504,7 @@ export default function RoomsListPage() {
           </div>
         </div>
       </main>
-          {/* Location Section */}
-          <div className={styles.locationSection}>
-            <h2>
-              <FaMapMarkerAlt className={styles.sectionIcon} />
-              Vị trí
-            </h2>
-            <div className={styles.mapContainer}>
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.757135614257!2d105.84125361476292!3d21.007025386010126!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ac428c3336e5%3A0x384d11d7f7f3b4a8!2zQ29wYWNhYmFuYSBNYXJrZXQgLSBUaOG7jyBMw6A!5e0!3m2!1svi!2s!4v1647901645957!5m2!1svi!2s"
-                width="100%"
-                height="300"
-                style={{ border: 0 }}
-                allowFullScreen
-                loading="lazy"
-              />
-            </div>
-          </div>
       <Footer />
-
-      {selectedRoomImages && (
-        <div className={styles.fullImageModal}>
-          <div className={styles.fullImageSliderContainer}>
-            <Image
-              src={selectedRoomImages[currentImageModalIndex]}
-              alt={`Ảnh phòng ${currentImageModalIndex + 1}`}
-              width={1200}
-              height={700}
-              className={styles.fullImageMain}
-              priority
-            />
-
-            {selectedRoomImages.length > 1 && (
-              <>
-                <button
-                  className={`${styles.modalSliderNavButton} ${styles.modalPrevButton}`}
-                  onClick={handlePrevImageModal}
-                  aria-label="Ảnh trước"
-                >
-                  &lt;
-                </button>
-                <button
-                  className={`${styles.modalSliderNavButton} ${styles.modalNextButton}`}
-                  onClick={handleNextImageModal}
-                  aria-label="Ảnh tiếp theo"
-                >
-                  &gt;
-                </button>
-              </>
-            )}
-
-            {selectedRoomImages.length > 1 && (
-              <div className={styles.modalThumbnailsSlider}>
-                {selectedRoomImages.map((img, index) => (
-                  <Image
-                    key={index}
-                    src={img}
-                    alt={`Ảnh nhỏ ${index + 1}`}
-                    width={100}
-                    height={70}
-                    className={`${styles.modalThumbnailImage} ${index === currentImageModalIndex ? styles.activeModalThumbnail : ''}`}
-                    onClick={() => handleThumbnailModalClick(index)}
-                    priority={false}
-                  />
-                ))}
-              </div>
-            )}
-
-            <button
-              className={styles.closeModalButton}
-              onClick={handleCloseModal}
-              aria-label="Đóng ảnh"
-            >
-              ×
-            </button>
-          </div>
-        </div>
-      )}
-
       {showBookingModal && selectedRoomForBooking && (
         <BookingModal
           loaiPhong={roomType} // Pass the roomType details to the booking modal
