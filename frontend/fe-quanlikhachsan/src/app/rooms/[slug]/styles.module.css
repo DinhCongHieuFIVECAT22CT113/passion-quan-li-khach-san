@@ -197,13 +197,13 @@
 
 .roomRow {
   display: flex;
-  gap: 1rem;
-  background-color: white;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-  border: 1px solid #f0f0f0;
+  gap: 2.2rem;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 5px 18px rgba(0,0,0,0.09);
+  padding: 1.5rem 1.5rem 2rem 1.5rem;
+  margin-bottom: 2.2rem;
+  align-items: flex-start;
 }
 
 .roomRow:hover {
@@ -212,7 +212,12 @@
 }
 
 .roomRowImage {
-  flex: 0 0 500px;
+  flex: 1 1 45%;
+  max-width: 46%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
 }
 
 .rowImage {
@@ -220,6 +225,15 @@
   height: 300px;
   object-fit: cover;
   border-radius: 12px 0 0 12px;
+}
+
+.rowImage, .mainImage img {
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(156,130,80,0.08);
+  background: #f5f5f5;
 }
 
 .imageGallery {
@@ -243,20 +257,26 @@
 
 .thumbnailGrid {
   display: flex;
-  gap: 4px;
-  margin-top: 4px;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
 }
 
 .thumbnailItem {
-  flex: 1;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(156,130,80,0.08);
+  transition: transform 0.2s;
 }
 
+.thumbnailItem:hover {
+  transform: scale(1.07);
+  box-shadow: 0 2px 8px rgba(156,130,80,0.18);
+}
 .thumbnailImage {
-  width: 100%;
+  width: 60px;
   height: 40px;
   object-fit: cover;
-  border-radius: 4px;
-  cursor: pointer;
+  display: block;
 }
 
 .moreImages {
@@ -270,30 +290,30 @@
   cursor: pointer;
 }
 
+/* Nút xem tất cả ảnh */
 .viewAllButton {
-  position: absolute;
-  bottom: 8px;
-  left: 8px;
-  background-color: #9c8250;
-  color: white;
+  margin-top: 0.7rem;
+  background: #9c8250;
+  color: #fff;
   border: none;
-  padding: 6px 12px;
-  border-radius: 4px;
-  font-size: 0.8rem;
+  border-radius: 8px;
+  padding: 0.45rem 1.2rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background 0.2s;
 }
-
 .viewAllButton:hover {
-  background-color: #7d6942;
+  background: #7d6942;
 }
 
 .roomRowContent {
-  flex: 1;
-  padding: 0.8rem 1rem;
+  flex: 1 1 55%;
+  max-width: 54%;
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  gap: 1.2rem;
+  padding-left: 1.2rem;
+  justify-content: flex-start;
 }
 
 .roomRowContent h3 {
@@ -323,6 +343,21 @@
 .featureValue {
   font-size: 0.85rem;
   color: #333;
+}
+
+/* Hiệu ứng cho phần mô tả phòng */
+.roomDescription {
+  transition: box-shadow 0.3s, background 0.3s, transform 0.3s;
+  border-radius: 10px;
+  background: #faf8f3;
+  padding: 0.8rem 1rem;
+  margin-bottom: 0.8rem;
+}
+
+.roomDescription:hover {
+  box-shadow: 0 4px 24px rgba(156, 130, 80, 0.13);
+  background: #fffbe9;
+  transform: translateY(-2px) scale(1.01);
 }
 
 .roomDescription h4 {
@@ -363,6 +398,140 @@
   color: #333;
 }
 
+/* ===== Room Overview (Thông tin tổng quan phòng) ===== */
+.roomOverview {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  margin-bottom: 1.2rem;
+  flex-wrap: wrap;
+  background: #fffbe9;
+  border-radius: 12px;
+  padding: 1.2rem 1.5rem 1rem 1.5rem;
+  box-shadow: 0 2px 12px rgba(156, 130, 80, 0.07);
+  transition: box-shadow 0.3s, border 0.3s;
+  border: 1.5px solid #f0e6d2;
+}
+
+.roomOverview:hover {
+  box-shadow: 0 6px 24px rgba(156, 130, 80, 0.13);
+  border-color: #c0a978;
+}
+
+.roomOverview:hover .roomOverviewTitle {
+  color: #9c8250;
+  text-shadow: 0 2px 8px #f5e9c8;
+}
+
+.roomOverviewLeft {
+  flex: 2;
+  min-width: 220px;
+}
+.roomOverviewRight {
+  flex: 1;
+  min-width: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-start;
+}
+
+.roomOverviewTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 0.7rem;
+  transition: color 0.25s, text-shadow 0.25s;
+}
+
+.roomOverviewDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  min-width: 180px;
+}
+
+.roomOverviewRow {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.2rem;
+}
+
+.roomOverviewLabel {
+  color: #9c8250;
+  font-size: 0.97rem;
+  font-weight: 500;
+  margin-right: 0.3rem;
+  transition: color 0.25s;
+}
+
+.roomOverviewValue {
+  color: #333;
+  font-size: 1.05rem;
+  font-weight: 500;
+  transition: color 0.25s, text-shadow 0.25s;
+}
+
+.roomOverview:hover .roomOverviewLabel {
+  color: #7d6942;
+}
+
+.roomOverview:hover .roomOverviewValue {
+  color: #b08a4a;
+  text-shadow: 0 1px 6px #f5e9c8;
+}
+
+.roomTypeValue {
+  color: #9c8250;
+  font-size: 1.08rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: color 0.25s, text-shadow 0.25s;
+}
+.roomOverview:hover .roomTypeValue {
+  color: #7d6942;
+  text-shadow: 0 1px 6px #f5e9c8;
+}
+
+.roomStatus {
+  color: #388e3c;
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin-left: 0.5rem;
+  transition: color 0.25s, text-shadow 0.25s;
+}
+.roomOverview:hover .roomStatus {
+  color: #2e7031;
+  text-shadow: 0 1px 6px #c8f5d2;
+}
+
+.roomStatusUnavailable {
+  color: #e53935;
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin-left: 0.5rem;
+  transition: color 0.25s, text-shadow 0.25s;
+}
+.roomOverview:hover .roomStatusUnavailable {
+  color: #b71c1c;
+  text-shadow: 0 1px 6px #f5c8c8;
+}
+
+/* Hiệu ứng cho phần tiện nghi */
+.amenities {
+  transition: box-shadow 0.3s, background 0.3s, transform 0.3s;
+  border-radius: 10px;
+  background: #faf8f3;
+  padding: 0.8rem 1rem;
+}
+
+.amenities:hover {
+  box-shadow: 0 4px 24px rgba(156, 130, 80, 0.13);
+  background: #fffbe9;
+  transform: translateY(-2px) scale(1.01);
+}
+
 .amenities h4 {
   font-size: 1rem;
   font-weight: 600;
@@ -377,6 +546,7 @@
   justify-content: flex-start;
 }
 
+/* Hiệu ứng cho từng tiện nghi khi hover */
 .amenityItem {
   display: flex;
   align-items: center;
@@ -386,6 +556,19 @@
   /* Đảm bảo 2 cột */
   flex-basis: calc(50% - 0.5rem); /* 50% trừ đi một nửa gap (1rem / 2) */
   min-width: 120px; /* Đảm bảo đủ rộng cho nội dung */
+  transition: background 0.25s, color 0.25s, transform 0.25s;
+  border-radius: 6px;
+  padding: 0.2rem 0.5rem;
+}
+
+.amenityItem:hover {
+  background: #f5e9c8;
+  color: #9c8250;
+  transform: scale(1.04);
+}
+
+.amenityItem:hover .amenityIcon {
+  color: #7d6942;
 }
 
 .amenityIcon {
@@ -676,6 +859,20 @@
   }
 }
 
+@media (max-width: 900px) {
+  .roomRow {
+    flex-direction: column;
+    padding: 1rem 0.5rem;
+  }
+  .roomRowImage, .roomRowContent {
+    max-width: 100%;
+    padding-left: 0;
+  }
+  .rowImage, .mainImage img {
+    height: 200px;
+  }
+}
+
 @media (max-width: 768px) {
   .headerContent {
     flex-direction: column;
@@ -714,6 +911,29 @@
   .footerLinks {
     grid-template-columns: 1fr;
     gap: 1.5rem;
+  }
+}
+
+@media (max-width: 700px) {
+  .roomOverview {
+    flex-direction: column;
+    gap: 0.7rem;
+    padding: 1rem 0.7rem;
+  }
+  .roomOverviewRight {
+    align-items: flex-start;
+    margin-top: 0.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .roomOverview {
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+  .roomOverviewRow {
+    flex-direction: column;
+    gap: 0.2rem;
   }
 }
 

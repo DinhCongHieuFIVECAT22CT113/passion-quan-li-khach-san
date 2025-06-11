@@ -409,22 +409,23 @@ export default function RoomsListPage() {
                       />
                     )}
                   </div>
-                  <div className={styles.roomRowContent}>
-                    <h3>{room.tenPhong}</h3>
-                    <div className={styles.roomInfo}>
-                      <div className={styles.feature}>
-                        <span className={styles.featureLabel}>Tên phòng:</span>
-                        <span className={styles.featureValue}>{room.tenPhong}</span>
-                      </div>
-                      <div className={styles.feature}>
-                        <span className={styles.featureLabel}>Loại phòng:</span>
-                        <span className={styles.featureValue}>{roomType?.tenLoaiPhong || 'Không xác định'}</span>
-                      </div>
-                      <div className={styles.feature}>
-                        <span className={styles.featureLabel}>Trạng thái:</span>
-                        <span className={styles.featureValue}>{room.trangThai === 'Trống' ? 'Còn trống' : room.trangThai}</span>
-                      </div>
-                    </div>
+<div className={styles.roomRowContent}>
+  <div className={styles.roomOverviewLeft}>
+    <div className={styles.roomOverviewRow}>
+      <span className={styles.roomOverviewLabel}>Tên phòng:</span>
+      <span className={styles.roomOverviewValue}>{room.tenPhong}</span>
+    </div>
+    <div className={styles.roomOverviewRow}>
+      <span className={styles.roomOverviewLabel}>Trạng thái:</span>
+      <span className={`${styles.roomOverviewValue} ${room.trangThai === 'Trống' ? styles.roomStatus : styles.roomStatusUnavailable}`}>
+        {room.trangThai === 'Trống' ? 'Còn trống' : room.trangThai}
+      </span>
+    </div>
+    <div className={styles.roomOverviewRow}>
+      <span className={styles.roomOverviewLabel}>Loại phòng:</span>
+      <span className={styles.roomTypeValue}>{roomType?.tenLoaiPhong || 'Không xác định'}</span>
+    </div>
+  </div>
                     <div className={styles.roomDescription}>
                       <h4>Mô tả</h4>
                       <p>{roomType?.moTa || room.moTa || 'Không có mô tả cho phòng này.'}</p>
