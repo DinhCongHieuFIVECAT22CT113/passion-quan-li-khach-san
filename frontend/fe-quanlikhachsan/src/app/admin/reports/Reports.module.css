@@ -14,20 +14,47 @@
   flex-wrap: wrap;
   gap: 24px;
   background: #fff;
-  padding: 24px;
+  padding: 24px 32px;
   border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #2563eb, #3b82f6, #60a5fa);
 }
 
 .header h1 {
   margin: 0;
-  font-size: 2rem;
-  font-weight: 700;
-  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  font-size: 2.2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #1e40af, #3b82f6);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  letter-spacing: -0.5px;
+  position: relative;
+  padding-left: 16px;
+}
+
+.header h1::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 70%;
+  background: linear-gradient(to bottom, #2563eb, #3b82f6);
+  border-radius: 3px;
 }
 
 .controls {
@@ -35,6 +62,11 @@
   gap: 16px;
   align-items: center;
   flex-wrap: wrap;
+  background: #f8fafc;
+  padding: 16px 20px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
 .dateRange {
@@ -42,52 +74,55 @@
   align-items: center;
   gap: 12px;
   margin-right: 24px;
-  background: #f8fafc;
+  background: rgba(255, 255, 255, 0.8);
   padding: 12px 16px;
   border-radius: 12px;
   border: 2px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
 }
 
 .dateInput {
-  padding: 10px 40px 10px 14px; /* Thêm padding bên phải cho icon */
+  padding: 12px 40px 12px 16px;
   border: 2px solid #e2e8f0;
   border-radius: 10px;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   font-weight: 500;
   background: #fff;
   transition: all 0.3s ease;
-  color: black;
-  position: relative; /* Cần để định vị icon */
+  color: #1e293b;
+  position: relative;
+  width: 150px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
 .dateInput::-webkit-calendar-picker-indicator {
-  opacity: 0; /* Ẩn icon lịch mặc định */
+  opacity: 0;
   cursor: pointer;
-  width: 30px; /* Đảm bảo vùng click vẫn hoạt động */
+  width: 30px;
   height: 30px;
   position: absolute;
   right: 5px;
 }
 
 .dateInput::after {
-  content: '📅'; /* Icon lịch Unicode */
+  content: '📅';
   position: absolute;
   right: 10px;
   top: 50%;
   transform: translateY(-50%);
   font-size: 18px;
-  color: #3b82f6; /* Màu xanh dương phù hợp với giao diện */
-  pointer-events: none; /* Đảm bảo click xuyên qua icon đến datepicker */
+  color: #3b82f6;
+  pointer-events: none;
 }
 
 .dateInput:focus::after {
-  color: #2563eb; /* Màu đậm hơn khi focus */
+  color: #2563eb;
 }
 
 .dateInput:focus {
   outline: none;
   border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), inset 0 2px 4px rgba(0, 0, 0, 0.02);
 }
 
 .dateRange span {
@@ -96,48 +131,99 @@
 }
 
 .timeButton {
-  padding: 10px 20px;
+  padding: 12px 20px;
   border: 2px solid #e2e8f0;
   border-radius: 10px;
   background: #fff;
   cursor: pointer;
-  font-size: 0.875rem;
+  font-size: 0.9rem;
   font-weight: 600;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-  color: #10b981;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+  color: #64748b;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.timeButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .timeButton:hover {
-  background: #f8fafc;
-  border-color: #cbd5e1;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  color: #3b82f6;
+  border-color: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(59, 130, 246, 0.15);
 }
 
 .timeButton.active {
-  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  background: transparent;
   color: white;
-  border-color: #2563eb;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  border-color: transparent;
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.25);
+}
+
+.timeButton.active::before {
+  opacity: 1;
 }
 
 .loading {
   text-align: center;
-  padding: 40px;
+  padding: 60px;
   font-size: 16px;
-  color: #666;
+  color: #64748b;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e2e8f0;
+  border-top: 3px solid #3b82f6;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
 .chartContainer {
   background: #fff;
   padding: 32px;
   border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   margin-bottom: 32px;
   border: 1px solid rgba(0, 0, 0, 0.05);
   position: relative;
   overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.chartContainer:hover {
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  transform: translateY(-5px);
 }
 
 .chartContainer::before {
@@ -147,29 +233,32 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  background: linear-gradient(90deg, #2563eb, #3b82f6, #60a5fa);
 }
 
 .summary {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 24px;
+  margin-bottom: 32px;
 }
 
 .summaryCard {
   background: #fff;
-  padding: 24px;
+  padding: 28px;
   border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(0, 0, 0, 0.05);
   position: relative;
   overflow: hidden;
   transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .summaryCard:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  transform: translateY(-8px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
 }
 
 .summaryCard::before {
@@ -179,47 +268,111 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(135deg, #10b981, #34d399);
+  background: linear-gradient(90deg, #10b981, #34d399);
 }
 
 .summaryCard:nth-child(2)::before {
-  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
 }
 
 .summaryCard:nth-child(3)::before {
-  background: linear-gradient(135deg, #ef4444, #f87171);
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
 }
 
 .summaryCard h3 {
-  margin: 0 0 12px 0;
-  font-size: 0.875rem;
+  margin: 0 0 16px 0;
+  font-size: 1rem;
   color: #64748b;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.summaryCard h3 svg {
+  color: #10b981;
+  font-size: 1.2rem;
+}
+
+.summaryCard:nth-child(2) h3 svg {
+  color: #f59e0b;
+}
+
+.summaryCard:nth-child(3) h3 svg {
+  color: #3b82f6;
 }
 
 .amount {
   margin: 0;
-  font-size: 2rem;
+  font-size: 2.4rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #2563eb, #3b82f6);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: #1e293b;
+  margin-top: auto;
+  position: relative;
+  display: inline-block;
+}
+
+.amount::after {
+  content: 'VNĐ';
+  position: absolute;
+  right: 0;
+  bottom: -10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #64748b;
 }
 
 .error {
-  padding: 16px;
+  padding: 20px;
   margin: 20px 0;
   background: #fee2e2;
   color: #b91c1c;
-  border-radius: 8px;
+  border-radius: 12px;
   border: 1px solid #fca5a5;
   font-weight: 500;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
 }
 
+.error svg {
+  font-size: 1.5rem;
+  color: #ef4444;
+}
+
+.noData {
+  text-align: center;
+  padding: 40px;
+  color: #64748b;
+  font-size: 1.1rem;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 12px;
+  border: 2px dashed #e2e8f0;
+  margin: 20px 0;
+}
+
+/* Thêm animation cho các phần tử */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.summary {
+  animation: fadeIn 0.6s ease-out forwards;
+}
+
+.chartContainer {
+  animation: fadeIn 0.6s ease-out 0.2s forwards;
+  opacity: 0;
+  transform: translateY(20px);
+  animation-fill-mode: forwards;
+}
+
+/* Responsive styles */
 @media (max-width: 768px) {
   .summary {
     grid-template-columns: 1fr;
@@ -233,5 +386,20 @@
 
   .dateInput {
     flex: 1;
+  }
+  
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .timeButton {
+    flex: 1;
+    text-align: center;
   }
 }

@@ -15,6 +15,7 @@ import {
 } from 'chart.js';
 import styles from './Reports.module.css';
 import { calculateRevenue, getInvoices } from '../../../lib/api';
+import { FaChartLine, FaMoneyBillWave, FaChartBar, FaCalendarAlt, FaExclamationTriangle } from 'react-icons/fa';
 
 // Đăng ký các components của ChartJS
 ChartJS.register(
@@ -176,27 +177,83 @@ export default function RevenueReport() {
     datasets: [{
       label: `Doanh thu theo ${timeRange === 'day' ? 'ngày' : 'tháng'} (VNĐ)`,
       data: revenueData.map(item => item.amount),
-      borderColor: 'rgb(75, 192, 192)',
-      tension: 0.1
+      borderColor: '#3b82f6',
+      backgroundColor: 'rgba(59, 130, 246, 0.1)',
+      borderWidth: 3,
+      pointBackgroundColor: '#3b82f6',
+      pointBorderColor: '#fff',
+      pointBorderWidth: 2,
+      pointRadius: 5,
+      pointHoverRadius: 7,
+      tension: 0.3,
+      fill: true
     }]
   };
 
   const options: ChartOptions<'line'> = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         position: 'top' as const,
+        labels: {
+          font: {
+            size: 14,
+            weight: 'bold'
+          },
+          padding: 20,
+          usePointStyle: true,
+          pointStyle: 'circle'
+        }
       },
       title: {
         display: true,
-        text: `Doanh thu theo ${timeRange === 'day' ? 'ngày' : 'tháng'}`,
+        text: `Biểu đồ doanh thu theo ${timeRange === 'day' ? 'ngày' : 'tháng'}`,
+        font: {
+          size: 18,
+          weight: 'bold'
+        },
+        padding: {
+          top: 10,
+          bottom: 30
+        },
+        color: '#1e293b'
       },
+      tooltip: {
+        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        titleColor: '#1e293b',
+        bodyColor: '#1e293b',
+        bodyFont: {
+          size: 14
+        },
+        titleFont: {
+          size: 16,
+          weight: 'bold'
+        },
+        padding: 12,
+        borderColor: '#e2e8f0',
+        borderWidth: 1,
+        displayColors: false,
+        callbacks: {
+          label: function(context) {
+            return `Doanh thu: ${context.parsed.y.toLocaleString('vi-VN')}đ`;
+          }
+        }
+      }
     },
     scales: {
       y: {
         type: 'linear',
         beginAtZero: true,
+        grid: {
+          color: 'rgba(226, 232, 240, 0.5)',
+          drawBorder: false
+        },
         ticks: {
+          font: {
+            size: 12
+          },
+          padding: 10,
           callback: function(value: string | number) {
             if (typeof value === 'number') {
               return value.toLocaleString('vi-VN') + 'đ';
@@ -204,26 +261,48 @@ export default function RevenueReport() {
             return value;
           }
         }
+      },
+      x: {
+        grid: {
+          display: false
+        },
+        ticks: {
+          font: {
+            size: 12
+          },
+          padding: 10
+        }
       }
+    },
+    elements: {
+      line: {
+        tension: 0.4
+      }
+    },
+    interaction: {
+      mode: 'index',
+      intersect: false
+    },
+    hover: {
+      mode: 'nearest',
+      intersect: true
+    },
+    animation: {
+      duration: 1000,
+      easing: 'easeOutQuart'
     }
   };
 
   // Tính toán các thống kê
-  console.log("Data before calculating stats (revenueData):", JSON.stringify(revenueData, null, 2));
-
   const validRevenueData = revenueData.filter(item => typeof item.amount === 'number' && !isNaN(item.amount));
-  console.log("Filtered validRevenueData for stats:", JSON.stringify(validRevenueData, null, 2));
-
   const totalRevenue = validRevenueData.reduce((sum, item) => sum + item.amount, 0);
   const averageRevenue = validRevenueData.length > 0 ? totalRevenue / validRevenueData.length : 0;
   const maxRevenue = validRevenueData.length > 0 ? Math.max(...validRevenueData.map(item => item.amount)) : 0;
 
-  console.log("Calculated Stats:", { totalRevenue, averageRevenue, maxRevenue });
-
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1>Báo cáo doanh thu</h1>
+        <h1><FaChartLine style={{ marginRight: '12px', verticalAlign: 'middle' }} /> Báo cáo doanh thu</h1>
         <div className={styles.controls}>
           <div className={styles.dateRange}>
             <input
@@ -244,13 +323,13 @@ export default function RevenueReport() {
             className={`${styles.timeButton} ${timeRange === 'day' ? styles.active : ''}`}
             onClick={() => setTimeRange('day')}
           >
-            Theo ngày
+            <FaCalendarAlt style={{ marginRight: '8px', verticalAlign: 'middle' }} /> Theo ngày
           </button>
           <button 
             className={`${styles.timeButton} ${timeRange === 'month' ? styles.active : ''}`}
             onClick={() => setTimeRange('month')}
           >
-            Theo tháng
+            <FaChartBar style={{ marginRight: '8px', verticalAlign: 'middle' }} /> Theo tháng
           </button>
         </div>
       </div>
@@ -258,15 +337,26 @@ export default function RevenueReport() {
       {isLoading ? (
         <div className={styles.loading}>Đang tải dữ liệu...</div>
       ) : error ? (
-        <div className={styles.error}>Lỗi: {error}</div>
+        <div className={styles.error}>
+          <FaExclamationTriangle /> Lỗi: {error}
+        </div>
       ) : (
         <>
           <div className={styles.summary}>
-            <div>Tổng doanh thu: <span>{totalRevenue.toLocaleString('vi-VN')}đ</span></div>
-            <div>Doanh thu trung bình: <span>{averageRevenue.toLocaleString('vi-VN')}đ</span></div>
-            <div>Doanh thu cao nhất: <span>{maxRevenue.toLocaleString('vi-VN')}đ</span></div>
+            <div className={styles.summaryCard}>
+              <h3><FaMoneyBillWave /> Tổng doanh thu</h3>
+              <p className={styles.amount}>{totalRevenue.toLocaleString('vi-VN')}</p>
+            </div>
+            <div className={styles.summaryCard}>
+              <h3><FaChartBar /> Doanh thu trung bình</h3>
+              <p className={styles.amount}>{averageRevenue.toLocaleString('vi-VN')}</p>
+            </div>
+            <div className={styles.summaryCard}>
+              <h3><FaChartLine /> Doanh thu cao nhất</h3>
+              <p className={styles.amount}>{maxRevenue.toLocaleString('vi-VN')}</p>
+            </div>
           </div>
-          <div className={styles.chartContainer}>
+          <div className={styles.chartContainer} style={{ height: '500px' }}>
             {revenueData.length > 0 ? (
               <Line options={options} data={chartData} />
             ) : (
