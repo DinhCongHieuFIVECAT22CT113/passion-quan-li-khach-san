@@ -2,12 +2,12 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
 # Copy csproj và restore dependencies
-COPY *.csproj ./
-RUN dotnet restore
+COPY ["be-quanlikhachsanapi.csproj", "./"]
+RUN dotnet restore "./be-quanlikhachsanapi.csproj"
 
 # Copy everything else and build
-COPY . ./
-RUN dotnet publish -c Release -o out
+COPY . .
+RUN dotnet publish "be-quanlikhachsanapi.csproj" -c Release -o out
 
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
