@@ -55,18 +55,19 @@ export default function MyBookingsPage() {
     fetchBookings();
   }, [user, authLoading, router]);
 
-  // Auto-refresh để hiển thị phòng vừa đặt
+  // Auto-refresh khi user quay lại trang (chỉ khi cần thiết)
   useEffect(() => {
     const handleFocus = () => {
-      // Refresh khi user quay lại trang (từ đặt phòng)
-      if (!isLoading && user) {
+      // Chỉ refresh nếu đã có user và không đang loading
+      if (!isLoading && user && bookings.length === 0) {
+        console.log('🔄 Page focus - refreshing bookings');
         fetchBookings();
       }
     };
 
     window.addEventListener('focus', handleFocus);
     return () => window.removeEventListener('focus', handleFocus);
-  }, [isLoading, user]);
+  }, [isLoading, user, bookings.length]); // Thêm bookings.length để tránh refresh không cần thiết
 
   // Kiểm tra có đặt phòng mới không (từ URL params hoặc localStorage)
   useEffect(() => {
@@ -94,203 +95,57 @@ export default function MyBookingsPage() {
       setIsLoading(true);
       setError(null);
 
-      // Thử nhiều endpoint để lấy dữ liệu đặt phòng
+      console.log('🔄 Fetching bookings for user:', user?.maNguoiDung);
+
+      // Sử dụng API đã được cải thiện - trả về đầy đủ thông tin
       const headers = await getAuthHeaders();
-      let data = null;
+      const response = await fetch(`${API_BASE_URL}/DatPhong/KhachHang`, {
+        method: 'GET',
+        headers,
+        credentials: 'include'
+      });
 
-      // Thử endpoint đầu tiên - lấy đặt phòng của khách hàng hiện tại
-      try {
-        const response1 = await fetch(`${API_BASE_URL}/DatPhong/KhachHang`, {
-          method: 'GET',
-          headers,
-          credentials: 'include'
-        });
-        data = await handleResponse(response1);
-        console.log('Dữ liệu từ /DatPhong/KhachHang:', data);
-        console.log('User maNguoiDung khi gọi API:', user?.maNguoiDung);
+      const data = await handleResponse(response);
+      console.log('📊 Dữ liệu đặt phòng từ API:', data);
 
-        // API /DatPhong/KhachHang đã lọc theo user rồi, không cần lọc thêm
-        console.log(`API trả về ${Array.isArray(data) ? data.length : 0} đặt phòng cho user ${user?.maNguoiDung}`);
-
-        // Chỉ verify dữ liệu để debug
-        if (Array.isArray(data) && data.length > 0) {
-          console.log('Mẫu đặt phòng đầu tiên:', data[0]);
-          console.log('Các mã khách hàng trong dữ liệu:', data.map(b => b.maKh || b.maKH || b.MaKH));
-        }
-      } catch (err) {
-        console.warn('Endpoint /DatPhong/KhachHang không hoạt động:', err);
-
-        // Thử endpoint thứ hai
-        try {
-          const response2 = await fetch(`${API_BASE_URL}/DatPhong`, {
-            method: 'GET',
-            headers,
-            credentials: 'include'
-          });
-          const allBookings = await handleResponse(response2);
-          console.log('Dữ liệu từ /DatPhong (tất cả):', allBookings);
-
-          // Lọc chỉ lấy đặt phòng của user hiện tại
-          if (Array.isArray(allBookings) && user?.maNguoiDung) {
-            data = allBookings.filter(booking => {
-              // API trả về field 'maKh' (chữ thường)
-              const bookingMaKH = booking.maKh || booking.maKH || booking.MaKH;
-              console.log(`So sánh: ${bookingMaKH} === ${user.maNguoiDung}`);
-              return bookingMaKH === user.maNguoiDung;
-            });
-            console.log('Đặt phòng của user hiện tại:', data);
-            console.log('User maNguoiDung:', user.maNguoiDung);
-          }
-        } catch (err2) {
-          console.error('Cả hai endpoint đều không hoạt động:', err2);
-          throw new Error('Không thể lấy dữ liệu đặt phòng');
-        }
+      if (!Array.isArray(data)) {
+        console.warn('⚠️ API không trả về mảng:', data);
+        setBookings([]);
+        return;
       }
 
-      console.log('Dữ liệu đặt phòng cuối cùng:', data);
-      console.log('Số lượng đặt phòng:', Array.isArray(data) ? data.length : 'Không phải mảng');
-      
-      // Xử lý dữ liệu đặt phòng với mapping đúng từ API
-      const processedBookings = await Promise.all(Array.isArray(data) && data.length > 0 ? data.map(async (booking: any) => {
-        console.log('Processing booking:', booking);
-
-        // Lấy chi tiết đặt phòng để có thông tin phòng
-        let roomData = null;
-        let roomTypeData = null;
-        let maPhong = null;
-
-        try {
-          // Thử lấy chi tiết đặt phòng từ nhiều endpoint
-          let chiTietData = null;
-          const maDatPhong = booking.maDatPhong || booking.MaDatPhong;
-
-          // Thử endpoint 1: /ChiTietDatPhong/DatPhong/{id}
-          try {
-            const chiTietResponse = await fetch(`${API_BASE_URL}/ChiTietDatPhong/DatPhong/${maDatPhong}`, {
-              method: 'GET',
-              headers,
-              credentials: 'include'
-            });
-            chiTietData = await handleResponse(chiTietResponse);
-            console.log('Chi tiết đặt phòng từ endpoint 1:', chiTietData);
-          } catch (err) {
-            console.warn('Endpoint 1 không hoạt động, thử endpoint 2');
-
-            // Thử endpoint 2: /ChiTietDatPhong và lọc theo maDatPhong
-            try {
-              const allChiTietResponse = await fetch(`${API_BASE_URL}/ChiTietDatPhong`, {
-                method: 'GET',
-                headers,
-                credentials: 'include'
-              });
-              const allChiTietData = await handleResponse(allChiTietResponse);
-              if (Array.isArray(allChiTietData)) {
-                chiTietData = allChiTietData.filter(ct =>
-                  (ct.maDatPhong || ct.MaDatPhong) === maDatPhong
-                );
-                console.log('Chi tiết đặt phòng từ endpoint 2:', chiTietData);
-              }
-            } catch (err2) {
-              console.warn('Cả hai endpoint chi tiết đặt phòng đều không hoạt động:', err2);
-            }
-          }
-
-          if (Array.isArray(chiTietData) && chiTietData.length > 0) {
-            const chiTiet = chiTietData[0]; // Lấy chi tiết đầu tiên
-            maPhong = chiTiet.maPhong || chiTiet.MaPhong;
-            console.log('Mã phòng từ chi tiết:', maPhong);
-
-            // Lấy thông tin phòng nếu có maPhong
-            if (maPhong) {
-              try {
-                const roomResponse = await fetch(`${API_BASE_URL}/Phong/${maPhong}`, {
-                  method: 'GET',
-                  headers,
-                  credentials: 'include'
-                });
-                roomData = await handleResponse(roomResponse);
-                console.log('Thông tin phòng:', roomData);
-
-                // Lấy thông tin loại phòng
-                const maLoaiPhong = roomData?.maLoaiPhong || roomData?.MaLoaiPhong;
-                if (maLoaiPhong) {
-                  try {
-                    const roomTypeResponse = await fetch(`${API_BASE_URL}/LoaiPhong/${maLoaiPhong}`, {
-                      method: 'GET',
-                      headers,
-                      credentials: 'include'
-                    });
-                    roomTypeData = await handleResponse(roomTypeResponse);
-                    console.log('Thông tin loại phòng:', roomTypeData);
-                  } catch (err) {
-                    console.warn(`Không thể lấy thông tin loại phòng ${maLoaiPhong}:`, err);
-                  }
-                }
-              } catch (err) {
-                console.warn(`Không thể lấy thông tin phòng ${maPhong}:`, err);
-              }
-            }
-          } else {
-            console.warn('Không tìm thấy chi tiết đặt phòng cho:', maDatPhong);
-          }
-        } catch (err) {
-          console.warn(`Lỗi khi lấy chi tiết đặt phòng ${booking.maDatPhong || booking.MaDatPhong}:`, err);
-        }
-
-        // Tạo tên phòng thông minh
-        const soPhong = roomData?.soPhong || roomData?.SoPhong;
-        const tenPhong = roomData?.tenPhong || roomData?.TenPhong ||
-                        (soPhong ? `Phòng ${soPhong}` :
-                        (maPhong ? `Phòng ${maPhong}` : 'Phòng không xác định'));
-
-        // Tạo tên loại phòng
-        const tenLoaiPhong = roomTypeData?.tenLoaiPhong || roomTypeData?.TenLoaiPhong ||
-                            (roomData?.maLoaiPhong || roomData?.MaLoaiPhong ?
-                            `Loại ${roomData.maLoaiPhong || roomData.MaLoaiPhong}` :
-                            'Loại phòng không xác định');
+      // Xử lý dữ liệu đặt phòng - API đã trả về đầy đủ thông tin
+      const processedBookings = data.map((booking: any) => {
+        console.log('📝 Processing booking:', booking);
 
         return {
-          maDatPhong: booking.maDatPhong || booking.MaDatPhong || 'N/A',
-          maPhong: maPhong || booking.maPhong || booking.MaPhong || 'N/A',
-          tenPhong: tenPhong,
-          soPhong: soPhong || maPhong || 'N/A',
-          loaiPhong: tenLoaiPhong,
-          ngayDat: booking.ngayTao || booking.NgayTao || booking.ngayDat || booking.NgayDat || new Date().toISOString(),
-          ngayBatDau: booking.ngayNhanPhong || booking.NgayNhanPhong || booking.ngayBatDau || booking.NgayBatDau,
-          ngayKetThuc: booking.ngayTraPhong || booking.NgayTraPhong || booking.ngayKetThuc || booking.NgayKetThuc,
-          tongTien: booking.tongTien || booking.TongTien || 0,
-          giaGoc: booking.giaGoc || booking.GiaGoc || 0,
-          trangThai: booking.trangThai || booking.TrangThai || 'Chờ xác nhận',
-          phuongThucThanhToan: booking.phuongThucThanhToan || booking.PhuongThucThanhToan || 'Chưa xác định',
-          ghiChu: booking.ghiChu || booking.GhiChu || '',
-          thoiGianDen: booking.thoiGianDen || booking.ThoiGianDen || '14:00',
-          treEm: booking.treEm || booking.TreEm || 0,
-          nguoiLon: booking.nguoiLon || booking.NguoiLon || 1,
-          soLuongPhong: booking.soLuongPhong || booking.SoLuongPhong || 1,
-          thumbnail: roomData?.thumbnail || roomData?.Thumbnail || roomTypeData?.thumbnail || roomTypeData?.Thumbnail
+          maDatPhong: booking.maDatPhong || 'N/A',
+          maPhong: booking.maPhong || 'N/A',
+          tenPhong: booking.tenPhong || 'Phòng không xác định',
+          soPhong: booking.maPhong || 'N/A',
+          loaiPhong: booking.tenLoaiPhong || 'Loại phòng không xác định',
+          ngayDat: booking.ngayTao || new Date().toISOString(),
+          ngayBatDau: booking.ngayNhanPhong,
+          ngayKetThuc: booking.ngayTraPhong,
+          tongTien: booking.tongTien || 0,
+          giaGoc: booking.giaMoiDem || 0,
+          trangThai: booking.trangThai || 'Chưa xác nhận',
+          phuongThucThanhToan: booking.trangThaiThanhToan || 'Chưa xác định',
+          ghiChu: booking.ghiChu || '',
+          thoiGianDen: booking.thoiGianDen || '14:00',
+          treEm: booking.treEm || 0,
+          nguoiLon: booking.nguoiLon || 1,
+          soLuongPhong: booking.soLuongPhong || 1,
+          thumbnail: undefined // Có thể thêm sau nếu cần
         };
-      }) : []);
+      });
 
-      console.log('Đặt phòng đã xử lý:', processedBookings);
-      console.log('Số lượng đặt phòng sau xử lý:', processedBookings.length);
+      console.log(`✅ Processed ${processedBookings.length} bookings`);
+      if (processedBookings.length > 0) {
+        console.log('📋 Sample booking:', processedBookings[0]);
+      }
 
       setBookings(processedBookings);
-
-      if (processedBookings.length === 0) {
-        console.log('=== DEBUG: Không có đặt phòng nào ===');
-        console.log('User hiện tại:', user);
-        console.log('User maNguoiDung:', user?.maNguoiDung);
-        console.log('Dữ liệu gốc từ API:', data);
-        console.log('Số lượng dữ liệu gốc:', Array.isArray(data) ? data.length : 'Không phải mảng');
-        if (Array.isArray(data) && data.length > 0) {
-          console.log('Mẫu đặt phòng đầu tiên:', data[0]);
-          console.log('Các mã khách hàng trong dữ liệu:', data.map(b => b.maKh || b.maKH || b.MaKH));
-        }
-      } else {
-        console.log('=== DEBUG: Tìm thấy đặt phòng ===');
-        console.log('Số lượng đặt phòng sau lọc:', processedBookings.length);
-        console.log('Mẫu đặt phòng đầu tiên:', processedBookings[0]);
-      }
     } catch (err) {
       console.error('Lỗi khi lấy danh sách đặt phòng:', err);
       setError('Không thể tải danh sách đặt phòng. Vui lòng thử lại sau.');

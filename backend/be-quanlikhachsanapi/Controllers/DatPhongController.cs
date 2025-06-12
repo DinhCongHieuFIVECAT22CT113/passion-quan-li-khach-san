@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authorization;
 using be_quanlikhachsanapi.Authorization;
 using System.Security.Claims;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.EntityFrameworkCore;
 
 namespace be_quanlikhachsanapi.Controllers
 {
@@ -408,24 +409,58 @@ namespace be_quanlikhachsanapi.Controllers
                 return Unauthorized("Không thể xác định người dùng. Vui lòng đăng nhập lại.");
             }
 
-            var datPhongs = await _datPhongRepo.GetDatPhongByKhachHang(maKh);
+            Console.WriteLine($"🔍 Lấy đặt phòng cho khách hàng: {maKh}");
 
-            // Chuyển đổi sang DTO để tránh circular reference
-            var datPhongDtos = datPhongs.Select(dp => new
-            {
-                maDatPhong = dp.MaDatPhong,
-                maKh = dp.MaKh,
-                treEm = dp.TreEm,
-                nguoiLon = dp.NguoiLon,
-                ghiChu = dp.GhiChu,
-                soLuongPhong = dp.SoLuongPhong,
-                thoiGianDen = dp.ThoiGianDen,
-                ngayNhanPhong = dp.NgayNhanPhong,
-                ngayTraPhong = dp.NgayTraPhong,
-                trangThai = dp.TrangThai,
-                ngayTao = dp.NgayTao,
-                ngaySua = dp.NgaySua
+            // Lấy đặt phòng với thông tin chi tiết phòng và loại phòng
+            var datPhongs = await _context.DatPhongs
+                .Where(dp => dp.MaKh == maKh)
+                .Include(dp => dp.ChiTietDatPhongs)
+                    .ThenInclude(ct => ct.MaPhongNavigation)
+                    .ThenInclude(p => p.MaLoaiPhongNavigation)
+                .Include(dp => dp.HoaDons)
+                .OrderByDescending(dp => dp.NgayTao)
+                .ToListAsync();
+
+            Console.WriteLine($"📊 Tìm thấy {datPhongs.Count} đặt phòng cho khách hàng {maKh}");
+
+            // Chuyển đổi sang DTO với thông tin đầy đủ
+            var datPhongDtos = datPhongs.Select(dp => {
+                var chiTietDatPhong = dp.ChiTietDatPhongs.FirstOrDefault();
+                var phong = chiTietDatPhong?.MaPhongNavigation;
+                var loaiPhong = phong?.MaLoaiPhongNavigation;
+                var hoaDon = dp.HoaDons.FirstOrDefault();
+
+                return new
+                {
+                    maDatPhong = dp.MaDatPhong,
+                    maKh = dp.MaKh,
+                    treEm = dp.TreEm,
+                    nguoiLon = dp.NguoiLon,
+                    ghiChu = dp.GhiChu,
+                    soLuongPhong = dp.SoLuongPhong,
+                    thoiGianDen = dp.ThoiGianDen,
+                    ngayNhanPhong = dp.NgayNhanPhong,
+                    ngayTraPhong = dp.NgayTraPhong,
+                    trangThai = dp.TrangThai,
+                    ngayTao = dp.NgayTao,
+                    ngaySua = dp.NgaySua,
+
+                    // Thông tin phòng
+                    maPhong = phong?.MaPhong,
+                    tenPhong = phong?.TenPhong ?? "Phòng không xác định",
+
+                    // Thông tin loại phòng
+                    maLoaiPhong = loaiPhong?.MaLoaiPhong,
+                    tenLoaiPhong = loaiPhong?.TenLoaiPhong ?? "Loại phòng không xác định",
+                    giaMoiDem = loaiPhong?.GiaMoiDem ?? 0,
+
+                    // Thông tin hóa đơn
+                    tongTien = hoaDon?.TongTien ?? 0,
+                    trangThaiThanhToan = hoaDon?.TrangThai ?? "Chưa thanh toán"
+                };
             }).ToList();
+
+            Console.WriteLine($"✅ Trả về {datPhongDtos.Count} đặt phòng với thông tin đầy đủ");
 
             return Ok(datPhongDtos);
         }
