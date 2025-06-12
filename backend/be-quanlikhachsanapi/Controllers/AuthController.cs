@@ -143,19 +143,19 @@ public class AuthController : ControllerBase
 
     [HttpPost("login")]
     [AllowAnonymous]
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<UserDto>> Login([FromForm] LoginDto loginDto)
+    {
+        Console.WriteLine($"🔐 Login attempt (Form): {loginDto?.UserName}");
+        return await ProcessLogin(loginDto);
+    }
+
+    [HttpPost("login-json")]
+    [AllowAnonymous]
     [Consumes("application/json")]
     public async Task<ActionResult<UserDto>> LoginJson([FromBody] LoginDto loginDto)
     {
         Console.WriteLine($"🔐 Login attempt (JSON): {loginDto?.UserName}");
-        return await ProcessLogin(loginDto);
-    }
-
-    [HttpPost("login-form")]
-    [AllowAnonymous]
-    [Consumes("multipart/form-data")]
-    public async Task<ActionResult<UserDto>> LoginForm([FromForm] LoginDto loginDto)
-    {
-        Console.WriteLine($"🔐 Login attempt (Form): {loginDto?.UserName}");
         return await ProcessLogin(loginDto);
     }
 
