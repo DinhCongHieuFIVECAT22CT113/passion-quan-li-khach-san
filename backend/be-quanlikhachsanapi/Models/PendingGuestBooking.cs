@@ -29,7 +29,16 @@ namespace be_quanlikhachsanapi.Models
         public int SoTreEm { get; set; } = 0;
         public string? GhiChu { get; set; }
         public string? ThoiGianDen { get; set; } = "14:00";
-        
+
+        // Thông tin thanh toán
+        public string? PhuongThucThanhToan { get; set; }
+        public string? LoaiThe { get; set; }
+        public string? GhiChuThanhToan { get; set; }
+        public decimal TongTien { get; set; }
+
+        // Đánh dấu là khách vãng lai
+        public bool IsGuestBooking { get; set; } = true;
+
         // Những trường này sẽ được tạo bởi server, không yêu cầu từ client
         public string? MaXacNhan { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;

@@ -217,15 +217,15 @@ export default function GuestBookingPage() {
 
       console.log('Gửi yêu cầu đặt phòng cho khách vãng lai:', bookingPayload);
 
-      // Gọi API tạo booking tạm cho khách vãng lai (public)
+      // Gọi API tạo booking tạm cho khách vãng lai với OTP (public)
       const formData = new FormData();
       Object.entries(bookingPayload).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
           formData.append(key, value as any);
         }
       });
-      
-      const response = await fetch(`${API_BASE_URL}/DatPhong/Guest`, {
+
+      const response = await fetch(`${API_BASE_URL}/DatPhong/GuestPending`, {
         method: 'POST',
         body: formData,
         headers: {
@@ -246,34 +246,25 @@ export default function GuestBookingPage() {
       }
 
       const result = await response.json();
-      console.log('Kết quả đặt phòng:', result);
+      console.log('Kết quả tạo booking tạm:', result);
 
-      // Tạo dữ liệu đặt phòng thành công để hiển thị ở trang success
-      const successData = {
-        maDatPhong: result.datPhong || 'DP' + Math.floor(Math.random() * 1000000),
-        hoTen: bookingData.hoTen,
-        soDienThoai: bookingData.soDienThoai,
-        email: bookingData.email,
-        roomData: {
-          tenPhong: bookingData.roomData.tenPhong,
-          tenLoaiPhong: bookingData.roomData.tenLoaiPhong,
-          thumbnail: bookingData.roomData.thumbnail || '/images/rooms/room1.jpg',
-        },
-        ngayNhanPhong: bookingData.ngayNhanPhong,
-        ngayTraPhong: bookingData.ngayTraPhong,
-        thoiGianDen: bookingData.thoiGianDen || '14:00',
-        soNguoiLon: bookingData.soNguoiLon,
-        soTreEm: bookingData.soTreEm,
-        tongTien: calculateTotalPrice(),
-        phuongThucThanhToan: paymentData.phuongThucThanhToan,
-        ngayDat: new Date().toISOString(),
-      };
+      // Lưu thông tin cần thiết để hiển thị ở trang confirm
+      localStorage.setItem('pendingGuestBookingId', result.bookingId);
+      localStorage.setItem('guestName', bookingData.hoTen);
+      localStorage.setItem('guestEmail', bookingData.email);
+      localStorage.setItem('guestPhone', bookingData.soDienThoai);
+      localStorage.setItem('roomName', bookingData.roomData.tenPhong);
+      localStorage.setItem('roomType', bookingData.roomData.tenLoaiPhong);
+      localStorage.setItem('roomThumbnail', bookingData.roomData.thumbnail || '/images/rooms/room1.jpg');
+      localStorage.setItem('checkInDate', bookingData.ngayNhanPhong);
+      localStorage.setItem('checkOutDate', bookingData.ngayTraPhong);
+      localStorage.setItem('adultCount', bookingData.soNguoiLon.toString());
+      localStorage.setItem('childCount', bookingData.soTreEm.toString());
+      localStorage.setItem('totalPrice', calculateTotalPrice().toString());
+      localStorage.setItem('paymentMethod', paymentData.phuongThucThanhToan);
 
-      // Lưu dữ liệu đặt phòng thành công vào localStorage
-      localStorage.setItem('guestBookingSuccess', JSON.stringify(successData));
-
-      // Chuyển trực tiếp đến trang success (không cần xác nhận OTP)
-      router.push('/guest-booking/success');
+      // Chuyển đến trang xác nhận OTP
+      router.push('/guest-booking/confirm');
       return;
 
     } catch (error) {
