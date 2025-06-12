@@ -133,23 +133,59 @@ public class AuthController : ControllerBase
         };
     }
 
+    [HttpOptions("login")]
+    [AllowAnonymous]
+    public IActionResult LoginOptions()
+    {
+        Console.WriteLine("🔧 OPTIONS request received for login endpoint");
+        return Ok();
+    }
+
     [HttpPost("login")]
     [AllowAnonymous]
-    [Consumes("multipart/form-data")]
-    public async Task<ActionResult<UserDto>> Login([FromForm] LoginDto loginDto)
+    [Consumes("application/json")]
+    public async Task<ActionResult<UserDto>> LoginJson([FromBody] LoginDto loginDto)
     {
+        Console.WriteLine($"🔐 Login attempt (JSON): {loginDto?.UserName}");
+        return await ProcessLogin(loginDto);
+    }
+
+    [HttpPost("login-form")]
+    [AllowAnonymous]
+    [Consumes("multipart/form-data")]
+    public async Task<ActionResult<UserDto>> LoginForm([FromForm] LoginDto loginDto)
+    {
+        Console.WriteLine($"🔐 Login attempt (Form): {loginDto?.UserName}");
+        return await ProcessLogin(loginDto);
+    }
+
+    private async Task<ActionResult<UserDto>> ProcessLogin(LoginDto loginDto)
+    {
+        if (loginDto == null)
+        {
+            Console.WriteLine("❌ LoginDto is null");
+            return BadRequest("Dữ liệu đăng nhập không hợp lệ");
+        }
+
+        Console.WriteLine($"🔍 Processing login for: {loginDto.UserName}");
+
         // Thử tìm trong bảng KhachHang
         var khachHang = await _context.KhachHangs
             .SingleOrDefaultAsync(x => x.UserName == loginDto.UserName);
 
         if (khachHang != null)
         {
+            Console.WriteLine($"👤 Found customer: {khachHang.UserName}");
             var result = _passwordHasherKh.VerifyHashedPassword(
                 khachHang, khachHang.PasswordHash, loginDto.Password);
 
             if (result == PasswordVerificationResult.Failed)
+            {
+                Console.WriteLine("❌ Customer password verification failed");
                 return Unauthorized("Mật khẩu không đúng.");
+            }
 
+            Console.WriteLine("✅ Customer login successful");
             return _tokenService.CreateTokenWithRefresh(khachHang);
         }
 
@@ -158,14 +194,22 @@ public class AuthController : ControllerBase
             .SingleOrDefaultAsync(x => x.UserName == loginDto.UserName);
 
         if (nhanVien == null)
+        {
+            Console.WriteLine($"❌ No user found with username: {loginDto.UserName}");
             return Unauthorized("Tài khoản không tồn tại.");
+        }
 
+        Console.WriteLine($"👨‍💼 Found employee: {nhanVien.UserName}");
         var resultNv = _passwordHasherNv.VerifyHashedPassword(
             nhanVien, nhanVien.PasswordHash, loginDto.Password);
 
         if (resultNv == PasswordVerificationResult.Failed)
+        {
+            Console.WriteLine("❌ Employee password verification failed");
             return Unauthorized("Mật khẩu không đúng.");
+        }
 
+        Console.WriteLine("✅ Employee login successful");
         return _tokenService.CreateTokenWithRefresh(nhanVien);
     }
 
