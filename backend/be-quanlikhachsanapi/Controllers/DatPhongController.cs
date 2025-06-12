@@ -447,7 +447,8 @@ namespace be_quanlikhachsanapi.Controllers
 
                     // Thông tin phòng
                     maPhong = phong?.MaPhong,
-                    tenPhong = phong?.TenPhong ?? "Phòng không xác định",
+                    tenPhong = phong?.SoPhong != null ? $"Phòng {phong.SoPhong}" : "Phòng không xác định",
+                    soPhong = phong?.SoPhong,
 
                     // Thông tin loại phòng
                     maLoaiPhong = loaiPhong?.MaLoaiPhong,

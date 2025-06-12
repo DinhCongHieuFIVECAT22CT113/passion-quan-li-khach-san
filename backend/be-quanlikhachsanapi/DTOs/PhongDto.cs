@@ -45,6 +45,8 @@ namespace be_quanlikhachsanapi.DTOs
 
         public string? HinhAnh { get; set; } = default; // Cho phép null
 
+        public string? TrangThai { get; set; } = default; // Trạng thái phòng
+
         public int? Tang { get; set; } = default; // Cho phép null
 
         // Thêm properties cho upload file

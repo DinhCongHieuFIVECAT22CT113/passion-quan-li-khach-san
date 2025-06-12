@@ -121,8 +121,8 @@ export default function MyBookingsPage() {
         return {
           maDatPhong: booking.maDatPhong || 'N/A',
           maPhong: booking.maPhong || 'N/A',
-          tenPhong: booking.tenPhong || 'Phòng không xác định',
-          soPhong: booking.maPhong || 'N/A',
+          tenPhong: booking.tenPhong || (booking.soPhong ? `Phòng ${booking.soPhong}` : 'Phòng không xác định'),
+          soPhong: booking.soPhong || booking.maPhong || 'N/A',
           loaiPhong: booking.tenLoaiPhong || 'Loại phòng không xác định',
           ngayDat: booking.ngayTao || new Date().toISOString(),
           ngayBatDau: booking.ngayNhanPhong,
@@ -473,7 +473,7 @@ export default function MyBookingsPage() {
                     </div>
                   )}
                   <div className={styles.roomInfo}>
-                    <h4>{selectedBooking.tenPhong}</h4>
+                    <h4>{selectedBooking.tenPhong || `Phòng ${selectedBooking.soPhong}` || 'Phòng không xác định'}</h4>
                     <p><FaBed /> {selectedBooking.loaiPhong}</p>
                     <p>Số phòng: {selectedBooking.soPhong}</p>
                   </div>

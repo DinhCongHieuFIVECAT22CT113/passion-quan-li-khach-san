@@ -172,6 +172,20 @@ namespace be_quanlikhachsanapi.Services
                 phong.Thumbnail = newThumbnailUrl ?? updatePhong.Thumbnail ?? phong.Thumbnail;
                 phong.HinhAnh = newHinhAnhUrl ?? updatePhong.HinhAnh ?? phong.HinhAnh;
                 phong.Tang = updatePhong.Tang;
+
+                // Cập nhật trạng thái nếu có
+                if (!string.IsNullOrEmpty(updatePhong.TrangThai))
+                {
+                    string oldTrangThai = phong.TrangThai;
+                    phong.TrangThai = updatePhong.TrangThai;
+
+                    // Gửi thông báo cập nhật trạng thái phòng nếu có thay đổi
+                    if (oldTrangThai != phong.TrangThai)
+                    {
+                        _notificationService.NotifyRoomStatusChanged(phong.MaPhong, phong.TrangThai).Wait();
+                    }
+                }
+
                 phong.NgaySua = DateTime.Now;
 
                 _context.SaveChanges();
