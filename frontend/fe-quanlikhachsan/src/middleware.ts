@@ -8,7 +8,7 @@ interface DecodedToken {
 }
 
 // Danh sách các đường dẫn công khai không yêu cầu token
-const PUBLIC_PATHS = ['/login', '/signup', '/users/home', '/users/about', '/users/explore', '/users/rooms', '/users/services', '/users/promotions', '/users/booking', '/users/booking-form', '/guest-booking', '/guest-booking/confirm', '/guest-booking/success', '/users/privacy', '/users/terms', '/users/faq'];
+const PUBLIC_PATHS = ['/login', '/signup', '/users/home', '/users/about', '/users/explore', '/users/rooms', '/users/services', '/users/promotions', '/users/booking', '/users/booking-form', '/guest-booking', '/guest-booking/payment-confirmation', '/guest-booking/confirm', '/guest-booking/success', '/users/privacy', '/users/terms', '/users/faq'];
 
 // Hàm kiểm tra đường dẫn công khai (bao gồm dynamic routes)
 const isPublicPath = (path: string): boolean => {
@@ -16,12 +16,17 @@ const isPublicPath = (path: string): boolean => {
   if (PUBLIC_PATHS.includes(path)) {
     return true;
   }
-  
+
   // Kiểm tra dynamic routes cho trang chi tiết phòng
   if (path.startsWith('/rooms/') && path.split('/').length === 3) {
     return true; // /rooms/[slug] - trang chi tiết phòng
   }
-  
+
+  // Kiểm tra tất cả sub-paths của guest-booking
+  if (path.startsWith('/guest-booking')) {
+    return true; // /guest-booking/* - tất cả trang guest booking
+  }
+
   return false;
 };
 
