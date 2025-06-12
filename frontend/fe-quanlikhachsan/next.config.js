@@ -16,6 +16,16 @@ const nextConfig = {
         },
         {
           protocol: 'https',
+          hostname: 'passion-quan-li-khach-san.onrender.com',
+          pathname: '/api/images/**', // Cho phép ảnh từ Render backend
+        },
+        {
+          protocol: 'https',
+          hostname: 'passion-quan-li-khach-san.onrender.com',
+          pathname: '/**', // Cho phép tất cả đường dẫn từ Render
+        },
+        {
+          protocol: 'https',
           hostname: 'encrypted-tbn0.gstatic.com',
         },
         {

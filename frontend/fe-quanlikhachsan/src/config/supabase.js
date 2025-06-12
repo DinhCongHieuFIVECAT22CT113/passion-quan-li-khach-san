@@ -26,7 +26,8 @@ export const getImageUrl = (imagePath) => {
   if (imagePath.startsWith('/') || imagePath.includes('UpLoad/')) {
     // Remove leading slash and UpLoad/ prefix if present
     const cleanPath = imagePath.replace(/^\//, '').replace(/^UpLoad\//, '');
-    return `http://localhost:5009/api/images/${cleanPath}`;
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://passion-quan-li-khach-san.onrender.com/api';
+    return `${backendUrl.replace('/api', '')}/api/images/${cleanPath}`;
   }
   
   // If it's a Supabase path (new system), construct the public URL
@@ -71,7 +72,8 @@ export const getValidImageSrc = (imagePath) => {
   if (imagePath.startsWith('/') || imagePath.includes('UpLoad/')) {
     // Remove leading slash and UpLoad/ prefix if present
     const cleanPath = imagePath.replace(/^\//, '').replace(/^UpLoad\//, '');
-    return `http://localhost:5009/api/images/${cleanPath}`;
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://passion-quan-li-khach-san.onrender.com/api';
+    return `${backendUrl.replace('/api', '')}/api/images/${cleanPath}`;
   }
   
   // If it's a relative path, assume it's a local asset
