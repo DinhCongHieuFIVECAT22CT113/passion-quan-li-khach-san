@@ -161,13 +161,15 @@ public class AuthController : ControllerBase
 
     private async Task<ActionResult<UserDto>> ProcessLogin(LoginDto loginDto)
     {
-        if (loginDto == null)
+        try
         {
-            Console.WriteLine("❌ LoginDto is null");
-            return BadRequest("Dữ liệu đăng nhập không hợp lệ");
-        }
+            if (loginDto == null)
+            {
+                Console.WriteLine("❌ LoginDto is null");
+                return BadRequest("Dữ liệu đăng nhập không hợp lệ");
+            }
 
-        Console.WriteLine($"🔍 Processing login for: {loginDto.UserName}");
+            Console.WriteLine($"🔍 Processing login for: {loginDto.UserName}");
 
         // Thử tìm trong bảng KhachHang
         var khachHang = await _context.KhachHangs
@@ -211,6 +213,13 @@ public class AuthController : ControllerBase
 
         Console.WriteLine("✅ Employee login successful");
         return _tokenService.CreateTokenWithRefresh(nhanVien);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Login error: {ex.Message}");
+            Console.WriteLine($"❌ Stack trace: {ex.StackTrace}");
+            return StatusCode(500, $"Lỗi server: {ex.Message}");
+        }
     }
 
     [HttpPut("change-password")]
