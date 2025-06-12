@@ -1,16 +1,24 @@
-# 🏨 Guest Booking Flow - Fixed
+# 🏨 Guest Booking Flow - Fixed (Updated)
 
-## 🔄 Flow mới (đã sửa)
+## 🔄 Flow mới (theo yêu cầu)
 
-### 1. Trang `/guest-booking` 
+### 1. Trang `/guest-booking`
 - Khách điền thông tin đặt phòng
-- Chọn phương thức thanh toán
+- Chọn phương thức thanh toán trong modal
 - Nhấn "Xác nhận đặt phòng"
+- **Lưu data vào localStorage**
+- **Chuyển đến**: `/guest-booking/payment-confirmation`
+
+### 2. Trang `/guest-booking/payment-confirmation` (MỚI)
+- Hiển thị tóm tắt toàn bộ thông tin đặt phòng
+- Hiển thị chi tiết thanh toán đã chọn
+- Điều khoản và điều kiện
+- Nhấn "Xác nhận và tiếp tục"
 - **Gọi API**: `POST /DatPhong/GuestPending`
 - **Kết quả**: Nhận `bookingId` và `maXacNhan`
 - **Chuyển đến**: `/guest-booking/confirm`
 
-### 2. Trang `/guest-booking/confirm`
+### 3. Trang `/guest-booking/confirm`
 - Hiển thị form nhập OTP 6 số
 - Khách nhập mã OTP từ email
 - Nhấn "Xác nhận đặt phòng"
@@ -18,7 +26,7 @@
 - **Kết quả**: Tạo đặt phòng chính thức
 - **Chuyển đến**: `/guest-booking/success`
 
-### 3. Trang `/guest-booking/success`
+### 4. Trang `/guest-booking/success`
 - Hiển thị thông tin đặt phòng thành công
 - Gợi ý tạo tài khoản
 - Các nút hành động
@@ -27,9 +35,13 @@
 
 ### Frontend
 1. **`/guest-booking/page.tsx`**:
-   - Đổi API call từ `/DatPhong/Guest` → `/DatPhong/GuestPending`
-   - Lưu thông tin vào localStorage cho trang confirm
-   - Chuyển hướng đến `/guest-booking/confirm` thay vì `/success`
+   - Bỏ API call, chỉ lưu data vào localStorage
+   - Chuyển hướng đến `/guest-booking/payment-confirmation`
+
+2. **`/guest-booking/payment-confirmation/page.tsx`** (MỚI):
+   - Hiển thị tóm tắt toàn bộ thông tin đặt phòng
+   - Gọi API `/DatPhong/GuestPending` khi xác nhận
+   - Chuyển hướng đến `/guest-booking/confirm` sau khi thành công
 
 ### Backend
 2. **`PendingGuestBooking.cs`**:

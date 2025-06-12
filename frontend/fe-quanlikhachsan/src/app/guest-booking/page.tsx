@@ -180,99 +180,12 @@ export default function GuestBookingPage() {
       return;
     }
 
-    setIsSubmitting(true);
-    setError('');
+    // Lưu dữ liệu vào localStorage để sử dụng ở trang xác nhận thanh toán
+    localStorage.setItem('guestBookingData', JSON.stringify(bookingData));
+    localStorage.setItem('guestPaymentData', JSON.stringify(paymentData));
 
-    try {
-      // Chuẩn bị dữ liệu gửi API
-      const bookingPayload = {
-        // Thông tin khách hàng
-        hoTen: bookingData.hoTen,
-        soDienThoai: bookingData.soDienThoai,
-        email: bookingData.email,
-        soCccd: '', // Khách vãng lai có thể không có CCCD
-
-        // Thông tin đặt phòng
-        maPhong: bookingData.roomData.maPhong,
-        ngayNhanPhong: bookingData.ngayNhanPhong,
-        ngayTraPhong: bookingData.ngayTraPhong,
-        thoiGianDen: bookingData.thoiGianDen || '14:00',
-        soNguoiLon: bookingData.soNguoiLon,
-        soTreEm: bookingData.soTreEm,
-        
-        // Thông tin thanh toán
-        phuongThucThanhToan: paymentData.phuongThucThanhToan,
-        loaiThe: paymentData.loaiThe,
-        
-        // Ghi chú
-        ghiChu: bookingData.ghiChu,
-        ghiChuThanhToan: paymentData.ghiChuThanhToan,
-        
-        // Tổng tiền
-        tongTien: calculateTotalPrice(),
-        
-        // Đánh dấu là khách vãng lai
-        isGuestBooking: true,
-      };
-
-      console.log('Gửi yêu cầu đặt phòng cho khách vãng lai:', bookingPayload);
-
-      // Gọi API tạo booking tạm cho khách vãng lai với OTP (public)
-      const formData = new FormData();
-      Object.entries(bookingPayload).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          formData.append(key, value as any);
-        }
-      });
-
-      const response = await fetch(`${API_BASE_URL}/DatPhong/GuestPending`, {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Accept': 'application/json'
-        },
-        // Quan trọng: Không gửi credentials để tránh gửi cookie
-        credentials: 'omit'
-      });
-
-      if (!response.ok) {
-        // Xử lý lỗi đặc biệt cho API này, không chuyển hướng đến trang đăng nhập
-        if (response.status === 401) {
-          throw new Error('API yêu cầu xác thực. Vui lòng liên hệ quản trị viên.');
-        }
-
-        const errorData = await response.text();
-        throw new Error(errorData || 'Có lỗi xảy ra khi đặt phòng');
-      }
-
-      const result = await response.json();
-      console.log('Kết quả tạo booking tạm:', result);
-
-      // Lưu thông tin cần thiết để hiển thị ở trang confirm
-      localStorage.setItem('pendingGuestBookingId', result.bookingId);
-      localStorage.setItem('guestName', bookingData.hoTen);
-      localStorage.setItem('guestEmail', bookingData.email);
-      localStorage.setItem('guestPhone', bookingData.soDienThoai);
-      localStorage.setItem('roomName', bookingData.roomData.tenPhong);
-      localStorage.setItem('roomType', bookingData.roomData.tenLoaiPhong);
-      localStorage.setItem('roomThumbnail', bookingData.roomData.thumbnail || '/images/rooms/room1.jpg');
-      localStorage.setItem('checkInDate', bookingData.ngayNhanPhong);
-      localStorage.setItem('checkOutDate', bookingData.ngayTraPhong);
-      localStorage.setItem('adultCount', bookingData.soNguoiLon.toString());
-      localStorage.setItem('childCount', bookingData.soTreEm.toString());
-      localStorage.setItem('totalPrice', calculateTotalPrice().toString());
-      localStorage.setItem('paymentMethod', paymentData.phuongThucThanhToan);
-
-      // Chuyển đến trang xác nhận OTP
-      router.push('/guest-booking/confirm');
-      return;
-
-    } catch (error) {
-      console.error('Lỗi khi đặt phòng:', error);
-      setError(error instanceof Error ? error.message : 'Có lỗi xảy ra khi đặt phòng. Vui lòng thử lại.');
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Chuyển đến trang xác nhận thanh toán
+    router.push('/guest-booking/payment-confirmation');
   };
 
   if (isLoading) {
