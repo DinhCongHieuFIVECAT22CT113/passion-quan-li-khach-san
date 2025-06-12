@@ -388,29 +388,19 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
     setIsSubmitting(true);
     
     try {
-      // Chuẩn bị dữ liệu đặt phòng
-      const bookingPayload: any = {
-        hoTen: formData.hoTen,
-        soDienThoai: formData.soDienThoai,
-        email: formData.email,
-        maPhong: selectedRoom?.maPhong || '',
-        ngayNhanPhong: formData.ngayNhanPhong,
-        ngayTraPhong: formData.ngayTraPhong,
-        thoiGianDen: formData.thoiGianDen,
-        soNguoiLon: formData.soNguoiLon,
-        soTreEm: formData.soTreEm,
-        phuongThucThanhToan: formData.phuongThucThanhToan,
-        loaiThe: formData.loaiThe,
-        tenNganHang: formData.tenNganHang, // Include bank name
-        ghiChu: formData.ghiChu,
-        tongTien: calculateTotalPrice(),
-        isGuestBooking: bookingType === 'guest',
-      };
 
-      // Nếu là khách vãng lai, lưu dữ liệu vào localStorage và chuyển đến trang thanh toán
+      // Nếu là khách vãng lai, lưu dữ liệu vào localStorage và chuyển đến trang xác nhận thanh toán
       if (bookingType === 'guest') {
         const guestBookingData = {
-          ...bookingPayload,
+          hoTen: formData.hoTen,
+          soDienThoai: formData.soDienThoai,
+          email: formData.email,
+          ngayNhanPhong: formData.ngayNhanPhong,
+          ngayTraPhong: formData.ngayTraPhong,
+          thoiGianDen: formData.thoiGianDen,
+          soNguoiLon: formData.soNguoiLon,
+          soTreEm: formData.soTreEm,
+          ghiChu: formData.ghiChu,
           roomData: {
             maPhong: selectedRoom?.maPhong || '',
             maLoaiPhong: loaiPhong?.maLoaiPhong || '',
@@ -424,16 +414,22 @@ const BookingModal: React.FC<BookingModalProps> = ({ selectedRoom, loaiPhong, on
           selectedPromotion: selectedPromotion,
           selectedServices: selectedServices,
           priceBreakdown: calculatePriceBreakdown(),
-          // Thêm phương thức thanh toán đã chọn
-          phuongThucThanhToan: formData.phuongThucThanhToan
         };
-        
-        // Lưu dữ liệu vào localStorage để trang guest-booking sử dụng
-        localStorage.setItem('bookingFormData', JSON.stringify(guestBookingData));
-        
-        // Đóng modal và chuyển đến trang thanh toán khách vãng lai
+
+        const guestPaymentData = {
+          phuongThucThanhToan: formData.phuongThucThanhToan,
+          loaiThe: formData.loaiThe,
+          tenNganHang: formData.tenNganHang,
+          ghiChuThanhToan: ''
+        };
+
+        // Lưu dữ liệu vào localStorage để trang payment-confirmation sử dụng
+        localStorage.setItem('guestBookingData', JSON.stringify(guestBookingData));
+        localStorage.setItem('guestPaymentData', JSON.stringify(guestPaymentData));
+
+        // Đóng modal và chuyển đến trang xác nhận thanh toán
         onClose();
-        router.push('/guest-booking');
+        router.push('/guest-booking/payment-confirmation');
         return;
       }
 
