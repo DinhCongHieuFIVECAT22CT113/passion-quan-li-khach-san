@@ -45,14 +45,35 @@
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .tabButton:hover {
   color: #2563eb;
 }
 
+.tabCount {
+  font-size: 0.875rem;
+  background: #f1f5f9;
+  color: #64748b;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
 .activeTab {
   color: #2563eb;
+}
+
+.activeTab .tabCount {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.activeTab {
   font-weight: 600;
 }
 

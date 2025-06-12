@@ -143,6 +143,12 @@ export default function MyBookingsPage() {
       console.log(`✅ Processed ${processedBookings.length} bookings`);
       if (processedBookings.length > 0) {
         console.log('📋 Sample booking:', processedBookings[0]);
+        console.log('📊 All booking statuses:', processedBookings.map(b => ({
+          id: b.maDatPhong,
+          status: b.trangThai,
+          startDate: b.ngayBatDau,
+          endDate: b.ngayKetThuc
+        })));
       }
 
       setBookings(processedBookings);
@@ -237,28 +243,118 @@ export default function MyBookingsPage() {
 
   const filterBookings = () => {
     const now = new Date();
-    
+    now.setHours(0, 0, 0, 0); // Set to start of today for accurate comparison
+
+    console.log('🔍 Filtering bookings:', { activeTab, totalBookings: bookings.length, currentDate: now });
+
     switch (activeTab) {
       case 'upcoming':
-        return bookings.filter(booking => {
+        const upcomingBookings = bookings.filter(booking => {
+          const startDate = new Date(booking.ngayBatDau);
           const endDate = new Date(booking.ngayKetThuc);
-          return endDate >= now && booking.trangThai.toLowerCase() !== 'đã hủy';
+          const status = booking.trangThai?.toLowerCase().trim();
+
+          // Upcoming: start date is today or future, or end date is future, and not cancelled
+          const isUpcoming = (startDate >= now || endDate >= now) &&
+                           status !== 'đã hủy' &&
+                           status !== 'đã hoàn thành' &&
+                           status !== 'đã trả phòng';
+
+          console.log('📅 Upcoming check:', {
+            booking: booking.maDatPhong,
+            startDate: startDate.toLocaleDateString(),
+            endDate: endDate.toLocaleDateString(),
+            status,
+            isUpcoming
+          });
+
+          return isUpcoming;
         });
+        console.log('✅ Upcoming bookings:', upcomingBookings.length);
+        return upcomingBookings;
+
       case 'past':
-        return bookings.filter(booking => {
+        const pastBookings = bookings.filter(booking => {
           const endDate = new Date(booking.ngayKetThuc);
-          return endDate < now && booking.trangThai.toLowerCase() !== 'đã hủy';
+          const status = booking.trangThai?.toLowerCase().trim();
+
+          // Past: end date is before today, or completed/checked out
+          const isPast = endDate < now ||
+                        status === 'đã hoàn thành' ||
+                        status === 'đã trả phòng';
+
+          // Exclude cancelled bookings from past
+          const isNotCancelled = status !== 'đã hủy';
+
+          console.log('📅 Past check:', {
+            booking: booking.maDatPhong,
+            endDate: endDate.toLocaleDateString(),
+            status,
+            isPast: isPast && isNotCancelled
+          });
+
+          return isPast && isNotCancelled;
         });
+        console.log('✅ Past bookings:', pastBookings.length);
+        return pastBookings;
+
       case 'cancelled':
-        return bookings.filter(booking => 
-          booking.trangThai.toLowerCase() === 'đã hủy'
-        );
+        const cancelledBookings = bookings.filter(booking => {
+          const status = booking.trangThai?.toLowerCase().trim();
+          const isCancelled = status === 'đã hủy' || status === 'hủy' || status === 'cancelled';
+
+          console.log('❌ Cancelled check:', {
+            booking: booking.maDatPhong,
+            status,
+            isCancelled
+          });
+
+          return isCancelled;
+        });
+        console.log('✅ Cancelled bookings:', cancelledBookings.length);
+        return cancelledBookings;
+
       default:
+        console.log('✅ All bookings:', bookings.length);
         return bookings;
     }
   };
 
   const filteredBookings = filterBookings();
+
+  // Tính số lượng cho mỗi tab
+  const getTabCounts = () => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+
+    const counts = {
+      all: bookings.length,
+      upcoming: 0,
+      past: 0,
+      cancelled: 0
+    };
+
+    bookings.forEach(booking => {
+      const startDate = new Date(booking.ngayBatDau);
+      const endDate = new Date(booking.ngayKetThuc);
+      const status = booking.trangThai?.toLowerCase().trim();
+
+      if (status === 'đã hủy' || status === 'hủy' || status === 'cancelled') {
+        counts.cancelled++;
+      } else if (endDate < now || status === 'đã hoàn thành' || status === 'đã trả phòng') {
+        counts.past++;
+      } else if ((startDate >= now || endDate >= now) &&
+                 status !== 'đã hủy' &&
+                 status !== 'đã hoàn thành' &&
+                 status !== 'đã trả phòng') {
+        counts.upcoming++;
+      }
+    });
+
+    return counts;
+  };
+
+  const tabCounts = getTabCounts();
 
   // Hàm mở popup chi tiết
   const openDetailModal = async (booking: Booking) => {
@@ -301,29 +397,33 @@ export default function MyBookingsPage() {
         </div>
         
         <div className={styles.tabsContainer}>
-          <button 
+          <button
             className={`${styles.tabButton} ${activeTab === 'all' ? styles.activeTab : ''}`}
             onClick={() => setActiveTab('all')}
           >
             Tất cả
+            <span className={styles.tabCount}>({tabCounts.all})</span>
           </button>
-          <button 
+          <button
             className={`${styles.tabButton} ${activeTab === 'upcoming' ? styles.activeTab : ''}`}
             onClick={() => setActiveTab('upcoming')}
           >
             Sắp tới
+            <span className={styles.tabCount}>({tabCounts.upcoming})</span>
           </button>
-          <button 
+          <button
             className={`${styles.tabButton} ${activeTab === 'past' ? styles.activeTab : ''}`}
             onClick={() => setActiveTab('past')}
           >
             Đã qua
+            <span className={styles.tabCount}>({tabCounts.past})</span>
           </button>
-          <button 
+          <button
             className={`${styles.tabButton} ${activeTab === 'cancelled' ? styles.activeTab : ''}`}
             onClick={() => setActiveTab('cancelled')}
           >
             Đã hủy
+            <span className={styles.tabCount}>({tabCounts.cancelled})</span>
           </button>
         </div>
         
@@ -342,16 +442,31 @@ export default function MyBookingsPage() {
         ) : filteredBookings.length === 0 ? (
           <div className={styles.emptyState}>
             <div className={styles.emptyStateIcon}>
-              <FaCalendarAlt />
+              {activeTab === 'upcoming' && <FaClock />}
+              {activeTab === 'past' && <FaCheckCircle />}
+              {activeTab === 'cancelled' && <FaTimesCircle />}
+              {activeTab === 'all' && <FaCalendarAlt />}
             </div>
-            <h3>Không có đặt phòng nào</h3>
-            <p>Bạn chưa có đặt phòng nào trong danh mục này</p>
-            <button 
-              onClick={() => router.push('/users/rooms')}
-              className={styles.browseRoomsButton}
-            >
-              Tìm phòng ngay
-            </button>
+            <h3>
+              {activeTab === 'upcoming' && 'Không có đặt phòng sắp tới'}
+              {activeTab === 'past' && 'Không có đặt phòng đã qua'}
+              {activeTab === 'cancelled' && 'Không có đặt phòng đã hủy'}
+              {activeTab === 'all' && 'Không có đặt phòng nào'}
+            </h3>
+            <p>
+              {activeTab === 'upcoming' && 'Bạn chưa có đặt phòng nào sắp tới. Hãy đặt phòng ngay!'}
+              {activeTab === 'past' && 'Bạn chưa có lịch sử đặt phòng nào.'}
+              {activeTab === 'cancelled' && 'Bạn chưa hủy đặt phòng nào.'}
+              {activeTab === 'all' && 'Bạn chưa có đặt phòng nào trong hệ thống.'}
+            </p>
+            {(activeTab === 'upcoming' || activeTab === 'all') && (
+              <button
+                onClick={() => router.push('/users/rooms')}
+                className={styles.browseRoomsButton}
+              >
+                Tìm phòng ngay
+              </button>
+            )}
           </div>
         ) : (
           <div className={styles.bookingsList}>
