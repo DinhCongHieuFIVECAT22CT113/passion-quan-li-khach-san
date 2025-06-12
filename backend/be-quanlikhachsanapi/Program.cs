@@ -81,6 +81,7 @@ builder.Services.AddCors(options =>
                          new[] {
                              "http://localhost:3000",
                              "https://passion-quan-li-khach-san-git-main-conghieus-projects.vercel.app",
+                             "https://passion-quan-li-khach-san.vercel.app", // Domain Vercel chính
                              "https://passion-quan-li-khach-san.onrender.com" // Thêm domain Render
                          };
 
