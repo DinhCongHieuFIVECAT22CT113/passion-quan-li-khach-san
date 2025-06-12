@@ -374,10 +374,40 @@
   gap: 6px;
 }
 
+.roomNumber {
+  margin: 4px 0;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.nightsInfo {
+  font-weight: 600;
+  color: #2563eb;
+  padding: 0.25rem 0;
+}
+
+.priceDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.originalPrice {
+  font-size: 0.9rem;
+  color: #6b7280;
+  text-decoration: line-through;
+}
+
 .totalPrice {
   font-size: 1.25rem;
   font-weight: 700;
   color: #059669;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .noteText {
@@ -603,6 +633,14 @@
 .paymentMethod {
   color: #64748b;
   font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  background: #f8fafc;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  margin-top: 0.5rem;
 }
 
 .bookingNotes {

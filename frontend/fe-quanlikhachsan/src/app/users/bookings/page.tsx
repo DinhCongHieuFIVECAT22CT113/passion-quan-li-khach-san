@@ -8,7 +8,7 @@ import { getAuthHeaders, handleResponse, getBookingPromotions, getBookingService
 import Header from '../../components/layout/Header';
 import Footer from '../../components/layout/Footer';
 import styles from './bookings.module.css';
-import { FaCalendarAlt, FaBed, FaMoneyBillWave, FaCheckCircle, FaTimesCircle, FaClock } from 'react-icons/fa';
+import { FaCalendarAlt, FaBed, FaMoneyBillWave, FaCheckCircle, FaTimesCircle, FaClock, FaHome, FaCreditCard } from 'react-icons/fa';
 
 interface Booking {
   maDatPhong: string;
@@ -486,12 +486,17 @@ export default function MyBookingsPage() {
                 
                 <div className={styles.bookingDetails}>
                   <div className={styles.roomInfo}>
-                    <h3>{booking.tenPhong || `Phòng ${booking.soPhong}`}</h3>
+                    <h3>
+                      {booking.tenPhong || (booking.soPhong ? `Phòng ${booking.soPhong}` : 'Phòng không xác định')}
+                    </h3>
                     <p className={styles.roomType}>
-                      <FaBed /> {booking.loaiPhong}
+                      <FaBed /> {booking.loaiPhong || 'Loại phòng không xác định'}
+                    </p>
+                    <p className={styles.roomNumber}>
+                      <FaHome /> Số phòng: {booking.soPhong || booking.maPhong || 'N/A'}
                     </p>
                   </div>
-                  
+
                   <div className={styles.dateInfo}>
                     <div>
                       <span>Ngày đặt:</span> {formatDate(booking.ngayDat)}
@@ -505,14 +510,25 @@ export default function MyBookingsPage() {
                     <div>
                       <span>Thời gian đến:</span> {booking.thoiGianDen || '14:00'}
                     </div>
+                    <div className={styles.nightsInfo}>
+                      <span>Số đêm:</span> {Math.ceil((new Date(booking.ngayKetThuc).getTime() - new Date(booking.ngayBatDau).getTime()) / (1000 * 60 * 60 * 24))} đêm
+                    </div>
                   </div>
-                  
+
                   <div className={styles.paymentInfo}>
-                    <div className={styles.totalPrice}>
-                      <FaMoneyBillWave /> {formatCurrency(booking.tongTien)}
+                    <div className={styles.priceDetails}>
+                      {booking.giaGoc && booking.giaGoc !== booking.tongTien && (
+                        <div className={styles.originalPrice}>
+                          <span>Giá gốc:</span> {formatCurrency(booking.giaGoc)}
+                        </div>
+                      )}
+                      <div className={styles.totalPrice}>
+                        <FaMoneyBillWave />
+                        <span>Tổng tiền: {formatCurrency(booking.tongTien)}</span>
+                      </div>
                     </div>
                     <div className={styles.paymentMethod}>
-                      {booking.phuongThucThanhToan}
+                      <FaCreditCard /> {booking.phuongThucThanhToan || 'Chưa xác định'}
                     </div>
                   </div>
                 </div>
