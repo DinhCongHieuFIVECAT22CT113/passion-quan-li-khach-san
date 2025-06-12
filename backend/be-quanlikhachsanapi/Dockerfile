@@ -17,9 +17,9 @@ WORKDIR /app
 # Copy file đã build từ build stage
 COPY --from=build /app/out .
 
-# Cấu hình cổng và biến môi trường
-EXPOSE 8080
-ENV ASPNETCORE_URLS=http://+:8080
+# Cấu hình cổng và biến môi trường cho Render
+EXPOSE $PORT
+ENV ASPNETCORE_URLS=http://+:$PORT
 ENV ASPNETCORE_ENVIRONMENT=Production
 
 ENTRYPOINT ["dotnet", "be-quanlikhachsanapi.dll"]

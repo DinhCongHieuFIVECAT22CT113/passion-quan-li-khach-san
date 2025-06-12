@@ -109,16 +109,13 @@ export default function MyBookingsPage() {
         console.log('Dữ liệu từ /DatPhong/KhachHang:', data);
         console.log('User maNguoiDung khi gọi API:', user?.maNguoiDung);
 
-        // Nếu endpoint này trả về tất cả đặt phòng, cần lọc theo user
-        if (Array.isArray(data) && user?.maNguoiDung) {
-          const originalLength = data.length;
-          data = data.filter(booking => {
-            // API trả về field 'maKh' (chữ thường)
-            const bookingMaKH = booking.maKh || booking.maKH || booking.MaKH;
-            console.log(`So sánh booking: ${bookingMaKH} === ${user.maNguoiDung}`);
-            return bookingMaKH === user.maNguoiDung;
-          });
-          console.log(`Lọc từ ${originalLength} xuống ${data.length} đặt phòng cho user ${user.maNguoiDung}`);
+        // API /DatPhong/KhachHang đã lọc theo user rồi, không cần lọc thêm
+        console.log(`API trả về ${Array.isArray(data) ? data.length : 0} đặt phòng cho user ${user?.maNguoiDung}`);
+
+        // Chỉ verify dữ liệu để debug
+        if (Array.isArray(data) && data.length > 0) {
+          console.log('Mẫu đặt phòng đầu tiên:', data[0]);
+          console.log('Các mã khách hàng trong dữ liệu:', data.map(b => b.maKh || b.maKH || b.MaKH));
         }
       } catch (err) {
         console.warn('Endpoint /DatPhong/KhachHang không hoạt động:', err);

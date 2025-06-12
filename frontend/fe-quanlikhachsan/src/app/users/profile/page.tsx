@@ -60,7 +60,7 @@ const ProfilePageContent: FC = () => {
     setIsClient(true);
   }, []);
 
-  // Update user info when user context changes
+  // Update user info when user context changes (chỉ cập nhật từ context, không fetch API)
   useEffect(() => {
     if (user) {
       setUserInfo({
@@ -74,16 +74,17 @@ const ProfilePageContent: FC = () => {
       });
       setAvatarSrc(user.anhDaiDien || user.avatarUrl || null);
     }
-  }, [user]); // Thêm dependency để re-render khi user thay đổi
+  }, [user]); // Chỉ cập nhật UI từ context, không gọi API
 
-  // Fetch user profile and transaction history on page load
+  // Fetch user profile từ API chỉ một lần khi component mount
   useEffect(() => {
+    let isMounted = true; // Flag để tránh race condition
 
     const fetchData = async () => {
-      if (!user?.maNguoiDung) {
-        setIsLoading(false);
+      if (!user?.maNguoiDung || authLoading) {
         return;
       }
+
       setIsLoading(true);
       try {
         // Lấy thông tin chi tiết khách hàng từ API
@@ -97,24 +98,32 @@ const ProfilePageContent: FC = () => {
           credentials: 'include'
         });
 
-        if (userResponse.ok) {
+        if (userResponse.ok && isMounted) {
           const userData = await userResponse.json();
           console.log('Thông tin khách hàng từ API:', userData);
-          
-          // Cập nhật state với dữ liệu từ API
+
+          // Kiểm tra cấu trúc dữ liệu trả về
+          const actualData = userData.value || userData; // Có thể API wrap trong .value
+          console.log('Dữ liệu thực tế:', actualData);
+
+          // Cập nhật state với dữ liệu từ API (sử dụng field names đúng từ backend)
           setUserInfo({
-            name: `${userData.hoKh || ''} ${userData.tenKh || ''}`.trim(),
-            address: userData.diaChi || '',
-            hokh: userData.hoKh || '',
-            tenkh: userData.tenKh || '',
-            email: userData.email || '',
-            phone: userData.soDienThoai || '',
-            idNumber: userData.soCccd || '',
+            name: `${actualData.hoKh || ''} ${actualData.tenKh || ''}`.trim(),
+            address: actualData.diaChi || '',
+            hokh: actualData.hoKh || '',
+            tenkh: actualData.tenKh || '',
+            email: actualData.email || '',
+            phone: actualData.sdt || '', // Backend sử dụng 'sdt' không phải 'soDienThoai'
+            idNumber: actualData.soCccd || '',
           });
-          
-          // Cập nhật avatar nếu có (backend trả về field anhDaiDien)
-          if (userData.anhDaiDien || userData.avatarUrl) {
-            setAvatarSrc(userData.anhDaiDien || userData.avatarUrl);
+
+          // Cập nhật avatar từ database (field anhDaiDien) - KHÔNG gọi updateUser để tránh infinite loop
+          if (actualData.anhDaiDien) {
+            console.log('Avatar URL từ database:', actualData.anhDaiDien);
+            setAvatarSrc(actualData.anhDaiDien);
+          } else {
+            console.log('Không có avatar trong database');
+            setAvatarSrc('/images/placeholder-avatar.jpg');
           }
         }
 
@@ -130,16 +139,24 @@ const ProfilePageContent: FC = () => {
       } catch (error) {
         console.error('Error fetching page data:', error);
       } finally {
-        setIsLoading(false);
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 
+    // Chỉ fetch một lần khi có user và auth đã load xong
     if (user && !authLoading) {
       fetchData();
     } else if (!authLoading) {
       setIsLoading(false);
     }
-  }, [user, authLoading]);
+
+    // Cleanup function để tránh race condition
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.maNguoiDung, authLoading]); // Chỉ phụ thuộc vào maNguoiDung và authLoading
 
   // Toggle edit mode
   const toggleEditMode = () => {

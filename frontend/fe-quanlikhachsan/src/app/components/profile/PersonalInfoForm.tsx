@@ -44,7 +44,7 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
 
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
 
-  // Khởi tạo giá trị từ initialValues
+  // Khởi tạo giá trị từ initialValues - chỉ chạy một lần khi component mount
   useEffect(() => {
     if (initialValues) {
       setHokh(initialValues.hokh);
@@ -54,7 +54,7 @@ const PersonalInfoForm: React.FC<PersonalInfoFormProps> = ({
       setSoCccd(initialValues.soCccd);
       setDiaChi(initialValues.diaChi || ''); // Khởi tạo địa chỉ
     }
-  }, [initialValues]);
+  }, [initialValues?.hokh, initialValues?.tenkh, initialValues?.email, initialValues?.soDienThoai, initialValues?.soCccd, initialValues?.diaChi]); // Chỉ phụ thuộc vào các giá trị cụ thể
 
 const validateFields = () => {
   const newErrors = {

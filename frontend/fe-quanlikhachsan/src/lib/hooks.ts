@@ -49,9 +49,9 @@ export const useLogout = () => {
       Cookies.remove(cookieName, { path: '/', domain: window.location.hostname });
     });
     
-    // Force reload để đảm bảo state được reset hoàn toàn
+    // Chuyển hướng mà không force reload để tránh gây reload liên tục
     setTimeout(() => {
-      window.location.href = '/users/home';
+      router.push('/users/home');
     }, 100);
   };
 

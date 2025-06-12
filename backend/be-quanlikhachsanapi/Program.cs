@@ -18,11 +18,14 @@ using be_quanlikhachsanapi.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ Cấu hình Kestrel đúng cổng Render yêu cầu
+// ✅ Cấu hình Kestrel với dynamic port cho Render
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenAnyIP(8080);
+    options.ListenAnyIP(int.Parse(port));
 });
+
+Console.WriteLine($"🚀 Server sẽ chạy trên port: {port}");
 
 // ✅ Connection String
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -75,7 +78,11 @@ builder.Services.AddDbContext<DataQlks113Nhom2Context>(opt =>
 builder.Services.AddCors(options =>
 {
     var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ??
-                         new[] { "http://localhost:3000", "https://passion-quan-li-khach-san-git-main-conghieus-projects.vercel.app" };
+                         new[] {
+                             "http://localhost:3000",
+                             "https://passion-quan-li-khach-san-git-main-conghieus-projects.vercel.app",
+                             "https://passion-quan-li-khach-san.onrender.com" // Thêm domain Render
+                         };
 
     options.AddPolicy("AllowCredentials", cors =>
     {
@@ -165,18 +172,16 @@ catch (Exception ex)
     Console.WriteLine($"❌ Lỗi kết nối CSDL: {ex.Message}");
 }
 
-// ✅ Middleware pipeline
-if (app.Environment.IsDevelopment())
+// ✅ Middleware pipeline - Enable Swagger cho cả Development và Production
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "QuanLyKhachSan API v1");
-        c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.None);
-        c.DefaultModelsExpandDepth(-1);
-        c.DisplayRequestDuration();
-    });
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "QuanLyKhachSan API v1");
+    c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.None);
+    c.DefaultModelsExpandDepth(-1);
+    c.DisplayRequestDuration();
+    c.RoutePrefix = "swagger"; // Đảm bảo Swagger UI có thể truy cập tại /swagger
+});
 
 app.UseStaticFiles();
 app.UseCors("AllowCredentials");
@@ -185,6 +190,21 @@ app.UseCors("AllowCredentials");
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// ✅ Health check endpoint
+app.MapGet("/", () => new {
+    message = "Hotel Management API is running!",
+    timestamp = DateTime.Now,
+    environment = app.Environment.EnvironmentName,
+    version = "1.0.0"
+});
+
+app.MapGet("/api/health", () => new {
+    status = "healthy",
+    timestamp = DateTime.Now,
+    database = "connected" // Sẽ check thực tế sau
+});
+
 app.MapControllers();
 app.MapHub<NotificationHub>("/notificationHub");
 
