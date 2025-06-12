@@ -156,16 +156,24 @@ builder.Services.AddScoped<IPasswordHasher<KhachHang>, PasswordHasher<KhachHang>
 builder.Services.AddScoped<IPasswordHasher<NhanVien>, PasswordHasher<NhanVien>>();
 
 // ✅ JWT Authentication
+var tokenKey = builder.Configuration["TokenKey"] ?? throw new InvalidOperationException("TokenKey not found");
+Console.WriteLine($"🔑 TokenKey length: {tokenKey.Length} characters");
+
+if (tokenKey.Length < 64)
+{
+    throw new InvalidOperationException($"TokenKey must be at least 64 characters long for HmacSha512. Current length: {tokenKey.Length}");
+}
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-                builder.Configuration["TokenKey"] ?? throw new InvalidOperationException("TokenKey not found"))),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenKey)),
             ValidateIssuer = false,
-            ValidateAudience = false
+            ValidateAudience = false,
+            ClockSkew = TimeSpan.Zero // Giảm clock skew để bảo mật tốt hơn
         };
     });
 
